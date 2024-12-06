@@ -1,0 +1,39 @@
+# Application generated files
+carrier_list.json
+
+# Python environment
+__pycache__/
+*.pyc
+.env
+venv/
+.mypy_cache/
+~/
+
+# Build and output directories
+output/
+build/
+dist/
+*.spec
+
+# Poetry
+dist/
+*.egg-info/
+poetry.lock
+
+# IDE specific
+.vscode/
+.idea/
+
+# PyQt5 build artifacts
+*.dll
+*.qm
+
+# Temporary/backup files
+*.bak
+*~
+
+# Other
+spreadsheets/
+*backup*/
+*Copy*.json
+black_changes.txt
