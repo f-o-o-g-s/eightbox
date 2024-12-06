@@ -144,8 +144,9 @@ class CustomTitleBar(QWidget):
 
 
 class MainApp(QMainWindow):
-    VERSION = "2024.0.0.0"  # Initial release version
-    BUILD_TIME = "2023-12-06 14:45"
+    # Class-level version info (single source of truth)
+    VERSION = "2024.0.0.0"  # Year.Major.Minor.Patch
+    BUILD_TIME = "2024-01-10"  # Build timestamp
 
     @staticmethod
     def update_version(increment_type="patch"):
@@ -1138,17 +1139,12 @@ class MainApp(QMainWindow):
     def show_about_dialog(self):
         """Show the About dialog using our custom themed dialog."""
 
-        from custom_widgets import CustomInfoDialog
-
-        VERSION = "2024.0.0.0"  # Initial release version
-        BUILD_TIME = "2024-01-10"  # Fixed timestamp from when project started
-
         about_text = f"""
         <h3>Eightbox - Article 8 Violation Detection</h3>
         <p>A tool for detecting and displaying Article 8 violations.</p>
         <p>Created by: Branch 815</p>
-        <p>Version {VERSION}</p>
-        <p>Build: {BUILD_TIME}</p>
+        <p>Version {self.VERSION}</p>
+        <p>Build: {self.BUILD_TIME}</p>
         """
 
         CustomInfoDialog.information(self, "About Eightbox", about_text)
