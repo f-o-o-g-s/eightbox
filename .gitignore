@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+output/
+
+# IDE
+.vscode/
+*.code-workspace
+
+# Temporary/backup files
+*.bak
+*~
+
+# Other
+spreadsheets/
+*backup*/
+*Copy*.json
+black_changes.txt

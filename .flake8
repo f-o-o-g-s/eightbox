@@ -1,0 +1,11 @@
+[flake8]
+max-line-length = 100
+extend-ignore = E203, W503
+exclude = 
+    venv,
+    __pycache__,
+    85F_5th_backup,
+    85F_5th_revised,
+    output,
+    spreadsheets,
+    documentation_content.py
