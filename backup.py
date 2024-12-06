@@ -15,8 +15,20 @@ def create_backup():
         # Create backup commit message
         message = f"BACKUP ({timestamp}): {description}"
 
-        # Git commands - only add Python files and specific configs
-        subprocess.run(["git", "add", "*.py", "pyproject.toml", ".gitignore", "README.md", "LICENSE"])
+        # Git commands - add specific file types and configs
+        files_to_backup = [
+            "*.py",
+            "pyproject.toml",
+            ".gitignore",
+            "README.md",
+            "LICENSE",
+            ".flake8",
+            ".pre-commit-config.yaml"
+        ]
+        
+        for file in files_to_backup:
+            subprocess.run(["git", "add", file])
+            
         subprocess.run(["git", "commit", "-m", message])
         subprocess.run(["git", "push", "origin", "main"])
 
