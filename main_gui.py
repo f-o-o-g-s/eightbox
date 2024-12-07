@@ -160,7 +160,7 @@ class CustomTitleBar(QWidget):
 
 class MainApp(QMainWindow):
     # Class-level version info (single source of truth)
-    VERSION = "2024.0.0.2"  # Year.Major.Minor.Patch
+    VERSION = "2024.0.0.3"  # Year.Major.Minor.Patch
     BUILD_TIME = "2024-01-10"  # Build timestamp
 
     @staticmethod
