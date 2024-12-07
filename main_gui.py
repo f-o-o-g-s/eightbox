@@ -13,6 +13,7 @@ import pandas as pd  # Data manipulation
 from PyQt5.QtCore import (
     Qt,
     QTimer,
+    qInstallMessageHandler,
 )
 from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QAction,
@@ -54,6 +55,14 @@ from violation_detection import (
     get_violation_remedies,
 )
 from violations_summary_tab import ViolationRemediesTab
+
+
+def qt_message_handler(mode, context, message):
+    if "Unknown property cursor" not in message:  # Ignore cursor property warnings
+        print(mode, context, message)
+
+
+qInstallMessageHandler(qt_message_handler)
 
 
 class CustomTitleBar(QWidget):
