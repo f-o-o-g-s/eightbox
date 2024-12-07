@@ -72,8 +72,9 @@ def format_release_notes(version, notes, commit_msg):
 ## Technical Details
 - Release Date: {datetime.now().strftime('%Y-%m-%d')}
 - Build Time: {datetime.now().strftime('%H:%M')}
+- Commit: {subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()[:8]}
 
-[Full Changelog](https://github.com/f-o-o-g-s/eightbox/commits/{version})
+[Full Changelog](https://github.com/f-o-o-g-s/eightbox/commits/main)
 """
 
 
@@ -149,39 +150,53 @@ def update_version_and_release():
 
         main_gui_path.write_text(content)
 
-        # 7. Git commands
-        subprocess.run(["git", "add", "main_gui.py"])
-        subprocess.run(["git", "commit", "-m", f"{commit_msg} (v{new_version})"])
+        # 7. Git commands - Updated order
+        subprocess.run(["git", "add", "main_gui.py"], check=True)
+        subprocess.run(
+            ["git", "commit", "-m", f"{commit_msg} (v{new_version})"], check=True
+        )
+        subprocess.run(["git", "push", "origin", "main"], check=True)
 
-        # Format release notes
+        # Get the current commit SHA
+        commit_sha = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+        )
+
+        # Format release notes with commit SHA
         formatted_notes = format_release_notes(new_version, release_notes, commit_msg)
 
         # Create tag with formatted notes
-        subprocess.run(["git", "tag", "-a", f"v{new_version}", "-m", formatted_notes])
+        subprocess.run(
+            ["git", "tag", "-a", f"v{new_version}", "-m", formatted_notes], check=True
+        )
+        subprocess.run(["git", "push", "origin", "--tags"], check=True)
 
-        # Push changes
-        subprocess.run(["git", "push", "origin", "main"])
-        subprocess.run(["git", "push", "origin", "--tags"])
-
-        # 8. Create GitHub Release
+        # 8. Create GitHub Release - Updated to use commit SHA
         token = get_github_token()
         g = Github(token)
         repo = g.get_user().get_repo("eightbox")
 
-        # Create release
+        # Create release with specific commit
         release = repo.create_git_release(
             tag=f"v{new_version}",
             name=f"Version {new_version}",
             message=formatted_notes,
             draft=False,
             prerelease=False,
+            target_commitish=commit_sha,  # Explicitly set the commit
         )
 
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")
+        print(f"Commit SHA: {commit_sha}")
 
+    except subprocess.CalledProcessError as e:
+        print(f"\nGit command failed: {e.cmd}")
+        print(
+            f"Error output: {e.stderr if hasattr(e, 'stderr') else 'No error output'}"
+        )
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"\nError: {str(e)}")
 
 
 if __name__ == "__main__":

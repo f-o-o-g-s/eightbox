@@ -10,7 +10,7 @@ from violation_model import (
 class Violation85dTab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.tab_type = "85D"
+        self.tab_type = "85d"
 
     def create_tab_for_date(self, date, date_data):
         """Create a tab for the given date."""

@@ -11,7 +11,7 @@ from violation_model import (
 class Violation85f5thTab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.tab_type = "85F_5th"
+        self.tab_type = "85f_5th"
 
     def create_tab_for_date(self, date, date_data):
         """Create a tab for the given date."""

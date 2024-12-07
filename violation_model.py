@@ -150,7 +150,7 @@ class ViolationModel(QStandardItemModel):
                         pass
 
         # Then apply specific cell colors that should override the row highlight
-        if self.tab_type in ["85D", "85F", "85F_NS"]:
+        if self.tab_type == "85d":
             if self.is_summary:
                 # Weekly Remedy Total in teal
                 if col_name == "Weekly Remedy Total":
@@ -181,7 +181,7 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
 
-        elif self.tab_type == "85F_5th":
+        elif self.tab_type == "85f":
             if self.is_summary:
                 # Weekly Remedy Total in teal
                 if col_name == "Weekly Remedy Total":
@@ -214,7 +214,73 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
 
-        elif self.tab_type == "MAX12":
+        elif self.tab_type == "85f_5th":
+            if self.is_summary:
+                # Weekly Remedy Total in teal
+                if col_name == "Weekly Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return WEEKLY_TOTAL_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+                # Check if current date column exists in the violation_dates
+                # for this specific row
+                elif col_name not in ["Carrier Name", "List Status", "violation_dates"]:
+                    try:
+                        # Get the violation dates for this row
+                        violation_dates_col = self.df.columns.get_loc("violation_dates")
+                        violation_dates = self.data(
+                            self.index(row, violation_dates_col), Qt.DisplayRole
+                        )
+                        if violation_dates and col_name in str(violation_dates):
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError, KeyError):
+                        pass
+            else:
+                # Daily tab formatting - same as other violation types
+                if col_name == "Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+
+        elif self.tab_type == "85f_ns":
+            if self.is_summary:
+                # Weekly Remedy Total in teal
+                if col_name == "Weekly Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return WEEKLY_TOTAL_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+                # Check if current date column exists in the violation_dates
+                # for this specific row
+                elif col_name not in ["Carrier Name", "List Status", "violation_dates"]:
+                    try:
+                        # Get the violation dates for this row
+                        violation_dates_col = self.df.columns.get_loc("violation_dates")
+                        violation_dates = self.data(
+                            self.index(row, violation_dates_col), Qt.DisplayRole
+                        )
+                        if violation_dates and col_name in str(violation_dates):
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError, KeyError):
+                        pass
+            else:
+                # Daily tab formatting - same as other violation types
+                if col_name == "Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+
+        elif self.tab_type == "max12":
             if self.is_summary:
                 # Weekly Remedy Total in teal
                 if col_name == "Weekly Remedy Total":
@@ -256,7 +322,7 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
 
-        elif self.tab_type == "MAX60":
+        elif self.tab_type == "max60":
             if self.is_summary:
                 # Weekly Remedy Total in teal
                 if col_name == "Weekly Remedy Total":
