@@ -7,7 +7,7 @@ from violation_model import (
 )
 
 
-class Violation85FNS(BaseViolationTab):
+class Violation85fNsTab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = "85F_NS"

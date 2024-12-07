@@ -8,40 +8,38 @@ from violation_model import (
 )
 
 
-class ViolationMAX60Tab(BaseViolationTab):
+class Violation85f5thTab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.tab_type = "MAX60"
+        self.tab_type = "85F_5th"
 
     def create_tab_for_date(self, date, date_data):
         """Create a tab for the given date."""
-        # Format daily hours with display indicator
+        # Create a copy of the data to avoid SettingWithCopyWarning
         date_data = date_data.copy()
+
+        # Add display indicator and combine with total_hours
+        if "display_indicator" not in date_data.columns:
+            date_data["display_indicator"] = date_data.apply(set_display, axis=1)
+
         date_data["daily_hours"] = date_data.apply(
             lambda row: (
-                f"{row['daily_hours']:.2f} {row['display_indicator']}"
-                if pd.notna(row["daily_hours"])
+                f"{row['total_hours']:.2f} {row['display_indicator']}"
+                if pd.notna(row["total_hours"])
                 else row["display_indicator"]
             ),
             axis=1,
         )
 
-        # Reorder columns for display
-        display_columns = [
-            "carrier_name",
-            "list_status",
-            "date",
-            "daily_hours",
-            "cumulative_hours",
-            "remedy_total",
-            "violation_type",
-        ]
-        date_data = date_data[display_columns]
-
         model = ViolationModel(date_data, tab_type=self.tab_type, is_summary=False)
         proxy_model = ViolationFilterProxyModel()
         proxy_model.setSourceModel(model)
         view = self.create_table_view(model, proxy_model)
+
+        # Hide violation_dates column
+        if "violation_dates" in model.df.columns:
+            column_idx = model.df.columns.get_loc("violation_dates")
+            view.setColumnHidden(column_idx, True)
 
         self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
 
@@ -66,21 +64,17 @@ class ViolationMAX60Tab(BaseViolationTab):
         required_columns = [
             "carrier_name",
             "date",
-            "daily_hours",
-            "list_status",
-            "leave_type",
-            "code",
-            "cumulative_hours",
-            "remedy_total",
             "violation_type",
+            "remedy_total",
+            "total_hours",
             "display_indicator",
-            "total",
+            "85F_5th_date",
         ]
         for col in required_columns:
             if col not in violation_data.columns:
-                violation_data[col] = pd.NA
+                violation_data[col] = ""
 
-        # Generate display_indicator if not present
+        # Add display_indicator if not present
         if "display_indicator" not in violation_data.columns:
             violation_data["display_indicator"] = violation_data.apply(
                 set_display, axis=1
@@ -89,7 +83,7 @@ class ViolationMAX60Tab(BaseViolationTab):
         violation_data = violation_data.dropna(subset=["date"])
 
         # Round numerical columns
-        numerical_columns = ["remedy_total", "daily_hours", "cumulative_hours"]
+        numerical_columns = ["remedy_total", "total_hours"]
         for col in numerical_columns:
             if col in violation_data.columns:
                 violation_data[col] = violation_data[col].round(2)
@@ -112,8 +106,7 @@ class ViolationMAX60Tab(BaseViolationTab):
                     break
 
     def add_summary_tab(self, data):
-        """Add a summary tab with daily hours for each carrier."""
-        # Get unique dates for columns
+        """Add a summary tab that displays carrier totals and daily hours for a 7-day range."""
         unique_dates = sorted(data["date"].unique())
 
         # Create base summary data with carrier names and list status
@@ -123,44 +116,55 @@ class ViolationMAX60Tab(BaseViolationTab):
             .reset_index()[["carrier_name", "list_status"]]
         )
 
-        # Add daily hours with display indicators for each date
+        # Add daily hours with indicators
         for date in unique_dates:
-            date_data = data[data["date"] == date].copy()
             summary_data[date] = (
                 summary_data["carrier_name"]
                 .map(
-                    date_data.set_index("carrier_name").apply(
+                    lambda carrier: data[
+                        (data["carrier_name"] == carrier) & (data["date"] == date)
+                    ]
+                    .apply(
                         lambda row: (
-                            f"{row['daily_hours']:.2f} {row['display_indicator']}"
-                            if pd.notna(row["daily_hours"])
+                            f"{row['total_hours']:.2f} {row['display_indicator']}"
+                            if pd.notna(row["total_hours"])
                             else row["display_indicator"]
                         ),
                         axis=1,
                     )
+                    .sum()
                 )
                 .fillna("")
             )
 
-        # Add remedy_total and cumulative_hours
+        # Add remedy total and violation dates
         remedy_totals = data.groupby("carrier_name")["remedy_total"].sum().round(2)
-        cumulative_hours = (
-            data.groupby("carrier_name")["cumulative_hours"].max().round(2)
+        violation_dates = data.groupby("carrier_name")["85F_5th_date"].agg(
+            lambda x: list(x[x != ""].unique())
         )
 
         summary_data["remedy_total"] = summary_data["carrier_name"].map(remedy_totals)
-        summary_data["cumulative_hours"] = summary_data["carrier_name"].map(
-            cumulative_hours
+        summary_data["violation_dates"] = summary_data["carrier_name"].map(
+            violation_dates
         )
 
-        # Reorder columns to include list_status
-        pivot_columns = (
-            ["carrier_name", "list_status", "remedy_total"]
-            + unique_dates
-            + ["cumulative_hours"]
-        )
+        # Reorder columns
+        pivot_columns = [
+            "carrier_name",
+            "list_status",
+            "remedy_total",
+            "violation_dates",
+        ] + unique_dates
         summary_data = summary_data[pivot_columns]
+
+        # Rename columns
         summary_data.rename(
-            columns={"remedy_total": "Weekly Remedy Total"}, inplace=True
+            columns={
+                "carrier_name": "Carrier Name",
+                "list_status": "List Status",
+                "remedy_total": "Weekly Remedy Total",
+            },
+            inplace=True,
         )
 
         # Create model and view
@@ -168,6 +172,11 @@ class ViolationMAX60Tab(BaseViolationTab):
         proxy_model = ViolationFilterProxyModel()
         proxy_model.setSourceModel(model)
         view = self.create_table_view(model, proxy_model)
+
+        # Hide violation_dates column
+        if "violation_dates" in model.df.columns:
+            column_idx = model.df.columns.get_loc("violation_dates")
+            view.setColumnHidden(column_idx, True)
 
         self.summary_proxy_model = proxy_model
         self.date_tabs.addTab(view, "Summary")

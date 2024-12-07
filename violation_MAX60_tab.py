@@ -8,7 +8,7 @@ from violation_model import (
 )
 
 
-class ViolationMAX60Tab(BaseViolationTab):
+class ViolationMax60Tab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = "MAX60"

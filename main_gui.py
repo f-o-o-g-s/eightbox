@@ -44,12 +44,12 @@ from otdl_maximization_pane import OTDLMaximizationPane
 # Theme colors
 from theme import apply_material_dark_theme
 from utils import set_display
-from vio_85D_tab import Violation85DTab
-from vio_85F_5th_tab import Violation85F5thTab
-from vio_85F_ns_tab import Violation85FNS
-from vio_85F_tab import Violation85FTab
-from vio_MAX12_tab import ViolationMAX12Tab
-from vio_MAX60_tab import ViolationMAX60Tab
+from violation_85d_tab import Violation85dTab
+from violation_85f_5th_tab import Violation85f5thTab
+from violation_85f_ns_tab import Violation85fNsTab
+from violation_85f_tab import Violation85fTab
+from violation_max12_tab import ViolationMax12Tab
+from violation_max60_tab import ViolationMax60Tab
 from violation_detection import (
     detect_violations,
     get_violation_remedies,
@@ -453,7 +453,7 @@ class MainApp(QMainWindow):
         print("Initializing 8.5.D Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.D Tab."""
-        self.vio_85d_tab = Violation85DTab()
+        self.vio_85d_tab = Violation85dTab()
         self.central_tab_widget.addTab(self.vio_85d_tab, "8.5.D Violations")
         self.vio_85d_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
@@ -461,7 +461,7 @@ class MainApp(QMainWindow):
         print("Initializing 8.5.F Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.F Tab."""
-        self.vio_85f_tab = Violation85FTab()
+        self.vio_85f_tab = Violation85fTab()
         self.central_tab_widget.addTab(self.vio_85f_tab, "8.5.F Violations")
         self.vio_85f_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
@@ -469,7 +469,7 @@ class MainApp(QMainWindow):
         print("Initializing 8.5.F NS Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.F NS Tab."""
-        self.vio_85f_ns_tab = Violation85FNS()
+        self.vio_85f_ns_tab = Violation85fNsTab()
         self.central_tab_widget.addTab(self.vio_85f_ns_tab, "8.5.F NS Violations")
         self.vio_85f_ns_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
@@ -477,7 +477,7 @@ class MainApp(QMainWindow):
         print("Initializing 8.5.F 5th Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.F 5th Tab."""
-        self.vio_85f_5th_tab = Violation85F5thTab()
+        self.vio_85f_5th_tab = Violation85f5thTab()
         self.central_tab_widget.addTab(self.vio_85f_5th_tab, "8.5.F 5th Violations")
         self.vio_85f_5th_tab.refresh_data(
             pd.DataFrame()
@@ -487,7 +487,7 @@ class MainApp(QMainWindow):
         print("Initializing MAX12 Violations Tab")  # Debugging statement
 
         """Initialize and add the MAX12 Violations Tab."""
-        self.vio_MAX12_tab = ViolationMAX12Tab()
+        self.vio_MAX12_tab = ViolationMax12Tab()
         self.central_tab_widget.addTab(self.vio_MAX12_tab, "MAX12 Violations")
         self.vio_MAX12_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
@@ -495,7 +495,7 @@ class MainApp(QMainWindow):
         print("Initializing MAX60 Violations Tab")  # Debugging statement
 
         """Initialize and add the MAX60 Violations Tab."""
-        self.vio_MAX60_tab = ViolationMAX60Tab()
+        self.vio_MAX60_tab = ViolationMax60Tab()
         self.central_tab_widget.addTab(self.vio_MAX60_tab, "MAX60 Violations")
         self.vio_MAX60_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 

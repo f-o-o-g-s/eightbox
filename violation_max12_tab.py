@@ -5,7 +5,7 @@ from violation_model import (
 )
 
 
-class ViolationMAX12Tab(BaseViolationTab):
+class ViolationMax12Tab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = "MAX12"

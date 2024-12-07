@@ -145,6 +145,11 @@ class OTDLMaximizationPane(QWidget):
         print(updated_carrier_df)
         if hasattr(self, "clock_ring_data") and self.clock_ring_data is not None:
             print("Refreshing OTDL view with updated carrier list")
+            # Reset maximization state
+            self.date_maximized = {}
+            self.cached_date_maximized = {}
+            self.excusal_data = {}
+            # Refresh the data
             self.refresh_data(self.clock_ring_data, updated_carrier_df)
         else:
             print("No clock ring data available for refresh")
