@@ -1,3 +1,9 @@
+"""Custom widget implementations for the application's user interface.
+
+Contains specialized widgets and UI components that extend PyQt's base widgets
+with additional functionality specific to the application's needs.
+"""
+
 # Create a new file: custom_widgets.py
 from PyQt5.QtCore import (
     QByteArray,

@@ -1,3 +1,4 @@
+"""Handles database backup and restore operations for the application."""
 import subprocess
 from datetime import datetime
 

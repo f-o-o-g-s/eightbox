@@ -1,3 +1,9 @@
+"""Data model implementations for violation-related data in the application.
+
+Provides the model classes that handle data representation and manipulation
+for various types of carrier violations and their associated information.
+"""
+
 import pandas as pd
 from PyQt5.QtCore import (
     QSortFilterProxyModel,

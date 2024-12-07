@@ -96,7 +96,11 @@ class MetaQWidgetABC(type(QWidget), ABCMeta):  # type: ignore[misc]
 
 
 class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
-    """Base class for violation tabs with common functionality."""
+    """Provides the base class for all violation tab implementations in the application.
+
+    This module contains the core functionality for displaying and managing violation data
+    in tabbed interfaces, including filtering and data presentation capabilities.
+    """
 
     data_refreshed = pyqtSignal(pd.DataFrame)
 

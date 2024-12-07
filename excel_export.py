@@ -22,6 +22,12 @@ from violation_model import calculate_optimal_gray
 
 
 class ExcelExporter:
+    """Handles the export of application data to Excel format.
+
+    Provides functionality for converting and exporting various types of application
+    data (violations, carrier information, etc.) to Excel spreadsheet format.
+    """
+
     def __init__(self, main_window):
         self.main_window = main_window
         self.progress_dialog = None

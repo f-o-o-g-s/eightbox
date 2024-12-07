@@ -1,3 +1,9 @@
+"""Implements violation detection logic for carrier work hours.
+
+Contains the core algorithms and rules for detecting various types of
+work hour violations based on carrier schedules and USPS regulations.
+"""
+
 # violation_detection.py
 from typing import (
     Callable,

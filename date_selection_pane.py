@@ -1,3 +1,9 @@
+"""Manages the date selection interface for the application.
+
+ProvidesUI components and logic for selecting and managing date ranges,
+allowing users to filter and view data for specific time periods.
+"""
+
 from PyQt5.QtCore import (
     QDate,
     QEvent,

@@ -1,3 +1,10 @@
+"""Utility functions used throughout the application.
+
+Contains helper functions and common utilities that are used by multiple
+modules across the application for data processing and manipulation.
+"""
+
+
 def set_display(row):
     """Set display indicators based on conditions."""
     code = (

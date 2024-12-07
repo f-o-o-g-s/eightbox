@@ -1,3 +1,9 @@
+"""Main graphical user interface for the application.
+
+Implements the primary window and core UI functionality, coordinating between
+different panes and managing the overall application state and user interactions.
+"""
+
 import json
 import os
 import sqlite3

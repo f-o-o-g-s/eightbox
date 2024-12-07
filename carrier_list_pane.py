@@ -1,3 +1,9 @@
+"""Manages the carrier list interface and related functionality.
+
+This module provides the UI components and logic for displaying, filtering,
+and managing carrier information, including their hour limits and status.
+"""
+
 # Python standard library imports
 import os
 import sqlite3

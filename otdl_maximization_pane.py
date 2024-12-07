@@ -70,6 +70,12 @@ def is_automatically_excused(
 
 
 class OTDLMaximizationPane(QWidget):
+    """Manages the Overtime Desired List (OTDL) maximization interface.
+
+    Provides UI components and logic for analyzing and maximizing overtime
+    distribution among carriers on the overtime desired list.
+    """
+
     date_maximized_updated = pyqtSignal(str, bool)
 
     def __init__(self, parent=None, carrier_list_pane=None):

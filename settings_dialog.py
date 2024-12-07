@@ -11,6 +11,12 @@ from custom_widgets import CustomTitleBarWidget
 
 
 class SettingsDialog(QWidget):
+    """Dialog interface for application settings and configuration.
+
+    Provides a user interface for viewing and modifying application settings,
+    including database connections and user preferences.
+    """
+
     def __init__(self, current_path, parent=None):
         super().__init__(parent)
         self.parent = parent
