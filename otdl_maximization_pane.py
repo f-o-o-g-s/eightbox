@@ -642,12 +642,12 @@ class OTDLMaximizationPane(QWidget):
         for col_idx, date in enumerate(unique_dates, start=2):
             apply_button = QPushButton("Apply")
             apply_button.setStyleSheet(
-                """
-                QPushButton {
-                    background-color: #2D2D2D;  /* Dark, but slightly elevated */
-                    color: #BB86FC;            /* Using primary purple but will be subtle */
-                    border: 1px solid #3D3D3D; /* Subtle top border for depth */
-                    border-bottom: 2px solid #1D1D1D; /* Darker bottom border for depth */
+                f"""
+                QPushButton {{
+                    background-color: #2D2D2D;
+                    color: #BB86FC;
+                    border: 1px solid #3D3D3D;
+                    border-bottom: 2px solid #1D1D1D;
                     padding: 4px 16px;
                     font-weight: 500;
                     min-height: 26px;
@@ -655,27 +655,27 @@ class OTDLMaximizationPane(QWidget):
                     font-size: 12px;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
-                }
-                QPushButton:hover {
+                }}
+                QPushButton:hover {{
                     background-color: #353535;
                     border: 1px solid #454545;
                     border-bottom: 2px solid #252525;
-                    color: #CBB0FF;  /* Lighter purple on hover */
-                }
-                QPushButton:pressed {
+                    color: #CBB0FF;
+                }}
+                QPushButton:pressed {{
                     background-color: #252525;
                     border: 1px solid #353535;
                     border-top: 2px solid #151515;
                     border-bottom: 1px solid #353535;
-                    padding-top: 5px;  /* Slight shift down when pressed */
+                    padding-top: 5px;
                     color: #BB86FC;
-                }
-                QPushButton:disabled {
+                }}
+                QPushButton:disabled {{
                     background-color: #252525;
-                    color: #555555;
+                    color: {calculate_optimal_gray(QColor('#252525')).name()};
                     border: 1px solid #2D2D2D;
-                }
-            """
+                }}
+                """
             )
             apply_button.clicked.connect(partial(self.apply_changes_for_date, date))
             self.table.setCellWidget(apply_row_index, col_idx, apply_button)

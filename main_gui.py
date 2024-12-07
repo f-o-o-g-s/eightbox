@@ -195,7 +195,7 @@ class MainApp(QMainWindow):
         apply_material_dark_theme(QApplication.instance())
 
         self.setWindowTitle("Violation Detection Application")
-        self.resize(1200, 800)
+        self.resize(1350, 800)
 
         # Initialize database path
         self.mandates_db_path = self.auto_detect_klusterbox_path()
