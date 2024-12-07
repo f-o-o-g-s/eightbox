@@ -8,10 +8,12 @@ version control workflow.
 import subprocess
 from datetime import datetime
 
-from custom_widgets import (
-    CustomErrorDialog,
-    CustomMessageBox,
-)
+# Only import Qt widgets when needed (not for command line usage)
+try:
+    from custom_widgets import CustomErrorDialog, CustomMessageBox
+except ImportError:
+    CustomErrorDialog = None
+    CustomMessageBox = None
 
 
 def restore_to_backup(main_window, backup_description=None):
@@ -69,17 +71,27 @@ def restore_to_backup(main_window, backup_description=None):
         # Restore to the selected commit
         subprocess.run(["git", "checkout", commit_hash], check=True)
 
-        CustomMessageBox.information(
-            main_window,
-            "Restore Successful",
-            f"Files have been restored to backup commit {commit_hash[:8]}\n"
-            f"A backup of your previous state was created at {timestamp}",
-        )
+        # Use print instead of CustomMessageBox when no window
+        if main_window is None:
+            print(f"\nRestore Successful!")
+            print(f"Files have been restored to backup commit {commit_hash[:8]}")
+            print(f"A backup of your previous state was created at {timestamp}")
+        else:
+            CustomMessageBox.information(
+                main_window,
+                "Restore Successful",
+                f"Files have been restored to backup commit {commit_hash[:8]}\n"
+                f"A backup of your previous state was created at {timestamp}",
+            )
 
     except Exception as e:
-        CustomErrorDialog.error(
-            main_window, "Restore Failed", f"Failed to restore from backup: {str(e)}"
-        )
+        # Use print instead of CustomErrorDialog when no window
+        if main_window is None:
+            print(f"\nError: Failed to restore from backup: {str(e)}")
+        else:
+            CustomErrorDialog.error(
+                main_window, "Restore Failed", f"Failed to restore from backup: {str(e)}"
+            )
 
 
 def restore_to_version(main_window, version=None):
@@ -138,14 +150,49 @@ def restore_to_version(main_window, version=None):
         # Restore to the selected commit
         subprocess.run(["git", "checkout", version_tag], check=True)
 
-        CustomMessageBox.information(
-            main_window,
-            "Restore Successful",
-            f"Files have been restored to release version {version_tag}\n"
-            f"A backup of your previous state was created at {timestamp}",
-        )
+        # Use print instead of CustomMessageBox when no window
+        if main_window is None:
+            print(f"\nRestore Successful!")
+            print(f"Files have been restored to version {version_tag}")
+            print(f"A backup of your previous state was created at {timestamp}")
+        else:
+            CustomMessageBox.information(
+                main_window,
+                "Restore Successful",
+                f"Files have been restored to release version {version_tag}\n"
+                f"A backup of your previous state was created at {timestamp}",
+            )
 
     except Exception as e:
-        CustomErrorDialog.error(
-            main_window, "Restore Failed", f"Failed to restore to version: {str(e)}"
-        )
+        # Use print instead of CustomErrorDialog when no window
+        if main_window is None:
+            print(f"\nError: Failed to restore to version: {str(e)}")
+        else:
+            CustomErrorDialog.error(
+                main_window, "Restore Failed", f"Failed to restore to version: {str(e)}"
+            )
+
+
+if __name__ == "__main__":
+    import sys
+    
+    if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help", "help"]:
+        print("\nUsage: python restore.py")
+        print("Restores files to a previous backup or version.")
+        print("\nThe script will:")
+        print("1. Show available backups/versions")
+        print("2. Let you choose which one to restore to")
+        print("3. Create a backup of current state")
+        print("4. Restore files to chosen state")
+    else:
+        print("\nChoose restore type:")
+        print("1. Restore from backup")
+        print("2. Restore from version release")
+        choice = input("\nEnter choice (1-2): ").strip()
+        
+        if choice == "1":
+            restore_to_backup(None)  # Passing None since we're running from command line
+        elif choice == "2":
+            restore_to_version(None)  # Passing None since we're running from command line
+        else:
+            print("Invalid choice. Please enter 1 or 2.")
