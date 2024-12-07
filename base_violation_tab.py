@@ -1,3 +1,10 @@
+"""Base classes and utilities for violation tab implementations.
+
+This module provides the foundation for all violation-specific tabs,
+including common filtering, display, and data management functionality
+that is shared across different violation type views.
+"""
+
 from abc import (
     ABC,
     ABCMeta,
@@ -48,10 +55,13 @@ class SummaryProxyModel(QSortFilterProxyModel):
 
 
 class ViolationFilterProxyModel(QSortFilterProxyModel):
+    """Proxy model for filtering violation data in table views."""
+
     def __init__(self):
+        """Initialize the filter proxy model."""
         super().__init__()
-        self.filter_type = "name"
         self.filter_text = ""
+        self.filter_type = "name"
 
     def set_filter(self, text, filter_type="name"):
         """Set the filter type and text."""

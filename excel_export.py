@@ -38,10 +38,11 @@ class ExcelExporter:
         self.date_range = None
 
     def export_all_violations(self):
-        """Export violations for all tabs.
+        """Export all violation tabs to separate Excel files.
 
-        Switches views slowly and uses the existing `export_to_excel` logic
-        for accuracy.
+        Creates individual Excel files for each violation tab in the application,
+        with proper formatting and data organization. Shows a progress dialog
+        during the export process.
         """
         try:
             # Get the selected date range
@@ -183,7 +184,15 @@ class ExcelExporter:
         return f"{start_date} to {end_date}"
 
     def _write_excel_file(self, writer, date_range):
-        """Write data to Excel file with proper formatting."""
+        """Write data to Excel file with proper formatting.
+
+        Args:
+            writer: The ExcelWriter object to write to
+            date_range: String representing the date range for the export
+
+        Handles the creation of worksheets, formatting of cells, and writing
+        of data with proper styling including colors, borders, and text alignment.
+        """
         workbook = writer.book
         border_color = "#424242"
 
@@ -321,7 +330,17 @@ class ExcelExporter:
                         worksheet.write(row_idx + 3, col_idx, cell_value, cell_format)
 
     def _sanitize_sheet_name(self, sheet_name):
-        """Replace invalid characters in sheet names for Excel."""
+        """Sanitize the sheet name to be Excel-compatible.
+
+        Args:
+            sheet_name: The original sheet name
+
+        Returns:
+            str: A sanitized version of the sheet name that is valid for Excel
+
+        Removes or replaces invalid characters and ensures the sheet name meets
+        Excel's requirements.
+        """
         invalid_chars = r"[]:*?/\\"
         for char in invalid_chars:
             sheet_name = sheet_name.replace(char, "_")

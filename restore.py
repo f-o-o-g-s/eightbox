@@ -1,90 +1,151 @@
+"""Git restoration utilities for the application.
+
+This module provides functions for restoring files to previous states,
+working alongside backup.py and release.py to provide a complete
+version control workflow.
+"""
+
 import subprocess
 from datetime import datetime
 
-
-def show_backups():
-    """Show list of available backups."""
-    print("\nAvailable Backups:")
-    print("-" * 80)
-    result = subprocess.run(
-        [
-            "git",
-            "log",
-            "--grep=BACKUP",
-            "--pretty=format:%h | %ad | %s",
-            "--date=format:%Y-%m-%d %H:%M",
-        ],
-        capture_output=True,
-        text=True,
-    )
-    print(result.stdout)
-    print("-" * 80)
+from custom_widgets import (
+    CustomErrorDialog,
+    CustomMessageBox,
+)
 
 
-def create_restore_branch(commit_hash):
-    """Create a new branch for restoration."""
-    branch_name = f"restore-{datetime.now().strftime('%Y%m%d-%H%M')}"
-    subprocess.run(["git", "checkout", "-b", branch_name, commit_hash])
-    return branch_name
+def restore_to_backup(main_window, backup_description=None):
+    """Restore to a specific backup commit.
 
-
-def restore_backup():
-    """Interactive backup restoration."""
+    Args:
+        main_window: Main application window for displaying dialogs
+        backup_description: Optional description to find specific backup
+    """
     try:
-        # Show available backups
-        show_backups()
+        # Find backup commits
+        if backup_description:
+            cmd = [
+                "git",
+                "log",
+                "--grep=BACKUP",
+                f"--grep={backup_description}",
+                "--format=%H|%s",
+                "-i",
+            ]  # -i for case-insensitive
+        else:
+            cmd = ["git", "log", "--grep=BACKUP", "--format=%H|%s"]
 
-        # Get commit hash from user
-        print("\nEnter the commit hash (left column) to restore:")
-        commit_hash = input("Hash: ").strip()
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        commits = result.stdout.strip().split("\n")
 
-        # Ask about restoration type
-        print("\nRestore options:")
-        print("1. Restore everything (creates new branch)")
-        print("2. Restore specific files")
-        choice = input("Choose option (1-2): ").strip()
+        if not commits or not commits[0]:
+            raise Exception("No backup commits found")
 
-        if choice == "1":
-            # Create new branch and restore everything
-            branch_name = create_restore_branch(commit_hash)
-            print(f"\nCreated new branch: {branch_name}")
-            print("All files restored to backup state")
+        # If multiple backups found, let user choose
+        if len(commits) > 1:
+            print("\nAvailable backups:")
+            for i, commit in enumerate(commits, 1):
+                hash, msg = commit.split("|")
+                print(f"{i}. {msg} ({hash[:8]})")
 
-        elif choice == "2":
-            # Restore specific files
-            print("\nEnter files to restore (empty line to finish):")
-            print("Examples: main_gui.py, *.py, folder/*")
-            files = []
-            while True:
-                file = input("File: ").strip()
-                if not file:
-                    break
-                files.append(file)
+            choice = input(
+                "\nEnter backup number to restore (or press Enter for latest): "
+            )
+            if choice.strip():
+                commit_hash = commits[int(choice) - 1].split("|")[0]
+            else:
+                commit_hash = commits[0].split("|")[0]
+        else:
+            commit_hash = commits[0].split("|")[0]
 
-            for file in files:
-                subprocess.run(["git", "checkout", commit_hash, "--", file])
-            print("\nSelected files restored from backup")
+        # Create a new backup before restoring
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        subprocess.run(["git", "add", "-u"], check=True)
+        subprocess.run(
+            ["git", "commit", "-m", f"BACKUP ({timestamp}): Before restore operation"],
+            check=True,
+        )
 
-        print("\nRestore completed!")
-        print("\nTo return to latest version:")
-        print("  git checkout main")
+        # Restore to the selected commit
+        subprocess.run(["git", "checkout", commit_hash], check=True)
 
-    except KeyboardInterrupt:
-        print("\nRestore cancelled.")
+        CustomMessageBox.information(
+            main_window,
+            "Restore Successful",
+            f"Files have been restored to backup commit {commit_hash[:8]}\n"
+            f"A backup of your previous state was created at {timestamp}",
+        )
+
     except Exception as e:
-        print(f"\nError: {str(e)}")
-        print("Make sure the commit hash is correct")
+        CustomErrorDialog.error(
+            main_window, "Restore Failed", f"Failed to restore from backup: {str(e)}"
+        )
 
 
-if __name__ == "__main__":
-    import sys
+def restore_to_version(main_window, version=None):
+    """Restore to a specific version release.
 
-    if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help", "help"]:
-        print("\nUsage: python restore.py")
-        print("Interactive tool to restore from backups")
-        print("\nThe script will:")
-        print("1. Show list of available backups")
-        print("2. Let you choose what to restore")
-        print("3. Create a safe restoration branch")
-    else:
-        restore_backup()
+    Args:
+        main_window: Main application window for displaying dialogs
+        version: Optional specific version to restore to
+    """
+    try:
+        # Get list of version tags
+        result = subprocess.run(
+            ["git", "tag", "-l", "v*", "--sort=-v:refname"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        versions = result.stdout.strip().split("\n")
+
+        if not versions or not versions[0]:
+            raise Exception("No version releases found")
+
+        # If version not specified, show list
+        if not version:
+            print("\nAvailable versions:")
+            for i, ver in enumerate(versions, 1):
+                # Get commit message for this tag
+                msg = subprocess.run(
+                    ["git", "tag", "-l", "--format=%(contents)", ver],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                print(f"{i}. {ver} - {msg.stdout.split('\n')[0]}")
+
+            choice = input(
+                "\nEnter version number to restore (or press Enter for latest): "
+            )
+            if choice.strip():
+                version_tag = versions[int(choice) - 1]
+            else:
+                version_tag = versions[0]
+        else:
+            version_tag = f"v{version}"
+            if version_tag not in versions:
+                raise Exception(f"Version {version} not found")
+
+        # Create a new backup before restoring
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        subprocess.run(["git", "add", "-u"], check=True)
+        subprocess.run(
+            ["git", "commit", "-m", f"RELEASE ({timestamp}): Before restore operation"],
+            check=True,
+        )
+
+        # Restore to the selected commit
+        subprocess.run(["git", "checkout", version_tag], check=True)
+
+        CustomMessageBox.information(
+            main_window,
+            "Restore Successful",
+            f"Files have been restored to release version {version_tag}\n"
+            f"A backup of your previous state was created at {timestamp}",
+        )
+
+    except Exception as e:
+        CustomErrorDialog.error(
+            main_window, "Restore Failed", f"Failed to restore to version: {str(e)}"
+        )

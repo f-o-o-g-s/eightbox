@@ -5,6 +5,12 @@ from PyQt5.QtWidgets import (
     QStyleFactory,
 )
 
+"""Theme configuration and styling for the application.
+
+This module contains color schemes, style definitions, and other UI theming
+constants used throughout the application to maintain a consistent look and feel.
+"""
+
 # Material Design Dark Theme Colors
 MATERIAL_PRIMARY = QColor("#BB86FC")  # Purple-ish
 MATERIAL_PRIMARY_VARIANT = QColor("#3700B3")

@@ -1,3 +1,10 @@
+"""Defines the ViolationType enum used throughout the application.
+
+This module provides a centralized enum for all violation types supported
+by the application, ensuring consistent type checking and preventing string
+literal errors in violation handling code.
+"""
+
 from enum import Enum
 
 

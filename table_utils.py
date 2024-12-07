@@ -1,3 +1,10 @@
+"""Table utility functions for handling QTableView operations.
+
+This module provides utility functions for enhancing QTableView widgets with
+additional functionality such as copy operations, context menus, and data
+extraction capabilities.
+"""
+
 from PyQt5.QtCore import (
     QSortFilterProxyModel,
     Qt,
@@ -11,11 +18,14 @@ from PyQt5.QtWidgets import (
 
 
 def setup_table_copy_functionality(table_view):
-    """
-    Adds right-click and Ctrl+C copy functionality to a QTableView or QTableWidget.
+    """Add copy functionality to a table view.
 
     Args:
         table_view (QTableView or QTableWidget): The table view to enhance.
+
+    Adds right-click context menu and Ctrl+C keyboard shortcut support
+    for copying selected cells to the clipboard. Also configures proper
+    selection behavior for the table.
     """
     # Enable custom context menu
     table_view.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -44,7 +54,15 @@ def setup_table_copy_functionality(table_view):
 
 
 def show_context_menu(table_view, position):
-    """Display the context menu for copying selected items."""
+    """Display the context menu for copying selected items.
+
+    Args:
+        table_view: The QTableView showing the context menu
+        position: The position where the context menu should appear
+
+    Creates and displays a context menu with copy functionality at
+    the specified position when right-clicking the table.
+    """
     print("Displaying context menu...")
     selection_model = table_view.selectionModel()
     if not selection_model.hasSelection():
@@ -61,7 +79,15 @@ def show_context_menu(table_view, position):
 
 
 def copy_selection(table_view):
-    """Copy the selected items and column headers from the QTableView to the clipboard."""
+    """Copy selected cells to clipboard with headers.
+
+    Args:
+        table_view: The QTableView containing the selection
+
+    Copies the selected cells along with their column headers to the
+    system clipboard in a tab-delimited format suitable for pasting
+    into spreadsheet applications.
+    """
     print("Copy selection initiated.")
     selection_model = table_view.selectionModel()
     if not selection_model.hasSelection():
@@ -105,7 +131,20 @@ def copy_selection(table_view):
 
 
 def extract_table_state(table_view):
-    """Extract content, formatting metadata, and row highlights from a QTableView."""
+    """Extract the complete state of a table view.
+
+    Args:
+        table_view: The QTableView to extract data from
+
+    Returns:
+        tuple: (content_df, metadata_df, row_highlights_df)
+            - content_df: DataFrame containing cell values
+            - metadata_df: DataFrame containing cell formatting metadata
+            - row_highlights_df: DataFrame containing row highlight information
+
+    Extracts both the content and formatting information from the table,
+    filtering for only visible columns.
+    """
     if not isinstance(table_view, QTableView):
         return None, None, None
 

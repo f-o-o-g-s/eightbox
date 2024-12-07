@@ -1,3 +1,8 @@
+"""Dialog for displaying application documentation and help information.
+
+This module provides a dialog window that shows documentation, usage guides,
+and help information to users in a formatted, easy-to-read layout.
+"""
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
@@ -20,11 +25,7 @@ from documentation_content import (
 
 
 class DocumentationDialog(QDialog):
-    """Dialog interface for displaying application documentation and help content.
-
-    Provides a user interface for viewing application documentation, help text,
-    and usage instructions in a dedicated dialog window.
-    """
+    """A dialog window for displaying application documentation."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
