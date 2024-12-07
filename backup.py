@@ -43,10 +43,10 @@ def create_backup():
         ]
 
         for file in files_to_backup:
-            subprocess.run(["git", "add", file])
+            subprocess.run(["git", "add", file], check=True)
 
-        subprocess.run(["git", "commit", "-m", message])
-        subprocess.run(["git", "push", "origin", "main"])
+        subprocess.run(["git", "commit", "-m", message], check=True)
+        subprocess.run(["git", "push", "origin", "main"], check=True)
 
         print("\nBackup created successfully!")
         print(f"Description: {description}")
