@@ -381,7 +381,7 @@ will not prevent a violation.</p>
 """
 
 DOCUMENTATION_MAX12 = """
-<h2 style='color: #BB86FC;'>Article - Maximum Work Hour Limitations</h2>
+<h2 style='color: #BB86FC;'>Maximum Daily Work Hour Limitations - 12 Hours</h2>
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
