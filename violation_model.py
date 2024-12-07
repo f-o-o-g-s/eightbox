@@ -90,9 +90,12 @@ class ViolationModel(QStandardItemModel):
         elif role == Qt.UserRole:  # Use UserRole for sorting
             value = self.item(index.row(), index.column()).text()
             try:
-                # Try to convert to float for numeric sorting
-                # Handle cases like "8.00 (NS day)" by splitting
-                return float(value.split()[0])
+                # Try to extract numeric part for sorting
+                parts = value.split()
+                if parts and any(char.isdigit() for char in parts[0]):
+                    return float(parts[0])
+                # If no numeric part, sort by the full string
+                return value
             except (ValueError, TypeError):
                 return value
 
