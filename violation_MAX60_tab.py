@@ -2,7 +2,10 @@ import pandas as pd
 
 from base_violation_tab import BaseViolationTab
 from utils import set_display
-from violation_model import ViolationFilterProxyModel, ViolationModel
+from violation_model import (
+    ViolationFilterProxyModel,
+    ViolationModel,
+)
 
 
 class ViolationMAX60Tab(BaseViolationTab):

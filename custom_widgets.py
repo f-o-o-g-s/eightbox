@@ -1,5 +1,9 @@
 # Create a new file: custom_widgets.py
-from PyQt5.QtCore import QByteArray, Qt, QTimer
+from PyQt5.QtCore import (
+    QByteArray,
+    Qt,
+    QTimer,
+)
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
     QApplication,

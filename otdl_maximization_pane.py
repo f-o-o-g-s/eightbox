@@ -2,7 +2,11 @@ from datetime import datetime
 from functools import partial
 
 import pandas as pd
-from PyQt5.QtCore import QEvent, Qt, pyqtSignal
+from PyQt5.QtCore import (
+    QEvent,
+    Qt,
+    pyqtSignal,
+)
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QCheckBox,
@@ -17,7 +21,11 @@ from PyQt5.QtWidgets import (
 
 from custom_widgets import CustomTitleBarWidget
 from table_utils import setup_table_copy_functionality
-from theme import COLOR_NO_HIGHLIGHT, COLOR_ROW_HIGHLIGHT, COLOR_TEXT_LIGHT
+from theme import (
+    COLOR_NO_HIGHLIGHT,
+    COLOR_ROW_HIGHLIGHT,
+    COLOR_TEXT_LIGHT,
+)
 from violation_model import calculate_optimal_gray
 
 

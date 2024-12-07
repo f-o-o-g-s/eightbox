@@ -1,5 +1,13 @@
-from PyQt5.QtCore import QSortFilterProxyModel, Qt
-from PyQt5.QtWidgets import QAbstractItemView, QApplication, QMenu, QTableView
+from PyQt5.QtCore import (
+    QSortFilterProxyModel,
+    Qt,
+)
+from PyQt5.QtWidgets import (
+    QAbstractItemView,
+    QApplication,
+    QMenu,
+    QTableView,
+)
 
 
 def setup_table_copy_functionality(table_view):

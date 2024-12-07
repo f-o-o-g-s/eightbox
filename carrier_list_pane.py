@@ -15,7 +15,10 @@ from PyQt5.QtCore import (
     QVariant,
     pyqtSignal,
 )
-from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtGui import (
+    QBrush,
+    QColor,
+)
 from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,

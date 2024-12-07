@@ -1,5 +1,8 @@
 from base_violation_tab import BaseViolationTab
-from violation_model import ViolationFilterProxyModel, ViolationModel
+from violation_model import (
+    ViolationFilterProxyModel,
+    ViolationModel,
+)
 
 
 class ViolationMAX12Tab(BaseViolationTab):
