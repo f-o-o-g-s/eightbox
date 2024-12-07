@@ -31,19 +31,24 @@ def create_backup():
         # Create backup commit message
         message = f"BACKUP ({timestamp}): {description}"
 
-        # Git commands - add specific file types and configs
-        files_to_backup = [
-            "*.py",
-            "pyproject.toml",
+        # Git commands - only add tracked files and respect .gitignore
+        subprocess.run(["git", "add", "-u"], check=True)
+
+        # Add any new config files that should be tracked
+        config_files = [
             ".gitignore",
+            "pyproject.toml",
             "README.md",
             "LICENSE",
             ".flake8",
             ".pre-commit-config.yaml",
         ]
-
-        for file in files_to_backup:
-            subprocess.run(["git", "add", file], check=True)
+        for file in config_files:
+            try:
+                subprocess.run(["git", "add", file], check=True, capture_output=True)
+            except subprocess.CalledProcessError:
+                # Skip if file doesn't exist
+                pass
 
         subprocess.run(["git", "commit", "-m", message], check=True)
         subprocess.run(["git", "push", "origin", "main"], check=True)
@@ -67,7 +72,7 @@ if __name__ == "__main__":
         print("\nThe script will:")
         print("1. Run pre-commit hooks (black, isort, flake8)")
         print("2. Ask for a description of upcoming changes")
-        print("3. Add all changes to Git")
+        print("3. Add tracked changes to Git")
         print("4. Create a commit with timestamp")
         print("5. Push to GitHub")
     else:
