@@ -6,12 +6,13 @@ from violation_model import (
     ViolationFilterProxyModel,
     ViolationModel,
 )
+from violation_types import ViolationType
 
 
 class Violation85f5thTab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.tab_type = "85f_5th"
+        self.tab_type = ViolationType.EIGHT_FIVE_F_5TH
 
     def create_tab_for_date(self, date, date_data):
         """Create a tab for the given date."""

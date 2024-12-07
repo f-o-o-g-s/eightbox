@@ -3,12 +3,13 @@ from violation_model import (
     ViolationFilterProxyModel,
     ViolationModel,
 )
+from violation_types import ViolationType
 
 
 class ViolationMax12Tab(BaseViolationTab):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.tab_type = "max12"
+        self.tab_type = ViolationType.MAX_12
 
     def create_tab_for_date(self, date, date_data):
         """Create a tab for the given date."""

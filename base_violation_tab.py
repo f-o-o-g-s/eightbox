@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
 
 from table_utils import setup_table_copy_functionality
 from violation_model import ViolationModel
+from violation_types import ViolationType
 
 
 class SummaryProxyModel(QSortFilterProxyModel):
@@ -104,7 +105,7 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
 
     data_refreshed = pyqtSignal(pd.DataFrame)
 
-    def __init__(self, parent=None, otdl_enabled=False, tab_type=None):
+    def __init__(self, parent=None, otdl_enabled=False, tab_type: ViolationType = None):
         super().__init__(parent)
         self.otdl_enabled = otdl_enabled
         self.tab_type = tab_type
