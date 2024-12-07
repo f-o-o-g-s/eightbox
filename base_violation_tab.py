@@ -33,17 +33,35 @@ from violation_types import ViolationType
 
 
 class SummaryProxyModel(QSortFilterProxyModel):
-    """Common proxy model for summary tabs."""
+    """Proxy model for filtering summary data in violation tabs.
+
+    Provides case-insensitive filtering of carrier names in summary views.
+    Maintains a single filter string that is applied across all rows.
+    """
 
     def __init__(self):
         super().__init__()
         self._filter_text = ""
 
     def setFilterFixedString(self, text):
+        """Set the filter string for carrier name filtering.
+
+        Args:
+            text (str): Text to filter by (case-insensitive)
+        """
         self._filter_text = text.lower()
         super().setFilterFixedString(text)
 
     def filterAcceptsRow(self, source_row, source_parent):
+        """Determine if a row should be shown based on the current filter.
+
+        Args:
+            source_row (int): Row index in the source model
+            source_parent (QModelIndex): Parent index in source model
+
+        Returns:
+            bool: True if row should be shown, False if filtered out
+        """
         model = self.sourceModel()
         carrier_idx = model.index(source_row, 0, source_parent)
         carrier_name = str(model.data(carrier_idx, Qt.DisplayRole)).lower()
@@ -55,7 +73,16 @@ class SummaryProxyModel(QSortFilterProxyModel):
 
 
 class ViolationFilterProxyModel(QSortFilterProxyModel):
-    """Proxy model for filtering violation data in table views."""
+    """Proxy model for filtering violation data with multiple filter types.
+
+    Supports filtering by:
+    - Carrier name (case-insensitive substring match)
+    - List status (exact match)
+    - Violation status
+
+    The filter type can be changed dynamically while maintaining the current
+    filter text.
+    """
 
     def __init__(self):
         """Initialize the filter proxy model."""
@@ -64,13 +91,31 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
         self.filter_type = "name"
 
     def set_filter(self, text, filter_type="name"):
-        """Set the filter type and text."""
+        """Set both the filter text and type.
+
+        Args:
+            text (str): Text to filter by
+            filter_type (str): Type of filter to apply ('name' or 'list_status')
+        """
         self.filter_type = filter_type
         self.filter_text = text.lower() if text else ""
         self.invalidateFilter()
 
     def filterAcceptsRow(self, source_row, source_parent):
-        """Filter rows based on filter_type and filter_text."""
+        """Apply the current filter to determine row visibility.
+
+        Handles different filter types:
+        - name: Case-insensitive substring match on carrier name
+        - list_status: Exact match on carrier's list status
+        - violations: Show only carriers with violations
+
+        Args:
+            source_row (int): Row index in the source model
+            source_parent (QModelIndex): Parent index in source model
+
+        Returns:
+            bool: True if row should be shown, False if filtered out
+        """
         source_model = self.sourceModel()
 
         # If no filter text, show all rows
@@ -107,10 +152,21 @@ class MetaQWidgetABC(type(QWidget), ABCMeta):  # type: ignore[misc]
 
 
 class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
-    """Provides the base class for all violation tab implementations in the application.
+    """Base class for all violation tab implementations.
 
-    This module contains the core functionality for displaying and managing violation data
-    in tabbed interfaces, including filtering and data presentation capabilities.
+    Provides core functionality for displaying and managing violation data including:
+    - Filtering and sorting capabilities
+    - Date-based tab management
+    - Statistics tracking and display
+    - List status filtering buttons
+    - Common table view setup
+
+    Attributes:
+        data_refreshed (pyqtSignal): Signal emitted when data is updated
+        otdl_enabled (bool): Whether OTDL functionality is enabled
+        tab_type (ViolationType): Type of violation this tab handles
+        models (dict): Maps dates to their corresponding models and views
+        showing_no_data (bool): Whether the tab is showing the no-data state
     """
 
     data_refreshed = pyqtSignal(pd.DataFrame)
@@ -240,7 +296,15 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
         self.date_tabs.addTab(no_data_view, "No Data")
 
     def filter_carriers(self, text, filter_type="name"):
-        """Filter carriers based on search text and filter type."""
+        """Filter carriers across all tabs based on search criteria.
+
+        Applies the filter to both regular date tabs and the summary tab.
+        Updates statistics after filtering.
+
+        Args:
+            text (str): Text to filter by
+            filter_type (str): Type of filter to apply ('name', 'list_status', 'violations')
+        """
         if self.showing_no_data:
             return
 
@@ -270,7 +334,17 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
             print(f"Error filtering carriers: {str(e)}")
 
     def calculate_violations(self, df):
-        """Calculate number of violations in the dataframe."""
+        """Calculate the total number of violations in the given data.
+
+        Handles multiple possible column names for remedy totals to support
+        different violation types.
+
+        Args:
+            df (pd.DataFrame): Violation data to analyze
+
+        Returns:
+            int: Number of carriers with violations
+        """
         # Check both original and renamed column names
         if "Weekly Remedy Total" in df.columns:
             return len(df[df["Weekly Remedy Total"] > 0])
@@ -303,7 +377,21 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
         return model, None
 
     def create_table_view(self, model, proxy_model=None):
-        """Create a QTableView with the given model."""
+        """Create and configure a table view for violation data.
+
+        Sets up:
+        - Sorting capability
+        - Copy functionality
+        - Column sizing
+        - Model/proxy model connections
+
+        Args:
+            model (ViolationModel): The source model containing violation data
+            proxy_model (QSortFilterProxyModel, optional): Proxy model for filtering
+
+        Returns:
+            QTableView: Configured table view
+        """
         view = QTableView()
 
         # Rename columns before setting the model
@@ -326,7 +414,17 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
         return view
 
     def rename_columns(self, df):
-        """Rename columns consistently across all tabs."""
+        """Rename DataFrame columns to user-friendly display names.
+
+        Maintains consistent column naming across all violation types.
+        Only renames columns that exist in the input DataFrame.
+
+        Args:
+            df (pd.DataFrame): DataFrame with original column names
+
+        Returns:
+            pd.DataFrame: DataFrame with renamed columns
+        """
         # Create a copy of the dataframe to avoid the SettingWithCopyWarning
         df = df.copy()
 
@@ -354,7 +452,20 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
         return df
 
     def create_tab_for_date(self, date, date_data):
-        """Create a new tab for a specific date."""
+        """Create a new tab for a specific date's violation data.
+
+        Sets up:
+        - Data model and proxy model
+        - Table view with proper configuration
+        - Tab registration in the tab widget
+
+        Args:
+            date (datetime.date): Date for the new tab
+            date_data (pd.DataFrame): Violation data for the specified date
+
+        Returns:
+            QTableView: The configured view for the new tab
+        """
         model, proxy_model = self.create_violation_model(
             date_data, proxy=True, tab_type=self.tab_type
         )
@@ -367,36 +478,80 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
         return view
 
     def create_summary_proxy_model(self, model):
-        """Create a proxy model for the summary tab."""
+        """Create a proxy model for the summary tab's data.
+
+        Args:
+            model (ViolationModel): Source model containing summary data
+
+        Returns:
+            ViolationFilterProxyModel: Configured proxy model for filtering
+        """
         proxy_model = ViolationFilterProxyModel()
         proxy_model.setSourceModel(model)
         return proxy_model
 
     def resize_columns_on_current_tab(self, index):
-        """Resize columns for the currently active subtab."""
+        """Resize columns to fit their contents on the current tab.
+
+        Args:
+            index (int): Index of the current tab
+        """
         current_widget = self.date_tabs.widget(index)
         if isinstance(current_widget, QTableView):
             current_widget.resizeColumnsToContents()
 
     @abstractmethod
     def refresh_data(self, violation_data):
-        """Refresh the data in the tab."""
+        """Refresh the tab's data with new violation information.
+
+        Must be implemented by subclasses to handle specific violation types.
+        Should clear existing tabs and create new ones based on the data.
+
+        Args:
+            violation_data (pd.DataFrame): New violation data to display
+        """
         pass
 
     @abstractmethod
     def add_summary_tab(self, data):
-        """Add a summary tab to display aggregated data."""
+        """Add or update the summary tab with aggregated violation data.
+
+        Must be implemented by subclasses to handle specific violation types.
+        Should create a summary view of all violations across dates.
+
+        Args:
+            data (pd.DataFrame): Aggregated data for summary display
+        """
         pass
 
     def create_filter_button(self, text):
-        """Create a styled filter button with count."""
+        """Create a styled filter button for list status filtering.
+
+        Creates a checkable button with:
+        - Initial count of 0
+        - Connected click handler
+        - Consistent styling
+
+        Args:
+            text (str): Button label (e.g., "WAL", "NL", "OTDL")
+
+        Returns:
+            QPushButton: Configured filter button
+        """
         btn = QPushButton(f"{text}: 0")
         btn.setCheckable(True)
         btn.clicked.connect(self.handle_filter_click)
         return btn
 
     def handle_filter_click(self):
-        """Handle filter button clicks."""
+        """Handle clicks on filter buttons (WAL, NL, OTDL, etc.).
+
+        Manages button states and applies appropriate filters:
+        - Unchecks other buttons when one is selected
+        - Clears filters when button is unchecked
+        - Applies specific list status filters
+        - Updates carrier counts and statistics
+        """
         sender = self.sender()
 
         # Uncheck other buttons
@@ -430,7 +585,14 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
             self.filter_carriers("", filter_type="violations")
 
     def apply_list_status_filter(self, status):
-        """Apply filter for list status."""
+        """Apply a filter to show only carriers with specific list status.
+
+        Handles filtering in both regular and summary tabs using the
+        appropriate proxy model.
+
+        Args:
+            status (str): List status to filter by ("WAL", "NL", "OTDL", "PTF")
+        """
         current_tab_index = self.date_tabs.currentIndex()
         if current_tab_index == -1 or self.showing_no_data:
             return
@@ -446,7 +608,11 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
         proxy_model.setFilterFixedString(status)
 
     def apply_violations_filter(self):
-        """Apply filter to show only carriers with violations."""
+        """Apply a filter to show only carriers with violations.
+
+        Uses a custom role in the proxy model to filter based on
+        the presence of violations (remedy hours > 0).
+        """
         current_tab_index = self.date_tabs.currentIndex()
         if current_tab_index == -1 or self.showing_no_data:
             return
@@ -462,13 +628,30 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
         proxy_model.setFilterFixedString("has_violation")
 
     def maintain_current_filter(self, index):
-        """Maintain the current filter when switching tabs."""
+        """Maintain active filters when switching between tabs.
+
+        Ensures that the current filter remains applied when:
+        - Switching between date tabs
+        - Switching to/from summary tab
+        - Resizing columns for visibility
+
+        Args:
+            index (int): Index of the newly selected tab
+        """
         if self.current_filter or self.current_filter_type != "name":
             self.filter_carriers(self.current_filter, self.current_filter_type)
         self.resize_columns_on_current_tab(index)
 
     def update_table_style(self):
-        """Update the table style based on the current theme."""
+        """Update the table's visual style to match the application theme.
+
+        Applies consistent Material Design styling to:
+        - Table background and alternating rows
+        - Grid lines and borders
+        - Selection highlighting
+        - Header sections
+        - Hover states
+        """
         style = """
             QTableView {
                 background-color: #1E1E1E;

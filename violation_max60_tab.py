@@ -10,12 +10,36 @@ from violation_types import ViolationType
 
 
 class ViolationMax60Tab(BaseViolationTab):
+    """Class for tracking and displaying Maximum 60-Hour Rule violations."""
+
     def __init__(self, parent=None):
+        """Initialize the Maximum 60-Hour Rule violation tracking tab.
+
+        Args:
+            parent: Parent widget, defaults to None
+        """
         super().__init__(parent)
         self.tab_type = ViolationType.MAX_60
 
     def create_tab_for_date(self, date, date_data):
-        """Create a tab for the given date."""
+        """Create a tab showing hours worked for a specific date.
+
+        Formats and displays:
+        - Daily hours with leave type indicators
+        - Cumulative hours for the week
+        - Remedy hours if 60-hour limit is exceeded
+
+        Args:
+            date (datetime.date): The date to display
+            date_data (pd.DataFrame): Hours data for the specified date
+
+        Returns:
+            QTableView: The configured view for the new tab
+
+        Note:
+            Display indicators show leave types (AL, SL, etc.)
+            and holiday status where applicable.
+        """
         # Format daily hours with display indicator
         date_data = date_data.copy()
         date_data["daily_hours"] = date_data.apply(
@@ -50,7 +74,30 @@ class ViolationMax60Tab(BaseViolationTab):
         return view
 
     def refresh_data(self, violation_data):
-        """Refresh all tabs with new violation data."""
+        """Refresh all tabs with new violation data.
+
+        Processes and displays weekly hour accumulation including:
+        - Regular work hours
+        - Overtime hours
+        - All types of paid leave
+        - Holiday pay
+
+        Args:
+            violation_data (pd.DataFrame): New violation data containing:
+                - carrier_name: Name of the carrier
+                - date: Date of work/leave
+                - daily_hours: Hours for that day
+                - list_status: WAL/NL/OTDL status
+                - leave_type: Type of leave if applicable
+                - cumulative_hours: Running total for the week
+                - remedy_total: Hours beyond 60 if violated
+
+        Note:
+            - Handles leave type indicators
+            - Tracks cumulative hours
+            - Rounds all numerical values to 2 decimals
+            - Shows "No Data" tab if violation_data is empty
+        """
         if violation_data.empty:
             self.init_no_data_tab()
             return
@@ -113,7 +160,22 @@ class ViolationMax60Tab(BaseViolationTab):
                     break
 
     def add_summary_tab(self, data):
-        """Add a summary tab with daily hours for each carrier."""
+        """Create or update the summary tab with weekly hour totals.
+
+        Creates a summary showing:
+        - Daily hours with leave indicators
+        - Weekly running total (cumulative hours)
+        - Total remedy hours if limit exceeded
+
+        Args:
+            data (pd.DataFrame): Complete hours data for the week
+
+        Note:
+            - Displays leave types and holiday indicators
+            - Shows running total of weekly hours
+            - Highlights when 60-hour limit is exceeded
+            - Excludes PTF carriers from violation tracking
+        """
         # Get unique dates for columns
         unique_dates = sorted(data["date"].unique())
 

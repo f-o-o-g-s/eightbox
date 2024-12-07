@@ -7,33 +7,49 @@ from PyQt5.QtWidgets import (
 
 """Theme configuration and styling for the application.
 
-This module contains color schemes, style definitions, and other UI theming
-constants used throughout the application to maintain a consistent look and feel.
+This module implements a Material Design dark theme for the application,
+providing a modern, eye-friendly interface. It defines color schemes,
+style definitions, and applies consistent styling across all UI elements.
+
+The theme includes:
+- Material Design color palette
+- Custom widget styling (buttons, tables, scrollbars, etc.)
+- Consistent spacing and typography
+- Hover and active states for interactive elements
 """
 
 # Material Design Dark Theme Colors
-MATERIAL_PRIMARY = QColor("#BB86FC")  # Purple-ish
-MATERIAL_PRIMARY_VARIANT = QColor("#3700B3")
-MATERIAL_SECONDARY = QColor("#03DAC6")  # Teal
-MATERIAL_BACKGROUND = QColor("#121212")  # Dark background
-MATERIAL_SURFACE = QColor("#1E1E1E")  # Slightly lighter surface
-MATERIAL_ERROR = QColor("#CF6679")  # Error red
+MATERIAL_PRIMARY = QColor("#BB86FC")  # Primary brand color (purple)
+MATERIAL_PRIMARY_VARIANT = QColor("#3700B3")  # Darker primary for contrast
+MATERIAL_SECONDARY = QColor("#03DAC6")  # Accent color (teal)
+MATERIAL_BACKGROUND = QColor("#121212")  # Main background
+MATERIAL_SURFACE = QColor("#1E1E1E")  # Elevated surface color
+MATERIAL_ERROR = QColor("#CF6679")  # Error states
 
-# Existing color mappings updated to material theme
-COLOR_ROW_HIGHLIGHT = QColor("#2D2D2D")  # Slightly lighter than surface
-COLOR_CELL_HIGHLIGHT = MATERIAL_PRIMARY.darker(150)
-COLOR_WEEKLY_REMEDY = MATERIAL_SECONDARY.darker(150)
-COLOR_NO_HIGHLIGHT = MATERIAL_SURFACE
-COLOR_TEXT_LIGHT = QColor("#E1E1E1")  # Near-white text
-COLOR_TEXT_DIM = QColor(
-    "#333333"
-)  # Much darker gray (almost black) for light backgrounds
-COLOR_MAXIMIZED_TRUE = QColor("#4CAF50")  # Material green
-COLOR_MAXIMIZED_FALSE = QColor("#F44336")  # Material red
+# Application-specific color mappings
+COLOR_ROW_HIGHLIGHT = QColor("#2D2D2D")  # Table row hover
+COLOR_CELL_HIGHLIGHT = MATERIAL_PRIMARY.darker(150)  # Selected cell
+COLOR_WEEKLY_REMEDY = MATERIAL_SECONDARY.darker(150)  # Weekly totals
+COLOR_NO_HIGHLIGHT = MATERIAL_SURFACE  # Default state
+COLOR_TEXT_LIGHT = QColor("#E1E1E1")  # Primary text
+COLOR_TEXT_DIM = QColor("#333333")  # Secondary text
+COLOR_MAXIMIZED_TRUE = QColor("#4CAF50")  # Success state
+COLOR_MAXIMIZED_FALSE = QColor("#F44336")  # Error state
 
 
 def apply_material_dark_theme(app: QApplication):
-    """Apply Material Dark theme to the entire application."""
+    """Apply Material Dark theme to the entire application.
+
+    Configures the application-wide dark theme using Material Design principles.
+    This includes setting up:
+    - Color palette for all UI elements
+    - Custom styling for widgets
+    - Typography and spacing
+    - Interactive states (hover, pressed, etc.)
+
+    Args:
+        app (QApplication): The main application instance to theme
+    """
     app.setStyle(QStyleFactory.create("Fusion"))
 
     # Create dark palette

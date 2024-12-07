@@ -35,6 +35,16 @@ n/5vGzyJme0B4JxbhhCOvfeXlNJt7KwBQkRkZ2ZrEZkD1xjjKed8rLWu+nPe+wUwE5E9cAaOIYTT
 
 
 class CustomTitleBarWidget(QWidget):
+    """Custom title bar widget that replaces the default window title bar.
+
+    Provides a custom-styled title bar with minimize and close buttons.
+    Supports window dragging functionality.
+
+    Args:
+        title (str): Text to display in the title bar
+        parent (QWidget): Parent widget, typically the main window
+    """
+
     def __init__(self, title="", parent=None):
         super().__init__(parent)
         self.parent = parent
@@ -95,25 +105,51 @@ class CustomTitleBarWidget(QWidget):
         )
 
     def mousePressEvent(self, event):
-        """Handle mouse press events for window dragging."""
+        """Handle mouse press events for window dragging.
+
+        Args:
+            event (QMouseEvent): The mouse event
+        """
         if event.button() == Qt.LeftButton:
             self.dragPos = event.globalPos() - self.parent.frameGeometry().topLeft()
             event.accept()
 
     def mouseMoveEvent(self, event):
-        """Handle mouse move events for window dragging."""
+        """Handle mouse move events for window dragging.
+
+        Args:
+            event (QMouseEvent): The mouse event
+        """
         if event.buttons() == Qt.LeftButton and self.dragPos is not None:
             self.parent.move(event.globalPos() - self.dragPos)
             event.accept()
 
     def mouseReleaseEvent(self, event):
-        """Handle mouse release events for window dragging."""
+        """Handle mouse release events for window dragging.
+
+        Args:
+            event (QMouseEvent): The mouse event
+        """
         if event.button() == Qt.LeftButton:
             self.dragPos = None
             event.accept()
 
 
 class CustomProgressDialog(QProgressDialog):
+    """Custom progress dialog with Material Design styling.
+
+    Provides a progress dialog with custom title bar and styling that matches
+    the application's theme. Supports progress updates and cancel functionality.
+
+    Args:
+        label_text (str): Text describing the operation in progress
+        cancel_button_text (str): Text for the cancel button
+        minimum (int): Minimum progress value
+        maximum (int): Maximum progress value
+        parent (QWidget): Parent widget
+        title (str, optional): Dialog title. Defaults to "Progress"
+    """
+
     def __init__(
         self,
         label_text,
@@ -202,6 +238,17 @@ class CustomProgressDialog(QProgressDialog):
 
 
 class CustomMessageBox(QWidget):
+    """Custom message box with Material Design styling.
+
+    Provides a simple message dialog with an OK button and custom styling
+    that matches the application's theme.
+
+    Args:
+        title (str): Dialog title
+        message (str): Message to display
+        parent (QWidget): Parent widget
+    """
+
     def __init__(self, title, message, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -272,6 +319,17 @@ class CustomMessageBox(QWidget):
 
 
 class CustomWarningDialog(QDialog):
+    """Custom warning dialog with Material Design styling.
+
+    Provides a warning dialog with Yes/No buttons and custom styling.
+    Includes a warning icon and supports user choice confirmation.
+
+    Args:
+        title (str): Dialog title
+        message (str): Warning message to display
+        parent (QWidget): Parent widget
+    """
+
     def __init__(self, title, message, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -379,12 +437,33 @@ class CustomWarningDialog(QDialog):
 
     @staticmethod
     def warning(parent, title, message):
+        """Show a warning dialog and return the user's choice.
+
+        Args:
+            parent (QWidget): Parent widget
+            title (str): Dialog title
+            message (str): Warning message to display
+
+        Returns:
+            QMessageBox.StandardButton: QMessageBox.Yes or QMessageBox.No
+        """
         dialog = CustomWarningDialog(title, message, parent)
         dialog.exec_()
         return dialog.result
 
 
 class CustomInfoDialog(QDialog):
+    """Custom information dialog with Material Design styling.
+
+    Provides an information dialog with an OK button and custom styling.
+    Includes an information icon and supports HTML-formatted messages.
+
+    Args:
+        title (str): Dialog title
+        message (str): Information message to display (supports HTML)
+        parent (QWidget): Parent widget
+    """
+
     def __init__(self, title, message, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -482,11 +561,29 @@ class CustomInfoDialog(QDialog):
 
     @staticmethod
     def information(parent, title, message):
+        """Show an information dialog.
+
+        Args:
+            parent (QWidget): Parent widget
+            title (str): Dialog title
+            message (str): Information message to display (supports HTML)
+        """
         dialog = CustomInfoDialog(title, message, parent)
         dialog.exec_()
 
 
 class CustomNotificationDialog(QDialog):
+    """Custom notification dialog with Material Design styling.
+
+    Provides a notification dialog that appears centered on the parent window
+    or screen. Includes an information icon and OK button.
+
+    Args:
+        title (str): Dialog title
+        message (str): Notification message to display
+        parent (QWidget): Parent widget
+    """
+
     def __init__(self, title, message, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -580,7 +677,13 @@ class CustomNotificationDialog(QDialog):
 
     @staticmethod
     def show_notification(parent, title, message):
-        """Show a notification dialog centered on the parent window."""
+        """Show a notification dialog centered on the parent window.
+
+        Args:
+            parent (QWidget): Parent widget
+            title (str): Dialog title
+            message (str): Notification message to display
+        """
         dialog = CustomNotificationDialog(title, message, parent)
 
         # Center the notification on the parent window
@@ -602,102 +705,42 @@ class CustomNotificationDialog(QDialog):
 
 
 class CustomErrorDialog(QDialog):
-    def __init__(self, title, message, parent=None):
-        super().__init__(parent)
-        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+    """Custom error dialog with Material Design styling.
 
-        # Create main layout
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+    Provides an error dialog with an OK button and custom styling.
+    Includes an error icon and displays error messages in a user-friendly format.
 
-        # Add custom title bar
-        self.title_bar = CustomTitleBarWidget(title, self)
-        layout.addWidget(self.title_bar)
-
-        # Create content widget
-        content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
-            }
-            QPushButton {
-                background-color: #BB86FC;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: black;
-                min-width: 80px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
-        """
-        )
-
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(20, 20, 20, 20)
-        content_layout.setSpacing(15)
-
-        # Error icon and message layout
-        message_layout = QHBoxLayout()
-
-        # Error icon
-        icon_label = QLabel()
-        icon_label.setPixmap(
-            self.style().standardIcon(self.style().SP_MessageBoxCritical).pixmap(32, 32)
-        )
-        icon_label.setFixedSize(32, 32)
-        message_layout.addWidget(icon_label, 0)
-
-        # Message text
-        message_label = QLabel(message)
-        message_label.setWordWrap(True)
-        message_label.setMinimumWidth(300)
-        message_layout.addWidget(message_label, 1)
-
-        content_layout.addLayout(message_layout)
-
-        # OK button
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-
-        ok_button = QPushButton("OK")
-        ok_button.clicked.connect(self.accept)
-        button_layout.addWidget(ok_button)
-
-        content_layout.addLayout(button_layout)
-
-        layout.addWidget(content_widget)
-        self.setLayout(layout)
-
-        # Set minimum size and adjust based on content
-        self.setMinimumSize(400, 150)
-        self.adjustSize()
-
-        # Center on parent
-        if parent:
-            self.move(
-                parent.x() + (parent.width() - self.width()) // 2,
-                parent.y() + (parent.height() - self.height()) // 2,
-            )
+    Args:
+        title (str): Dialog title
+        message (str): Error message to display
+        parent (QWidget): Parent widget
+    """
 
     @staticmethod
     def error(parent, title, message):
-        dialog = CustomErrorDialog(title, message, parent)
-        return dialog.exec_()
+        """Show an error dialog and return the result.
+
+        Args:
+            parent (QWidget): Parent widget
+            title (str): Dialog title
+            message (str): Error message to display
+
+        Returns:
+            int: Dialog execution result code
+        """
 
 
 class ConfirmDialog(QDialog):
+    """Custom confirmation dialog with Material Design styling.
+
+    Provides a confirmation dialog with Yes/No buttons and custom styling.
+    Includes a question icon and is typically used for confirming destructive actions.
+
+    Args:
+        message (str): Confirmation message to display
+        parent (QWidget): Parent widget
+    """
+
     def __init__(self, message, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -794,6 +837,19 @@ class ConfirmDialog(QDialog):
 
 
 class NewCarriersDialog(QDialog):
+    """Custom dialog for selecting new carriers to add.
+
+    Provides a dialog with checkboxes for selecting multiple carriers from a list.
+    Features Material Design styling and custom checkmark icons.
+
+    Args:
+        carriers (list): List of carrier names to display
+        parent (QWidget): Parent widget
+
+    Attributes:
+        checkboxes (dict): Dictionary mapping carrier names to their checkboxes
+    """
+
     def __init__(self, carriers, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -916,7 +972,11 @@ class NewCarriersDialog(QDialog):
             self.move(geometry.topLeft())
 
     def get_selected_carriers(self):
-        """Return list of selected carriers."""
+        """Return list of selected carriers.
+
+        Returns:
+            list: Names of carriers whose checkboxes are checked
+        """
         return [
             carrier
             for carrier, checkbox in self.checkboxes.items()
@@ -925,7 +985,12 @@ class NewCarriersDialog(QDialog):
 
     @staticmethod
     def center_dialog(dialog, parent):
-        """Center the dialog on its parent."""
+        """Center the dialog on its parent.
+
+        Args:
+            dialog (QDialog): The dialog to center
+            parent (QWidget): Parent widget to center on
+        """
         if parent and parent.isVisible():
             parent_geo = parent.geometry()
             dialog_geo = dialog.geometry()
@@ -935,7 +1000,17 @@ class NewCarriersDialog(QDialog):
 
     @staticmethod
     def get_new_carriers(parent, carriers):
-        """Show dialog and return selected carriers."""
+        """Show dialog and return selected carriers.
+
+        Creates and shows the dialog, handling centering and execution.
+
+        Args:
+            parent (QWidget): Parent widget
+            carriers (list): List of carrier names to display
+
+        Returns:
+            list: Names of carriers selected by the user, or empty list if cancelled
+        """
         dialog = NewCarriersDialog(carriers, parent)
 
         # Force the dialog to be centered on the parent window
