@@ -2,9 +2,24 @@ import subprocess
 from datetime import datetime
 
 
+def run_pre_commit():
+    """Run pre-commit hooks on all files."""
+    print("\nRunning pre-commit hooks...")
+    try:
+        subprocess.run(["pre-commit", "run", "--all-files"], check=True)
+        return True
+    except subprocess.CalledProcessError:
+        print("\nPre-commit hooks failed. Please fix the issues and try again.")
+        return False
+
+
 def create_backup():
     """Create a backup of the current state."""
     try:
+        # Run pre-commit hooks first
+        if not run_pre_commit():
+            return
+
         # Get current timestamp
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -49,9 +64,10 @@ if __name__ == "__main__":
         print("\nUsage: python backup.py")
         print("Creates a backup of the current project state.")
         print("\nThe script will:")
-        print("1. Ask for a description of upcoming changes")
-        print("2. Add all changes to Git")
-        print("3. Create a commit with timestamp")
-        print("4. Push to GitHub")
+        print("1. Run pre-commit hooks (black, isort, flake8)")
+        print("2. Ask for a description of upcoming changes")
+        print("3. Add all changes to Git")
+        print("4. Create a commit with timestamp")
+        print("5. Push to GitHub")
     else:
         create_backup()
