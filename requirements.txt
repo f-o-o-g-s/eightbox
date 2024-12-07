@@ -1,0 +1,12 @@
+PyQt5>=5.15.2
+pandas>=2.2.3
+openpyxl>=3.1.5
+numpy>=1.24.0
+PyGithub>=2.1.1
+xlsxwriter>=3.1.2
+
+# Development dependencies
+black>=24.2.0  # -dev
+isort>=5.13.2  # -dev
+flake8>=7.0.0  # -dev
+pre-commit>=3.6.0  # -dev 
