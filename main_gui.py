@@ -4,10 +4,7 @@ import sqlite3
 import sys
 
 import pandas as pd  # Data manipulation
-from PyQt5.QtCore import (
-    Qt,
-    QTimer,
-)
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QAction,
     QApplication,
@@ -23,11 +20,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
 )
 
 from carrier_list_pane import CarrierListPane
-from custom_widgets import (
-    CustomInfoDialog,
-    CustomProgressDialog,
-    CustomWarningDialog,
-)
+from custom_widgets import CustomInfoDialog, CustomProgressDialog, CustomWarningDialog
 
 # Custom modules
 from date_selection_pane import DateSelectionPane
@@ -43,10 +36,7 @@ from vio_85F_ns_tab import Violation85FNS
 from vio_85F_tab import Violation85FTab
 from vio_MAX12_tab import ViolationMAX12Tab
 from vio_MAX60_tab import ViolationMAX60Tab
-from violation_detection import (
-    detect_violations,
-    get_violation_remedies,
-)
+from violation_detection import detect_violations, get_violation_remedies
 from violations_summary_tab import ViolationRemediesTab
 
 

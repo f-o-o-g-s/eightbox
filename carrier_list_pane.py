@@ -15,10 +15,7 @@ from PyQt5.QtCore import (
     QVariant,
     pyqtSignal,
 )
-from PyQt5.QtGui import (
-    QBrush,
-    QColor,
-)
+from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,
@@ -591,7 +588,6 @@ class CarrierListPane(QWidget):
                 and parent.date_selection_pane is not None
                 and parent.date_selection_pane.calendar.selectedDate().isValid()
             ):
-
                 # Only emit signals if we have a valid date
                 self.carrier_list_updated.emit(self.main_model.df)
                 self.request_apply_date_range.emit()

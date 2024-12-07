@@ -1,15 +1,7 @@
-from abc import (
-    ABC,
-    ABCMeta,
-    abstractmethod,
-)
+from abc import ABC, ABCMeta, abstractmethod
 
 import pandas as pd
-from PyQt5.QtCore import (
-    QSortFilterProxyModel,
-    Qt,
-    pyqtSignal,
-)
+from PyQt5.QtCore import QSortFilterProxyModel, Qt, pyqtSignal
 from PyQt5.QtWidgets import (
     QHBoxLayout,
     QLineEdit,

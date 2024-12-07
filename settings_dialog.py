@@ -1,11 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (
-    QFileDialog,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt5.QtWidgets import QFileDialog, QLabel, QPushButton, QVBoxLayout, QWidget
 
 from custom_widgets import CustomTitleBarWidget
 

@@ -1,19 +1,6 @@
-from PyQt5.QtCore import (
-    QDate,
-    QEvent,
-    Qt,
-)
-from PyQt5.QtGui import (
-    QColor,
-    QTextCharFormat,
-)
-from PyQt5.QtWidgets import (
-    QCalendarWidget,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt5.QtCore import QDate, QEvent, Qt
+from PyQt5.QtGui import QColor, QTextCharFormat
+from PyQt5.QtWidgets import QCalendarWidget, QLabel, QPushButton, QVBoxLayout, QWidget
 
 from custom_widgets import CustomTitleBarWidget
 

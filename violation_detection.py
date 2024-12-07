@@ -1,9 +1,5 @@
 # violation_detection.py
-from typing import (
-    Callable,
-    Dict,
-    Optional,
-)
+from typing import Callable, Dict, Optional
 
 import numpy as np
 import pandas as pd

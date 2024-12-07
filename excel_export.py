@@ -1,10 +1,7 @@
 import os
 
 import pandas as pd
-from PyQt5.QtCore import (
-    Qt,
-    QTimer,
-)
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QColor
 
 from custom_widgets import (
@@ -14,10 +11,7 @@ from custom_widgets import (
     CustomWarningDialog,
 )
 from table_utils import extract_table_state
-from theme import (
-    COLOR_CELL_HIGHLIGHT,
-    COLOR_WEEKLY_REMEDY,
-)
+from theme import COLOR_CELL_HIGHLIGHT, COLOR_WEEKLY_REMEDY
 from violation_model import calculate_optimal_gray
 
 

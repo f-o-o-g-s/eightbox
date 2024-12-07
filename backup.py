@@ -23,12 +23,12 @@ def create_backup():
             "README.md",
             "LICENSE",
             ".flake8",
-            ".pre-commit-config.yaml"
+            ".pre-commit-config.yaml",
         ]
-        
+
         for file in files_to_backup:
             subprocess.run(["git", "add", file])
-            
+
         subprocess.run(["git", "commit", "-m", message])
         subprocess.run(["git", "push", "origin", "main"])
 

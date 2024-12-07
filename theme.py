@@ -1,9 +1,6 @@
 # theme.py
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import (
-    QApplication,
-    QStyleFactory,
-)
+from PyQt5.QtWidgets import QApplication, QStyleFactory
 
 # Material Design Dark Theme Colors
 MATERIAL_PRIMARY = QColor("#BB86FC")  # Purple-ish

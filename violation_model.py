@@ -1,14 +1,6 @@
 import pandas as pd
-from PyQt5.QtCore import (
-    QSortFilterProxyModel,
-    Qt,
-)
-from PyQt5.QtGui import (
-    QBrush,
-    QColor,
-    QStandardItem,
-    QStandardItemModel,
-)
+from PyQt5.QtCore import QSortFilterProxyModel, Qt
+from PyQt5.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 
 # We can remove the theme import entirely since we're calculating all text colors dynamically
 

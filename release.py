@@ -136,19 +136,17 @@ def update_version_and_release():
         # 6. Write changes back to file
         main_gui_path = Path("main_gui.py")
         content = main_gui_path.read_text()
-        
+
         # Update version
         content = content.replace(
-            f'VERSION = "{old_version}"',
-            f'VERSION = "{new_version}"'
+            f'VERSION = "{old_version}"', f'VERSION = "{new_version}"'
         )
-        
+
         # Update build time
         content = content.replace(
-            f'BUILD_TIME = "{MainApp.BUILD_TIME}"',
-            f'BUILD_TIME = "{current_time}"'
+            f'BUILD_TIME = "{MainApp.BUILD_TIME}"', f'BUILD_TIME = "{current_time}"'
         )
-        
+
         main_gui_path.write_text(content)
 
         # 7. Git commands
