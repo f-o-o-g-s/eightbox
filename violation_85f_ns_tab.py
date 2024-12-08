@@ -5,8 +5,6 @@ Article 8.5.F violations that occur when non-OTDL carriers work more than
 8 hours on their non-scheduled days.
 """
 
-import pandas as pd
-
 from base_violation_tab import BaseViolationTab
 from violation_model import (
     ViolationFilterProxyModel,
@@ -33,23 +31,13 @@ class Violation85fNsTab(BaseViolationTab):
         super().__init__(parent)
         self.tab_type = ViolationType.EIGHT_FIVE_F_NS
 
-    def create_tab_for_date(self, date, date_data):
-        """Create a tab for the given date.
+    def get_display_columns(self) -> list:
+        """Return columns to display for non-scheduled day violations.
         
-        Args:
-            date (datetime.date): The date to display
-            date_data (pd.DataFrame): Violation data for the specified date
-
         Returns:
-            QTableView: The configured view for the new tab
-
-        Note:
-            Filters the data to show only relevant columns for non-scheduled
-            day violations, including carrier name, list status, total hours,
-            and remedy hours.
+            list: Column names specific to non-scheduled day violations
         """
-        # Filter to display columns
-        display_columns = [
+        return [
             "carrier_name",
             "list_status",
             "violation_type",
@@ -57,14 +45,3 @@ class Violation85fNsTab(BaseViolationTab):
             "remedy_total",
             "total_hours",
         ]
-        filtered_data = date_data[display_columns]
-
-        model = ViolationModel(filtered_data, tab_type=self.tab_type, is_summary=False)
-        proxy_model = ViolationFilterProxyModel()
-        proxy_model.setSourceModel(model)
-        view = self.create_table_view(model, proxy_model)
-
-        self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
-
-        self.date_tabs.addTab(view, str(date))
-        return view

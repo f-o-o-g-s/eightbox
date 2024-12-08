@@ -5,8 +5,6 @@ Article 8.5.D violations, which occur when carriers work off their bid assignmen
 without proper notification.
 """
 
-import pandas as pd
-
 from base_violation_tab import BaseViolationTab
 from violation_model import (
     ViolationFilterProxyModel,
@@ -33,27 +31,19 @@ class Violation85dTab(BaseViolationTab):
         super().__init__(parent)
         self.tab_type = ViolationType.EIGHT_FIVE_D
 
-    def create_tab_for_date(self, date, date_data):
-        """Create a tab showing violations for a specific date.
-
-        Args:
-            date (datetime.date): The date to display
-            date_data (pd.DataFrame): Violation data for the specified date
-
+    def get_display_columns(self) -> list:
+        """Return columns to display for 8.5.D violations.
+        
         Returns:
-            QTableView: The configured view for the new tab
-
-        Note:
-            The model is configured specifically for 8.5.D violations,
-            showing relevant columns like carrier name, list status,
-            and remedy hours.
+            list: Column names specific to off-assignment violations
         """
-        model = ViolationModel(date_data, tab_type=self.tab_type, is_summary=False)
-        proxy_model = ViolationFilterProxyModel()
-        proxy_model.setSourceModel(model)
-        view = self.create_table_view(model, proxy_model)
-
-        self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
-
-        self.date_tabs.addTab(view, str(date))
-        return view
+        return [
+            "carrier_name",
+            "list_status",
+            "date",
+            "total_hours",
+            "own_route_hours",
+            "off_route_hours",
+            "moves",
+            "remedy_total",
+        ]

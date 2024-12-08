@@ -106,7 +106,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 
         Handles different filter types:
         - name: Case-insensitive substring match on carrier name
-        - list_status: Exact match on carrier's list status
+        - list_status: Case-insensitive exact match on carrier's list status
         - violations: Show only carriers with violations
 
         Args:
@@ -123,21 +123,48 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             return True
 
         if self.filter_type == "list_status":
-            # Get list_status value
+            # Get list_status value - check both original and display column names
+            list_status_col = None
             for col in range(source_model.columnCount()):
                 header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-                if header and header.lower() == "list_status":
-                    idx = source_model.index(source_row, col, source_parent)
-                    list_status = source_model.data(idx, Qt.DisplayRole)
-                    if list_status:
-                        return str(list_status).lower() == self.filter_text
+                if header and header.lower() in ["list_status", "list status"]:
+                    list_status_col = col
+                    break
+            
+            if list_status_col is not None:
+                idx = source_model.index(source_row, list_status_col, source_parent)
+                list_status = source_model.data(idx, Qt.DisplayRole)
+                if list_status:
+                    return str(list_status).lower() == self.filter_text.lower()
 
         elif self.filter_type == "name":
-            # Original name filtering
-            idx = source_model.index(source_row, 0, source_parent)
-            name = source_model.data(idx, Qt.DisplayRole)
-            if name:
-                return self.filter_text in str(name).lower()
+            # Get carrier name - check both original and display column names
+            name_col = None
+            for col in range(source_model.columnCount()):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and header.lower() in ["carrier_name", "carrier name"]:
+                    name_col = col
+                    break
+            
+            if name_col is not None:
+                idx = source_model.index(source_row, name_col, source_parent)
+                name = source_model.data(idx, Qt.DisplayRole)
+                if name:
+                    return self.filter_text.lower() in str(name).lower()
+
+        elif self.filter_type == "violations":
+            # Check for violations by looking at remedy total columns
+            for col in range(source_model.columnCount()):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and any(x in header.lower() for x in ["remedy total", "weekly remedy total"]):
+                    idx = source_model.index(source_row, col, source_parent)
+                    value = source_model.data(idx, Qt.DisplayRole)
+                    try:
+                        if float(str(value).split()[0]) > 0:
+                            return True
+                    except (ValueError, TypeError, IndexError):
+                        continue
+            return False
 
         return True
 
@@ -462,31 +489,114 @@ class BaseViolationTab(QWidget, ABC, metaclass=MetaQWidgetABC):
 
         return df
 
-    def create_tab_for_date(self, date, date_data):
-        """Create a new tab for a specific date's violation data.
+    @abstractmethod
+    def get_display_columns(self) -> list:
+        """Return list of columns to display for this violation type.
+        
+        Must be implemented by subclasses to specify which columns
+        should be shown in the violation tab views.
+        
+        Returns:
+            list: Column names to display
+        """
+        pass
 
-        Sets up:
-        - Data model and proxy model
-        - Table view with proper configuration
-        - Tab registration in the tab widget
+    def format_display_data(self, date_data: pd.DataFrame) -> pd.DataFrame:
+        """Format data for display in violation tab.
+        
+        Can be overridden by subclasses to perform custom data formatting
+        like adding indicators or combining columns.
+        
+        Args:
+            date_data: Raw violation data for a specific date
+            
+        Returns:
+            Formatted data ready for display
+        """
+        return date_data.copy()
+
+    def create_tab_for_date(self, date, date_data):
+        """Create a tab showing violations for a specific date.
+        
+        Uses template method pattern to allow customization by subclasses
+        while maintaining common setup logic.
 
         Args:
-            date (datetime.date): Date for the new tab
+            date (datetime.date): The date to display
             date_data (pd.DataFrame): Violation data for the specified date
 
         Returns:
             QTableView: The configured view for the new tab
         """
-        model, proxy_model = self.create_violation_model(
-            date_data, proxy=True, tab_type=self.tab_type
-        )
+        # Get columns to display
+        display_columns = self.get_display_columns()
+        
+        # Format data for display
+        formatted_data = self.format_display_data(date_data)
+        
+        # Filter columns if specified
+        if display_columns:
+            formatted_data = formatted_data[display_columns]
+
+        # Create and configure model
+        model = ViolationModel(formatted_data, tab_type=self.tab_type, is_summary=False)
+        proxy_model = ViolationFilterProxyModel()
+        proxy_model.setSourceModel(model)
         view = self.create_table_view(model, proxy_model)
 
+        # Store model and view
         self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
-        self.proxy_models[str(date)] = proxy_model
-
+        
+        # Add tab
         self.date_tabs.addTab(view, str(date))
+        
+        # Allow subclasses to perform additional configuration
+        self.configure_tab_view(view, model)
+        
         return view
+
+    def configure_tab_view(self, view: QTableView, model: ViolationModel):
+        """Configure the tab view after creation.
+        
+        Can be overridden by subclasses to perform additional view setup
+        like hiding columns or setting custom formatting.
+        
+        Args:
+            view: The table view to configure
+            model: The model containing the data
+        """
+        pass
+
+    def restore_tab_selection(self, current_tab_name: str):
+        """Restore the previously selected tab.
+        
+        Args:
+            current_tab_name: Name of the tab to restore
+        """
+        if current_tab_name == "Summary":
+            self.date_tabs.setCurrentIndex(self.date_tabs.count() - 1)
+        else:
+            for i in range(self.date_tabs.count()):
+                if self.date_tabs.tabText(i) == current_tab_name:
+                    self.date_tabs.setCurrentIndex(i)
+                    break
+
+    def create_summary_model(self, summary_data: pd.DataFrame) -> ViolationModel:
+        """Create a model for the summary tab.
+        
+        Args:
+            summary_data: Processed data for the summary view
+            
+        Returns:
+            Configured ViolationModel for summary tab
+        """
+        model = ViolationModel(summary_data, tab_type=self.tab_type, is_summary=True)
+        proxy_model = ViolationFilterProxyModel()
+        proxy_model.setSourceModel(model)
+        view = self.create_table_view(model, proxy_model)
+        
+        self.summary_proxy_model = proxy_model
+        return model, view
 
     def create_summary_proxy_model(self, model):
         """Create a proxy model for the summary tab's data.

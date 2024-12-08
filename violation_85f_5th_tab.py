@@ -6,6 +6,7 @@ on more than 4 of their 5 scheduled days in a service week.
 """
 
 import pandas as pd
+from PyQt5.QtWidgets import QTableView
 
 from base_violation_tab import BaseViolationTab
 from utils import set_display
@@ -31,38 +32,48 @@ class Violation85f5thTab(BaseViolationTab):
 
     Attributes:
         tab_type (ViolationType): Set to EIGHT_FIVE_F_5TH for this violation type
-        showing_no_data (bool): Indicates if the "No Data" placeholder is shown
-        models (dict): Collection of models and views for each date tab
-        date_tabs (QTabWidget): Widget containing all date-specific tabs
-        summary_proxy_model (ViolationFilterProxyModel): Model for summary tab
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = ViolationType.EIGHT_FIVE_F_5TH
 
-    def create_tab_for_date(self, date, date_data):
-        """Create a tab showing violations for a specific date.
-
-        Args:
-            date (datetime.date): The date to display
-            date_data (pd.DataFrame): Violation data for the specified date
-
+    def get_display_columns(self) -> list:
+        """Return columns to display for 5th overtime day violations.
+        
         Returns:
-            QTableView: The configured view for the new tab
-
-        Note:
-            Adds special display indicators for fifth overtime day occurrences
-            and hides the violation_dates column which is only used internally.
+            list: Column names specific to 5th overtime day violations
         """
-        # Create a copy of the data to avoid SettingWithCopyWarning
-        date_data = date_data.copy()
+        return [
+            "carrier_name",
+            "list_status",
+            "date",
+            "daily_hours",
+            "total_hours",
+            "remedy_total",
+            "violation_type",
+        ]
 
-        # Add display indicator and combine with total_hours
-        if "display_indicator" not in date_data.columns:
-            date_data["display_indicator"] = date_data.apply(set_display, axis=1)
+    def format_display_data(self, date_data: pd.DataFrame) -> pd.DataFrame:
+        """Format data for display in 5th overtime day violation tab.
+        
+        Adds special formatting for daily hours with overtime indicators.
+        
+        Args:
+            date_data: Raw violation data for a specific date
+            
+        Returns:
+            Formatted data with combined daily hours and indicators
+        """
+        # Create a copy to avoid modifying original
+        formatted_data = date_data.copy()
 
-        date_data["daily_hours"] = date_data.apply(
+        # Add display indicator if not present
+        if "display_indicator" not in formatted_data.columns:
+            formatted_data["display_indicator"] = formatted_data.apply(set_display, axis=1)
+
+        # Format daily hours with indicator
+        formatted_data["daily_hours"] = formatted_data.apply(
             lambda row: (
                 f"{row['total_hours']:.2f} {row['display_indicator']}"
                 if pd.notna(row["total_hours"])
@@ -71,17 +82,18 @@ class Violation85f5thTab(BaseViolationTab):
             axis=1,
         )
 
-        model = ViolationModel(date_data, tab_type=self.tab_type, is_summary=False)
-        proxy_model = ViolationFilterProxyModel()
-        proxy_model.setSourceModel(model)
-        view = self.create_table_view(model, proxy_model)
+        return formatted_data
 
+    def configure_tab_view(self, view: QTableView, model: ViolationModel):
+        """Configure the tab view after creation.
+        
+        Hides the violation_dates column which is only used internally.
+        
+        Args:
+            view: The table view to configure
+            model: The model containing the data
+        """
         # Hide violation_dates column
         if "violation_dates" in model.df.columns:
             column_idx = model.df.columns.get_loc("violation_dates")
             view.setColumnHidden(column_idx, True)
-
-        self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
-
-        self.date_tabs.addTab(view, str(date))
-        return view

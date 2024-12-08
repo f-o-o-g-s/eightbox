@@ -10,9 +10,7 @@ view of all violation types in a single interface. It combines data from:
 The summary provides both daily breakdowns and weekly totals for each
 violation type, allowing for easy tracking of multiple violation categories.
 """
-
 import pandas as pd
-
 from base_violation_tab import BaseViolationTab
 from violation_model import (
     ViolationFilterProxyModel,
@@ -43,52 +41,58 @@ class ViolationRemediesTab(BaseViolationTab):
         tab_type (ViolationType): Set to VIOLATION_REMEDIES for this summary view
     """
 
+    # Define standard order of violation types
+    VIOLATION_ORDER = [
+        "8.5.D",
+        "8.5.F",
+        "8.5.F NS",
+        "8.5.F 5th",
+        "MAX12",
+        "MAX60",
+    ]
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = ViolationType.VIOLATION_REMEDIES
 
-    def create_tab_for_date(self, date, date_data):
-        """Create a tab showing all violation types for a specific date.
-
-        Args:
-            date (datetime.date): The date to display
-            date_data (pd.DataFrame): Combined violation data for the date
-
+    def get_display_columns(self) -> list:
+        """Return columns to display for violation summary.
+        
         Returns:
-            QTableView: The configured view for the new tab
-
-        Note:
-            Organizes violations in a standard order and calculates
-            combined remedy totals for each carrier.
+            list: Standard column order for summary view
         """
-        # Prepare data for each date tab
-        date_data = date_data.copy()
+        return ["carrier_name", "list_status"] + self.VIOLATION_ORDER + ["Remedy Total"]
 
-        # Add Remedy Total (daily version)
-        if "Remedy Total" not in date_data.columns:
-            date_data["Remedy Total"] = (
-                date_data.select_dtypes(include=["number"]).sum(axis=1).round(2)
+    def format_display_data(self, date_data: pd.DataFrame) -> pd.DataFrame:
+        """Format data for display in summary tab.
+        
+        Adds combined remedy total and ensures consistent column ordering.
+        
+        Args:
+            date_data: Raw violation data for a specific date
+            
+        Returns:
+            Formatted data with remedy totals and ordered columns
+        """
+        # Create a copy to avoid modifying original
+        formatted_data = date_data.copy()
+
+        # Add Remedy Total if not present
+        if "Remedy Total" not in formatted_data.columns:
+            formatted_data["Remedy Total"] = (
+                formatted_data.select_dtypes(include=["number"]).sum(axis=1).round(2)
             )
 
-        # Define the desired order of violation types
-        desired_order = ["8.5.D", "8.5.F", "8.5.F NS", "8.5.F 5th", "MAX12", "MAX60"]
-
-        # Reorder columns if they exist
-        existing_violations = [col for col in desired_order if col in date_data.columns]
+        # Reorder columns based on which violation types are present
+        existing_violations = [
+            col for col in self.VIOLATION_ORDER if col in formatted_data.columns
+        ]
         ordered_columns = (
             ["carrier_name", "list_status"] + existing_violations + ["Remedy Total"]
         )
-        date_data = date_data[ordered_columns]
+        formatted_data = formatted_data[ordered_columns]
 
-        model = ViolationModel(date_data, tab_type=self.tab_type, is_summary=False)
-        proxy_model = ViolationFilterProxyModel()
-        proxy_model.setSourceModel(model)
-        view = self.create_table_view(model, proxy_model)
-
-        self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
-
-        self.date_tabs.addTab(view, str(date))
-        return view
+        return formatted_data
 
     def refresh_data(self, data):
         """Refresh the tabs with aggregated violation data.
@@ -111,13 +115,11 @@ class ViolationRemediesTab(BaseViolationTab):
         current_tab_index = self.date_tabs.currentIndex()
         current_tab_name = self.date_tabs.tabText(current_tab_index)
 
+        # Clear existing tabs
         while self.date_tabs.count():
             self.date_tabs.removeTab(0)
         self.models.clear()
         self.showing_no_data = False
-
-        # Define the desired order of violation types
-        desired_order = ["8.5.D", "8.5.F", "8.5.F NS", "8.5.F 5th", "MAX12", "MAX60"]
 
         # Reorder columns based on desired order
         new_columns = []
@@ -125,20 +127,19 @@ class ViolationRemediesTab(BaseViolationTab):
             if date in ["carrier_name", "list_status"]:
                 new_columns.append((date, ""))
             else:
-                for violation_type in desired_order:
+                for violation_type in self.VIOLATION_ORDER:
                     if (date, violation_type) in data.columns:
                         new_columns.append((date, violation_type))
 
         data = data[new_columns]
 
-        # Group data by date
+        # Create tabs for each date
         unique_dates = sorted(
             date
             for date in data.columns.get_level_values(0).unique()
             if date not in ["carrier_name", "list_status"]
         )
 
-        # Create tabs for each date
         for date in unique_dates:
             date_data = data.xs(date, level=0, axis=1).copy()
             if "carrier_name" in data.columns.get_level_values(0):
@@ -152,13 +153,7 @@ class ViolationRemediesTab(BaseViolationTab):
         self.add_summary_tab(data)
 
         # Restore tab selection
-        if current_tab_name == "Summary":
-            self.date_tabs.setCurrentIndex(self.date_tabs.count() - 1)
-        else:
-            for i in range(self.date_tabs.count()):
-                if self.date_tabs.tabText(i) == current_tab_name:
-                    self.date_tabs.setCurrentIndex(i)
-                    break
+        self.restore_tab_selection(current_tab_name)
 
     def add_summary_tab(self, data):
         """Create a summary tab showing weekly totals for all violation types.
@@ -179,17 +174,9 @@ class ViolationRemediesTab(BaseViolationTab):
                 data.select_dtypes(include=["number"]).T.groupby(level=1).sum().T
             )
 
-            # Define the desired order of violation types
-            desired_order = [
-                "8.5.D",
-                "8.5.F",
-                "8.5.F NS",
-                "8.5.F 5th",
-                "MAX12",
-                "MAX60",
-            ]
+            # Filter and order violation types
             summary_data = summary_data[
-                [col for col in desired_order if col in summary_data.columns]
+                [col for col in self.VIOLATION_ORDER if col in summary_data.columns]
             ]
 
             # Add Weekly Remedy Total
@@ -205,14 +192,7 @@ class ViolationRemediesTab(BaseViolationTab):
             summary_data.reset_index(drop=True, inplace=True)
 
             # Create model and view
-            model = ViolationModel(
-                summary_data, tab_type=self.tab_type, is_summary=True
-            )
-            proxy_model = ViolationFilterProxyModel()
-            proxy_model.setSourceModel(model)
-            view = self.create_table_view(model, proxy_model)
-
-            self.summary_proxy_model = proxy_model
+            model, view = self.create_summary_model(summary_data)
             self.date_tabs.addTab(view, "Summary")
 
         except Exception as e:
