@@ -27,6 +27,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QTabWidget,
     QVBoxLayout,
     QWidget,
+    QLineEdit,
 )
 
 from carrier_list_pane import CarrierListPane
@@ -239,6 +240,9 @@ class MainApp(QMainWindow):
         # Create the excel exporter first
         self.excel_exporter = ExcelExporter(self)
 
+        # Track current filter state
+        self.current_status_filter = "all"
+
         # Create main container
         container = QWidget()
         container_layout = QVBoxLayout()
@@ -284,9 +288,7 @@ class MainApp(QMainWindow):
         self.main_layout.addWidget(self.central_tab_widget)
 
         # Connect the main tab change signal
-        self.central_tab_widget.currentChanged.connect(
-            self.resize_columns_on_current_tab
-        )
+        self.central_tab_widget.currentChanged.connect(self.handle_main_tab_change)
 
         # Add main layout to menu content layout
         menu_content_layout.addLayout(self.main_layout)
@@ -312,40 +314,33 @@ class MainApp(QMainWindow):
         export_all_action.triggered.connect(self.excel_exporter.export_all_violations)
         self.file_menu.addAction(export_all_action)
 
-    def resize_columns_on_current_tab(self, index):
+    def handle_main_tab_change(self, index):
+        """Handle switching between main violation tabs.
+        
+        Maintains the current filter state across tab switches.
+        
+        Args:
+            index (int): Index of the newly selected tab
         """
-        Resize columns to fit contents for the current main tab and its subtabs.
-        """
-        main_tab = self.central_tab_widget.widget(index)
-        if hasattr(main_tab, "view"):
-            # Resize columns for the main tab's view
-            main_tab.view.resizeColumnsToContents()
-
-        # Check if the main tab contains subtabs
-        if hasattr(
-            main_tab, "date_tabs"
-        ):  # Assuming 'date_tabs' is the subtab container
-            main_tab.date_tabs.currentChanged.connect(
-                self.resize_columns_on_current_subtab
-            )
-            # Resize columns for the currently active subtab
-            self.resize_columns_on_current_subtab(main_tab.date_tabs.currentIndex())
-
-    def resize_columns_on_current_subtab(self, index):
-        """
-        Resize columns to fit contents for the currently active subtab in a nested tab widget.
-        """
-        current_tab = self.central_tab_widget.currentWidget()
-        if hasattr(current_tab, "date_tabs"):
-            subtab = current_tab.date_tabs.widget(index)
-            if hasattr(subtab, "view"):
-                subtab.view.resizeColumnsToContents()
+        # Get the current tab
+        current_tab = self.central_tab_widget.widget(index)
+        
+        # If we have a valid tab and current filter state
+        if current_tab and hasattr(current_tab, "handle_global_filter_click"):
+            # Apply the current filter
+            current_tab.handle_global_filter_click(self.current_status_filter)
+            # Force stats update
+            current_tab.update_stats()
 
     def init_button_row(self):
-        """Create a horizontal row for buttons.
+        """Create a horizontal row for buttons and filters.
 
-        Contains Date Selection, Carrier List, and OTDL Maximization buttons.
+        Contains:
+        - Date Selection, Carrier List, and OTDL Maximization buttons
+        - Global carrier filter
+        - Status filter buttons
         """
+        # Create top button row
         button_row_layout = QHBoxLayout()
 
         # Create a container widget for the button row with a darker background
@@ -376,6 +371,21 @@ class MainApp(QMainWindow):
                 border-color: #BB86FC;
                 color: #000000;
             }
+            QLineEdit {
+                background-color: #2D2D2D;
+                color: #E1E1E1;
+                border: 1px solid #404040;
+                border-radius: 4px;
+                padding: 8px;
+                margin: 8px 4px;
+                min-width: 250px;
+            }
+            QLineEdit:focus {
+                border: 1px solid #BB86FC;
+            }
+            QLineEdit::placeholder {
+                color: #808080;
+            }
         """
         )
 
@@ -392,14 +402,123 @@ class MainApp(QMainWindow):
         self.otdl_button.setCheckable(True)
         self.otdl_button.clicked.connect(self.toggle_otdl_maximization)
 
-        # Add buttons to the layout
+        # Add global carrier filter
+        self.global_carrier_filter = QLineEdit()
+        self.global_carrier_filter.setPlaceholderText("Filter carriers across all tabs...")
+        self.global_carrier_filter.textChanged.connect(self.apply_global_carrier_filter)
+
+        # Add buttons and filter to the layout
         button_row_layout.addWidget(self.date_selection_button)
         button_row_layout.addWidget(self.carrier_list_button)
         button_row_layout.addWidget(self.otdl_button)
+        button_row_layout.addWidget(self.global_carrier_filter)
         button_row_layout.addStretch(1)
 
         button_container.setLayout(button_row_layout)
         self.main_layout.addWidget(button_container)
+
+        # Create status filter row
+        status_row = QWidget()
+        status_row.setStyleSheet("""
+            QWidget {
+                background-color: #1E1E1E;
+                border-bottom: 1px solid #333333;
+            }
+            QPushButton {
+                background-color: #2D2D2D;
+                border: 1px solid #404040;
+                border-radius: 4px;
+                color: #BB86FC;
+                padding: 4px 8px;
+                font-size: 12px;
+                margin: 4px;
+                min-width: 100px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background-color: #383838;
+            }
+            QPushButton:checked {
+                background-color: #BB86FC;
+                color: #000000;
+            }
+        """)
+        status_layout = QHBoxLayout()
+        status_layout.setContentsMargins(8, 0, 8, 0)
+        status_layout.setSpacing(4)  # Reduce spacing between buttons
+
+        # Create status filter buttons
+        self.total_btn = self.create_filter_button("Total Carriers: 0")
+        self.wal_btn = self.create_filter_button("WAL: 0")
+        self.nl_btn = self.create_filter_button("NL: 0")
+        self.otdl_btn = self.create_filter_button("OTDL: 0")
+        self.ptf_btn = self.create_filter_button("PTF: 0")
+        self.violations_btn = self.create_filter_button("Carriers With Violations: 0")
+
+        # Add buttons to layout
+        for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
+            status_layout.addWidget(btn)
+
+        status_layout.addStretch()
+        status_row.setLayout(status_layout)
+        self.main_layout.addWidget(status_row)
+
+    def create_filter_button(self, text):
+        """Create a styled filter button for list status filtering."""
+        btn = QPushButton(text)
+        btn.setCheckable(True)
+        btn.clicked.connect(self.handle_filter_click)
+        return btn
+
+    def handle_filter_click(self):
+        """Handle clicks on filter buttons."""
+        sender = self.sender()
+
+        # Uncheck other buttons
+        for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
+            if btn != sender:
+                btn.setChecked(False)
+
+        # Determine which filter to apply
+        if not sender.isChecked():
+            self.apply_global_status_filter("all")
+        elif sender == self.total_btn:
+            self.apply_global_status_filter("all")
+        elif sender == self.wal_btn:
+            self.apply_global_status_filter("wal")
+        elif sender == self.nl_btn:
+            self.apply_global_status_filter("nl")
+        elif sender == self.otdl_btn:
+            self.apply_global_status_filter("otdl")
+        elif sender == self.ptf_btn:
+            self.apply_global_status_filter("ptf")
+        elif sender == self.violations_btn:
+            self.apply_global_status_filter("violations")
+
+    def update_filter_stats(self, total, wal, nl, otdl, ptf, violations):
+        """Update the filter button statistics.
+        
+        Args:
+            total (int): Total number of carriers
+            wal (int): Number of WAL carriers
+            nl (int): Number of NL carriers
+            otdl (int): Number of OTDL carriers
+            ptf (int): Number of PTF carriers
+            violations (int): Number of carriers with violations
+        """
+        print(f"Updating main window stats: Total={total}, WAL={wal}, NL={nl}, "
+              f"OTDL={otdl}, PTF={ptf}, Violations={violations}")
+        
+        self.total_btn.setText(f"Total Carriers: {total}")
+        self.wal_btn.setText(f"WAL: {wal}")
+        self.nl_btn.setText(f"NL: {nl}")
+        self.otdl_btn.setText(f"OTDL: {otdl}")
+        self.ptf_btn.setText(f"PTF: {ptf}")
+        self.violations_btn.setText(f"Carriers With Violations: {violations}")
+
+        # Force button update
+        for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
+            btn.update()
 
     def toggle_date_selection_pane(self):
         """Toggle the Date Selection Pane and button state."""
@@ -516,7 +635,10 @@ class MainApp(QMainWindow):
         """Initialize and add the 8.5.D Tab."""
         self.vio_85d_tab = Violation85dTab()
         self.central_tab_widget.addTab(self.vio_85d_tab, "8.5.D Violations")
-        self.vio_85d_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
+        self.vio_85d_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
+
+        # Connect tab change signal
+        self.central_tab_widget.currentChanged.connect(self.handle_main_tab_change)
 
     def init_85f_tab(self):
         """Initialize the Article 8.5.F violation tab."""
@@ -1438,6 +1560,49 @@ class MainApp(QMainWindow):
             return self.remedies_tab
         else:
             return None
+
+    def apply_global_carrier_filter(self, text):
+        """Apply carrier filter text across all violation tabs.
+
+        Args:
+            text (str): The filter text to apply
+        """
+        # Apply filter to each violation tab
+        for tab in [
+            self.vio_85d_tab,
+            self.vio_85f_tab,
+            self.vio_85f_ns_tab,
+            self.vio_85f_5th_tab,
+            self.vio_MAX12_tab,
+            self.vio_MAX60_tab,
+            self.remedies_tab,
+        ]:
+            if hasattr(tab, "filter_carriers"):
+                tab.filter_carriers(text, "name")
+
+    def apply_global_status_filter(self, status_type):
+        """Apply status filter across all violation tabs.
+
+        Args:
+            status_type (str): The status to filter by ('all', 'wal', 'nl', 'otdl', 'ptf', 'violations')
+        """
+        # Store current filter state
+        self.current_status_filter = status_type
+
+        # Apply filter to each violation tab
+        for tab in [
+            self.vio_85d_tab,
+            self.vio_85f_tab,
+            self.vio_85f_ns_tab,
+            self.vio_85f_5th_tab,
+            self.vio_MAX12_tab,
+            self.vio_MAX60_tab,
+            self.remedies_tab,
+        ]:
+            if hasattr(tab, "handle_global_filter_click"):
+                tab.handle_global_filter_click(status_type)
+                # Force stats update after applying filter
+                tab.update_stats()
 
 
 if __name__ == "__main__":

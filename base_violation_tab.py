@@ -16,6 +16,7 @@ from PyQt5.QtCore import (
     QSortFilterProxyModel,
     Qt,
     pyqtSignal,
+    QTimer,
 )
 from PyQt5.QtWidgets import (
     QHBoxLayout,
@@ -227,18 +228,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         """Initialize the UI components."""
         self.main_layout = QVBoxLayout(self)
 
-        # Create search box
-        self.search_box = QLineEdit()
-        self.search_box.setPlaceholderText("Filter carriers...")
-        self.search_box.textChanged.connect(self.filter_carriers)
-        self.main_layout.addWidget(self.search_box)
-
         # Create tab widget
         self.date_tabs = QTabWidget()
         self.main_layout.addWidget(self.date_tabs)
-
-        # Create filter buttons
-        self._create_filter_buttons()
 
         # Connect tab change signal
         self.date_tabs.currentChanged.connect(self.update_stats)
@@ -246,30 +238,6 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
         # Initialize with no data
         self.init_no_data_tab()
-
-    def _create_filter_buttons(self):
-        """Create and set up filter buttons."""
-        self.stats_layout = QHBoxLayout()
-
-        self.total_btn = self.create_filter_button("Total Carriers")
-        self.wal_btn = self.create_filter_button("WAL")
-        self.nl_btn = self.create_filter_button("NL")
-        self.otdl_btn = self.create_filter_button("OTDL")
-        self.ptf_btn = self.create_filter_button("PTF")
-        self.violations_btn = self.create_filter_button("Carriers With Violations")
-
-        for btn in [
-            self.total_btn,
-            self.wal_btn,
-            self.nl_btn,
-            self.otdl_btn,
-            self.ptf_btn,
-            self.violations_btn,
-        ]:
-            self.stats_layout.addWidget(btn)
-
-        self.stats_layout.addStretch()
-        self.main_layout.addLayout(self.stats_layout)
 
     @abstractmethod
     def get_display_columns(self) -> list:
@@ -284,49 +252,13 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         """Configure the tab view after creation."""
         pass
 
-    def create_filter_button(self, text):
-        """Create a styled filter button for list status filtering."""
-        btn = QPushButton(f"{text}: 0")
-        btn.setCheckable(True)
-        btn.clicked.connect(self.handle_filter_click)
-        return btn
-
-    def handle_filter_click(self):
-        """Handle clicks on filter buttons."""
-        sender = self.sender()
-
-        # Uncheck other buttons
-        for btn in [
-            self.total_btn,
-            self.wal_btn,
-            self.nl_btn,
-            self.otdl_btn,
-            self.ptf_btn,
-            self.violations_btn,
-        ]:
-            if btn != sender:
-                btn.setChecked(False)
-
-        if not sender.isChecked():
-            self.filter_carriers("")
-            return
-
-        # Apply appropriate filter
-        if sender == self.total_btn:
-            self.filter_carriers("")
-        elif sender == self.wal_btn:
-            self.filter_carriers("wal", filter_type="list_status")
-        elif sender == self.nl_btn:
-            self.filter_carriers("nl", filter_type="list_status")
-        elif sender == self.otdl_btn:
-            self.filter_carriers("otdl", filter_type="list_status")
-        elif sender == self.ptf_btn:
-            self.filter_carriers("ptf", filter_type="list_status")
-        elif sender == self.violations_btn:
-            self.filter_carriers("", filter_type="violations")
-
     def filter_carriers(self, text, filter_type="name"):
-        """Filter carriers across all tabs based on search criteria."""
+        """Filter carriers across all tabs based on search criteria.
+        
+        Args:
+            text (str): The text to filter by
+            filter_type (str): The type of filter to apply ('name' or 'list_status')
+        """
         if self.showing_no_data:
             return
 
@@ -340,40 +272,76 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         current_tab_name = self.date_tabs.tabText(current_tab_index)
 
         try:
+            # Get the proxy model for the current tab
             proxy_model = (
                 self.summary_proxy_model
                 if current_tab_name == "Summary"
                 else self.models[current_tab_name]["proxy"]
             )
+
+            # Apply the filter
             proxy_model.set_filter(text, filter_type)
             self.update_stats()
         except Exception as e:
             print(f"Error filtering carriers: {str(e)}")
 
+    def handle_global_filter_click(self, status_type):
+        """Handle global filter click from another tab.
+        
+        Args:
+            status_type (str): The status to filter by
+        """
+        # Apply the filter
+        if status_type == "all":
+            self.filter_carriers("")
+        elif status_type == "violations":
+            self.filter_carriers("", filter_type="violations")
+        else:
+            self.filter_carriers(status_type, filter_type="list_status")
+
     def update_stats(self):
-        """Update statistics and button texts."""
-        if self.showing_no_data:
-            self.reset_button_counts()
-            return
-
-        current_tab_index = self.date_tabs.currentIndex()
-        if current_tab_index == -1:
-            return
-
+        """Update the statistics display in the filter buttons."""
         try:
-            current_tab_name = self.date_tabs.tabText(current_tab_index)
-            df = (
-                self.summary_proxy_model.sourceModel().df
-                if current_tab_name == "Summary"
-                else self.models[current_tab_name]["model"].df
-            )
+            if self.showing_no_data:
+                self._update_main_window_stats(0, 0, 0, 0, 0, 0)
+                return
 
+            current_tab_index = self.date_tabs.currentIndex()
+            if current_tab_index == -1:
+                self._update_main_window_stats(0, 0, 0, 0, 0, 0)
+                return
+
+            current_tab = self.date_tabs.widget(current_tab_index)
+            if not current_tab:
+                self._update_main_window_stats(0, 0, 0, 0, 0, 0)
+                return
+
+            # Get the model and data
+            df = None
+            
+            # Try to get data from the current tab's model
+            if current_tab_name := self.date_tabs.tabText(current_tab_index):
+                if current_tab_name == "Summary" and self.summary_proxy_model:
+                    source_model = self.summary_proxy_model.sourceModel()
+                    if source_model:
+                        df = source_model.df
+                elif current_tab_name in self.models:
+                    source_model = self.models[current_tab_name]["model"]
+                    if source_model:
+                        df = source_model.df
+
+            if df is None or df.empty:
+                self._update_main_window_stats(0, 0, 0, 0, 0, 0)
+                return
+
+            # Calculate totals
             total_carriers = len(df)
-            list_status_col = (
-                "list_status" if "list_status" in df.columns else "List Status"
+            list_status_col = next(
+                (col for col in df.columns if col.lower() in ["list_status", "list status"]),
+                None,
             )
 
-            if list_status_col in df.columns:
+            if list_status_col:
                 wal_carriers = len(df[df[list_status_col].str.lower() == "wal"])
                 nl_carriers = len(df[df[list_status_col].str.lower() == "nl"])
                 otdl_carriers = len(df[df[list_status_col].str.lower() == "otdl"])
@@ -383,32 +351,63 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
             violations = self._calculate_violations(df)
 
-            self.total_btn.setText(f"Total Carriers: {total_carriers}")
-            self.wal_btn.setText(f"WAL: {wal_carriers}")
-            self.nl_btn.setText(f"NL: {nl_carriers}")
-            self.otdl_btn.setText(f"OTDL: {otdl_carriers}")
-            self.ptf_btn.setText(f"PTF: {ptf_carriers}")
-            self.violations_btn.setText(f"Carriers With Violations: {violations}")
+            print(f"Stats: Total={total_carriers}, WAL={wal_carriers}, NL={nl_carriers}, "
+                  f"OTDL={otdl_carriers}, PTF={ptf_carriers}, Violations={violations}")
+
+            # Update stats in main window
+            self._update_main_window_stats(
+                total_carriers, wal_carriers, nl_carriers, 
+                otdl_carriers, ptf_carriers, violations
+            )
 
         except Exception as e:
             print(f"Error updating stats: {str(e)}")
-            self.reset_button_counts()
+            self._update_main_window_stats(0, 0, 0, 0, 0, 0)
 
     def _calculate_violations(self, df):
         """Calculate the total number of violations in the given data."""
-        for col in ["Weekly Remedy Total", "Remedy Total", "remedy_total", "total"]:
-            if col in df.columns:
-                return len(df[df[col] > 0])
-        return 0
+        try:
+            # For Summary tab, check numeric columns for any non-zero values
+            if self.__class__.__name__ == "ViolationsSummaryTab":
+                numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+                # Exclude certain columns that shouldn't be counted for violations
+                exclude_cols = ['Total Hours', 'Own Route Hours', 'Off Route Hours']
+                violation_cols = [col for col in numeric_cols if col not in exclude_cols]
+                return len(df[df[violation_cols].gt(0).any(axis=1)])
+            
+            # For regular violation tabs
+            if "violation_type" in df.columns:
+                return len(df[~df["violation_type"].str.contains("No Violation", na=False)])
+            
+            # If no violation type column, check remedy totals
+            for col in ["remedy_total", "Remedy Total", "Weekly Remedy Total"]:
+                if col in df.columns:
+                    return len(df[pd.to_numeric(df[col], errors='coerce') > 0])
+            
+            # As a last resort, check if any numeric columns have values > 0
+            numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+            if len(numeric_cols) > 0:
+                return len(df[df[numeric_cols].gt(0).any(axis=1)])
+            
+            return 0
+        except Exception as e:
+            print(f"Error calculating violations: {str(e)}")
+            return 0
 
-    def reset_button_counts(self):
-        """Reset all button counts to zero."""
-        self.total_btn.setText("Total Carriers: 0")
-        self.wal_btn.setText("WAL: 0")
-        self.nl_btn.setText("NL: 0")
-        self.otdl_btn.setText("OTDL: 0")
-        self.ptf_btn.setText("PTF: 0")
-        self.violations_btn.setText("Carriers With Violations: 0")
+    def _update_main_window_stats(self, total, wal, nl, otdl, ptf, violations):
+        """Update the stats in the main window.
+        
+        Args:
+            total (int): Total number of carriers
+            wal (int): Number of WAL carriers
+            nl (int): Number of NL carriers
+            otdl (int): Number of OTDL carriers
+            ptf (int): Number of PTF carriers
+            violations (int): Number of carriers with violations
+        """
+        main_window = self.window()
+        if hasattr(main_window, "update_filter_stats"):
+            main_window.update_filter_stats(total, wal, nl, otdl, ptf, violations)
 
     def init_no_data_tab(self):
         """Initialize the No Data tab."""
@@ -633,3 +632,15 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             proxy_model.setSourceModel(model)
             return model, proxy_model
         return model, None
+
+    def showEvent(self, event):
+        """Handle tab being shown.
+        
+        Ensures the global filter is applied when switching tabs.
+        """
+        super().showEvent(event)
+        # Apply global filter if it exists
+        if hasattr(self.parent(), "global_carrier_filter"):
+            text = self.parent().global_carrier_filter.text()
+            if text:
+                self.filter_carriers(text, "name")

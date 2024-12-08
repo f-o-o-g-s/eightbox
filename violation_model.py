@@ -681,12 +681,12 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
         self.filter_text = ""
         self.setSortRole(Qt.UserRole)
 
-    def set_filter(self, filter_type, text):
+    def set_filter(self, text, filter_type="name"):
         """Set the current filter criteria.
 
         Args:
-            filter_type (str): The type of filter to apply (e.g. 'list_status', 'violations')
             text (str): The filter text to match against
+            filter_type (str): The type of filter to apply (e.g. 'name', 'list_status', 'violations')
         """
         self.filter_type = filter_type
         self.filter_text = text.lower() if text else ""
@@ -706,35 +706,58 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 
         Returns:
             bool: True if row should be shown, False if filtered out
-
-        Note:
-            Special handling for "violations" filter type which shows
-            only rows with actual violations
         """
         source_model = self.sourceModel()
 
         if not self.filter_text and self.filter_type != "violations":
             return True
 
-        if self.filter_type == "list_status":
-            list_status = source_model.data(
-                source_model.index(
-                    source_row, source_model.df.columns.get_loc("list_status")
-                ),
-                Qt.DisplayRole,
-            )
-            return self.filter_text.lower() in str(list_status).lower()
+        if self.filter_type == "name":
+            # Get carrier name column
+            carrier_col = None
+            for col in range(source_model.columnCount(source_parent)):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and header.lower() in ["carrier_name", "carrier name"]:
+                    carrier_col = col
+                    break
+
+            if carrier_col is not None:
+                idx = source_model.index(source_row, carrier_col, source_parent)
+                name = str(source_model.data(idx, Qt.DisplayRole)).lower()
+                return self.filter_text in name
+            return False
+
+        elif self.filter_type == "list_status":
+            # Get list status column
+            status_col = None
+            for col in range(source_model.columnCount(source_parent)):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and header.lower() in ["list_status", "list status"]:
+                    status_col = col
+                    break
+
+            if status_col is not None:
+                idx = source_model.index(source_row, status_col, source_parent)
+                status = str(source_model.data(idx, Qt.DisplayRole)).lower()
+                return status == self.filter_text
+            return False
 
         elif self.filter_type == "violations":
-            remedy_total = source_model.data(
-                source_model.index(
-                    source_row, source_model.df.columns.get_loc("remedy_total")
-                ),
-                Qt.DisplayRole,
-            )
-            try:
-                return float(remedy_total) > 0
-            except (ValueError, TypeError):
-                return False
+            # Check remedy total column
+            remedy_col = None
+            for col in range(source_model.columnCount(source_parent)):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and header.lower() in ["remedy_total", "remedy total"]:
+                    remedy_col = col
+                    break
+
+            if remedy_col is not None:
+                idx = source_model.index(source_row, remedy_col, source_parent)
+                remedy = source_model.data(idx, Qt.DisplayRole)
+                try:
+                    return float(str(remedy).split()[0]) > 0
+                except (ValueError, TypeError, IndexError):
+                    return False
+            return False
 
         return True
