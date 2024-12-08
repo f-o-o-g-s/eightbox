@@ -220,7 +220,16 @@ class PandasTableModel(QAbstractTableModel):
         """
         return len(self.df.columns)
 
-    def data(self, index, role):
+    def data(self, index, role=Qt.DisplayRole):
+        """Get data for the specified model index and role.
+
+        Args:
+            index (QModelIndex): The index to get data for
+            role (Qt.ItemDataRole): The role to get data for (default: DisplayRole)
+
+        Returns:
+            The data for the given index and role
+        """
         if not index.isValid():
             return QVariant()
 

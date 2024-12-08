@@ -144,6 +144,16 @@ def get_new_version(current_version, update_type):
 
 
 def update_version_and_release():
+    """Update version number and create a new release.
+
+    Handles the complete release process including:
+    - Getting version update type from user
+    - Collecting commit message and release notes
+    - Updating version in main_gui.py
+    - Creating git commit and tag
+    - Pushing changes to GitHub
+    - Creating GitHub release
+    """
     try:
         # 1. Get version update type from user
         print("\nWhat type of update is this?")

@@ -620,6 +620,16 @@ class ViolationModel(QStandardItemModel):
         except Exception as e:
             print(f"Sorting error: {e}")
 
+    def get_violation_type_display(self, violation_type):
+        """Get the display name for a violation type.
+
+        Args:
+            violation_type (str): The internal violation type code
+
+        Returns:
+            str: The human-readable display name for the violation type
+        """
+
 
 class ViolationFilterProxyModel(QSortFilterProxyModel):
     """Proxy model for filtering violation data in table views.
@@ -640,7 +650,13 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
         self.filter_text = ""
         self.setSortRole(Qt.UserRole)
 
-    def set_filter(self, text, filter_type="name"):
+    def set_filter(self, filter_type, text):
+        """Set the current filter criteria.
+
+        Args:
+            filter_type (str): The type of filter to apply (e.g. 'list_status', 'violations')
+            text (str): The filter text to match against
+        """
         self.filter_type = filter_type
         self.filter_text = text.lower() if text else ""
         self.invalidateFilter()

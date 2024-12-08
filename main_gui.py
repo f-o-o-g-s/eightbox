@@ -65,6 +65,14 @@ def qt_message_handler(mode, context, message):
 qInstallMessageHandler(qt_message_handler)
 
 
+def get_version():
+    """Get the current version of the application.
+
+    Returns:
+        str: The current version number in YYYY.MAJOR.MINOR.PATCH format
+    """
+
+
 class CustomTitleBar(QWidget):
     """Custom window title bar with minimize/maximize/close controls.
 
