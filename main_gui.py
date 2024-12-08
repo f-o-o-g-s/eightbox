@@ -445,9 +445,9 @@ class MainApp(QMainWindow):
                 background-color: rgba(187, 134, 252, 0.1);
                 border: none;
                 color: #BB86FC;
-                padding: 4px 8px;
+                padding: 8px 8px;
                 font-size: 12px;
-                margin: 2px;
+                margin: 1px;
                 min-width: 90px;
                 max-height: 24px;
                 border-radius: 4px;
