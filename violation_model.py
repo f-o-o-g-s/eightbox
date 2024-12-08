@@ -222,7 +222,7 @@ class ViolationModel(QStandardItemModel):
                 if col_name == "Remedy Total" and value:
                     try:
                         if float(str(value)) > 0:
-                            return QBrush(VIOLATION_COLOR)
+                            return VIOLATION_COLOR
                     except ValueError:
                         pass
 
