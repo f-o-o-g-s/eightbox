@@ -33,7 +33,7 @@ from violation_model import ViolationModel
 
 class BaseViolationColumns:
     """Shared column configurations for violation tabs."""
-    
+
     COMMON_COLUMNS = [
         "carrier_name",
         "list_status",
@@ -41,13 +41,13 @@ class BaseViolationColumns:
         "total_hours",
         "remedy_total",
     ]
-    
+
     ROUTE_SPECIFIC_COLUMNS = [
         "own_route_hours",
         "off_route_hours",
         "moves",
     ]
-    
+
     @classmethod
     def get_columns(cls, include_route_data=False, include_violation_type=False):
         """Get column list with optional additions."""
@@ -61,7 +61,7 @@ class BaseViolationColumns:
 
 class TabRefreshMixin:
     """Mixin providing common tab refresh functionality."""
-    
+
     def refresh_tabs(self, data=None):
         """Common tab refresh logic."""
         if data is None or data.empty:
@@ -75,10 +75,7 @@ class TabRefreshMixin:
     def get_current_tab_info(self):
         """Get current tab index and name."""
         index = self.date_tabs.currentIndex()
-        return {
-            'index': index,
-            'name': self.date_tabs.tabText(index)
-        }
+        return {"index": index, "name": self.date_tabs.tabText(index)}
 
     def clear_all_tabs(self):
         """Clear all tabs and reset state."""
@@ -99,7 +96,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 
     def set_filter(self, text, filter_type="name"):
         """Set both the filter text and type.
-        
+
         Args:
             text (str): Text to filter by
             filter_type (str): Type of filter to apply ('name', 'list_status', or 'violations')
@@ -110,7 +107,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 
     def filter_accepts_row(self, source_row, source_parent):
         """Apply the current filter to determine row visibility.
-        
+
         Args:
             source_row (int): Row index in the source model
             source_parent (QModelIndex): Parent index in source model
@@ -130,7 +127,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
                 if header and header.lower() in ["list_status", "list status"]:
                     list_status_col = col
                     break
-            
+
             if list_status_col is not None:
                 idx = source_model.index(source_row, list_status_col, source_parent)
                 list_status = source_model.data(idx, Qt.DisplayRole)
@@ -145,7 +142,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
                 if header and header.lower() in ["carrier_name", "carrier name"]:
                     name_col = col
                     break
-            
+
             if name_col is not None:
                 idx = source_model.index(source_row, name_col, source_parent)
                 name = source_model.data(idx, Qt.DisplayRole)
@@ -157,7 +154,10 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             # First check for remedy total columns
             for col in range(source_model.columnCount()):
                 header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-                if header and any(x in str(header).lower() for x in ["remedy total", "weekly remedy total"]):
+                if header and any(
+                    x in str(header).lower()
+                    for x in ["remedy total", "weekly remedy total"]
+                ):
                     idx = source_model.index(source_row, col, source_parent)
                     value = source_model.data(idx, Qt.DisplayRole)
                     try:
@@ -169,7 +169,10 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             # Then check for violation type columns
             for col in range(source_model.columnCount()):
                 header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-                if header and any(x in str(header).lower() for x in ["violation type", "violation_type"]):
+                if header and any(
+                    x in str(header).lower()
+                    for x in ["violation type", "violation_type"]
+                ):
                     idx = source_model.index(source_row, col, source_parent)
                     value = source_model.data(idx, Qt.DisplayRole)
                     if value and not str(value).lower().startswith("no violation"):
@@ -192,6 +195,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 # Create a metaclass that combines QWidget and ABC
 class MetaQWidgetABC(type(QWidget), ABCMeta):
     """Metaclass combining QWidget and ABC metaclasses."""
+
     pass
 
 
@@ -202,7 +206,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def __init__(self, parent=None, otdl_enabled=False):
         """Initialize the base violation tab.
-        
+
         Args:
             parent: Parent widget
             otdl_enabled: Whether OTDL functionality is enabled
@@ -254,8 +258,14 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.ptf_btn = self.create_filter_button("PTF")
         self.violations_btn = self.create_filter_button("Carriers With Violations")
 
-        for btn in [self.total_btn, self.wal_btn, self.nl_btn, 
-                   self.otdl_btn, self.ptf_btn, self.violations_btn]:
+        for btn in [
+            self.total_btn,
+            self.wal_btn,
+            self.nl_btn,
+            self.otdl_btn,
+            self.ptf_btn,
+            self.violations_btn,
+        ]:
             self.stats_layout.addWidget(btn)
 
         self.stats_layout.addStretch()
@@ -286,8 +296,14 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         sender = self.sender()
 
         # Uncheck other buttons
-        for btn in [self.total_btn, self.wal_btn, self.nl_btn,
-                   self.otdl_btn, self.ptf_btn, self.violations_btn]:
+        for btn in [
+            self.total_btn,
+            self.wal_btn,
+            self.nl_btn,
+            self.otdl_btn,
+            self.ptf_btn,
+            self.violations_btn,
+        ]:
             if btn != sender:
                 btn.setChecked(False)
 
@@ -324,8 +340,11 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         current_tab_name = self.date_tabs.tabText(current_tab_index)
 
         try:
-            proxy_model = (self.summary_proxy_model if current_tab_name == "Summary"
-                         else self.models[current_tab_name]["proxy"])
+            proxy_model = (
+                self.summary_proxy_model
+                if current_tab_name == "Summary"
+                else self.models[current_tab_name]["proxy"]
+            )
             proxy_model.set_filter(text, filter_type)
             self.update_stats()
         except Exception as e:
@@ -343,14 +362,17 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
         try:
             current_tab_name = self.date_tabs.tabText(current_tab_index)
-            df = (self.summary_proxy_model.sourceModel().df
-                 if current_tab_name == "Summary"
-                 else self.models[current_tab_name]["model"].df)
+            df = (
+                self.summary_proxy_model.sourceModel().df
+                if current_tab_name == "Summary"
+                else self.models[current_tab_name]["model"].df
+            )
 
             total_carriers = len(df)
-            list_status_col = ("list_status" if "list_status" in df.columns
-                             else "List Status")
-            
+            list_status_col = (
+                "list_status" if "list_status" in df.columns else "List Status"
+            )
+
             if list_status_col in df.columns:
                 wal_carriers = len(df[df[list_status_col].str.lower() == "wal"])
                 nl_carriers = len(df[df[list_status_col].str.lower() == "nl"])
@@ -430,8 +452,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             "off_route_hours": "Off Route Hours",
             "moves": "Moves",
         }
-        existing_columns = {col: new_name for col, new_name in rename_map.items()
-                          if col in df.columns}
+        existing_columns = {
+            col: new_name for col, new_name in rename_map.items() if col in df.columns
+        }
         if existing_columns:
             df.rename(columns=existing_columns, inplace=True)
         return df
@@ -450,9 +473,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def init_ui(self, initial_data=None):
         """Initialize the UI with optional initial data.
-        
+
         This method is kept for backwards compatibility with main_gui.py.
-        
+
         Args:
             initial_data: Optional DataFrame to initialize the view with
         """
@@ -482,7 +505,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.add_summary_tab(violation_data)
 
         # Restore tab selection
-        self.restore_tab_selection(current_tab['name'])
+        self.restore_tab_selection(current_tab["name"])
 
     def restore_tab_selection(self, current_tab_name):
         """Restore the previously selected tab."""
@@ -498,7 +521,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         """Create a tab showing violations for a specific date."""
         display_columns = self.get_display_columns()
         formatted_data = self.format_display_data(date_data)
-        
+
         if display_columns:
             formatted_data = formatted_data[display_columns]
 
@@ -510,7 +533,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
         self.date_tabs.addTab(view, str(date))
         self.configure_tab_view(view, model)
-        
+
         return view
 
     def add_summary_tab(self, data):
@@ -559,10 +582,10 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def create_summary_model(self, summary_data: pd.DataFrame):
         """Create a model for the summary tab.
-        
+
         Args:
             summary_data: Processed data for the summary view
-            
+
         Returns:
             tuple: (model, view) The configured model and view
         """
@@ -570,16 +593,16 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         proxy_model = ViolationFilterProxyModel()
         proxy_model.setSourceModel(model)
         view = self.create_table_view(model, proxy_model)
-        
+
         self.summary_proxy_model = proxy_model
         return model, view
 
     def create_summary_proxy_model(self, model):
         """Create a proxy model for the summary tab's data.
-        
+
         Args:
             model: Source model containing summary data
-            
+
         Returns:
             ViolationFilterProxyModel: Configured proxy model for filtering
         """
@@ -595,11 +618,11 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def create_violation_model(self, data, proxy=True):
         """Create a model for the violation data.
-        
+
         Args:
             data: The data to model
             proxy: Whether to create a proxy model
-            
+
         Returns:
             tuple: (model, proxy_model) or (model, None)
         """

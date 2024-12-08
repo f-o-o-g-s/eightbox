@@ -1,16 +1,12 @@
 """Implementation of the Maximum 60-Hour Rule violation tracking tab.
 
 This module provides specific implementation for tracking and displaying
-violations of the 60-hour weekly work limit, which prohibits carriers from
+violations of the 60-hour work limit, which prohibits carriers from
 accumulating more than 60 work hours in a service week.
 """
 import pandas as pd
+
 from base_violation_tab import BaseViolationTab
-from utils import set_display
-from violation_model import (
-    ViolationFilterProxyModel,
-    ViolationModel,
-)
 from violation_types import ViolationType
 
 
@@ -35,7 +31,7 @@ class ViolationMax60Tab(BaseViolationTab):
 
     def get_display_columns(self) -> list:
         """Return columns to display for 60-hour violations.
-        
+
         Returns:
             list: Column names specific to 60-hour limit violations
         """
@@ -51,12 +47,12 @@ class ViolationMax60Tab(BaseViolationTab):
 
     def format_display_data(self, date_data: pd.DataFrame) -> pd.DataFrame:
         """Format data for display in 60-hour violation tab.
-        
+
         Adds special formatting for daily hours with leave type indicators.
-        
+
         Args:
             date_data: Raw violation data for a specific date
-            
+
         Returns:
             Formatted data with combined daily hours and indicators
         """

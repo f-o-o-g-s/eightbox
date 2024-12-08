@@ -1021,7 +1021,7 @@ class MainApp(QMainWindow):
 
     def on_carrier_data_updated(self, _):
         """Handle updates to the carrier list and refresh all tabs.
-        
+
         Actually uses the JSON file for applying updates to the fetched clock ring data.
         Just updating the data without clicking 'Save Carrier List' will not update the views.
         """

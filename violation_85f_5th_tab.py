@@ -10,10 +10,7 @@ from PyQt5.QtWidgets import QTableView
 
 from base_violation_tab import BaseViolationTab
 from utils import set_display
-from violation_model import (
-    ViolationFilterProxyModel,
-    ViolationModel,
-)
+from violation_model import ViolationModel
 from violation_types import ViolationType
 
 
@@ -40,7 +37,7 @@ class Violation85f5thTab(BaseViolationTab):
 
     def get_display_columns(self) -> list:
         """Return columns to display for 5th overtime day violations.
-        
+
         Returns:
             list: Column names specific to 5th overtime day violations
         """
@@ -56,12 +53,12 @@ class Violation85f5thTab(BaseViolationTab):
 
     def format_display_data(self, date_data: pd.DataFrame) -> pd.DataFrame:
         """Format data for display in 5th overtime day violation tab.
-        
+
         Adds special formatting for daily hours with overtime indicators.
-        
+
         Args:
             date_data: Raw violation data for a specific date
-            
+
         Returns:
             Formatted data with combined daily hours and indicators
         """
@@ -70,7 +67,9 @@ class Violation85f5thTab(BaseViolationTab):
 
         # Add display indicator if not present
         if "display_indicator" not in formatted_data.columns:
-            formatted_data["display_indicator"] = formatted_data.apply(set_display, axis=1)
+            formatted_data["display_indicator"] = formatted_data.apply(
+                set_display, axis=1
+            )
 
         # Format daily hours with indicator
         formatted_data["daily_hours"] = formatted_data.apply(
@@ -86,9 +85,9 @@ class Violation85f5thTab(BaseViolationTab):
 
     def configure_tab_view(self, view: QTableView, model: ViolationModel):
         """Configure the tab view after creation.
-        
+
         Hides the violation_dates column which is only used internally.
-        
+
         Args:
             view: The table view to configure
             model: The model containing the data

@@ -1,21 +1,11 @@
-"""Implementation of the Violations Summary tab.
+"""Implementation of the violations summary tab.
 
-This module provides a specialized implementation for displaying an aggregated
-view of all violation types in a single interface. It combines data from:
-- Article 8.5.D violations (off-assignment work)
-- Article 8.5.F violations (overtime limits)
-- Maximum 12-Hour Rule violations
-- Maximum 60-Hour Rule violations
-
-The summary provides both daily breakdowns and weekly totals for each
-violation type, allowing for easy tracking of multiple violation categories.
+This module provides a summary view of all violations across different types,
+allowing for quick analysis and comparison of violation patterns.
 """
 import pandas as pd
+
 from base_violation_tab import BaseViolationTab
-from violation_model import (
-    ViolationFilterProxyModel,
-    ViolationModel,
-)
 from violation_types import ViolationType
 
 
@@ -57,7 +47,7 @@ class ViolationRemediesTab(BaseViolationTab):
 
     def get_display_columns(self) -> list:
         """Return columns to display for violation summary.
-        
+
         Returns:
             list: Standard column order for summary view
         """
@@ -65,12 +55,12 @@ class ViolationRemediesTab(BaseViolationTab):
 
     def format_display_data(self, date_data: pd.DataFrame) -> pd.DataFrame:
         """Format data for display in summary tab.
-        
+
         Adds combined remedy total and ensures consistent column ordering.
-        
+
         Args:
             date_data: Raw violation data for a specific date
-            
+
         Returns:
             Formatted data with remedy totals and ordered columns
         """

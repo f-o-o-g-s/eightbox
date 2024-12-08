@@ -6,10 +6,6 @@ Article 8.5.F violations that occur when non-OTDL carriers work more than
 """
 
 from base_violation_tab import BaseViolationTab
-from violation_model import (
-    ViolationFilterProxyModel,
-    ViolationModel,
-)
 from violation_types import ViolationType
 
 
@@ -33,7 +29,7 @@ class Violation85fNsTab(BaseViolationTab):
 
     def get_display_columns(self) -> list:
         """Return columns to display for non-scheduled day violations.
-        
+
         Returns:
             list: Column names specific to non-scheduled day violations
         """

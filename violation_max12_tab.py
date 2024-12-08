@@ -6,10 +6,6 @@ more than 12 hours in a single day (11.50 hours for WAL carriers).
 """
 
 from base_violation_tab import BaseViolationTab
-from violation_model import (
-    ViolationFilterProxyModel,
-    ViolationModel,
-)
 from violation_types import ViolationType
 
 
@@ -33,7 +29,7 @@ class ViolationMax12Tab(BaseViolationTab):
 
     def get_display_columns(self) -> list:
         """Return columns to display for 12-hour violations.
-        
+
         Returns:
             list: Column names specific to daily hour limit violations
         """

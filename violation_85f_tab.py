@@ -11,10 +11,6 @@ These rules do not apply during December (penalty overtime exclusion period).
 """
 
 from base_violation_tab import BaseViolationTab
-from violation_model import (
-    ViolationFilterProxyModel,
-    ViolationModel,
-)
 from violation_types import ViolationType
 
 
@@ -41,7 +37,7 @@ class Violation85fTab(BaseViolationTab):
 
     def get_display_columns(self) -> list:
         """Return columns to display for 8.5.F violations.
-        
+
         Returns:
             list: Column names specific to overtime violations
         """

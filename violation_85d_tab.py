@@ -6,10 +6,6 @@ without proper notification.
 """
 
 from base_violation_tab import BaseViolationTab
-from violation_model import (
-    ViolationFilterProxyModel,
-    ViolationModel,
-)
 from violation_types import ViolationType
 
 
@@ -33,7 +29,7 @@ class Violation85dTab(BaseViolationTab):
 
     def get_display_columns(self) -> list:
         """Return columns to display for 8.5.D violations.
-        
+
         Returns:
             list: Column names specific to off-assignment violations
         """
