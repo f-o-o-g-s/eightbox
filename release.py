@@ -9,9 +9,9 @@ This module provides functionality for:
 """
 
 import os
+import re
 import subprocess
 from datetime import datetime
-from pathlib import Path
 
 from github import Github
 
@@ -143,70 +143,76 @@ def get_new_version(current_version, update_type):
         return f"{year}.{major}.{minor}.{patch + 1}"
 
 
-def update_version_and_release():
-    """Update version number and create a new release.
+def get_current_version():
+    """Get the current version from main_gui.py file."""
+    with open("main_gui.py", "r", encoding="utf-8") as f:
+        content = f.read()
+        version_match = re.search(r'VERSION = "([^"]+)"', content)
+        if version_match:
+            return version_match.group(1)
+        raise ValueError("Could not find VERSION in main_gui.py")
 
-    Handles the complete release process including:
-    - Getting version update type from user
-    - Collecting commit message and release notes
-    - Updating version in main_gui.py
-    - Creating git commit and tag
-    - Pushing changes to GitHub
-    - Creating GitHub release
-    """
+
+def update_version_and_time(old_version, new_version):
+    """Update version and build time in main_gui.py file."""
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    with open("main_gui.py", "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Update version
+    content = content.replace(
+        f'VERSION = "{old_version}"', f'VERSION = "{new_version}"'
+    )
+
+    # Update build time using regex to handle any existing time
+    content = re.sub(r'BUILD_TIME = "[^"]+"', f'BUILD_TIME = "{current_time}"', content)
+
+    with open("main_gui.py", "w", encoding="utf-8") as f:
+        f.write(content)
+
+    return current_time
+
+
+def create_release():
+    """Create a new release with version bump and release notes."""
     try:
-        # 1. Get version update type from user
-        print("\nWhat type of update is this?")
+        # 1. Get current version
+        old_version = get_current_version()
+
+        # 2-3. Get release type and notes
+        print("\nWhat type of release is this?")
         print("1. Patch (bug fixes)")
         print("2. Minor (new features)")
         print("3. Major (breaking changes)")
-        print("4. Year (new year update)")
-        choice = input("Enter choice (1-4): ")
+        choice = input("\nEnter choice (1-3): ").strip()
 
-        update_types = {"1": "patch", "2": "minor", "3": "major", "4": "year"}
+        if not choice or choice not in "123":
+            print("\nInvalid choice. Please enter 1, 2, or 3.")
+            return False
 
-        if choice not in update_types:
-            raise ValueError("Invalid choice")
+        choice = int(choice)
 
-        # 2. Get commit message
-        commit_msg = input("\nEnter commit message: ")
+        print("\nEnter a short commit message:")
+        commit_msg = input().strip()
 
-        # 3. Get release notes
+        if not commit_msg:
+            print("\nCommit message cannot be empty")
+            return False
+
         print("\nEnter release notes (one per line, empty line to finish):")
         release_notes = []
         while True:
-            note = input("- ")
+            note = input().strip()
             if not note:
                 break
             release_notes.append(f"- {note}")
 
-        # 4. Update version in main_gui.py
-        from main_gui import MainApp
-
-        old_version = MainApp.VERSION
+        # 4. Update version and build time
         new_version = get_new_version(old_version, choice)
+        update_version_and_time(old_version, new_version)
 
-        # 5. Update build time
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-        MainApp.BUILD_TIME = current_time
-
-        # 6. Write changes back to file
-        main_gui_path = Path("main_gui.py")
-        content = main_gui_path.read_text()
-
-        # Update version
-        content = content.replace(
-            f'VERSION = "{old_version}"', f'VERSION = "{new_version}"'
-        )
-
-        # Update build time
-        content = content.replace(
-            f'BUILD_TIME = "{MainApp.BUILD_TIME}"', f'BUILD_TIME = "{current_time}"'
-        )
-
-        main_gui_path.write_text(content)
-
-        # 7. Git commands - Updated order
+        # 5. Git commands
         subprocess.run(["git", "add", "main_gui.py"], check=True)
         subprocess.run(
             ["git", "commit", "-m", f"{commit_msg} (v{new_version})"], check=True
@@ -227,7 +233,7 @@ def update_version_and_release():
         )
         subprocess.run(["git", "push", "origin", "--tags"], check=True)
 
-        # 8. Create GitHub Release - Updated to use commit SHA
+        # 6. Create GitHub Release
         token = get_github_token()
         g = Github(token)
         repo = g.get_user().get_repo("eightbox")
@@ -239,20 +245,25 @@ def update_version_and_release():
             message=formatted_notes,
             draft=False,
             prerelease=False,
-            target_commitish=commit_sha,  # Explicitly set the commit
+            target_commitish=commit_sha,
         )
 
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")
         print(f"Commit SHA: {commit_sha}")
 
+        return True
+
     except subprocess.CalledProcessError as e:
         print(f"\nGit command failed: {e.cmd}")
         print(
             f"Error output: {e.stderr if hasattr(e, 'stderr') else 'No error output'}"
         )
+        return False
+
     except Exception as e:
         print(f"\nError: {str(e)}")
+        return False
 
 
 if __name__ == "__main__":
@@ -261,10 +272,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help", "help"]:
         show_help()
     else:
-        try:
-            update_version_and_release()
-        except KeyboardInterrupt:
-            print("\nRelease process cancelled.")
-        except Exception as e:
-            print(f"\nError: {str(e)}")
-            print("Use --help to see usage information.")
+        create_release()
