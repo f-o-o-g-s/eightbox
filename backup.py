@@ -3,7 +3,6 @@ import os
 import shutil
 import subprocess
 from datetime import datetime
-from pathlib import Path
 
 
 def run_pre_commit():
@@ -21,6 +20,7 @@ def create_zip_backup(project_dir, backup_dir):
     """Create a ZIP backup of the entire project directory."""
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
     project_name = os.path.basename(project_dir)
+    temp_dir = os.path.join(backup_dir, f"temp_{timestamp}")
     backup_path = os.path.join(backup_dir, f"{project_name}_backup_{timestamp}.zip")
 
     # Directories/files to exclude from ZIP
@@ -39,20 +39,24 @@ def create_zip_backup(project_dir, backup_dir):
         # Create backup directory if it doesn't exist
         os.makedirs(backup_dir, exist_ok=True)
 
-        # Create ZIP file
-        shutil.make_archive(
-            backup_path[:-4],  # Remove .zip extension
-            "zip",
-            project_dir,
-            verbose=True,
-            logger=print,
-            # Exclude function for unwanted directories/files
-            exclude=lambda x: any(e in Path(x).parts for e in exclude),
-        )
+        # Copy files to temporary directory, excluding unwanted paths
+        def ignore_patterns(path, names):
+            return {n for n in names if n in exclude}
+
+        shutil.copytree(project_dir, temp_dir, ignore=ignore_patterns)
+
+        # Create ZIP from temporary directory
+        shutil.make_archive(backup_path[:-4], "zip", temp_dir)  # Remove .zip extension
+
+        # Clean up temporary directory
+        shutil.rmtree(temp_dir)
+
         print(f"\nZIP backup created at: {backup_path}")
         return backup_path
     except Exception as e:
         print(f"\nError creating ZIP backup: {str(e)}")
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
         return None
 
 
