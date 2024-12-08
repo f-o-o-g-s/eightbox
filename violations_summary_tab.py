@@ -1,3 +1,16 @@
+"""Implementation of the Violations Summary tab.
+
+This module provides a specialized implementation for displaying an aggregated
+view of all violation types in a single interface. It combines data from:
+- Article 8.5.D violations (off-assignment work)
+- Article 8.5.F violations (overtime limits)
+- Maximum 12-Hour Rule violations
+- Maximum 60-Hour Rule violations
+
+The summary provides both daily breakdowns and weekly totals for each
+violation type, allowing for easy tracking of multiple violation categories.
+"""
+
 import pandas as pd
 
 from base_violation_tab import BaseViolationTab
@@ -9,12 +22,45 @@ from violation_types import ViolationType
 
 
 class ViolationRemediesTab(BaseViolationTab):
+    """Tab for displaying aggregated violation data across all violation types.
+
+    Provides a comprehensive view of all violation categories including:
+    - Daily violation breakdowns by type
+    - Weekly totals per violation type
+    - Combined remedy totals
+    - List status filtering
+    - Carrier-specific violation history
+
+    The display is organized to show:
+    - 8.5.D violations (off-assignment work)
+    - 8.5.F violations (regular day overtime)
+    - 8.5.F NS violations (non-scheduled day)
+    - 8.5.F 5th day violations
+    - MAX12 violations (12-hour limit)
+    - MAX60 violations (weekly limit)
+
+    Attributes:
+        tab_type (ViolationType): Set to VIOLATION_REMEDIES for this summary view
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = ViolationType.VIOLATION_REMEDIES
 
     def create_tab_for_date(self, date, date_data):
-        """Create a tab for the given date."""
+        """Create a tab showing all violation types for a specific date.
+
+        Args:
+            date (datetime.date): The date to display
+            date_data (pd.DataFrame): Combined violation data for the date
+
+        Returns:
+            QTableView: The configured view for the new tab
+
+        Note:
+            Organizes violations in a standard order and calculates
+            combined remedy totals for each carrier.
+        """
         # Prepare data for each date tab
         date_data = date_data.copy()
 
@@ -45,7 +91,19 @@ class ViolationRemediesTab(BaseViolationTab):
         return view
 
     def refresh_data(self, data):
-        """Refresh the tabs with remedies data."""
+        """Refresh the tabs with aggregated violation data.
+
+        This implementation differs from the base class to handle the
+        multi-indexed DataFrame that contains all violation types.
+
+        Args:
+            data (pd.DataFrame): Multi-indexed DataFrame containing all violation data
+
+        Note:
+            Expects a DataFrame with a MultiIndex column structure where:
+            - Level 0 contains dates and carrier info
+            - Level 1 contains violation types
+        """
         if data.empty or not isinstance(data.columns, pd.MultiIndex):
             self.init_no_data_tab()
             return
@@ -103,7 +161,18 @@ class ViolationRemediesTab(BaseViolationTab):
                     break
 
     def add_summary_tab(self, data):
-        """Add a single summary tab showing aggregated violations."""
+        """Create a summary tab showing weekly totals for all violation types.
+
+        Args:
+            data (pd.DataFrame): Multi-indexed DataFrame with all violation data
+
+        Note:
+            Creates a summary that shows:
+            - Weekly total for each violation type
+            - Combined weekly remedy total
+            - Carrier list status
+            All numerical values are rounded to 2 decimal places.
+        """
         try:
             # Aggregate data for summary
             summary_data = (
