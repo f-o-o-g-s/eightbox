@@ -60,7 +60,26 @@ def get_github_token():
 
 
 def format_release_notes(version, notes, commit_msg):
-    """Format release notes in a structured way."""
+    """Format release notes in a structured markdown format.
+
+    Creates a standardized release notes document including:
+    - Version number
+    - Overview (commit message)
+    - What's New (bullet points)
+    - Technical details (date, time, commit hash)
+    - Link to full changelog
+
+    Args:
+        version (str): Version number in YYYY.MAJOR.MINOR.PATCH format
+        notes (list): List of release note bullet points
+        commit_msg (str): Main commit message describing the release
+
+    Returns:
+        str: Formatted release notes in markdown format
+
+    Note:
+        Includes the current git commit hash truncated to 8 characters
+    """
     return f"""# Version {version}
 
 ## Overview
@@ -79,13 +98,30 @@ def format_release_notes(version, notes, commit_msg):
 
 
 def get_new_version(current_version, update_type):
-    """Get new version number based on update type."""
+    """Calculate the new version number based on update type.
+
+    Follows the YYYY.MAJOR.MINOR.PATCH versioning scheme, where:
+    - YYYY: Current year (resets other numbers when changed)
+    - MAJOR: Increments for breaking changes (resets minor and patch)
+    - MINOR: Increments for new features (resets patch)
+    - PATCH: Increments for bug fixes
+
+    Args:
+        current_version (str): Current version in YYYY.MAJOR.MINOR.PATCH format
+        update_type (str): Type of update ('1'=patch, '2'=minor, '3'=major, '4'=year)
+
+    Returns:
+        str: New version number in YYYY.MAJOR.MINOR.PATCH format
+
+    Note:
+        When year changes, all other numbers reset to 0
+    """
     year, major, minor, patch = map(int, current_version.split("."))
     current_year = datetime.now().year
 
     if update_type == "4":  # Year
         return f"{current_year}.0.0.0"
-    elif update_type == "3":  # Major - FIXED THIS PART
+    elif update_type == "3":  # Major
         if year != current_year:
             return f"{current_year}.0.0.0"
         if major == 0:  # If it's the first major version

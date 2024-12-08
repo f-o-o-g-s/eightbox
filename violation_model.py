@@ -646,58 +646,44 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
         self.invalidateFilter()
 
     def filterAcceptsRow(self, source_row, source_parent):
+        """Determine if a row should be included in the filtered view.
+
+        Implements the filtering logic for violations based on:
+        - List status (WAL, NL, OTDL, etc.)
+        - Violation type
+        - Custom text filters
+
+        Args:
+            source_row (int): Row index in the source model
+            source_parent (QModelIndex): Parent index in source model
+
+        Returns:
+            bool: True if row should be shown, False if filtered out
+
+        Note:
+            Special handling for "violations" filter type which shows
+            only rows with actual violations
+        """
         source_model = self.sourceModel()
 
         if not self.filter_text and self.filter_type != "violations":
             return True
 
         if self.filter_type == "list_status":
-            for col in range(source_model.columnCount()):
-                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-                # Check for both original and renamed column names
-                if header and header.lower() in ["list status", "list_status"]:
-                    idx = source_model.index(source_row, col, source_parent)
-                    list_status = source_model.data(idx, Qt.DisplayRole)
-                    if list_status:
-                        return str(list_status).lower() == self.filter_text
-
-        elif self.filter_type == "name":
-            # Check for both "Carrier Name" and "carrier_name"
-            for col in range(source_model.columnCount()):
-                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-                if header and header.lower() in ["carrier name", "carrier_name"]:
-                    idx = source_model.index(source_row, col, source_parent)
-                    name = source_model.data(idx, Qt.DisplayRole)
-                    if name:
-                        return self.filter_text in str(name).lower()
-            # Fallback to first column if no carrier name column found
-            idx = source_model.index(source_row, 0, source_parent)
-            name = source_model.data(idx, Qt.DisplayRole)
-            if name:
-                return self.filter_text in str(name).lower()
+            list_status = source_model.data(
+                source_model.index(source_row, source_model.df.columns.get_loc("list_status")),
+                Qt.DisplayRole,
+            )
+            return self.filter_text.lower() in str(list_status).lower()
 
         elif self.filter_type == "violations":
-            # Check for Weekly Remedy Total column first (Summary tab)
-            for col in range(source_model.columnCount()):
-                header = str(
-                    source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-                )
-                if header in ["Weekly Remedy Total", "Remedy Total"]:
-                    idx = source_model.index(source_row, col, source_parent)
-                    value = source_model.data(idx, Qt.DisplayRole)
-                    try:
-                        return float(str(value).replace(",", "")) > 0.00
-                    except (ValueError, TypeError):
-                        return False
-
-            # If not found, check violation_type (Daily tabs)
-            for col in range(source_model.columnCount()):
-                header = str(
-                    source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-                )
-                if header in ["violation_type", "Violation Type"]:
-                    idx = source_model.index(source_row, col, source_parent)
-                    value = str(source_model.data(idx, Qt.DisplayRole))
-                    return value != "No Violation"
+            remedy_total = source_model.data(
+                source_model.index(source_row, source_model.df.columns.get_loc("remedy_total")),
+                Qt.DisplayRole,
+            )
+            try:
+                return float(remedy_total) > 0
+            except (ValueError, TypeError):
+                return False
 
         return True

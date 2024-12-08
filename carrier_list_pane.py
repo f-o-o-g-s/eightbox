@@ -199,9 +199,25 @@ class PandasTableModel(QAbstractTableModel):
         self.endResetModel()
 
     def rowCount(self, parent=None):
+        """Get the number of rows in the model.
+
+        Args:
+            parent (QModelIndex): The parent index (unused in table models)
+
+        Returns:
+            int: The number of rows in the model
+        """
         return len(self.df)
 
     def columnCount(self, parent=None):
+        """Get the number of columns in the model.
+
+        Args:
+            parent (QModelIndex): The parent index (unused in table models)
+
+        Returns:
+            int: The number of columns in the model
+        """
         return len(self.df.columns)
 
     def data(self, index, role):
@@ -236,6 +252,18 @@ class PandasTableModel(QAbstractTableModel):
         return QVariant()
 
     def headerData(self, section, orientation, role):
+        """Get the header data for display.
+
+        Provides header labels for both horizontal and vertical orientations.
+
+        Args:
+            section (int): The section (row or column) number
+            orientation (Qt.Orientation): The header orientation
+            role (Qt.ItemDataRole): The role being requested
+
+        Returns:
+            str: The header text for DisplayRole, None for other roles
+        """
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self.df.columns[section]
@@ -244,17 +272,17 @@ class PandasTableModel(QAbstractTableModel):
         return QVariant()
 
     def setData(self, index, value, role=Qt.EditRole):
-        """Update data in the model when edited by user.
+        """Set data in the model.
 
-        Handles cell editing and tracks which rows have been modified.
+        Updates the model data and handles any necessary post-update actions.
 
         Args:
-            index (QModelIndex): Index of cell being edited
-            value: New value for the cell
-            role (Qt.ItemDataRole): Role of the data being set
+            index (QModelIndex): The index to update
+            value (Any): The new value to set
+            role (Qt.ItemRole): The role being set (default: EditRole)
 
         Returns:
-            bool: True if data was successfully updated, False otherwise
+            bool: True if data was successfully set, False otherwise
         """
         if role == Qt.EditRole and index.isValid():
             column = self.df.columns[index.column()]
