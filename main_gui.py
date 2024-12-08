@@ -434,7 +434,7 @@ class MainApp(QMainWindow):
         filter_row = QWidget()
         filter_row.setStyleSheet("""
             QWidget {
-                background-color: #1E1E1E;
+                background-color: #121212;  /* Darker background to match the area below */
                 border-top: 1px solid #333333;
             }
             QPushButton {
@@ -462,8 +462,8 @@ class MainApp(QMainWindow):
         """)
 
         filter_layout = QHBoxLayout()
-        filter_layout.setContentsMargins(8, 0, 8, 0)
-        filter_layout.setSpacing(4)  # Reduce spacing between buttons
+        filter_layout.setContentsMargins(2, 2, 2, 2)  # Added vertical padding (top, right, bottom, left)
+        filter_layout.setSpacing(4)  # Spacing between buttons
 
         # Create status filter buttons with stats
         self.total_btn = self.create_filter_button("Total Carriers: 0")
