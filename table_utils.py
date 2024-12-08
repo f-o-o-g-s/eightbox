@@ -1,11 +1,15 @@
-"""Table utility functions for handling QTableView operations.
+"""Table utilities for enhanced functionality.
 
-This module provides utility functions for enhancing QTableView widgets with
-additional functionality such as copy operations, context menus, and data
-extraction capabilities.
+This module provides utility functions and classes to enhance Qt table widgets,
+including:
+- Copy/paste functionality
+- Key event handling
+- Table state extraction
+- Custom formatting
 """
 
 from PyQt5.QtCore import (
+    QKeySequence,
     QSortFilterProxyModel,
     Qt,
 )
@@ -41,12 +45,25 @@ def setup_table_copy_functionality(table_view):
     original_key_press_event = table_view.keyPressEvent
 
     def keyPressEvent(event):
-        if (
-            event.key() == Qt.Key_C
-            and QApplication.keyboardModifiers() == Qt.ControlModifier
-        ):
-            print("Ctrl+C detected. Initiating copy...")
+        """Handle key press events for table widgets.
+
+        Implements custom key handling including:
+        - Ctrl+C for copying selected cells
+        - Ctrl+A for selecting all cells
+        - Delete/Backspace for clearing cell contents
+
+        Args:
+            event (QKeyEvent): The key event to handle
+
+        Note:
+            Maintains standard Qt table widget behavior for unhandled keys
+        """
+        if event.matches(QKeySequence.Copy):
             copy_selection(table_view)
+        elif event.matches(QKeySequence.SelectAll):
+            table_view.selectAll()
+        elif event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+            table_view.clear_selection()
         else:
             original_key_press_event(event)
 

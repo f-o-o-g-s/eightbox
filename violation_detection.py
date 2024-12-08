@@ -1,7 +1,27 @@
-"""Implements violation detection logic for carrier work hours.
+"""Contract violation detection and analysis.
 
-Contains the core algorithms and rules for detecting various types of
-work hour violations based on carrier schedules and USPS regulations.
+This module implements the core business logic for detecting various types
+of contract violations in carrier work schedules, including:
+
+Article 8.5.D Violations:
+- Working off bid assignment without proper notification
+- Improper assignment of overtime work
+
+Article 8.5.F Violations:
+- Non-OTDL carriers working over 10 hours on regular days
+- Non-OTDL carriers working over 8 hours on non-scheduled days
+- Working overtime on more than 4 of 5 scheduled days
+
+Maximum Hour Violations:
+- Exceeding 12-hour daily limit (11.5 for WAL)
+- Exceeding 60-hour weekly limit
+
+Features:
+- Configurable detection rules
+- Remedy calculations
+- Multi-day analysis
+- List status consideration
+- Exception handling for special cases
 """
 
 # violation_detection.py

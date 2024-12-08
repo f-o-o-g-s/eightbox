@@ -1,8 +1,18 @@
-"""Git restoration utilities for the application.
+"""Backup restoration and recovery functionality.
 
-This module provides functions for restoring files to previous states,
-working alongside backup.py and release.py to provide a complete
-version control workflow.
+This module handles the restoration of application backups, including:
+- ZIP backup restoration
+- Git backup restoration
+- Version management
+- Data integrity checks
+- Error recovery
+
+Features:
+- Selective restoration (Git or ZIP)
+- Backup validation
+- Progress tracking
+- Error handling
+- Automatic cleanup
 """
 
 import subprocess
@@ -17,6 +27,50 @@ try:
 except ImportError:
     CustomErrorDialog = None
     CustomMessageBox = None
+
+
+def restore_from_zip(zip_path: str, project_dir: str) -> None:
+    """Restore application files from a ZIP backup.
+
+    Extracts files from a backup ZIP archive and restores them to the
+    project directory, maintaining file structure and permissions.
+
+    Args:
+        zip_path: Path to the ZIP backup file
+        project_dir: Target directory for restoration
+
+    Raises:
+        Exception: If restoration fails or backup is invalid
+    """
+    # ... existing code ...
+
+
+def restore_from_git(hash: str, project_dir: str) -> None:
+    """Restore application files from a Git commit.
+
+    Checks out a specific Git commit and restores the application state
+    to that point in time.
+
+    Args:
+        hash: Git commit hash to restore
+        project_dir: Project directory containing Git repository
+
+    Raises:
+        Exception: If Git operations fail or commit is invalid
+    """
+    # ... existing code ...
+
+
+def create_restore_point() -> None:
+    """Create a restore point before making changes.
+
+    Creates a backup of the current state that can be used for recovery
+    if the restoration process fails.
+
+    Raises:
+        Exception: If restore point creation fails
+    """
+    # ... existing code ...
 
 
 def restore_to_backup(main_window, backup_description=None):
