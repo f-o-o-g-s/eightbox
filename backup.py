@@ -72,7 +72,15 @@ def create_zip_backup(project_dir, backup_dir):
         print("Copying files...")
         
         # Directories to exclude
-        exclude_dirs = {'.git', 'backups', '__pycache__', '.pytest_cache', 'output', '.venv'}
+        exclude_dirs = {
+            '.git', 
+            'backups', 
+            '__pycache__', 
+            '.pytest_cache', 
+            'output', 
+            '.venv',
+            'spreadsheets'
+        }
         # File extensions to exclude
         exclude_extensions = {'.pyc', '.pyo', '.pyd', '.zip'}
         
@@ -85,7 +93,7 @@ def create_zip_backup(project_dir, backup_dir):
                     if not any(file.endswith(ext) for ext in exclude_extensions):
                         file_path = os.path.join(root, file)
                         arcname = os.path.relpath(file_path, project_dir)
-                        print(f"Adding: {arcname}")  # Show which file is being added
+                        print(f"Adding: {arcname}")
                         zipf.write(file_path, arcname)
         
         print(f"\nZIP backup created: {zip_path}")
