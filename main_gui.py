@@ -345,30 +345,28 @@ class MainApp(QMainWindow):
 
         # Create a container widget for the button row with a darker background
         button_container = QWidget()
+        button_container.setObjectName("ButtonContainer")
         button_container.setStyleSheet(
             """
-            QWidget {
+            QWidget#ButtonContainer {
                 background-color: #1E1E1E;
                 border-bottom: 1px solid #333333;
             }
-            QPushButton {
-                background-color: #2D2D2D;
-                border: 1px solid #404040;
-                border-radius: 4px;
+            QWidget#ButtonContainer QPushButton {
+                background-color: transparent;
+                border: none;
                 color: #E1E1E1;
                 padding: 12px 24px;
                 font-size: 13px;
                 font-weight: normal;
                 text-align: left;
-                margin: 8px 4px;
             }
-            QPushButton:hover {
-                background-color: #383838;
-                border-color: #4D4D4D;
+            QWidget#ButtonContainer QPushButton:hover {
+                background-color: #2D2D2D;
             }
-            QPushButton:checked {
+            QWidget#ButtonContainer QPushButton:pressed,
+            QWidget#ButtonContainer QPushButton:checked {
                 background-color: #BB86FC;
-                border-color: #BB86FC;
                 color: #000000;
             }
             QLineEdit {
@@ -425,18 +423,22 @@ class MainApp(QMainWindow):
                 border-bottom: 1px solid #333333;
             }
             QPushButton {
-                background-color: #2D2D2D;
-                border: 1px solid #404040;
-                border-radius: 4px;
+                background-color: rgba(187, 134, 252, 0.1);
+                border: none;
                 color: #BB86FC;
                 padding: 4px 8px;
                 font-size: 12px;
-                margin: 4px;
-                min-width: 100px;
+                margin: 2px;
+                min-width: 90px;
+                max-height: 24px;
+                border-radius: 4px;
                 text-align: center;
             }
             QPushButton:hover {
-                background-color: #383838;
+                background-color: rgba(187, 134, 252, 0.2);
+            }
+            QPushButton:pressed {
+                background-color: rgba(187, 134, 252, 0.3);
             }
             QPushButton:checked {
                 background-color: #BB86FC;
@@ -506,9 +508,6 @@ class MainApp(QMainWindow):
             ptf (int): Number of PTF carriers
             violations (int): Number of carriers with violations
         """
-        print(f"Updating main window stats: Total={total}, WAL={wal}, NL={nl}, "
-              f"OTDL={otdl}, PTF={ptf}, Violations={violations}")
-        
         self.total_btn.setText(f"Total Carriers: {total}")
         self.wal_btn.setText(f"WAL: {wal}")
         self.nl_btn.setText(f"NL: {nl}")

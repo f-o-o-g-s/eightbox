@@ -351,9 +351,6 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
             violations = self._calculate_violations(df)
 
-            print(f"Stats: Total={total_carriers}, WAL={wal_carriers}, NL={nl_carriers}, "
-                  f"OTDL={otdl_carriers}, PTF={ptf_carriers}, Violations={violations}")
-
             # Update stats in main window
             self._update_main_window_stats(
                 total_carriers, wal_carriers, nl_carriers, 
@@ -361,7 +358,6 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             )
 
         except Exception as e:
-            print(f"Error updating stats: {str(e)}")
             self._update_main_window_stats(0, 0, 0, 0, 0, 0)
 
     def _calculate_violations(self, df):
@@ -391,7 +387,6 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             
             return 0
         except Exception as e:
-            print(f"Error calculating violations: {str(e)}")
             return 0
 
     def _update_main_window_stats(self, total, wal, nl, otdl, ptf, violations):
