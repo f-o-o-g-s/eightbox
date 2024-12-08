@@ -188,7 +188,9 @@ class CustomTitleBar(QWidget):
             event (QMouseEvent): The mouse move event containing position data
         """
         if event.buttons() == Qt.LeftButton and self.dragPos is not None:
-            self.move(event.globalPos() - self.dragPos)
+            delta = event.globalPos() - self.dragPos
+            self.parent.move(self.parent.pos() + delta)
+            self.dragPos = event.globalPos()
             event.accept()
 
     def mouseDoubleClickEvent(self, event):
