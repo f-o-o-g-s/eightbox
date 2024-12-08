@@ -21,14 +21,51 @@ from theme import (
 from violation_model import calculate_optimal_gray
 
 
+"""Excel export functionality for application data.
+
+This module handles the export of application data to Excel format, providing:
+- Batch export of all violation tabs
+- Individual tab exports
+- Progress tracking and user feedback
+- Consistent formatting and styling
+- Error handling and recovery
+
+Features:
+- Preserves table formatting and styling
+- Maintains column widths and alignments
+- Supports custom headers and footers
+- Handles cell background colors
+- Preserves data types (dates, numbers, text)
+- Creates organized folder structure by date range
+
+The module uses xlsxwriter for Excel file creation and handles
+the complexities of converting Qt table data to Excel format.
+"""
+
+
 class ExcelExporter:
     """Handles the export of application data to Excel format.
 
     Provides functionality for converting and exporting various types of application
     data (violations, carrier information, etc.) to Excel spreadsheet format.
+    Includes progress tracking and error handling.
+
+    Attributes:
+        main_window: Reference to main application window
+        progress_dialog: Dialog showing export progress
+        timer: Timer for processing tabs
+        current_tab_index: Index of tab being processed
+        tab_indices_to_process: List of tab indices to export
+        folder_path: Path where Excel files will be saved
+        date_range: Date range string for file naming
     """
 
     def __init__(self, main_window):
+        """Initialize the Excel exporter.
+
+        Args:
+            main_window: Reference to the main application window
+        """
         self.main_window = main_window
         self.progress_dialog = None
         self.timer = None
@@ -43,6 +80,18 @@ class ExcelExporter:
         Creates individual Excel files for each violation tab in the application,
         with proper formatting and data organization. Shows a progress dialog
         during the export process.
+
+        The files are organized in folders by date range and include:
+        - Formatted data with proper column types
+        - Headers and footers
+        - Consistent styling
+        - Cell background colors
+        - Column widths and alignments
+
+        Raises:
+            AttributeError: If required UI components are not initialized
+            ValueError: If date selection is invalid
+            Exception: For other export-related errors
         """
         try:
             # Get the selected date range
@@ -94,7 +143,15 @@ class ExcelExporter:
             )
 
     def process_next_tab_with_progress(self):
-        """Process the next tab in the list and update the progress dialog."""
+        """Process the next tab in the export queue.
+
+        Updates the progress dialog and handles the export of the current tab.
+        Continues until all tabs are processed or the user cancels.
+
+        Note:
+            This method is called repeatedly by a timer to provide a responsive UI
+            during the export process.
+        """
         if self.progress_dialog.wasCanceled():
             self.timer.stop()
             CustomWarningDialog.warning(
@@ -141,7 +198,14 @@ class ExcelExporter:
                 print(f"Failed to open folder: {e}")
 
     def export_to_excel_custom_path(self, save_path):
-        """Export the currently viewed tab and its nested tabs to a specified file path."""
+        """Export the current tab to a specific Excel file path.
+
+        Args:
+            save_path (str): Full path where the Excel file should be saved
+
+        Raises:
+            Exception: If export fails for any reason
+        """
         try:
             date_range = self._get_date_range()
             with pd.ExcelWriter(save_path, engine="xlsxwriter") as writer:
@@ -157,7 +221,15 @@ class ExcelExporter:
             raise
 
     def _get_date_range(self):
-        """Fetch the selected date range."""
+        """Get the selected date range for file naming.
+
+        Returns:
+            str: Date range in format "MM-DD-YYYY to MM-DD-YYYY"
+
+        Raises:
+            AttributeError: If date selection components are not initialized
+            ValueError: If selected date is invalid or not a Saturday
+        """
         if (
             not hasattr(self.main_window, "date_selection_pane")
             or self.main_window.date_selection_pane is None
@@ -184,14 +256,21 @@ class ExcelExporter:
         return f"{start_date} to {end_date}"
 
     def _write_excel_file(self, writer, date_range):
-        """Write data to Excel file with proper formatting.
+        """Write data to Excel with proper formatting.
+
+        Creates worksheets with consistent styling including:
+        - Headers with background colors
+        - Proper column widths
+        - Data type formatting
+        - Borders and alignment
+        - Title formatting
 
         Args:
-            writer: The ExcelWriter object to write to
-            date_range: String representing the date range for the export
+            writer: Excel writer object
+            date_range: Date range string for headers
 
-        Handles the creation of worksheets, formatting of cells, and writing
-        of data with proper styling including colors, borders, and text alignment.
+        Note:
+            Uses optimal text colors based on background colors for readability
         """
         workbook = writer.book
         border_color = "#424242"

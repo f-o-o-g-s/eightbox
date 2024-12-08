@@ -5,17 +5,23 @@ from PyQt5.QtWidgets import (
     QStyleFactory,
 )
 
-"""Theme configuration and styling for the application.
+"""Application theming and style management.
 
-This module implements a Material Design dark theme for the application,
-providing a modern, eye-friendly interface. It defines color schemes,
-style definitions, and applies consistent styling across all UI elements.
+This module defines the application's visual theme and styling, including:
+- Color schemes for UI elements
+- Material design color palette
+- Custom widget styling
+- Color calculations for contrast and readability
+- Theme application helpers
 
-The theme includes:
-- Material Design color palette
-- Custom widget styling (buttons, tables, scrollbars, etc.)
-- Consistent spacing and typography
-- Hover and active states for interactive elements
+The theme follows Material Design principles with a dark mode focus,
+ensuring consistent styling across all application components.
+
+Color Constants:
+    - Primary theme colors (background, text, borders)
+    - Accent colors for different states (active, hover, pressed)
+    - Semantic colors (success, warning, error)
+    - Table styling colors (headers, alternating rows)
 """
 
 # Material Design Dark Theme Colors
