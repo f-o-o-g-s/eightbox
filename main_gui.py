@@ -157,20 +157,40 @@ class CustomTitleBar(QWidget):
             self.parent.showMaximized()
 
     def mousePressEvent(self, event):
+        """Handle mouse press events for window dragging.
+
+        Captures the initial position when the user clicks on the window,
+        enabling window dragging functionality.
+
+        Args:
+            event (QMouseEvent): The mouse press event containing position data
+        """
         if event.button() == Qt.LeftButton:
-            self.dragPos = event.globalPos() - self.parent.frameGeometry().topLeft()
-            event.accept()
+            self.dragPos = event.globalPos()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton:
-            self.parent.move(event.globalPos() - self.dragPos)
+        """Handle mouse move events for window dragging.
+
+        Updates the window position as the user drags, creating a smooth
+        window movement effect.
+
+        Args:
+            event (QMouseEvent): The mouse move event containing position data
+        """
+        if event.buttons() == Qt.LeftButton and self.dragPos is not None:
+            self.move(event.globalPos() - self.dragPos)
             event.accept()
 
     def mouseDoubleClickEvent(self, event):
-        """Handle double-click events for maximize/restore."""
-        if event.button() == Qt.LeftButton:
-            self.toggle_maximize()
-            event.accept()
+        """Handle mouse double-click events for window maximization.
+
+        Toggles between maximized and normal window state when the user
+        double-clicks on the window.
+
+        Args:
+            event (QMouseEvent): The mouse double-click event
+        """
+        self.maximize_restore()
 
 
 class MainApp(QMainWindow):
@@ -543,20 +563,24 @@ class MainApp(QMainWindow):
         )  # Start with an empty DataFrame
 
     def init_MAX12_tab(self):
-        print("Initializing MAX12 Violations Tab")  # Debugging statement
+        """Initialize the Maximum 12-Hour Rule violation tab.
 
-        """Initialize and add the MAX12 Violations Tab."""
-        self.vio_MAX12_tab = ViolationMax12Tab()
-        self.central_tab_widget.addTab(self.vio_MAX12_tab, "MAX12 Violations")
-        self.vio_MAX12_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
+        Creates and configures the tab for tracking violations of the 12-hour daily
+        work limit. This includes setting up the tab widget, connecting signals,
+        and configuring the display.
+        """
+        self.vio_MAX12_tab = ViolationMax12Tab(self)
+        self.central_tab_widget.addTab(self.vio_MAX12_tab, "MAX12")
 
     def init_MAX60_tab(self):
-        print("Initializing MAX60 Violations Tab")  # Debugging statement
+        """Initialize the Maximum 60-Hour Rule violation tab.
 
-        """Initialize and add the MAX60 Violations Tab."""
-        self.vio_MAX60_tab = ViolationMax60Tab()
-        self.central_tab_widget.addTab(self.vio_MAX60_tab, "MAX60 Violations")
-        self.vio_MAX60_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
+        Creates and configures the tab for tracking violations of the 60-hour weekly
+        work limit. This includes setting up the tab widget, connecting signals,
+        and configuring the display.
+        """
+        self.vio_MAX60_tab = ViolationMax60Tab(self)
+        self.central_tab_widget.addTab(self.vio_MAX60_tab, "MAX60")
 
     def init_remedies_tab(self):
         print("Initializing Violations Summary Tab")  # Debugging statement

@@ -119,19 +119,48 @@ class SettingsDialog(QWidget):
         self.setFixedSize(400, 337)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.dragPos = event.globalPos() - self.frameGeometry().topLeft()
-            event.accept()
+        """Handle mouse press events for window dragging.
+
+        Captures the initial position when the user clicks on the window,
+        enabling window dragging functionality.
+
+        Args:
+            event (QMouseEvent): The mouse press event containing position data
+        """
+        self.dragPos = event.globalPos()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton and self.dragPos is not None:
-            self.move(event.globalPos() - self.dragPos)
-            event.accept()
+        """Handle mouse move events for window dragging.
+
+        Updates the window position as the user drags, creating a smooth
+        window movement effect.
+
+        Args:
+            event (QMouseEvent): The mouse move event containing position data
+        """
+        if event.buttons() == Qt.LeftButton:
+            self.move(self.pos() + event.globalPos() - self.dragPos)
+            self.dragPos = event.globalPos()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.dragPos = None
-            event.accept()
+        """Handle mouse release events for window dragging.
+
+        Cleans up after window dragging is complete.
+
+        Args:
+            event (QMouseEvent): The mouse release event
+        """
+        self.dragPos = None
+
+    def hideEvent(self, event):
+        """Handle window hide events.
+
+        Performs cleanup when the settings dialog is hidden.
+
+        Args:
+            event (QHideEvent): The hide event
+        """
+        super().hideEvent(event)
 
     def accept(self):
         self.hide()
