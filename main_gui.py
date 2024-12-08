@@ -58,19 +58,21 @@ from violations_summary_tab import ViolationRemediesTab
 
 
 def qt_message_handler(mode, context, message):
+    """Handle Qt debug/warning messages.
+
+    Custom message handler that filters out specific Qt warnings while
+    passing through other messages to the console.
+
+    Args:
+        mode: Message type/severity
+        context: Context information about the message
+        message (str): The actual message content
+    """
     if "Unknown property cursor" not in message:  # Ignore cursor property warnings
         print(mode, context, message)
 
 
 qInstallMessageHandler(qt_message_handler)
-
-
-def get_version():
-    """Get the current version of the application.
-
-    Returns:
-        str: The current version number in YYYY.MAJOR.MINOR.PATCH format
-    """
 
 
 class CustomTitleBar(QWidget):
@@ -202,19 +204,14 @@ class CustomTitleBar(QWidget):
 
 
 class MainApp(QMainWindow):
-    """Main application window for violation tracking and management.
+    """Main application window.
 
-    Provides the primary interface for:
-    - Loading and processing carrier clock ring data
-    - Detecting contract violations (8.5.D, 8.5.F, MAX12, MAX60)
-    - Managing OTDL maximization and assignments
-    - Viewing violation details in specialized tabs
-    - Calculating and displaying remedy totals
-    - Exporting violation data to Excel
+    Implements the primary application window and coordinates all major components.
+    Manages the overall application state and user interactions.
 
-    The window uses a custom title bar and contains multiple specialized tabs
-    for different violation types. Each tab provides detailed views of specific
-    contract violations and their associated remedies.
+    Class Attributes:
+        VERSION (str): Current version in YYYY.MAJOR.MINOR.PATCH format
+        BUILD_TIME (str): Build timestamp in YYYY-MM-DD HH:MM format
 
     Attributes:
         current_data (pd.DataFrame): Currently loaded clock ring data
@@ -230,34 +227,8 @@ class MainApp(QMainWindow):
         otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
     """
 
-    # Class-level version info (single source of truth)
-    VERSION = "2024.0.1.2"  # Year.Major.Minor.Patch
-    BUILD_TIME = "2024-01-10"  # Build timestamp
-
-    @staticmethod
-    def update_version(increment_type="patch"):
-        """Update version number based on increment type.
-
-        Args:
-            increment_type: 'year', 'major', 'minor', or 'patch'
-        """
-        year, major, minor, patch = MainApp.VERSION.split(".")
-
-        if increment_type == "year":
-            from datetime import datetime
-
-            year = str(datetime.now().year)
-        elif increment_type == "major":
-            major = str(int(major) + 1)
-            minor = "0"
-            patch = "0"
-        elif increment_type == "minor":
-            minor = str(int(minor) + 1)
-            patch = "0"
-        elif increment_type == "patch":
-            patch = str(int(patch) + 1)
-
-        MainApp.VERSION = f"{year}.{major}.{minor}.{patch}"
+    VERSION = "2024.1.0.0"  # Updated by release.py
+    BUILD_TIME = "2024-01-01 00:00"  # Updated by release.py
 
     def __init__(self):
         super().__init__()

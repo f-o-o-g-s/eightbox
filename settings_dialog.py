@@ -173,6 +173,11 @@ class SettingsDialog(QWidget):
         super().hideEvent(event)
 
     def accept(self):
+        """Accept the dialog changes and close.
+
+        Hides the dialog without applying settings. Settings are only applied
+        when the Apply button is clicked.
+        """
         self.hide()
 
     def set_database_path(self):
