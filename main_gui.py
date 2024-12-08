@@ -257,8 +257,11 @@ class MainApp(QMainWindow):
         # Apply material dark theme
         apply_material_dark_theme(QApplication.instance())
 
-        self.setWindowTitle("Violation Detection Application")
-        self.resize(1300, 800)
+        self.setWindowTitle("Eightbox - Branch 815 - Violation Detection")
+        self.setGeometry(100, 100, 1200, 800)
+
+        # Hide status bar
+        self.statusBar().hide()
 
         # Initialize database path
         self.mandates_db_path = self.auto_detect_klusterbox_path()
@@ -429,12 +432,13 @@ class MainApp(QMainWindow):
 
         Contains:
         - Status filter buttons with carrier stats
+        - Date range display
         """
         # Create filter row
         filter_row = QWidget()
         filter_row.setStyleSheet("""
             QWidget {
-                background-color: #121212;  /* Darker background to match the area below */
+                background-color: #121212;
                 border-top: 1px solid #333333;
             }
             QPushButton {
@@ -459,10 +463,15 @@ class MainApp(QMainWindow):
                 background-color: #BB86FC;
                 color: #000000;
             }
+            QLabel {
+                color: #E1E1E1;
+                font-size: 12px;
+                padding: 4px 8px;
+            }
         """)
 
         filter_layout = QHBoxLayout()
-        filter_layout.setContentsMargins(2, 2, 2, 2)  # Added vertical padding (top, right, bottom, left)
+        filter_layout.setContentsMargins(8, 12, 8, 12)  # Added vertical padding
         filter_layout.setSpacing(4)  # Spacing between buttons
 
         # Create status filter buttons with stats
@@ -477,7 +486,12 @@ class MainApp(QMainWindow):
         for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
             filter_layout.addWidget(btn)
 
-        filter_layout.addStretch()
+        # Add date range label
+        self.date_range_label = QLabel("Selected Date Range: ")
+        self.date_range_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        filter_layout.addStretch()  # This pushes the date range to the right
+        filter_layout.addWidget(self.date_range_label)
+
         filter_row.setLayout(filter_layout)
         self.main_layout.addWidget(filter_row)
 
@@ -617,16 +631,7 @@ class MainApp(QMainWindow):
         self.remedies_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
 
     def apply_date_range(self):
-        """Apply the selected date range and update all tabs.
-
-        Processes carrier data for the selected date range and updates
-        all violation tabs with the new data. Shows progress dialog
-        during processing.
-
-        Note:
-            This is a core function that triggers violation detection
-            and updates the entire application state.
-        """
+        """Apply the selected date range and update all tabs."""
         if not os.path.exists("carrier_list.json"):
             response = CustomWarningDialog.warning(
                 self,
@@ -648,24 +653,6 @@ class MainApp(QMainWindow):
                     self.carrier_list_pane.data_updated.connect(
                         lambda: self.retry_apply_date_range()
                     )
-            else:
-                self.statusBar().showMessage(
-                    "Date processing cancelled. Configure and save Carrier List first to proceed.",
-                    5000,
-                )
-
-                # Use the new CustomInfoDialog
-                CustomInfoDialog.information(
-                    self,
-                    "Operation Cancelled",
-                    "The application requires a saved carrier list to process "
-                    "dates and detect violations.<br><br>"
-                    "To proceed:<br>"
-                    "1. Click the '<b>Carrier List</b>' button<br>"
-                    "2. Configure your <span style='color: #BB86FC;'>carrier list</span><br>"
-                    "3. Click '<b>Save/Apply</b>' to save your changes<br><br>"
-                    "You can do this at any time when you're ready.",
-                )
             return
 
         # Second check: Carrier List content validation
@@ -725,7 +712,11 @@ class MainApp(QMainWindow):
             # Access the calendar from the DateSelectionPane
             selected_date = self.date_selection_pane.calendar.selectedDate()
             if selected_date.dayOfWeek() != 6:  # Ensure the selected date is a Saturday
-                self.statusBar().showMessage("Error: Please select a Saturday.", 5000)
+                QMessageBox.warning(
+                    self,
+                    "Invalid Date",
+                    "Please select a Saturday."
+                )
                 return
 
             progress.setValue(20)
@@ -736,6 +727,10 @@ class MainApp(QMainWindow):
             progress.setLabelText("Fetching clock ring data...")
             start_date = selected_date.toString("yyyy-MM-dd")
             end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
+            
+            # Update the date range display
+            self.update_date_range_display(start_date, end_date)
+            
             clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
 
             progress.setValue(40)
@@ -821,7 +816,7 @@ class MainApp(QMainWindow):
 
             progress.setValue(100)
             self.statusBar().showMessage(
-                f"Selected Date Range: {start_date} to {end_date}", 5000
+                "Date range processing complete", 5000
             )
 
         except Exception as e:
@@ -1298,116 +1293,31 @@ class MainApp(QMainWindow):
         CustomInfoDialog.information(self, "About Eightbox", about_text)
 
     def load_carrier_data(self):
-        """Load carrier data from the database.
-
-        Retrieves carrier information and clock rings from the database
-        for the selected date range. Updates carrier list and OTDL
-        maximization panes.
-
-        Raises:
-            Exception: If database connection fails or data is invalid
-        """
+        """Load carrier data from the database."""
         try:
-            # Get the selected date range
-            if (
-                not hasattr(self, "date_selection_pane")
-                or self.date_selection_pane is None
-            ):
-                raise AttributeError("Date selection pane is not initialized")
-
-            selected_date = self.date_selection_pane.calendar.selectedDate()
-            if not selected_date.isValid():
-                raise ValueError("No valid date selected")
-
-            # Fetch clock ring data
-            clock_ring_data = self.fetch_clock_ring_data()
-            if clock_ring_data.empty:
-                raise ValueError("No data found for selected date range")
-
-            # Update OTDL maximization pane
-            if self.otdl_maximization_pane:
-                self.otdl_maximization_pane.refresh_data(clock_ring_data)
-
-            # Update violations and remedies
-            self.update_violations_and_remedies(clock_ring_data)
-
-            self.statusBar().showMessage("Carrier data loaded successfully", 5000)
-
+            self.carrier_list_pane.load_carrier_data()
         except Exception as e:
             QMessageBox.critical(
-                self, "Error", f"Failed to load carrier data: {str(e)}"
+                self,
+                "Error",
+                f"Failed to load carrier data: {str(e)}"
             )
-            raise
 
     def export_violations(self):
-        """Export all violation data to Excel files.
-
-        Creates Excel spreadsheets for each violation type, organized
-        by date range. Shows progress during export and opens the
-        output folder when complete.
-
-        Note:
-            Files are saved in the 'spreadsheets' directory, organized
-            by date range.
-        """
+        """Export violations to Excel."""
         try:
-            # Create progress dialog
-            progress = CustomProgressDialog(
-                "Exporting violations...", "", 0, 100, self, title="Exporting to Excel"
+            self.remedies_tab.export_to_excel()
+            QMessageBox.information(
+                self,
+                "Success",
+                "Violations exported successfully"
             )
-            progress.setCancelButton(None)
-            progress.setWindowModality(Qt.WindowModal)
-            progress.show()
-
-            # Get date range for filename
-            selected_date = self.date_selection_pane.calendar.selectedDate()
-            start_date = selected_date.toString("yyyy-MM-dd")
-            end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
-
-            # Create spreadsheets directory if it doesn't exist
-            os.makedirs("spreadsheets", exist_ok=True)
-
-            # Export each violation type
-            violation_types = {
-                "8.5.D": self.vio_85d_tab,
-                "8.5.F": self.vio_85f_tab,
-                "8.5.F NS": self.vio_85f_ns_tab,
-                "8.5.F 5th": self.vio_85f_5th_tab,
-                "MAX12": self.vio_MAX12_tab,
-                "MAX60": self.vio_MAX60_tab,
-                "Summary": self.remedies_tab,
-            }
-
-            for i, (vio_type, tab) in enumerate(violation_types.items()):
-                progress.setValue(int((i / len(violation_types)) * 100))
-                progress.setLabelText(f"Exporting {vio_type} violations...")
-
-                filename = (
-                    f"spreadsheets/violations_{vio_type.replace('.', '_')}_"
-                    f"{start_date}_to_{end_date}.xlsx"
-                )
-                self.excel_exporter.export_tab_to_excel(tab, filename)
-
-            progress.setValue(100)
-            progress.setLabelText("Opening output folder...")
-
-            # Open the spreadsheets folder
-            if sys.platform == "win32":
-                os.startfile("spreadsheets")
-            else:
-                import subprocess
-
-                subprocess.Popen(["xdg-open", "spreadsheets"])
-
-            self.statusBar().showMessage("Violations exported successfully", 5000)
-
         except Exception as e:
             QMessageBox.critical(
-                self, "Export Error", f"Failed to export violations: {str(e)}"
+                self,
+                "Error",
+                f"Failed to export violations: {str(e)}"
             )
-        finally:
-            if progress:
-                progress.close()
 
     def show_settings(self):
         """Show the settings dialog.
@@ -1606,6 +1516,16 @@ class MainApp(QMainWindow):
             # Update stats after filtering
             if hasattr(current_tab, "update_stats"):
                 current_tab.update_stats()
+
+    def update_date_range_display(self, start_date, end_date):
+        """Update the date range display in the filter row.
+        
+        Args:
+            start_date (str): Start date in YYYY-MM-DD format
+            end_date (str): End date in YYYY-MM-DD format
+        """
+        if hasattr(self, 'date_range_label'):
+            self.date_range_label.setText(f"Selected Date Range: {start_date} to {end_date}")
 
 
 if __name__ == "__main__":
