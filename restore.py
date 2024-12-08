@@ -10,7 +10,10 @@ from datetime import datetime
 
 # Only import Qt widgets when needed (not for command line usage)
 try:
-    from custom_widgets import CustomErrorDialog, CustomMessageBox
+    from custom_widgets import (
+        CustomErrorDialog,
+        CustomMessageBox,
+    )
 except ImportError:
     CustomErrorDialog = None
     CustomMessageBox = None
@@ -73,7 +76,7 @@ def restore_to_backup(main_window, backup_description=None):
 
         # Use print instead of CustomMessageBox when no window
         if main_window is None:
-            print(f"\nRestore Successful!")
+            print("\nRestore Successful!")
             print(f"Files have been restored to backup commit {commit_hash[:8]}")
             print(f"A backup of your previous state was created at {timestamp}")
         else:
@@ -90,7 +93,9 @@ def restore_to_backup(main_window, backup_description=None):
             print(f"\nError: Failed to restore from backup: {str(e)}")
         else:
             CustomErrorDialog.error(
-                main_window, "Restore Failed", f"Failed to restore from backup: {str(e)}"
+                main_window,
+                "Restore Failed",
+                f"Failed to restore from backup: {str(e)}",
             )
 
 
@@ -152,7 +157,7 @@ def restore_to_version(main_window, version=None):
 
         # Use print instead of CustomMessageBox when no window
         if main_window is None:
-            print(f"\nRestore Successful!")
+            print("\nRestore Successful!")
             print(f"Files have been restored to version {version_tag}")
             print(f"A backup of your previous state was created at {timestamp}")
         else:
@@ -175,7 +180,7 @@ def restore_to_version(main_window, version=None):
 
 if __name__ == "__main__":
     import sys
-    
+
     if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help", "help"]:
         print("\nUsage: python restore.py")
         print("Restores files to a previous backup or version.")
@@ -189,10 +194,14 @@ if __name__ == "__main__":
         print("1. Restore from backup")
         print("2. Restore from version release")
         choice = input("\nEnter choice (1-2): ").strip()
-        
+
         if choice == "1":
-            restore_to_backup(None)  # Passing None since we're running from command line
+            restore_to_backup(
+                None
+            )  # Passing None since we're running from command line
         elif choice == "2":
-            restore_to_version(None)  # Passing None since we're running from command line
+            restore_to_version(
+                None
+            )  # Passing None since we're running from command line
         else:
             print("Invalid choice. Please enter 1 or 2.")
