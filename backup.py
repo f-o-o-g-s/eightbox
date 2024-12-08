@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 from datetime import datetime
+import zipfile
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 backup_dir = os.path.join(project_dir, "backups")
@@ -57,66 +58,36 @@ def run_pre_commit():
 
 
 def create_zip_backup(project_dir, backup_dir):
-    """Create a ZIP backup of the entire project directory."""
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    project_name = os.path.basename(project_dir)
-    temp_dir = os.path.join(backup_dir, f"temp_{timestamp}")
-    backup_path = os.path.join(backup_dir, f"{project_name}_backup_{timestamp}.zip")
-
-    # Directories/files to exclude from ZIP
-    exclude = {
-        "__pycache__",
-        ".git",
-        ".pytest_cache",
-        ".venv",
-        "venv",
-        "node_modules",
-        ".DS_Store",
-        "output",  # Build output directory
-        "spreadsheets",  # Generated Excel files
-        "dist",  # PyInstaller dist directory
-        "build",  # PyInstaller build directory
-        ".eggs",
-        "*.pyc",
-        "*.pyo",
-        "*.pyd",
-        ".Python",
-        "develop-eggs",
-        "downloads",
-        "eggs",
-        "parts",
-        "sdist",
-        "var",
-        ".env",
-    }
-
-    print("\nCreating ZIP backup...")
+    """Create a ZIP backup of the project."""
     try:
+        print("\nCreating ZIP backup...")
+        
         # Create backup directory if it doesn't exist
         os.makedirs(backup_dir, exist_ok=True)
-
-        # Copy files to temporary directory, excluding unwanted paths
-        def ignore_patterns(path, names):
-            return {n for n in names if n in exclude}
-
+        
+        # Generate backup filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        zip_path = os.path.join(backup_dir, f"backup_{timestamp}.zip")
+        
         print("Copying files...")
-        shutil.copytree(project_dir, temp_dir, ignore=ignore_patterns)
-
-        # Create ZIP from temporary directory
-        print("Creating ZIP archive...")
-        shutil.make_archive(backup_path[:-4], "zip", temp_dir)  # Remove .zip extension
-
-        # Clean up temporary directory
-        print("Cleaning up temporary files...")
-        shutil.rmtree(temp_dir)
-
-        print(f"\nZIP backup created at: {backup_path}")
-        print(f"Backup size: {os.path.getsize(backup_path) / (1024*1024):.1f} MB")
-        return backup_path
+        
+        # Create ZIP file with specific exclusions
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(project_dir):
+                # Skip specific directories
+                dirs[:] = [d for d in dirs if d not in ['.git', 'backups', '__pycache__', '.pytest_cache']]
+                
+                for file in files:
+                    if not file.endswith(('.pyc', '.pyo', '.pyd')):
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, project_dir)
+                        zipf.write(file_path, arcname)
+        
+        print(f"ZIP backup created: {zip_path}")
+        return zip_path
+        
     except Exception as e:
         print(f"\nError creating ZIP backup: {str(e)}")
-        if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
         return None
 
 
