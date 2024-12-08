@@ -118,7 +118,7 @@ def get_new_version(current_version, update_type):
 
     Args:
         current_version (str): Current version in YYYY.MAJOR.MINOR.PATCH format
-        update_type (str): Type of update ('1'=patch, '2'=minor, '3'=major, '4'=year)
+        update_type (int): Type of update (1=patch, 2=minor, 3=major)
 
     Returns:
         str: New version number in YYYY.MAJOR.MINOR.PATCH format
@@ -129,15 +129,11 @@ def get_new_version(current_version, update_type):
     year, major, minor, patch = map(int, current_version.split("."))
     current_year = datetime.now().year
 
-    if update_type == "4":  # Year
-        return f"{current_year}.0.0.0"
-    elif update_type == "3":  # Major
+    if update_type == 3:  # Major
         if year != current_year:
             return f"{current_year}.0.0.0"
-        if major == 0:  # If it's the first major version
-            return f"{year}.0.0.0"
         return f"{year}.{major + 1}.0.0"
-    elif update_type == "2":  # Minor
+    elif update_type == 2:  # Minor
         return f"{year}.{major}.{minor + 1}.0"
     else:  # Patch
         return f"{year}.{major}.{minor}.{patch + 1}"
@@ -191,7 +187,7 @@ def create_release():
             print("\nInvalid choice. Please enter 1, 2, or 3.")
             return False
 
-        choice = int(choice)
+        choice = int(choice)  # Convert to integer for version calculation
 
         print("\nEnter a short commit message:")
         commit_msg = input().strip()
