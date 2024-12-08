@@ -623,6 +623,8 @@ class ViolationModel(QStandardItemModel):
     def get_violation_type_display(self, violation_type):
         """Get the display name for a violation type.
 
+        Converts internal violation type codes to human-readable display names.
+
         Args:
             violation_type (str): The internal violation type code
 
