@@ -499,7 +499,7 @@ class ViolationModel(QStandardItemModel):
         for row in range(len(self.df)):
             for col in range(len(self.df.columns)):
                 value = self.df.iloc[row, col]
-                item = QStandardItem(str(value))
+                item = QStandardItem(str(value) if pd.notna(value) else "")
                 self.setItem(row, col, item)
 
     def get_violation_column(self):
@@ -541,49 +541,63 @@ class ViolationModel(QStandardItemModel):
         return metadata
 
     def get_table_state(self):
-        """Extract complete table state including content and formatting."""
-        data = []
-        metadata = []
+        """Extract the complete state of the table.
+
+        Returns:
+            tuple: (content_df, metadata_df, row_highlights_df)
+                - content_df: DataFrame containing cell values
+                - metadata_df: DataFrame containing cell formatting metadata
+                - row_highlights_df: DataFrame containing row highlight information
+        """
+        # Get column headers
+        headers = [self.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in range(self.columnCount())]
+        
+        # Extract content
+        content_data = []
+        metadata_data = []
         row_highlights = []
-
+        
         for row in range(self.rowCount()):
-            data_row = []
-            metadata_row = []
-            row_highlight = None
-
+            row_content = []
+            row_metadata = []
+            has_highlight = False
+            
             for col in range(self.columnCount()):
                 index = self.index(row, col)
-                cell_metadata = self.get_cell_metadata(index)
-
-                # Add value to data
-                data_row.append(cell_metadata["value"])
-
-                # Add formatting to metadata
-                metadata_row.append(
-                    {
-                        "background": cell_metadata["background"],
-                        "text_color": cell_metadata["text_color"],
-                    }
-                )
-
-                # Check for row highlight (SUMMARY_ROW_COLOR)
-                if cell_metadata["background"] == SUMMARY_ROW_COLOR.name():
-                    row_highlight = cell_metadata["background"]
-
-            data.append(data_row)
-            metadata.append(metadata_row)
-            row_highlights.append(row_highlight)
-
-        # Convert to DataFrames
-        headers = [
-            self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
-            for col in range(self.columnCount())
-        ]
-
-        content_df = pd.DataFrame(data, columns=headers)
-        metadata_df = pd.DataFrame(metadata, columns=headers)
-        row_highlights_df = pd.Series(row_highlights, name="row_highlight")
-
+                
+                # Get display value
+                value = self.data(index, Qt.DisplayRole)
+                if value is None:
+                    value = ""
+                row_content.append(value)
+                
+                # Get formatting metadata
+                bg_color = self.get_background_color(index)
+                fg_color = self.get_foreground_color(index)
+                
+                # Convert QColor to string or None
+                bg_color_str = bg_color.name() if isinstance(bg_color, QColor) else None
+                fg_color_str = fg_color.name() if isinstance(fg_color, QColor) else None
+                
+                metadata = {
+                    'background': bg_color_str,
+                    'foreground': fg_color_str
+                }
+                row_metadata.append(metadata)
+                
+                # Check for highlights - only if we have a valid background color
+                if bg_color_str and bg_color_str.lower() != '#000000':
+                    has_highlight = True
+            
+            content_data.append(row_content)
+            metadata_data.append(row_metadata)
+            row_highlights.append(has_highlight)
+        
+        # Create DataFrames with explicit dtypes to avoid ambiguous truth values
+        content_df = pd.DataFrame(content_data, columns=headers)
+        metadata_df = pd.DataFrame(metadata_data, columns=headers)
+        row_highlights_df = pd.DataFrame({'highlighted': row_highlights}, dtype=bool)
+        
         return content_df, metadata_df, row_highlights_df
 
     def sort(self, column, order):
