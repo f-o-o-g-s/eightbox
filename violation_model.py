@@ -110,6 +110,21 @@ class ViolationModel(QStandardItemModel):
         self.setup_model()
 
     def data(self, index, role=Qt.DisplayRole):
+        """Get data for display in the violation table.
+
+        Handles different display roles including:
+        - DisplayRole: Formatted cell values
+        - BackgroundRole: Cell background colors
+        - ForegroundRole: Text colors
+        - UserRole: Sorting values
+
+        Args:
+            index (QModelIndex): The cell index
+            role (Qt.ItemDataRole): The role being requested
+
+        Returns:
+            Various: Data appropriate for the requested role, or None if invalid
+        """
         if not index.isValid():
             return None
 

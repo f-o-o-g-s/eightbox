@@ -1,48 +1,40 @@
 # theme.py
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import (
-    QApplication,
-    QStyleFactory,
-)
+"""Application theming and style management.
 
-"""Application theme and styling definitions.
-
-This module defines the application's visual styling including:
-- Color schemes and palettes
+This module defines the application's visual theme and styling, including:
+- Material Design dark theme implementation
+- Color schemes for UI elements (background, text, borders)
+- Accent colors for different states (active, hover, pressed)
+- Semantic colors (success, warning, error)
 - Font styles and sizes
 - Widget styling (QSS)
 - Layout spacing and margins
 - Custom widget appearance
-"""
-
-"""Module for managing application theming and visual styles.
-
-This module provides:
-- Material dark theme implementation
-- Custom color schemes and palettes
-- Widget style definitions
-- Consistent visual appearance across the application
-- Theme application utilities
-"""
-
-"""Application theming and style management.
-
-This module defines the application's visual theme and styling, including:
-- Color schemes for UI elements
-- Material design color palette
-- Custom widget styling
-- Color calculations for contrast and readability
-- Theme application helpers
 
 The theme follows Material Design principles with a dark mode focus,
 ensuring consistent styling across all application components.
 
 Color Constants:
-    - Primary theme colors (background, text, borders)
-    - Accent colors for different states (active, hover, pressed)
-    - Semantic colors (success, warning, error)
-    - Table styling colors (headers, alternating rows)
+    MATERIAL_PRIMARY: Primary brand color (purple)
+    MATERIAL_PRIMARY_VARIANT: Darker primary for contrast
+    MATERIAL_SECONDARY: Accent color (teal)
+    MATERIAL_BACKGROUND: Main background color
+    MATERIAL_SURFACE: Elevated surface color
+    MATERIAL_ERROR: Error state color
+    COLOR_ROW_HIGHLIGHT: Table row hover color
+    COLOR_CELL_HIGHLIGHT: Selected cell color
+    COLOR_WEEKLY_REMEDY: Weekly totals highlight
+    COLOR_TEXT_LIGHT: Primary text color
+    COLOR_TEXT_DIM: Secondary text color
+    COLOR_MAXIMIZED_TRUE: Success state color
+    COLOR_MAXIMIZED_FALSE: Error state color
 """
+
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import (
+    QApplication,
+    QStyleFactory,
+)
 
 # Material Design Dark Theme Colors
 MATERIAL_PRIMARY = QColor("#BB86FC")  # Primary brand color (purple)

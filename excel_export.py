@@ -1,3 +1,13 @@
+"""Module for exporting violation data to Excel format.
+
+This module provides functionality to export violation data and summaries
+to Excel workbooks, with features including:
+- Customizable worksheet formatting
+- Data filtering and organization
+- Summary statistics
+- Multi-sheet workbooks for different violation types
+"""
+
 import os
 
 import pandas as pd
@@ -19,17 +29,6 @@ from theme import (
     COLOR_WEEKLY_REMEDY,
 )
 from violation_model import calculate_optimal_gray
-
-
-"""Module for exporting violation data to Excel format.
-
-This module provides functionality to export violation data and summaries
-to Excel workbooks, with features including:
-- Customizable worksheet formatting
-- Data filtering and organization
-- Summary statistics
-- Multi-sheet workbooks for different violation types
-"""
 
 
 class ExcelExporter:
