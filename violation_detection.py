@@ -251,7 +251,7 @@ def detect_85d_overtime(data, date_maximized_status=None):
 
     # Handle maximized dates
     maximized_dates = result_df["rings_date"].map(
-        lambda x: date_maximized.get(x, False)
+        lambda x: date_maximized_status.get(x, False) if date_maximized_status else False
     )
     result_df.loc[maximized_dates, "violation_type"] = "No Violation (OTDL Maxed)"
 

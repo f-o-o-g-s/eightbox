@@ -110,6 +110,7 @@ class OTDLMaximizationPane(QWidget):
 
     def __init__(self, parent=None, carrier_list_pane=None):
         super().__init__(parent)
+        self.date_maximized = {}
         self.parent_widget = parent
         self.parent_main = parent
 
