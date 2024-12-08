@@ -16,12 +16,8 @@ from PyQt5.QtCore import (
     QSortFilterProxyModel,
     Qt,
     pyqtSignal,
-    QTimer,
 )
 from PyQt5.QtWidgets import (
-    QHBoxLayout,
-    QLineEdit,
-    QPushButton,
     QTableView,
     QTabWidget,
     QVBoxLayout,
@@ -254,7 +250,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def filter_carriers(self, text, filter_type="name"):
         """Filter carriers across all tabs based on search criteria.
-        
+
         Args:
             text (str): The text to filter by
             filter_type (str): The type of filter to apply ('name' or 'list_status')
@@ -279,7 +275,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def handle_global_filter_click(self, status_type):
         """Handle global filter click from another tab.
-        
+
         Args:
             status_type (str): The status to filter by
         """
@@ -310,7 +306,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
             # Get the model and data
             df = None
-            
+
             # Try to get data from the current tab's model
             if current_tab_name := self.date_tabs.tabText(current_tab_index):
                 if current_tab_name == "Summary" and self.summary_proxy_model:
@@ -329,7 +325,11 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             # Calculate totals
             total_carriers = len(df)
             list_status_col = next(
-                (col for col in df.columns if col.lower() in ["list_status", "list status"]),
+                (
+                    col
+                    for col in df.columns
+                    if col.lower() in ["list_status", "list status"]
+                ),
                 None,
             )
 
@@ -345,11 +345,15 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
             # Update stats in main window
             self._update_main_window_stats(
-                total_carriers, wal_carriers, nl_carriers, 
-                otdl_carriers, ptf_carriers, violations
+                total_carriers,
+                wal_carriers,
+                nl_carriers,
+                otdl_carriers,
+                ptf_carriers,
+                violations,
             )
 
-        except Exception as e:
+        except Exception:
             self._update_main_window_stats(0, 0, 0, 0, 0, 0)
 
     def _calculate_violations(self, df):
@@ -357,33 +361,37 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         try:
             # For Summary tab, check numeric columns for any non-zero values
             if self.__class__.__name__ == "ViolationsSummaryTab":
-                numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+                numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
                 # Exclude certain columns that shouldn't be counted for violations
-                exclude_cols = ['Total Hours', 'Own Route Hours', 'Off Route Hours']
-                violation_cols = [col for col in numeric_cols if col not in exclude_cols]
+                exclude_cols = ["Total Hours", "Own Route Hours", "Off Route Hours"]
+                violation_cols = [
+                    col for col in numeric_cols if col not in exclude_cols
+                ]
                 return len(df[df[violation_cols].gt(0).any(axis=1)])
-            
+
             # For regular violation tabs
             if "violation_type" in df.columns:
-                return len(df[~df["violation_type"].str.contains("No Violation", na=False)])
-            
+                return len(
+                    df[~df["violation_type"].str.contains("No Violation", na=False)]
+                )
+
             # If no violation type column, check remedy totals
             for col in ["remedy_total", "Remedy Total", "Weekly Remedy Total"]:
                 if col in df.columns:
-                    return len(df[pd.to_numeric(df[col], errors='coerce') > 0])
-            
+                    return len(df[pd.to_numeric(df[col], errors="coerce") > 0])
+
             # As a last resort, check if any numeric columns have values > 0
-            numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+            numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
             if len(numeric_cols) > 0:
                 return len(df[df[numeric_cols].gt(0).any(axis=1)])
-            
+
             return 0
-        except Exception as e:
+        except Exception:
             return 0
 
     def _update_main_window_stats(self, total, wal, nl, otdl, ptf, violations):
         """Update the stats in the main window.
-        
+
         Args:
             total (int): Total number of carriers
             wal (int): Number of WAL carriers
@@ -622,7 +630,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def showEvent(self, event):
         """Handle tab being shown.
-        
+
         Ensures the global filter is applied when switching tabs.
         """
         super().showEvent(event)

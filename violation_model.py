@@ -686,7 +686,8 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 
         Args:
             text (str): The filter text to match against
-            filter_type (str): The type of filter to apply (e.g. 'name', 'list_status', 'violations')
+            filter_type (str): The type of filter to apply
+                (e.g. 'name', 'list_status', 'violations')
         """
         self.filter_type = filter_type
         self.filter_text = text.lower() if text else ""

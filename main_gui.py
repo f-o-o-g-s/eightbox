@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QApplication,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QMainWindow,
     QMenuBar,
     QMessageBox,
@@ -27,7 +28,6 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QTabWidget,
     QVBoxLayout,
     QWidget,
-    QLineEdit,
 )
 
 from carrier_list_pane import CarrierListPane
@@ -284,7 +284,7 @@ class MainApp(QMainWindow):
 
         # Main layout with buttons and central tab widget
         self.main_layout = QVBoxLayout()
-        
+
         # Initialize top button row (utility buttons only)
         self.init_top_button_row()
 
@@ -324,19 +324,19 @@ class MainApp(QMainWindow):
 
     def handle_main_tab_change(self, index):
         """Handle switching between main violation tabs.
-        
+
         Maintains the current filter state across tab switches.
-        
+
         Args:
             index (int): Index of the newly selected tab
         """
         # Get the current tab
         current_tab = self.central_tab_widget.widget(index)
-        
+
         # If we have a valid tab and current filter state
         if current_tab and hasattr(current_tab, "filter_carriers"):
             # Apply filters in the correct order
-            
+
             # 1. Apply carrier name filter if it exists
             if hasattr(self, "carrier_filter"):
                 filter_text = self.carrier_filter.text()
@@ -344,12 +344,15 @@ class MainApp(QMainWindow):
                     current_tab.current_filter = filter_text
                     current_tab.current_filter_type = "name"
                     current_tab.filter_carriers(filter_text, filter_type="name")
-            
+
             # 2. Apply status filter if it exists
-            if hasattr(self, "current_status_filter") and self.current_status_filter != "all":
+            if (
+                hasattr(self, "current_status_filter")
+                and self.current_status_filter != "all"
+            ):
                 if hasattr(current_tab, "handle_global_filter_click"):
                     current_tab.handle_global_filter_click(self.current_status_filter)
-            
+
             # 3. Update stats
             if hasattr(current_tab, "update_stats"):
                 current_tab.update_stats()
@@ -416,7 +419,9 @@ class MainApp(QMainWindow):
 
         self.otdl_maximization_button = QPushButton("  OTDL Maximization")
         self.otdl_maximization_button.setCheckable(True)
-        self.otdl_maximization_button.clicked.connect(self.toggle_otdl_maximization_pane)
+        self.otdl_maximization_button.clicked.connect(
+            self.toggle_otdl_maximization_pane
+        )
 
         # Add global carrier filter
         self.carrier_filter = QLineEdit()
@@ -442,7 +447,8 @@ class MainApp(QMainWindow):
         """
         # Create filter row
         filter_row = QWidget()
-        filter_row.setStyleSheet("""
+        filter_row.setStyleSheet(
+            """
             QWidget {
                 background-color: #121212;
                 border-top: 1px solid #333333;
@@ -474,7 +480,8 @@ class MainApp(QMainWindow):
                 font-size: 12px;
                 padding: 4px 8px;
             }
-        """)
+        """
+        )
 
         filter_layout = QHBoxLayout()
         filter_layout.setContentsMargins(8, 12, 8, 12)  # Added vertical padding
@@ -489,7 +496,14 @@ class MainApp(QMainWindow):
         self.violations_btn = self.create_filter_button("Carriers With Violations: 0")
 
         # Add buttons to layout
-        for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
+        for btn in [
+            self.total_btn,
+            self.wal_btn,
+            self.nl_btn,
+            self.otdl_btn,
+            self.ptf_btn,
+            self.violations_btn,
+        ]:
             filter_layout.addWidget(btn)
 
         # Add date range label
@@ -513,7 +527,14 @@ class MainApp(QMainWindow):
         sender = self.sender()
 
         # Uncheck other buttons
-        for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
+        for btn in [
+            self.total_btn,
+            self.wal_btn,
+            self.nl_btn,
+            self.otdl_btn,
+            self.ptf_btn,
+            self.violations_btn,
+        ]:
             if btn != sender:
                 btn.setChecked(False)
 
@@ -535,7 +556,7 @@ class MainApp(QMainWindow):
 
     def update_filter_stats(self, total, wal, nl, otdl, ptf, violations):
         """Update the filter button statistics.
-        
+
         Args:
             total (int): Total number of carriers
             wal (int): Number of WAL carriers
@@ -552,19 +573,38 @@ class MainApp(QMainWindow):
         self.violations_btn.setText(f"Carriers With Violations: {violations}")
 
         # Force button update
-        for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
+        for btn in [
+            self.total_btn,
+            self.wal_btn,
+            self.nl_btn,
+            self.otdl_btn,
+            self.ptf_btn,
+            self.violations_btn,
+        ]:
             btn.update()
 
     def apply_global_status_filter(self, status):
         """Apply the global status filter to all tabs.
-        
+
         Args:
             status (str): The status to filter by ('all', 'wal', 'nl', etc.)
         """
-        current_tab = self.central_tab_widget.currentWidget()
-        if current_tab and hasattr(current_tab, "handle_global_filter_click"):
-            current_tab.handle_global_filter_click(status)
-            current_tab.update_stats()
+        # Store current filter state
+        self.current_status_filter = status
+
+        # Apply filter to each violation tab
+        for tab in [
+            self.vio_85d_tab,
+            self.vio_85f_tab,
+            self.vio_85f_ns_tab,
+            self.vio_85f_5th_tab,
+            self.vio_MAX12_tab,
+            self.vio_MAX60_tab,
+            self.remedies_tab,
+        ]:
+            if hasattr(tab, "handle_global_filter_click"):
+                tab.handle_global_filter_click(status)
+                tab.update_stats()
 
     def init_85d_tab(self):
         """Initialize the Article 8.5.D violation tab."""
@@ -718,11 +758,7 @@ class MainApp(QMainWindow):
             # Access the calendar from the DateSelectionPane
             selected_date = self.date_selection_pane.calendar.selectedDate()
             if selected_date.dayOfWeek() != 6:  # Ensure the selected date is a Saturday
-                QMessageBox.warning(
-                    self,
-                    "Invalid Date",
-                    "Please select a Saturday."
-                )
+                QMessageBox.warning(self, "Invalid Date", "Please select a Saturday.")
                 return
 
             progress.setValue(20)
@@ -733,10 +769,10 @@ class MainApp(QMainWindow):
             progress.setLabelText("Fetching clock ring data...")
             start_date = selected_date.toString("yyyy-MM-dd")
             end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
-            
+
             # Update the date range display
             self.update_date_range_display(start_date, end_date)
-            
+
             clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
 
             progress.setValue(40)
@@ -821,9 +857,7 @@ class MainApp(QMainWindow):
             self.update_violations_and_remedies(clock_ring_data)
 
             progress.setValue(100)
-            self.statusBar().showMessage(
-                "Date range processing complete", 5000
-            )
+            self.statusBar().showMessage("Date range processing complete", 5000)
 
         except Exception as e:
             progress.cancel()
@@ -1304,25 +1338,17 @@ class MainApp(QMainWindow):
             self.carrier_list_pane.load_carrier_data()
         except Exception as e:
             QMessageBox.critical(
-                self,
-                "Error",
-                f"Failed to load carrier data: {str(e)}"
+                self, "Error", f"Failed to load carrier data: {str(e)}"
             )
 
     def export_violations(self):
         """Export violations to Excel."""
         try:
             self.remedies_tab.export_to_excel()
-            QMessageBox.information(
-                self,
-                "Success",
-                "Violations exported successfully"
-            )
+            QMessageBox.information(self, "Success", "Violations exported successfully")
         except Exception as e:
             QMessageBox.critical(
-                self,
-                "Error",
-                f"Failed to export violations: {str(e)}"
+                self, "Error", f"Failed to export violations: {str(e)}"
             )
 
     def show_settings(self):
@@ -1414,15 +1440,12 @@ class MainApp(QMainWindow):
             if hasattr(tab, "filter_carriers"):
                 tab.filter_carriers(text, "name")
 
-    def apply_global_status_filter(self, status_type):
-        """Apply status filter across all violation tabs.
+    def on_carrier_filter_changed(self, text):
+        """Handle changes to the carrier filter text.
 
         Args:
-            status_type (str): The status to filter by ('all', 'wal', 'nl', 'otdl', 'ptf', 'violations')
+            text (str): The filter text entered by the user
         """
-        # Store current filter state
-        self.current_status_filter = status_type
-
         # Apply filter to each violation tab
         for tab in [
             self.vio_85d_tab,
@@ -1433,10 +1456,33 @@ class MainApp(QMainWindow):
             self.vio_MAX60_tab,
             self.remedies_tab,
         ]:
-            if hasattr(tab, "handle_global_filter_click"):
-                tab.handle_global_filter_click(status_type)
-                # Force stats update after applying filter
-                tab.update_stats()
+            if hasattr(tab, "filter_carriers"):
+                tab.filter_carriers(text, "name")
+
+    def apply_carrier_filter(self, text):
+        """Apply carrier name filter to the current tab.
+
+        Args:
+            text (str): The filter text to apply
+        """
+        current_tab = self.central_tab_widget.currentWidget()
+        if current_tab and hasattr(current_tab, "apply_carrier_filter"):
+            current_tab.apply_carrier_filter(text.lower())
+            # Update stats after filtering
+            if hasattr(current_tab, "update_stats"):
+                current_tab.update_stats()
+
+    def update_date_range_display(self, start_date, end_date):
+        """Update the date range display in the filter row.
+
+        Args:
+            start_date (str): Start date in YYYY-MM-DD format
+            end_date (str): End date in YYYY-MM-DD format
+        """
+        if hasattr(self, "date_range_label"):
+            self.date_range_label.setText(
+                f"Selected Date Range: {start_date} to {end_date}"
+            )
 
     def toggle_date_selection_pane(self):
         """Toggle the Date Selection Pane and button state."""
@@ -1465,8 +1511,13 @@ class MainApp(QMainWindow):
 
     def toggle_otdl_maximization_pane(self):
         """Toggle the OTDL Maximization Pane and button state."""
-        if not hasattr(self, "otdl_maximization_pane") or self.otdl_maximization_pane is None:
-            self.otdl_maximization_pane = OTDLMaximizationPane(self.carrier_list_pane, self)
+        if (
+            not hasattr(self, "otdl_maximization_pane")
+            or self.otdl_maximization_pane is None
+        ):
+            self.otdl_maximization_pane = OTDLMaximizationPane(
+                self.carrier_list_pane, self
+            )
 
         if self.otdl_maximization_pane.isVisible():
             self.otdl_maximization_pane.hide()
@@ -1475,63 +1526,6 @@ class MainApp(QMainWindow):
             self.otdl_maximization_pane.show()
             self.otdl_maximization_pane.setMinimumSize(1053, 681)
             self.otdl_maximization_button.setChecked(True)
-
-    def handle_status_filter_click(self, status):
-        """Handle clicks on status filter buttons.
-        
-        Args:
-            status (str): The status filter to apply ('WAL', 'NL', etc.)
-        """
-        # Store current filter
-        self.current_status_filter = status
-
-        # Uncheck all buttons except the clicked one
-        for button in [self.wal_button, self.nl_button, self.wal_nl_button, 
-                      self.otdl_button, self.aux_button, self.all_button]:
-            if button.text() == status:
-                button.setChecked(True)
-            else:
-                button.setChecked(False)
-
-        # Get current tab and apply filter if it supports it
-        current_tab = self.central_tab_widget.currentWidget()
-        if current_tab and hasattr(current_tab, "handle_global_filter_click"):
-            current_tab.handle_global_filter_click(status)
-            current_tab.update_stats()
-
-    def on_carrier_filter_changed(self, text):
-        """Handle changes to the carrier filter text.
-        
-        Args:
-            text (str): The new filter text
-        """
-        # Get current tab and apply filter if it supports it
-        current_tab = self.central_tab_widget.currentWidget()
-        if current_tab and hasattr(current_tab, "filter_carriers"):
-            current_tab.filter_carriers(text.lower(), filter_type="name")
-
-    def apply_carrier_filter(self, text):
-        """Apply carrier name filter to the current tab.
-        
-        Args:
-            text (str): The filter text to apply
-        """
-        current_tab = self.central_tab_widget.currentWidget()
-        if current_tab and hasattr(current_tab, "apply_carrier_filter"):
-            current_tab.apply_carrier_filter(text.lower())
-            # Update stats after filtering
-            if hasattr(current_tab, "update_stats"):
-                current_tab.update_stats()
-
-    def update_date_range_display(self, start_date, end_date):
-        """Update the date range display in the filter row.
-        
-        Args:
-            start_date (str): Start date in YYYY-MM-DD format
-            end_date (str): End date in YYYY-MM-DD format
-        """
-        if hasattr(self, 'date_range_label'):
-            self.date_range_label.setText(f"Selected Date Range: {start_date} to {end_date}")
 
 
 if __name__ == "__main__":
