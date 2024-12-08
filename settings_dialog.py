@@ -1,3 +1,13 @@
+"""Dialog for configuring application settings.
+
+This module provides a dialog interface for users to:
+- Configure application preferences
+- Set default values and behaviors
+- Customize UI settings
+- Manage data paths and locations
+- Save/load configuration
+"""
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QFileDialog,

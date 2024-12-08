@@ -21,14 +21,14 @@ from theme import (
 from violation_model import calculate_optimal_gray
 
 
-"""Module for exporting violation data and carrier information to Excel files.
+"""Module for exporting violation data to Excel format.
 
-This module provides functionality to:
-- Export violation data to formatted Excel workbooks
-- Export carrier list data with proper formatting
-- Handle batch exports of multiple tabs
-- Maintain consistent styling and layout
-- Track export progress and provide user feedback
+This module provides functionality to export violation data and summaries
+to Excel workbooks, with features including:
+- Customizable worksheet formatting
+- Data filtering and organization
+- Summary statistics
+- Multi-sheet workbooks for different violation types
 """
 
 
