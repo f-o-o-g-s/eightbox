@@ -265,25 +265,17 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.current_filter = text
         self.current_filter_type = filter_type
 
-        current_tab_index = self.date_tabs.currentIndex()
-        if current_tab_index == -1:
-            return
+        # Apply filter to all proxy models
+        for model_dict in self.models.values():
+            if "proxy" in model_dict:
+                proxy_model = model_dict["proxy"]
+                proxy_model.set_filter(text, filter_type)
 
-        current_tab_name = self.date_tabs.tabText(current_tab_index)
+        # Apply to summary proxy model if it exists
+        if self.summary_proxy_model:
+            self.summary_proxy_model.set_filter(text, filter_type)
 
-        try:
-            # Get the proxy model for the current tab
-            proxy_model = (
-                self.summary_proxy_model
-                if current_tab_name == "Summary"
-                else self.models[current_tab_name]["proxy"]
-            )
-
-            # Apply the filter
-            proxy_model.set_filter(text, filter_type)
-            self.update_stats()
-        except Exception as e:
-            print(f"Error filtering carriers: {str(e)}")
+        self.update_stats()
 
     def handle_global_filter_click(self, status_type):
         """Handle global filter click from another tab.

@@ -334,17 +334,23 @@ class MainApp(QMainWindow):
         current_tab = self.central_tab_widget.widget(index)
         
         # If we have a valid tab and current filter state
-        if current_tab:
-            # Apply carrier filter if there is any
-            if hasattr(self, "carrier_filter") and self.carrier_filter.text():
-                if hasattr(current_tab, "filter_carriers"):
-                    current_tab.filter_carriers(self.carrier_filter.text().lower(), filter_type="name")
+        if current_tab and hasattr(current_tab, "filter_carriers"):
+            # Apply filters in the correct order
             
-            # Apply status filter if there is any
-            if hasattr(current_tab, "handle_global_filter_click"):
-                current_tab.handle_global_filter_click(self.current_status_filter)
+            # 1. Apply carrier name filter if it exists
+            if hasattr(self, "carrier_filter"):
+                filter_text = self.carrier_filter.text()
+                if filter_text:
+                    current_tab.current_filter = filter_text
+                    current_tab.current_filter_type = "name"
+                    current_tab.filter_carriers(filter_text, filter_type="name")
             
-            # Update stats
+            # 2. Apply status filter if it exists
+            if hasattr(self, "current_status_filter") and self.current_status_filter != "all":
+                if hasattr(current_tab, "handle_global_filter_click"):
+                    current_tab.handle_global_filter_click(self.current_status_filter)
+            
+            # 3. Update stats
             if hasattr(current_tab, "update_stats"):
                 current_tab.update_stats()
 
