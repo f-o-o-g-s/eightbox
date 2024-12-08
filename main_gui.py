@@ -591,7 +591,16 @@ class MainApp(QMainWindow):
         self.remedies_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
 
     def apply_date_range(self):
-        """Refresh violations and OTDL Maximization Pane when a new date range is applied."""
+        """Apply the selected date range and update all tabs.
+
+        Processes carrier data for the selected date range and updates
+        all violation tabs with the new data. Shows progress dialog
+        during processing.
+
+        Note:
+            This is a core function that triggers violation detection
+            and updates the entire application state.
+        """
         if not os.path.exists("carrier_list.json"):
             response = CustomWarningDialog.warning(
                 self,
@@ -1261,6 +1270,154 @@ class MainApp(QMainWindow):
         """
 
         CustomInfoDialog.information(self, "About Eightbox", about_text)
+
+    def load_carrier_data(self):
+        """Load carrier data from the database.
+
+        Retrieves carrier information and clock rings from the database
+        for the selected date range. Updates carrier list and OTDL
+        maximization panes.
+
+        Raises:
+            Exception: If database connection fails or data is invalid
+        """
+        try:
+            # Get the selected date range
+            if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
+                raise AttributeError("Date selection pane is not initialized")
+
+            selected_date = self.date_selection_pane.calendar.selectedDate()
+            if not selected_date.isValid():
+                raise ValueError("No valid date selected")
+
+            # Fetch clock ring data
+            clock_ring_data = self.fetch_clock_ring_data()
+            if clock_ring_data.empty:
+                raise ValueError("No data found for selected date range")
+
+            # Update OTDL maximization pane
+            if self.otdl_maximization_pane:
+                self.otdl_maximization_pane.refresh_data(clock_ring_data)
+
+            # Update violations and remedies
+            self.update_violations_and_remedies(clock_ring_data)
+
+            self.statusBar().showMessage("Carrier data loaded successfully", 5000)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load carrier data: {str(e)}")
+            raise
+
+    def export_violations(self):
+        """Export all violation data to Excel files.
+
+        Creates Excel spreadsheets for each violation type, organized
+        by date range. Shows progress during export and opens the
+        output folder when complete.
+
+        Note:
+            Files are saved in the 'spreadsheets' directory, organized
+            by date range.
+        """
+        try:
+            # Create progress dialog
+            progress = CustomProgressDialog(
+                "Exporting violations...",
+                "",
+                0,
+                100,
+                self,
+                title="Exporting to Excel"
+            )
+            progress.setCancelButton(None)
+            progress.setWindowModality(Qt.WindowModal)
+            progress.show()
+
+            # Get date range for filename
+            selected_date = self.date_selection_pane.calendar.selectedDate()
+            start_date = selected_date.toString("yyyy-MM-dd")
+            end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
+
+            # Create spreadsheets directory if it doesn't exist
+            os.makedirs("spreadsheets", exist_ok=True)
+
+            # Export each violation type
+            violation_types = {
+                "8.5.D": self.vio_85d_tab,
+                "8.5.F": self.vio_85f_tab,
+                "8.5.F NS": self.vio_85f_ns_tab,
+                "8.5.F 5th": self.vio_85f_5th_tab,
+                "MAX12": self.vio_MAX12_tab,
+                "MAX60": self.vio_MAX60_tab,
+                "Summary": self.remedies_tab
+            }
+
+            for i, (vio_type, tab) in enumerate(violation_types.items()):
+                progress.setValue(int((i / len(violation_types)) * 100))
+                progress.setLabelText(f"Exporting {vio_type} violations...")
+
+                filename = f"spreadsheets/violations_{vio_type.replace('.', '_')}_{start_date}_to_{end_date}.xlsx"
+                self.excel_exporter.export_tab_to_excel(tab, filename)
+
+            progress.setValue(100)
+            progress.setLabelText("Opening output folder...")
+
+            # Open the spreadsheets folder
+            if sys.platform == "win32":
+                os.startfile("spreadsheets")
+            else:
+                import subprocess
+                subprocess.Popen(["xdg-open", "spreadsheets"])
+
+            self.statusBar().showMessage("Violations exported successfully", 5000)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"Failed to export violations: {str(e)}")
+        finally:
+            if progress:
+                progress.close()
+
+    def show_settings(self):
+        """Show the settings dialog.
+
+        Opens the settings dialog for configuring application options
+        including database path and other preferences.
+        """
+        if self.settings_dialog is None or not self.settings_dialog.isVisible():
+            from settings_dialog import SettingsDialog
+            self.settings_dialog = SettingsDialog(self.mandates_db_path, self)
+            self.settings_dialog.show()
+        else:
+            self.settings_dialog.activateWindow()
+
+    def show_documentation(self):
+        """Show the documentation dialog.
+
+        Opens the documentation window containing usage instructions,
+        keyboard shortcuts, and other help information.
+        """
+        from documentation_dialog import DocumentationDialog
+        doc_dialog = DocumentationDialog(self)
+        doc_dialog.exec_()
+
+    def minimize_to_tray(self):
+        """Minimize the application window.
+
+        Handles proper window minimization while maintaining
+        the custom window frame.
+        """
+        self.showMinimized()
+
+    def maximize_restore(self):
+        """Toggle between maximized and normal window states.
+
+        Handles proper window maximization/restoration while
+        maintaining the custom window frame.
+        """
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
 
 
 if __name__ == "__main__":
