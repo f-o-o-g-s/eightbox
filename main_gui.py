@@ -12,8 +12,8 @@ import sys
 import pandas as pd  # Data manipulation
 from PyQt5.QtCore import (
     Qt,
-    qInstallMessageHandler,
     QTimer,
+    qInstallMessageHandler,
 )
 from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QAction,
