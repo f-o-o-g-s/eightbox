@@ -281,11 +281,16 @@ class MainApp(QMainWindow):
 
         # Main layout with buttons and central tab widget
         self.main_layout = QVBoxLayout()
-        self.init_button_row()
+        
+        # Initialize top button row (utility buttons only)
+        self.init_top_button_row()
 
         # Central tab widget for reports
         self.central_tab_widget = QTabWidget()
         self.main_layout.addWidget(self.central_tab_widget)
+
+        # Initialize bottom filter row
+        self.init_filter_button_row()
 
         # Connect the main tab change signal
         self.central_tab_widget.currentChanged.connect(self.handle_main_tab_change)
@@ -326,19 +331,26 @@ class MainApp(QMainWindow):
         current_tab = self.central_tab_widget.widget(index)
         
         # If we have a valid tab and current filter state
-        if current_tab and hasattr(current_tab, "handle_global_filter_click"):
-            # Apply the current filter
-            current_tab.handle_global_filter_click(self.current_status_filter)
-            # Force stats update
-            current_tab.update_stats()
+        if current_tab:
+            # Apply carrier filter if there is any
+            if hasattr(self, "carrier_filter") and self.carrier_filter.text():
+                if hasattr(current_tab, "filter_carriers"):
+                    current_tab.filter_carriers(self.carrier_filter.text().lower(), filter_type="name")
+            
+            # Apply status filter if there is any
+            if hasattr(current_tab, "handle_global_filter_click"):
+                current_tab.handle_global_filter_click(self.current_status_filter)
+            
+            # Update stats
+            if hasattr(current_tab, "update_stats"):
+                current_tab.update_stats()
 
-    def init_button_row(self):
-        """Create a horizontal row for buttons and filters.
+    def init_top_button_row(self):
+        """Create a horizontal row for utility buttons.
 
         Contains:
         - Date Selection, Carrier List, and OTDL Maximization buttons
-        - Global carrier filter
-        - Status filter buttons
+        - Global carrier filter textbox
         """
         # Create top button row
         button_row_layout = QHBoxLayout()
@@ -366,11 +378,6 @@ class MainApp(QMainWindow):
                 background-color: #383838;
                 border-color: #4D4D4D;
             }
-            QPushButton:checked {
-                background-color: #BB86FC;
-                border-color: #BB86FC;
-                color: #000000;
-            }
             QLineEdit {
                 background-color: #2D2D2D;
                 color: #E1E1E1;
@@ -386,7 +393,7 @@ class MainApp(QMainWindow):
             QLineEdit::placeholder {
                 color: #808080;
             }
-        """
+            """
         )
 
         # Create buttons with icons
@@ -398,31 +405,37 @@ class MainApp(QMainWindow):
         self.carrier_list_button.setCheckable(True)
         self.carrier_list_button.clicked.connect(self.toggle_carrier_list_pane)
 
-        self.otdl_button = QPushButton("  OTDL Maximization")
-        self.otdl_button.setCheckable(True)
-        self.otdl_button.clicked.connect(self.toggle_otdl_maximization)
+        self.otdl_maximization_button = QPushButton("  OTDL Maximization")
+        self.otdl_maximization_button.setCheckable(True)
+        self.otdl_maximization_button.clicked.connect(self.toggle_otdl_maximization_pane)
 
         # Add global carrier filter
-        self.global_carrier_filter = QLineEdit()
-        self.global_carrier_filter.setPlaceholderText("Filter carriers across all tabs...")
-        self.global_carrier_filter.textChanged.connect(self.apply_global_carrier_filter)
+        self.carrier_filter = QLineEdit()
+        self.carrier_filter.setPlaceholderText("Filter carriers across all tabs...")
+        self.carrier_filter.textChanged.connect(self.on_carrier_filter_changed)
 
-        # Add buttons and filter to the layout
+        # Add buttons and filter to layout
         button_row_layout.addWidget(self.date_selection_button)
         button_row_layout.addWidget(self.carrier_list_button)
-        button_row_layout.addWidget(self.otdl_button)
-        button_row_layout.addWidget(self.global_carrier_filter)
-        button_row_layout.addStretch(1)
+        button_row_layout.addWidget(self.otdl_maximization_button)
+        button_row_layout.addWidget(self.carrier_filter)
+        button_row_layout.addStretch()
 
         button_container.setLayout(button_row_layout)
         self.main_layout.addWidget(button_container)
 
-        # Create status filter row
-        status_row = QWidget()
-        status_row.setStyleSheet("""
+    def init_filter_button_row(self):
+        """Create a horizontal row for filter buttons at the bottom.
+
+        Contains:
+        - Status filter buttons with carrier stats
+        """
+        # Create filter row
+        filter_row = QWidget()
+        filter_row.setStyleSheet("""
             QWidget {
                 background-color: #1E1E1E;
-                border-bottom: 1px solid #333333;
+                border-top: 1px solid #333333;
             }
             QPushButton {
                 background-color: rgba(187, 134, 252, 0.1);
@@ -447,11 +460,12 @@ class MainApp(QMainWindow):
                 color: #000000;
             }
         """)
-        status_layout = QHBoxLayout()
-        status_layout.setContentsMargins(8, 0, 8, 0)
-        status_layout.setSpacing(4)  # Reduce spacing between buttons
 
-        # Create status filter buttons
+        filter_layout = QHBoxLayout()
+        filter_layout.setContentsMargins(8, 0, 8, 0)
+        filter_layout.setSpacing(4)  # Reduce spacing between buttons
+
+        # Create status filter buttons with stats
         self.total_btn = self.create_filter_button("Total Carriers: 0")
         self.wal_btn = self.create_filter_button("WAL: 0")
         self.nl_btn = self.create_filter_button("NL: 0")
@@ -461,11 +475,11 @@ class MainApp(QMainWindow):
 
         # Add buttons to layout
         for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
-            status_layout.addWidget(btn)
+            filter_layout.addWidget(btn)
 
-        status_layout.addStretch()
-        status_row.setLayout(status_layout)
-        self.main_layout.addWidget(status_row)
+        filter_layout.addStretch()
+        filter_row.setLayout(filter_layout)
+        self.main_layout.addWidget(filter_row)
 
     def create_filter_button(self, text):
         """Create a styled filter button for list status filtering."""
@@ -521,113 +535,16 @@ class MainApp(QMainWindow):
         for btn in [self.total_btn, self.wal_btn, self.nl_btn, self.otdl_btn, self.ptf_btn, self.violations_btn]:
             btn.update()
 
-    def toggle_date_selection_pane(self):
-        """Toggle the Date Selection Pane and button state."""
-        if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
-            self.date_selection_pane = DateSelectionPane(self)
-
-        if self.date_selection_pane.isVisible():
-            self.date_selection_pane.hide()
-            self.date_selection_button.setChecked(False)
-        else:
-            self.date_selection_pane.show()
-            self.date_selection_button.setChecked(True)
-
-    def toggle_carrier_list_pane(self):
-        """Toggle the Carrier List Pane and button state."""
-        if not hasattr(self, "carrier_list_pane") or self.carrier_list_pane is None:
-            self.carrier_list_pane = CarrierListPane(self.mandates_db_path, self)
-
-        if self.carrier_list_pane.isVisible():
-            self.carrier_list_pane.hide()
-            self.carrier_list_button.setChecked(False)
-        else:
-            self.carrier_list_pane.show()
-            self.carrier_list_pane.resize(650, 400)
-            self.carrier_list_button.setChecked(True)
-
-    def toggle_otdl_maximization(self):
-        """Toggle the OTDL Maximization Pane and button state."""
-        if (
-            not hasattr(self, "otdl_maximization_pane")
-            or self.otdl_maximization_pane is None
-        ):
-            self.otdl_maximization_pane = OTDLMaximizationPane(self)
-
-        if self.otdl_maximization_pane.isVisible():
-            self.otdl_maximization_pane.hide()
-            self.otdl_button.setChecked(False)
-        else:
-            self.otdl_maximization_pane.show()
-            # Remove fixed size here too
-            self.otdl_maximization_pane.setMinimumSize(1053, 681)
-            self.otdl_button.setChecked(True)
-
-    def show_carrier_list_pane(self):
-        """Show the Carrier List Pane."""
-        if self.carrier_list_pane is None:
-            self.carrier_list_pane = CarrierListPane(self.mandates_db_path, self)
-        self.carrier_list_pane.show()
-        self.carrier_list_pane.resize(650, 400)  # Set a default size
-        self.carrier_list_button.setEnabled(False)
-
-    def reenable_carrier_list_button(self):
-        """Re-enable the Carrier List button when the pane is minimized.
-
-        Called when:
-        - Carrier List pane is closed
-        - Window state changes
-        - User minimizes the pane
-
-        Ensures the button remains interactive and properly reflects pane state.
+    def apply_global_status_filter(self, status):
+        """Apply the global status filter to all tabs.
+        
+        Args:
+            status (str): The status to filter by ('all', 'wal', 'nl', etc.)
         """
-        self.carrier_list_button.setEnabled(True)
-
-    def show_date_selection_pane(self):
-        """Show the Date Selection Pane."""
-        if self.date_selection_pane is None:
-            self.date_selection_pane = DateSelectionPane(self)
-        self.date_selection_pane.show()
-        # Let the window size itself based on contents
-        self.date_selection_button.setEnabled(False)
-
-    def reenable_date_selection_button(self):
-        """Re-enable the Date Selection button when the pane is minimized.
-
-        Called when:
-        - Date Selection pane is closed
-        - Window state changes
-        - User minimizes the pane
-
-        Ensures the button remains interactive and properly reflects pane state.
-        """
-        self.date_selection_button.setEnabled(True)
-
-    def show_otdl_maximization(self):
-        """Show the OTDL Maximization Pane."""
-        if self.otdl_maximization_pane is None:
-            self.otdl_maximization_pane = OTDLMaximizationPane(self)
-        self.otdl_maximization_pane.show()
-        self.otdl_maximization_pane.setMinimumSize(1053, 681)
-        self.otdl_button.setEnabled(False)
-
-    def reenable_otdl_button(self):
-        """Re-enable the OTDL Maximization button when the pane is minimized."""
-        self.otdl_button.setEnabled(True)
-
-    def init_date_selection_button(self):
-        """Add the Date Selection Button above the Violation Tabs."""
-        self.date_selection_button = QPushButton("Date Selection")
-        self.date_selection_button.setFixedWidth(200)
-        self.date_selection_button.clicked.connect(self.show_date_selection_pane)
-        self.main_layout.addWidget(self.date_selection_button, alignment=Qt.AlignLeft)
-
-    def init_otdl_button(self):
-        """Add the OTDL Maximization Button above the Violation Tabs."""
-        self.otdl_button = QPushButton("OTDL Maximization")
-        self.otdl_button.setFixedWidth(200)
-        self.otdl_button.clicked.connect(self.show_otdl_maximization)
-        self.main_layout.addWidget(self.otdl_button, alignment=Qt.AlignLeft)
+        current_tab = self.central_tab_widget.currentWidget()
+        if current_tab and hasattr(current_tab, "handle_global_filter_click"):
+            current_tab.handle_global_filter_click(status)
+            current_tab.update_stats()
 
     def init_85d_tab(self):
         """Initialize the Article 8.5.D violation tab."""
@@ -1604,6 +1521,91 @@ class MainApp(QMainWindow):
                 tab.handle_global_filter_click(status_type)
                 # Force stats update after applying filter
                 tab.update_stats()
+
+    def toggle_date_selection_pane(self):
+        """Toggle the Date Selection Pane and button state."""
+        if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
+            self.date_selection_pane = DateSelectionPane(self)
+
+        if self.date_selection_pane.isVisible():
+            self.date_selection_pane.hide()
+            self.date_selection_button.setChecked(False)
+        else:
+            self.date_selection_pane.show()
+            self.date_selection_button.setChecked(True)
+
+    def toggle_carrier_list_pane(self):
+        """Toggle the Carrier List Pane and button state."""
+        if not hasattr(self, "carrier_list_pane") or self.carrier_list_pane is None:
+            self.carrier_list_pane = CarrierListPane(self.mandates_db_path, self)
+
+        if self.carrier_list_pane.isVisible():
+            self.carrier_list_pane.hide()
+            self.carrier_list_button.setChecked(False)
+        else:
+            self.carrier_list_pane.show()
+            self.carrier_list_pane.resize(650, 400)
+            self.carrier_list_button.setChecked(True)
+
+    def toggle_otdl_maximization_pane(self):
+        """Toggle the OTDL Maximization Pane and button state."""
+        if not hasattr(self, "otdl_maximization_pane") or self.otdl_maximization_pane is None:
+            self.otdl_maximization_pane = OTDLMaximizationPane(self.carrier_list_pane, self)
+
+        if self.otdl_maximization_pane.isVisible():
+            self.otdl_maximization_pane.hide()
+            self.otdl_maximization_button.setChecked(False)
+        else:
+            self.otdl_maximization_pane.show()
+            self.otdl_maximization_pane.setMinimumSize(1053, 681)
+            self.otdl_maximization_button.setChecked(True)
+
+    def handle_status_filter_click(self, status):
+        """Handle clicks on status filter buttons.
+        
+        Args:
+            status (str): The status filter to apply ('WAL', 'NL', etc.)
+        """
+        # Store current filter
+        self.current_status_filter = status
+
+        # Uncheck all buttons except the clicked one
+        for button in [self.wal_button, self.nl_button, self.wal_nl_button, 
+                      self.otdl_button, self.aux_button, self.all_button]:
+            if button.text() == status:
+                button.setChecked(True)
+            else:
+                button.setChecked(False)
+
+        # Get current tab and apply filter if it supports it
+        current_tab = self.central_tab_widget.currentWidget()
+        if current_tab and hasattr(current_tab, "handle_global_filter_click"):
+            current_tab.handle_global_filter_click(status)
+            current_tab.update_stats()
+
+    def on_carrier_filter_changed(self, text):
+        """Handle changes to the carrier filter text.
+        
+        Args:
+            text (str): The new filter text
+        """
+        # Get current tab and apply filter if it supports it
+        current_tab = self.central_tab_widget.currentWidget()
+        if current_tab and hasattr(current_tab, "filter_carriers"):
+            current_tab.filter_carriers(text.lower(), filter_type="name")
+
+    def apply_carrier_filter(self, text):
+        """Apply carrier name filter to the current tab.
+        
+        Args:
+            text (str): The filter text to apply
+        """
+        current_tab = self.central_tab_widget.currentWidget()
+        if current_tab and hasattr(current_tab, "apply_carrier_filter"):
+            current_tab.apply_carrier_filter(text.lower())
+            # Update stats after filtering
+            if hasattr(current_tab, "update_stats"):
+                current_tab.update_stats()
 
 
 if __name__ == "__main__":
