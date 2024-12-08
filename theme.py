@@ -5,6 +5,16 @@ from PyQt5.QtWidgets import (
     QStyleFactory,
 )
 
+"""Module for managing application themes and styles.
+
+This module provides the application's visual styling including:
+- Color schemes
+- Font styles
+- Widget appearance
+- Layout spacing
+- Custom styling for specific widgets
+"""
+
 """Application theming and style management.
 
 This module defines the application's visual theme and styling, including:

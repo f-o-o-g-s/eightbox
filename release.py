@@ -1,3 +1,13 @@
+"""Module for managing application releases and version updates.
+
+This module provides functionality for:
+- Version number management (YYYY.MAJOR.MINOR.PATCH format)
+- Release notes generation
+- Git operations (commits, tags, pushes)
+- GitHub release creation
+- Build time tracking
+"""
+
 import os
 import subprocess
 from datetime import datetime

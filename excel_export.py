@@ -21,25 +21,14 @@ from theme import (
 from violation_model import calculate_optimal_gray
 
 
-"""Excel export functionality for application data.
+"""Module for exporting violation data to Excel spreadsheets.
 
-This module handles the export of application data to Excel format, providing:
-- Batch export of all violation tabs
-- Individual tab exports
-- Progress tracking and user feedback
-- Consistent formatting and styling
-- Error handling and recovery
-
-Features:
-- Preserves table formatting and styling
-- Maintains column widths and alignments
-- Supports custom headers and footers
-- Handles cell background colors
-- Preserves data types (dates, numbers, text)
-- Creates organized folder structure by date range
-
-The module uses xlsxwriter for Excel file creation and handles
-the complexities of converting Qt table data to Excel format.
+This module provides functionality to export violation data and carrier information
+to formatted Excel workbooks. It handles:
+- Formatting and styling of Excel cells
+- Creation of violation summary sheets
+- Export of carrier list data
+- Configurable column layouts
 """
 
 

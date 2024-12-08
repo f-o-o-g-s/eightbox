@@ -11,6 +11,7 @@ including:
 from PyQt5.QtCore import (
     Qt,
     QModelIndex,
+    QSortFilterProxyModel,
 )
 from PyQt5.QtGui import (
     QKeySequence,

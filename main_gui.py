@@ -529,6 +529,7 @@ class MainApp(QMainWindow):
         self.main_layout.addWidget(self.otdl_button, alignment=Qt.AlignLeft)
 
     def init_85d_tab(self):
+        """Initialize the Article 8.5.D violation tab."""
         print("Initializing 8.5.D Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.D Tab."""
@@ -537,6 +538,7 @@ class MainApp(QMainWindow):
         self.vio_85d_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_85f_tab(self):
+        """Initialize the Article 8.5.F violation tab."""
         print("Initializing 8.5.F Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.F Tab."""
@@ -545,6 +547,7 @@ class MainApp(QMainWindow):
         self.vio_85f_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_85f_ns_tab(self):
+        """Initialize the Article 8.5.F non-scheduled day violation tab."""
         print("Initializing 8.5.F NS Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.F NS Tab."""
@@ -553,6 +556,7 @@ class MainApp(QMainWindow):
         self.vio_85f_ns_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_85f_5th_tab(self):
+        """Initialize the Article 8.5.F fifth overtime day violation tab."""
         print("Initializing 8.5.F 5th Violations Tab")  # Debugging statement
 
         """Initialize and add the 8.5.F 5th Tab."""
@@ -583,6 +587,7 @@ class MainApp(QMainWindow):
         self.central_tab_widget.addTab(self.vio_MAX60_tab, "MAX60")
 
     def init_remedies_tab(self):
+        """Initialize the violation remedies summary tab."""
         print("Initializing Violations Summary Tab")  # Debugging statement
 
         """Initialize and add the Remedies Tab."""
@@ -1418,6 +1423,32 @@ class MainApp(QMainWindow):
             self.showNormal()
         else:
             self.showMaximized()
+
+    def get_violation_tab_by_type(self, violation_type):
+        """Get the violation tab instance for a given violation type.
+        
+        Args:
+            violation_type: The type of violation to get the tab for
+        
+        Returns:
+            The violation tab instance or None if not found
+        """
+        if violation_type == "8.5.D":
+            return self.vio_85d_tab
+        elif violation_type == "8.5.F":
+            return self.vio_85f_tab
+        elif violation_type == "8.5.F NS":
+            return self.vio_85f_ns_tab
+        elif violation_type == "8.5.F 5th":
+            return self.vio_85f_5th_tab
+        elif violation_type == "MAX12":
+            return self.vio_MAX12_tab
+        elif violation_type == "MAX60":
+            return self.vio_MAX60_tab
+        elif violation_type == "Summary":
+            return self.remedies_tab
+        else:
+            return None
 
 
 if __name__ == "__main__":

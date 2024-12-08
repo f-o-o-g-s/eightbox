@@ -180,3 +180,6 @@ class SettingsDialog(QWidget):
         if file_path:
             self.mandates_db_path = file_path
             self.path_display.setText(self.mandates_db_path)
+
+    def apply_settings(self):
+        """Apply the current settings and save them to the configuration file."""
