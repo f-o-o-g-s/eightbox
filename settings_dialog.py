@@ -198,7 +198,7 @@ class SettingsDialog(QWidget):
 
     def apply_settings(self):
         """Apply and save the current settings.
-        
+
         Updates the application configuration with the current dialog values
         and saves them to the settings file. Handles:
         - Database path validation

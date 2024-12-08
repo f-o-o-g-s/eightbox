@@ -11,49 +11,55 @@ backup_dir = os.path.join(project_dir, "backups")
 def run_pre_commit():
     """Run pre-commit hooks on all files."""
     print("\nRunning pre-commit hooks...")
+    max_retries = 3
+    current_try = 0
 
-    try:
-        # First attempt - with UTF-8 encoding
-        result = subprocess.run(
-            ["pre-commit", "run", "--all-files"],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
-
-        if result.returncode == 0:
-            return True
-
-        # If failed, check if it was just formatting
-        if "reformatted" in result.stdout or "reformatted" in result.stderr:
-            print(result.stdout)
-            print(result.stderr)
-
-            # Try one more time after reformatting
-            print("\nRetrying after reformatting...")
-            retry_result = subprocess.run(
+    while current_try < max_retries:
+        try:
+            result = subprocess.run(
                 ["pre-commit", "run", "--all-files"],
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
             )
-            return retry_result.returncode == 0
 
-        # If it failed for other reasons, show error and return False
-        print("\nPre-commit hooks failed. Please fix the issues and try again.")
-        print(result.stdout)
-        print(result.stderr)
-        return False
+            # If hooks passed successfully
+            if result.returncode == 0:
+                return True
 
-    except UnicodeDecodeError:
-        # Fallback to running without capturing output
-        print("Note: Unable to capture detailed output due to encoding issues.")
-        try:
-            subprocess.run(["pre-commit", "run", "--all-files"], check=True)
-            return True
-        except subprocess.CalledProcessError:
+            print(result.stdout)
+            print(result.stderr)
+
+            # If files were modified by formatting hooks (isort, black, etc)
+            if (
+                "reformatted" in result.stdout
+                or "reformatted" in result.stderr
+                or "files were modified" in result.stdout
+            ):
+                current_try += 1
+                if current_try < max_retries:
+                    print(
+                        "\nRetrying after formatting changes "
+                        f"(attempt {current_try + 1}/{max_retries})..."
+                    )
+                    continue
+
+            # If it failed for other reasons
             print("\nPre-commit hooks failed. Please fix the issues and try again.")
             return False
+
+        except UnicodeDecodeError:
+            # Fallback to running without capturing output
+            print("Note: Unable to capture detailed output due to encoding issues.")
+            try:
+                subprocess.run(["pre-commit", "run", "--all-files"], check=True)
+                return True
+            except subprocess.CalledProcessError:
+                print("\nPre-commit hooks failed. Please fix the issues and try again.")
+                return False
+
+    print("\nMax retries reached. Please check the remaining issues and try again.")
+    return False
 
 
 def create_zip_backup(project_dir, backup_dir):

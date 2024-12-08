@@ -1269,7 +1269,10 @@ class MainApp(QMainWindow):
         """
         try:
             # Get the selected date range
-            if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
+            if (
+                not hasattr(self, "date_selection_pane")
+                or self.date_selection_pane is None
+            ):
                 raise AttributeError("Date selection pane is not initialized")
 
             selected_date = self.date_selection_pane.calendar.selectedDate()
@@ -1291,7 +1294,9 @@ class MainApp(QMainWindow):
             self.statusBar().showMessage("Carrier data loaded successfully", 5000)
 
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to load carrier data: {str(e)}")
+            QMessageBox.critical(
+                self, "Error", f"Failed to load carrier data: {str(e)}"
+            )
             raise
 
     def export_violations(self):
@@ -1308,12 +1313,7 @@ class MainApp(QMainWindow):
         try:
             # Create progress dialog
             progress = CustomProgressDialog(
-                "Exporting violations...",
-                "",
-                0,
-                100,
-                self,
-                title="Exporting to Excel"
+                "Exporting violations...", "", 0, 100, self, title="Exporting to Excel"
             )
             progress.setCancelButton(None)
             progress.setWindowModality(Qt.WindowModal)
@@ -1335,14 +1335,17 @@ class MainApp(QMainWindow):
                 "8.5.F 5th": self.vio_85f_5th_tab,
                 "MAX12": self.vio_MAX12_tab,
                 "MAX60": self.vio_MAX60_tab,
-                "Summary": self.remedies_tab
+                "Summary": self.remedies_tab,
             }
 
             for i, (vio_type, tab) in enumerate(violation_types.items()):
                 progress.setValue(int((i / len(violation_types)) * 100))
                 progress.setLabelText(f"Exporting {vio_type} violations...")
 
-                filename = f"spreadsheets/violations_{vio_type.replace('.', '_')}_{start_date}_to_{end_date}.xlsx"
+                filename = (
+                    f"spreadsheets/violations_{vio_type.replace('.', '_')}_"
+                    f"{start_date}_to_{end_date}.xlsx"
+                )
                 self.excel_exporter.export_tab_to_excel(tab, filename)
 
             progress.setValue(100)
@@ -1353,12 +1356,15 @@ class MainApp(QMainWindow):
                 os.startfile("spreadsheets")
             else:
                 import subprocess
+
                 subprocess.Popen(["xdg-open", "spreadsheets"])
 
             self.statusBar().showMessage("Violations exported successfully", 5000)
 
         except Exception as e:
-            QMessageBox.critical(self, "Export Error", f"Failed to export violations: {str(e)}")
+            QMessageBox.critical(
+                self, "Export Error", f"Failed to export violations: {str(e)}"
+            )
         finally:
             if progress:
                 progress.close()
@@ -1371,6 +1377,7 @@ class MainApp(QMainWindow):
         """
         if self.settings_dialog is None or not self.settings_dialog.isVisible():
             from settings_dialog import SettingsDialog
+
             self.settings_dialog = SettingsDialog(self.mandates_db_path, self)
             self.settings_dialog.show()
         else:
@@ -1383,6 +1390,7 @@ class MainApp(QMainWindow):
         keyboard shortcuts, and other help information.
         """
         from documentation_dialog import DocumentationDialog
+
         doc_dialog = DocumentationDialog(self)
         doc_dialog.exec_()
 
@@ -1407,10 +1415,10 @@ class MainApp(QMainWindow):
 
     def get_violation_tab_by_type(self, violation_type):
         """Get the violation tab instance for a given violation type.
-        
+
         Args:
             violation_type: The type of violation to get the tab for
-        
+
         Returns:
             The violation tab instance or None if not found
         """

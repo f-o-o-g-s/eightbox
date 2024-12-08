@@ -15,8 +15,7 @@ from PyQt5.QtCore import (
     Qt,
     QTimer,
 )
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QTableView, QProgressDialog, QApplication
+from PyQt5.QtWidgets import QApplication
 
 from custom_widgets import (
     CustomErrorDialog,
@@ -256,29 +255,35 @@ class ExcelExporter:
         title_text_color = calculate_optimal_gray(title_bg)
 
         # Update formats to use calculated text colors
-        header_format = workbook.add_format({
-            "bold": True,
-            "align": "center",
-            "bg_color": header_bg.name(),
-            "font_color": header_text_color.name(),
-            "border": 1,
-            "border_color": border_color,
-        })
+        header_format = workbook.add_format(
+            {
+                "bold": True,
+                "align": "center",
+                "bg_color": header_bg.name(),
+                "font_color": header_text_color.name(),
+                "border": 1,
+                "border_color": border_color,
+            }
+        )
 
-        title_format = workbook.add_format({
-            "bold": True,
-            "align": "center",
-            "font_size": 14,
-            "bg_color": title_bg.name(),
-            "font_color": title_text_color.name(),
-            "border": 1,
-            "border_color": border_color,
-        })
+        title_format = workbook.add_format(
+            {
+                "bold": True,
+                "align": "center",
+                "font_size": 14,
+                "bg_color": title_bg.name(),
+                "font_color": title_text_color.name(),
+                "border": 1,
+                "border_color": border_color,
+            }
+        )
 
         # Get the currently active tab
         current_tab_index = self.main_window.central_tab_widget.currentIndex()
         current_tab = self.main_window.central_tab_widget.widget(current_tab_index)
-        current_tab_name = self.main_window.central_tab_widget.tabText(current_tab_index)
+        current_tab_name = self.main_window.central_tab_widget.tabText(
+            current_tab_index
+        )
 
         # Keep track of used worksheet names to avoid duplicates
         used_worksheet_names = set()
@@ -287,25 +292,25 @@ class ExcelExporter:
         for subtab_idx in range(current_tab.date_tabs.count()):
             # Update progress through main GUI
             QApplication.processEvents()  # Allow GUI to update
-            
+
             subtab_name = current_tab.date_tabs.tabText(subtab_idx)
-            
+
             # Initialize model as None
             model = None
             table_view = None
-            
+
             # Get table view - handle Summary tab specially
             if subtab_name == "Summary":
-                if hasattr(current_tab, 'summary_proxy_model'):
+                if hasattr(current_tab, "summary_proxy_model"):
                     model = current_tab.summary_proxy_model
                     table_view = current_tab.date_tabs.widget(subtab_idx)
                 else:
                     continue
             else:
                 # Get table view from the models dictionary
-                if hasattr(current_tab, 'models') and subtab_name in current_tab.models:
+                if hasattr(current_tab, "models") and subtab_name in current_tab.models:
                     model_info = current_tab.models[subtab_name]
-                    table_view = model_info['tab']
+                    table_view = model_info["tab"]
                 else:
                     continue
 
@@ -316,7 +321,7 @@ class ExcelExporter:
 
             # Extract table state using the utility function that handles proxy models
             content_df, metadata_df, row_highlights_df = extract_table_state(table_view)
-            
+
             if content_df is None or content_df.empty:
                 continue
 
@@ -336,13 +341,15 @@ class ExcelExporter:
                 available_space = 31 - len(suffix)
                 worksheet_name = f"{base_worksheet_name[:available_space]}{suffix}"
                 counter += 1
-            
+
             used_worksheet_names.add(worksheet_name.lower())
             worksheet = workbook.add_worksheet(worksheet_name)
 
             # Write title
             title = f"{current_tab_name} - {date_range}"
-            worksheet.merge_range(0, 0, 0, len(content_df.columns) - 1, title, title_format)
+            worksheet.merge_range(
+                0, 0, 0, len(content_df.columns) - 1, title, title_format
+            )
 
             # Write headers
             for col, header in enumerate(content_df.columns):
@@ -351,28 +358,30 @@ class ExcelExporter:
             # Write data with formatting
             for row in range(len(content_df)):
                 for col in range(len(content_df.columns)):
-                    cell_format = workbook.add_format({
-                        "border": 1,
-                        "border_color": border_color,
-                        "align": "center",
-                        "bg_color": "#1E1E1E",  # Dark gray background for unhighlighted cells
-                    })
+                    cell_format = workbook.add_format(
+                        {
+                            "border": 1,
+                            "border_color": border_color,
+                            "align": "center",
+                            "bg_color": "#1E1E1E",  # Dark gray background for unhighlighted cells
+                        }
+                    )
 
                     # Get cell metadata
                     cell_metadata = metadata_df.iloc[row, col]
-                    
+
                     # Apply background color if present
-                    bg_color = cell_metadata.get('background')
+                    bg_color = cell_metadata.get("background")
                     if bg_color:
                         cell_format.set_bg_color(bg_color)
-                    
+
                     # Always apply the foreground color from metadata
-                    text_color = cell_metadata.get('foreground')
+                    text_color = cell_metadata.get("foreground")
                     if text_color:
                         cell_format.set_font_color(text_color)
                     else:
                         # Default to white text on dark background for better visibility
-                        cell_format.set_font_color('#FFFFFF')
+                        cell_format.set_font_color("#FFFFFF")
 
                     value = content_df.iloc[row, col]
                     worksheet.write(row + 2, col, value, cell_format)
@@ -381,20 +390,25 @@ class ExcelExporter:
             for col in range(len(content_df.columns)):
                 # Get the column width from the GUI if available
                 gui_width = table_view.columnWidth(col)
-                excel_width = gui_width / 7  # Convert pixels to Excel units (approximate)
-                
+                excel_width = (
+                    gui_width / 7
+                )  # Convert pixels to Excel units (approximate)
+
                 # Calculate width based on content
                 header_length = len(str(content_df.columns[col]))
-                content_lengths = [len(str(content_df.iloc[row, col])) for row in range(len(content_df))]
+                content_lengths = [
+                    len(str(content_df.iloc[row, col]))
+                    for row in range(len(content_df))
+                ]
                 max_content_length = max(content_lengths) if content_lengths else 0
                 content_width = max(header_length, max_content_length)
-                
+
                 # Use the larger of GUI width or content width, with some padding
                 final_width = max(excel_width, content_width + 2)
-                
+
                 # Ensure minimum width of 8 and maximum of 50
                 final_width = max(8, min(50, final_width))
-                
+
                 worksheet.set_column(col, col, final_width)
 
             # Freeze panes
@@ -416,7 +430,7 @@ class ExcelExporter:
         invalid_chars = r"[]:*?/\\"
         for char in invalid_chars:
             sheet_name = sheet_name.replace(char, "_")
-        
+
         # If the name is too long, try to preserve both parts
         if len(sheet_name) > 31:
             parts = sheet_name.split(" - ")
@@ -424,12 +438,14 @@ class ExcelExporter:
                 tab_name, date = parts
                 # Try to keep both parts by shortening the first part
                 available_space = 31 - len(date) - 3  # 3 for " - "
-                if available_space > 10:  # Only if we can keep a reasonable part of the tab name
+                if (
+                    available_space > 10
+                ):  # Only if we can keep a reasonable part of the tab name
                     return f"{tab_name[:available_space]} - {date}"
-            
+
             # If we can't preserve both parts nicely, just truncate
             return sheet_name[:31]
-            
+
         return sheet_name
 
     # ... (continue with other helper methods like _write_excel_file)

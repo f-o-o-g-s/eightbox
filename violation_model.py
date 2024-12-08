@@ -550,54 +550,54 @@ class ViolationModel(QStandardItemModel):
                 - row_highlights_df: DataFrame containing row highlight information
         """
         # Get column headers
-        headers = [self.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in range(self.columnCount())]
-        
+        headers = [
+            self.headerData(i, Qt.Horizontal, Qt.DisplayRole)
+            for i in range(self.columnCount())
+        ]
+
         # Extract content
         content_data = []
         metadata_data = []
         row_highlights = []
-        
+
         for row in range(self.rowCount()):
             row_content = []
             row_metadata = []
             has_highlight = False
-            
+
             for col in range(self.columnCount()):
                 index = self.index(row, col)
-                
+
                 # Get display value
                 value = self.data(index, Qt.DisplayRole)
                 if value is None:
                     value = ""
                 row_content.append(value)
-                
+
                 # Get formatting metadata
                 bg_color = self.get_background_color(index)
                 fg_color = self.get_foreground_color(index)
-                
+
                 # Convert QColor to string or None
                 bg_color_str = bg_color.name() if isinstance(bg_color, QColor) else None
                 fg_color_str = fg_color.name() if isinstance(fg_color, QColor) else None
-                
-                metadata = {
-                    'background': bg_color_str,
-                    'foreground': fg_color_str
-                }
+
+                metadata = {"background": bg_color_str, "foreground": fg_color_str}
                 row_metadata.append(metadata)
-                
+
                 # Check for highlights - only if we have a valid background color
-                if bg_color_str and bg_color_str.lower() != '#000000':
+                if bg_color_str and bg_color_str.lower() != "#000000":
                     has_highlight = True
-            
+
             content_data.append(row_content)
             metadata_data.append(row_metadata)
             row_highlights.append(has_highlight)
-        
+
         # Create DataFrames with explicit dtypes to avoid ambiguous truth values
         content_df = pd.DataFrame(content_data, columns=headers)
         metadata_df = pd.DataFrame(metadata_data, columns=headers)
-        row_highlights_df = pd.DataFrame({'highlighted': row_highlights}, dtype=bool)
-        
+        row_highlights_df = pd.DataFrame({"highlighted": row_highlights}, dtype=bool)
+
         return content_df, metadata_df, row_highlights_df
 
     def sort(self, column, order):
@@ -718,14 +718,18 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 
         if self.filter_type == "list_status":
             list_status = source_model.data(
-                source_model.index(source_row, source_model.df.columns.get_loc("list_status")),
+                source_model.index(
+                    source_row, source_model.df.columns.get_loc("list_status")
+                ),
                 Qt.DisplayRole,
             )
             return self.filter_text.lower() in str(list_status).lower()
 
         elif self.filter_type == "violations":
             remedy_total = source_model.data(
-                source_model.index(source_row, source_model.df.columns.get_loc("remedy_total")),
+                source_model.index(
+                    source_row, source_model.df.columns.get_loc("remedy_total")
+                ),
                 Qt.DisplayRole,
             )
             try:

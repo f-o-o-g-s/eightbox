@@ -9,14 +9,10 @@ including:
 """
 
 from PyQt5.QtCore import (
-    Qt,
-    QModelIndex,
     QSortFilterProxyModel,
+    Qt,
 )
-from PyQt5.QtGui import (
-    QKeySequence,
-    QClipboard,
-)
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import (
     QAbstractItemView,
     QApplication,
