@@ -1,7 +1,15 @@
-"""Dialog for displaying application documentation and help information.
+"""Application documentation and help dialog.
 
-This module provides a dialog window that shows documentation, usage guides,
-and help information to users in a formatted, easy-to-read layout.
+This module provides a dialog interface for displaying application documentation,
+including:
+- Feature guides and tutorials
+- Usage instructions
+- Keyboard shortcuts
+- Troubleshooting tips
+- Version information
+
+The dialog uses a custom title bar and supports markdown-formatted content
+with proper styling and navigation.
 """
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -25,10 +33,40 @@ from documentation_content import (
 
 
 class DocumentationDialog(QDialog):
-    """A dialog window for displaying application documentation."""
+    """Dialog for displaying application documentation and help content.
+
+    Provides a styled interface for viewing documentation with:
+    - Custom title bar with window controls
+    - Markdown content rendering
+    - Organized sections and navigation
+    - Responsive layout
+    - Window dragging support
+
+    Attributes:
+        parent: Parent widget (usually main window)
+        dragPos: Position for window dragging
+    """
 
     def __init__(self, parent=None):
+        """Initialize the documentation dialog.
+
+        Args:
+            parent: Parent widget, typically the main application window
+        """
         super().__init__(parent)
+        self.parent = parent
+        self.dragPos = None
+        self.initUI()
+
+    def initUI(self):
+        """Initialize and configure the dialog's user interface.
+
+        Sets up:
+        - Window properties (title, size, flags)
+        - Custom title bar
+        - Content layout and styling
+        - Documentation sections
+        """
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setSizeGripEnabled(True)
         self.setMinimumSize(800, 600)
@@ -62,10 +100,10 @@ class DocumentationDialog(QDialog):
         self.setLayout(layout)
 
         # Center on parent
-        if parent:
+        if self.parent:
             self.move(
-                parent.x() + (parent.width() - self.width()) // 2,
-                parent.y() + (parent.height() - self.height()) // 2,
+                self.parent.x() + (self.parent.width() - self.width()) // 2,
+                self.parent.y() + (self.parent.height() - self.height()) // 2,
             )
 
     def _setup_styles(self, widget):
@@ -138,3 +176,10 @@ class DocumentationDialog(QDialog):
         text_browser.setOpenExternalLinks(True)
         text_browser.setHtml(content)
         tab_widget.addTab(text_browser, title)
+
+    def accept(self):
+        """Close the dialog.
+
+        Overrides QDialog's accept method to handle custom close behavior.
+        """
+        self.hide()

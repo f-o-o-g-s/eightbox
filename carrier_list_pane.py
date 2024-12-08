@@ -202,10 +202,10 @@ class PandasTableModel(QAbstractTableModel):
         """Get the number of rows in the model.
 
         Args:
-            parent (QModelIndex): The parent index (unused in table models)
+            parent (QModelIndex): Parent index (unused in table models)
 
         Returns:
-            int: The number of rows in the model
+            int: Number of rows in the carrier data
         """
         return len(self.df)
 
@@ -213,10 +213,10 @@ class PandasTableModel(QAbstractTableModel):
         """Get the number of columns in the model.
 
         Args:
-            parent (QModelIndex): The parent index (unused in table models)
+            parent (QModelIndex): Parent index (unused in table models)
 
         Returns:
-            int: The number of columns in the model
+            int: Number of columns in the carrier data
         """
         return len(self.df.columns)
 
@@ -252,24 +252,24 @@ class PandasTableModel(QAbstractTableModel):
         return QVariant()
 
     def headerData(self, section, orientation, role):
-        """Get the header data for display.
+        """Get header data for display.
 
-        Provides header labels for both horizontal and vertical orientations.
+        Provides column and row headers for the carrier list table.
 
         Args:
-            section (int): The section (row or column) number
-            orientation (Qt.Orientation): The header orientation
-            role (Qt.ItemDataRole): The role being requested
+            section (int): Section (row/column) number
+            orientation (Qt.Orientation): Header orientation
+            role (Qt.ItemDataRole): Data role being requested
 
         Returns:
-            str: The header text for DisplayRole, None for other roles
+            str: Header text for DisplayRole, None for other roles
         """
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self.df.columns[section]
             elif orientation == Qt.Vertical:
-                return section + 1
-        return QVariant()
+                return str(section + 1)
+        return None
 
     def setData(self, index, value, role=Qt.EditRole):
         """Set data in the model.
