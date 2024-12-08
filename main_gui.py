@@ -345,28 +345,30 @@ class MainApp(QMainWindow):
 
         # Create a container widget for the button row with a darker background
         button_container = QWidget()
-        button_container.setObjectName("ButtonContainer")
         button_container.setStyleSheet(
             """
-            QWidget#ButtonContainer {
+            QWidget {
                 background-color: #1E1E1E;
                 border-bottom: 1px solid #333333;
             }
-            QWidget#ButtonContainer QPushButton {
-                background-color: transparent;
-                border: none;
+            QPushButton {
+                background-color: #2D2D2D;
+                border: 1px solid #404040;
+                border-radius: 4px;
                 color: #E1E1E1;
                 padding: 12px 24px;
                 font-size: 13px;
                 font-weight: normal;
                 text-align: left;
+                margin: 8px 4px;
             }
-            QWidget#ButtonContainer QPushButton:hover {
-                background-color: #2D2D2D;
+            QPushButton:hover {
+                background-color: #383838;
+                border-color: #4D4D4D;
             }
-            QWidget#ButtonContainer QPushButton:pressed,
-            QWidget#ButtonContainer QPushButton:checked {
+            QPushButton:checked {
                 background-color: #BB86FC;
+                border-color: #BB86FC;
                 color: #000000;
             }
             QLineEdit {
