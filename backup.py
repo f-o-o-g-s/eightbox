@@ -86,6 +86,15 @@ def git_backup(description):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         message = f"BACKUP ({timestamp}): {description}"
 
+        # Check if there are any changes to commit
+        status = subprocess.run(
+            ["git", "status", "--porcelain"], check=True, capture_output=True, text=True
+        ).stdout.strip()
+
+        if not status:
+            print("\nNo changes to commit in Git.")
+            return True
+
         # Git commands - only add tracked files and respect .gitignore
         subprocess.run(["git", "add", "-u"], check=True)
 
@@ -113,9 +122,6 @@ def git_backup(description):
         return True
 
     except subprocess.CalledProcessError as e:
-        if "nothing to commit" in str(e.output):
-            print("\nNo changes to commit in Git.")
-            return True
         print(f"\nGit backup error: {str(e)}")
         return False
 
