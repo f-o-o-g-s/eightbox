@@ -1020,10 +1020,11 @@ class MainApp(QMainWindow):
         self.remedies_tab.refresh_data(remedies_data)
 
     def on_carrier_data_updated(self, _):
-        """Handle updates to the carrier list and refresh all tabs."""
-        """Actually uses the JSON file for applying updates to the fetched clock ring data"""
-        """Just updating the data without clicking 'Save Carrier List' will not update the views."""
-
+        """Handle updates to the carrier list and refresh all tabs.
+        
+        Actually uses the JSON file for applying updates to the fetched clock ring data.
+        Just updating the data without clicking 'Save Carrier List' will not update the views.
+        """
         print("MainApp: Received data_updated signal.")
 
         # Load the most up-to-date carrier data from the JSON file

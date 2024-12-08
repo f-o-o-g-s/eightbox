@@ -15,7 +15,7 @@ def run_pre_commit():
             ["pre-commit", "run", "--all-files"],
             capture_output=True,
             text=True,
-            encoding="utf-8",
+            encoding='utf-8'
         )
 
         if result.returncode == 0:
@@ -32,7 +32,7 @@ def run_pre_commit():
                 ["pre-commit", "run", "--all-files"],
                 capture_output=True,
                 text=True,
-                encoding="utf-8",
+                encoding='utf-8'
             )
             return retry_result.returncode == 0
 
@@ -117,13 +117,13 @@ def create_zip_backup(project_dir, backup_dir):
         return None
 
 
-def git_backup(description):
+def git_backup(description, target_branch="main"):
     """Handle Git version control backup."""
     try:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         message = f"BACKUP ({timestamp}): {description}"
 
-        # Check if there are any changes to commit
+        # Check for changes
         status = subprocess.run(
             ["git", "status", "--porcelain"], check=True, capture_output=True, text=True
         ).stdout.strip()
@@ -132,69 +132,63 @@ def git_backup(description):
             print("\nNo changes to commit in Git.")
             return True
 
-        # Git commands - only add tracked files and respect .gitignore
+        # Git commands
         subprocess.run(["git", "add", "-u"], check=True)
-
-        # Add any new config files that should be tracked
-        config_files = [
-            ".gitignore",
-            "pyproject.toml",
-            "README.md",
-            "LICENSE",
-            ".flake8",
-            ".pre-commit-config.yaml",
-        ]
-        for file in config_files:
-            try:
-                subprocess.run(["git", "add", file], check=True, capture_output=True)
-            except subprocess.CalledProcessError:
-                pass  # Skip if file doesn't exist
-
         subprocess.run(["git", "commit", "-m", message], check=True)
-        subprocess.run(["git", "push", "origin", "main"], check=True)
-
-        print("\nGit backup completed successfully!")
-        print(f"Description: {description}")
-        print(f"Timestamp: {timestamp}")
+        subprocess.run(["git", "push", "origin", target_branch], check=True)
+        
         return True
 
     except subprocess.CalledProcessError as e:
-        print(f"\nGit backup error: {str(e)}")
+        print(f"\nGit operation failed: {str(e)}")
         return False
 
 
 def create_backup():
-    """Create both Git and ZIP backups of the project."""
+    """Create a backup of the project using Git version control."""
     try:
-        # Run pre-commit hooks first
-        if not run_pre_commit():
+        # Get current branch
+        current_branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+        ).decode().strip()
+        
+        print(f"\nYou are on branch: {current_branch}")
+        
+        # If not on main, ask where to push
+        target_branch = "main"
+        if current_branch != "main":
+            print("\nWhere would you like to push your changes?")
+            print(f"1. Current branch ({current_branch})")
+            print("2. Main branch")
+            choice = input("\nEnter choice (1-2): ").strip()
+            
+            if choice == "1":
+                target_branch = current_branch
+        
+        # Get backup description and type
+        print("\nEnter a description of your changes:")
+        description = input().strip()
+        
+        if not description:
+            print("\nError: Description cannot be empty")
             return
 
-        # Get description from user
-        print("\nWhat changes are you backing up?")
-        description = input("Description: ").strip()
-
-        # Get backup preferences
-        print("\nWhat would you like to backup?")
-        print("1. Git only (version control)")
-        print("2. ZIP only (full directory)")
-        print("3. Both Git and ZIP")
-        choice = input("Enter choice (1-3): ").strip()
-
-        # Determine project and backup directories
-        project_dir = os.path.dirname(os.path.abspath(__file__))
-        backup_dir = os.path.join(os.path.expanduser("~"), "eightbox_backups")
+        print("\nBackup type:")
+        print("1. Git backup only")
+        print("2. ZIP backup only")
+        print("3. Both Git and ZIP backup")
+        backup_type = input("\nEnter choice (1-3): ").strip()
 
         success = True
-        if choice in ["1", "3"]:
-            success &= git_backup(description)
+        if backup_type in ["1", "3"]:
+            success &= git_backup(description, target_branch)  # Pass target_branch to git_backup
 
-        if choice in ["2", "3"]:
+        if backup_type in ["2", "3"]:
             zip_path = create_zip_backup(project_dir, backup_dir)
             success &= bool(zip_path)
 
         if success:
-            print("\nAll requested backup operations completed successfully!")
+            print(f"\nBackup successfully pushed to {target_branch} branch!")
         else:
             print("\nSome backup operations failed. Please check the logs above.")
 
