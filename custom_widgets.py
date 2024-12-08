@@ -428,10 +428,30 @@ class CustomWarningDialog(QDialog):
             )
 
     def accept(self):
+        """Accept the warning dialog and set result to Yes.
+
+        Overrides the QDialog accept() method to track the user's choice
+        before closing the dialog.
+
+        Note:
+            - Sets self.result to QMessageBox.Yes
+            - Calls parent class accept() to close dialog
+            - Used by the 'Yes' button click handler
+        """
         self.result = QMessageBox.Yes
         super().accept()
 
     def reject(self):
+        """Reject the warning dialog and set result to No.
+
+        Overrides the QDialog reject() method to track the user's choice
+        before closing the dialog.
+
+        Note:
+            - Sets self.result to QMessageBox.No
+            - Calls parent class reject() to close dialog
+            - Used by both 'No' button and close button
+        """
         self.result = QMessageBox.No
         super().reject()
 

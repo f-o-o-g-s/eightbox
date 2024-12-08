@@ -148,6 +148,17 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
 
 # Create a metaclass that combines QWidget and ABC
 class MetaQWidgetABC(type(QWidget), ABCMeta):  # type: ignore[misc]
+    """Metaclass combining QWidget and ABC metaclasses.
+
+    This metaclass allows the BaseViolationTab to properly inherit from both
+    QWidget and ABC, enabling both Qt widget functionality and abstract method
+    definition in a single class.
+
+    Note:
+        Required to resolve metaclass conflict between QWidget and ABC
+        when creating abstract base classes that are also Qt widgets.
+    """
+
     pass
 
 

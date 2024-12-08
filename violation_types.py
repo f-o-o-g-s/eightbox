@@ -9,7 +9,24 @@ from enum import Enum
 
 
 class ViolationType(Enum):
-    """Enum for different types of violations tracked in the system."""
+    """Enumeration of carrier overtime violation categories.
+
+    Each value represents a specific type of overtime violation,
+    with distinct rules for:
+    - When the violation occurs
+    - How remedy hours are calculated
+    - Which carriers are affected
+    - Display formatting requirements
+
+    Attributes:
+        EIGHT_FIVE_D: Article 8.5.D - Overtime off assignment
+        EIGHT_FIVE_F: Article 8.5.F - Over 10 hours (regular day)
+        EIGHT_FIVE_F_NS: Article 8.5.F - Over 8 hours (non-scheduled day)
+        EIGHT_FIVE_F_5TH: Article 8.5.F - 5th overtime day
+        MAX_12: Maximum 12-hour rule (11.5 for non-OTDL)
+        MAX_60: Maximum 60-hour weekly limit
+        VIOLATION_REMEDIES: Combined violation summary view
+    """
 
     EIGHT_FIVE_D = "85d"
     EIGHT_FIVE_F = "85f"

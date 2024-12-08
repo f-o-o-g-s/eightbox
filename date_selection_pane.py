@@ -25,6 +25,15 @@ from custom_widgets import CustomTitleBarWidget
 
 
 class CustomCalendarWidget(QCalendarWidget):
+    """A customized calendar widget with styled navigation and date display.
+
+    Provides a calendar interface with:
+    - White text for current month days
+    - Dimmed text for other month days
+    - Custom styled navigation bar with month/year controls
+    - Automatic format updates when month changes
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -127,6 +136,15 @@ class CustomCalendarWidget(QCalendarWidget):
 
 
 class DateSelectionPane(QWidget):
+    """A floating window that allows users to select date ranges.
+
+    Provides a calendar interface for selecting dates with:
+    - Custom calendar widget
+    - Apply button for confirming selection
+    - Instructions for user guidance
+    - Minimize/restore functionality
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent_widget = parent
@@ -169,11 +187,21 @@ class DateSelectionPane(QWidget):
         main_layout.addWidget(content_widget)
 
     def minimize_to_button(self):
+        """Minimize the date selection pane and update parent button state.
+
+        Hides the pane and unchecks the associated toggle button in the
+        parent window if it exists.
+        """
         if self.parent_main and hasattr(self.parent_main, "date_selection_button"):
             self.parent_main.date_selection_button.setChecked(False)
         self.hide()
 
     def changeEvent(self, event):
+        """Handle window state changes, particularly minimization.
+
+        Args:
+            event (QEvent): The window state change event
+        """
         if event.type() == QEvent.WindowStateChange:
             if self.windowState() & Qt.WindowMinimized:
                 self.minimize_to_button()
@@ -181,11 +209,24 @@ class DateSelectionPane(QWidget):
         super().changeEvent(event)
 
     def hideEvent(self, event):
+        """Handle window hide events.
+
+        Updates the parent window's date selection button state when
+        this pane is hidden.
+
+        Args:
+            event (QEvent): The hide event
+        """
         super().hideEvent(event)
         if self.parent_main and hasattr(self.parent_main, "date_selection_button"):
             self.parent_main.date_selection_button.setChecked(False)
 
     def apply_date_range_wrapper(self):
+        """Wrapper to call the parent's apply_date_range method.
+
+        Delegates the date range application to the parent window if
+        the method exists.
+        """
         if self.parent_main and hasattr(self.parent_main, "apply_date_range"):
             self.parent_main.apply_date_range()
 

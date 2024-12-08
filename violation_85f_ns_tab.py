@@ -9,6 +9,19 @@ from violation_types import ViolationType
 
 
 class Violation85fNsTab(BaseViolationTab):
+    """Tab for displaying and managing Article 8.5.F non-scheduled day violations.
+
+    Handles violations related to overtime work on non-scheduled days.
+    Provides daily and summary views of violations, including:
+    - Daily violation details
+    - Weekly totals per carrier
+    - List status filtering
+    - Remedy hour calculations
+
+    Attributes:
+        tab_type (ViolationType): Set to EIGHT_FIVE_F_NS for this violation type
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = ViolationType.EIGHT_FIVE_F_NS

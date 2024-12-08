@@ -58,6 +58,12 @@ from theme import (
 
 
 class CarrierListProxyModel(QSortFilterProxyModel):
+    """Custom proxy model for filtering and sorting carrier list data.
+
+    Provides custom sorting for list status and carrier names, along with
+    filtering capabilities for both status and text searches.
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.status_filter = ""
@@ -105,14 +111,39 @@ class CarrierListProxyModel(QSortFilterProxyModel):
             return str(left_data).lower() < str(right_data).lower()
 
     def set_status_filter(self, status):
+        """Set the status filter for the proxy model.
+
+        Args:
+            status (str): The list status to filter by ('all', 'otdl', 'wal', 'nl', 'ptf')
+                         Use 'all' to clear the filter.
+        """
         self.status_filter = status.lower() if status != "all" else ""
         self.invalidateFilter()
 
     def set_text_filter(self, text):
+        """Set the text filter for the proxy model.
+
+        Args:
+            text (str): The text to filter carrier names by.
+                       Case-insensitive partial matching is supported.
+        """
         self.text_filter = text.lower()
         self.invalidateFilter()
 
     def filterAcceptsRow(self, source_row, source_parent):
+        """Determine if a row should be included in the filtered results.
+
+        Implements both status and text filtering logic. A row is accepted if it:
+        1. Matches the current status filter (if any)
+        2. Contains the filter text in any column (if text filter is active)
+
+        Args:
+            source_row (int): Row index in the source model
+            source_parent (QModelIndex): Parent index in source model
+
+        Returns:
+            bool: True if row should be shown, False if it should be filtered out
+        """
         source_model = self.sourceModel()
 
         # Get the list status for this row
@@ -142,6 +173,12 @@ class CarrierListProxyModel(QSortFilterProxyModel):
 
 
 class PandasTableModel(QAbstractTableModel):
+    """Table model for displaying pandas DataFrame in a QTableView.
+
+    Handles data display, editing, and formatting for carrier information
+    including status colors and text alignment.
+    """
+
     def __init__(self, df, db_df=None, parent=None):
         super().__init__(parent)
         self.status_order = {"nl": 0, "wal": 1, "otdl": 2, "ptf": 3}
@@ -149,7 +186,12 @@ class PandasTableModel(QAbstractTableModel):
         self.db_df = db_df if db_df is not None else pd.DataFrame()
 
     def update_data(self, new_df, new_db_df=None):
-        """Update the model with new data."""
+        """Update the model's data with new DataFrame(s).
+
+        Args:
+            new_df (pd.DataFrame): New carrier data to display
+            new_db_df (pd.DataFrame, optional): New database reference data
+        """
         self.beginResetModel()
         self.df = new_df
         if new_db_df is not None:
@@ -202,7 +244,18 @@ class PandasTableModel(QAbstractTableModel):
         return QVariant()
 
     def setData(self, index, value, role=Qt.EditRole):
-        """Update the DataFrame when a cell is edited."""
+        """Update data in the model when edited by user.
+
+        Handles cell editing and tracks which rows have been modified.
+
+        Args:
+            index (QModelIndex): Index of cell being edited
+            value: New value for the cell
+            role (Qt.ItemDataRole): Role of the data being set
+
+        Returns:
+            bool: True if data was successfully updated, False otherwise
+        """
         if role == Qt.EditRole and index.isValid():
             column = self.df.columns[index.column()]
             current_value = self.df.iloc[index.row(), index.column()]
@@ -222,11 +275,32 @@ class PandasTableModel(QAbstractTableModel):
         return False
 
     def flags(self, index):
-        """Enable selection and editing for all items."""
+        """Return item flags for the given index.
+
+        Enables selection and editing for all cells in the table.
+
+        Args:
+            index (QModelIndex): Index to get flags for
+
+        Returns:
+            Qt.ItemFlags: Flags indicating item capabilities
+        """
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
 
 class CarrierListPane(QWidget):
+    """Main widget for managing carrier list interface.
+
+    Provides functionality for displaying, filtering, editing, and managing
+    carrier information including their list status and hour limits.
+
+    Signals:
+        data_updated: Emitted when carrier data is modified
+        reload_requested: Emitted when application reload is needed
+        request_apply_date_range: Emitted when date range should be applied
+        carrier_list_updated: Emitted when carrier list is modified
+    """
+
     data_updated = pyqtSignal(pd.DataFrame)  # Signal to notify about data changes
     reload_requested = pyqtSignal()  # Signal to request application reload
     request_apply_date_range = pyqtSignal()  # New signal
@@ -511,7 +585,11 @@ class CarrierListPane(QWidget):
         self.hide()
 
     def changeEvent(self, event):
-        """Handle window state changes"""
+        """Handle window state changes, particularly minimization.
+
+        Args:
+            event (QEvent): The window state change event
+        """
         if event.type() == QEvent.WindowStateChange:
             if self.windowState() & Qt.WindowMinimized:
                 # Prevent actual minimize, use our custom handler instead
@@ -520,7 +598,14 @@ class CarrierListPane(QWidget):
         super().changeEvent(event)
 
     def hideEvent(self, event):
-        """Handle the hide event."""
+        """Handle window hide events.
+
+        Updates the parent window's carrier list button state when
+        this pane is hidden.
+
+        Args:
+            event (QEvent): The hide event
+        """
         try:
             # Check if we have a parent widget and if it has the carrier_list_button
             if (
@@ -537,7 +622,14 @@ class CarrierListPane(QWidget):
         super().hideEvent(event)
 
     def initUI(self, layout):
-        """Initialize the Carrier List Pane UI."""
+        """Initialize the user interface components.
+
+        Sets up the table view, filter input, and control buttons.
+        Configures the layout and styling of all UI elements.
+
+        Args:
+            layout (QLayout): The layout to populate with UI elements
+        """
         layout.setContentsMargins(10, 10, 10, 10)
 
         # Initialize the main table view for the Carrier List tab
@@ -583,7 +675,12 @@ class CarrierListPane(QWidget):
         self.setLayout(layout)
 
     def save_to_json(self):
-        """Save the current carrier list to JSON."""
+        """Save the current carrier list to JSON file.
+
+        Saves the current state of the carrier list and emits appropriate
+        signals to update other components. Shows notification dialogs for
+        success or failure.
+        """
         try:
             self.main_model.df.to_json(self.json_path, orient="records")
             CustomNotificationDialog.show_notification(
@@ -613,7 +710,14 @@ class CarrierListPane(QWidget):
             )
 
     def load_carrier_list(self):
-        """Load carrier list from JSON or fallback to the database, and check for new carriers."""
+        """Load and process carrier list data.
+
+        Attempts to load from JSON file first, falls back to database if needed.
+        Handles data validation, default values, and checks for new carriers.
+
+        Returns:
+            pd.DataFrame: Processed carrier list data with all required columns
+        """
         # Define default columns and their types
         default_columns = {
             "carrier_name": str,
@@ -681,7 +785,16 @@ class CarrierListPane(QWidget):
         return df
 
     def show_new_carriers_dialog(self, new_carriers, new_carrier_names, df):
-        """Show the new carriers dialog and handle the result."""
+        """Display dialog for handling newly discovered carriers.
+
+        Shows a dialog allowing user to select which new carriers to add
+        to the list and handles updating the data accordingly.
+
+        Args:
+            new_carriers (pd.DataFrame): DataFrame containing new carrier data
+            new_carrier_names (list): List of new carrier names
+            df (pd.DataFrame): Current carrier list DataFrame
+        """
         # Show custom dialog and get selected carriers
         selected_carriers = NewCarriersDialog.get_new_carriers(
             self.parent_widget, new_carrier_names
@@ -730,7 +843,11 @@ class CarrierListPane(QWidget):
             self.update_statistics()
 
     def edit_carrier(self):
-        """Edit the selected carrier's details."""
+        """Edit the selected carrier's details.
+
+        Opens a dialog allowing modification of carrier list status and hour limits.
+        Updates the model and view with any changes made.
+        """
         selected_index = self.table_view.currentIndex()
         if not selected_index.isValid():
             CustomNotificationDialog.show_notification(
@@ -823,7 +940,11 @@ class CarrierListPane(QWidget):
         dialog.exec_()
 
     def remove_carrier(self):
-        """Remove the selected carrier after confirmation."""
+        """Remove the selected carrier from the list.
+
+        Shows confirmation dialog before removal. Updates the model,
+        JSON file, and emits appropriate signals after successful removal.
+        """
         try:
             selected_index = self.table_view.selectionModel().currentIndex()
             if not selected_index.isValid():
@@ -881,7 +1002,16 @@ class CarrierListPane(QWidget):
             self.table_view.clearSelection()
 
     def highlight_changes(self, top_left=None, bottom_right=None, roles=None):
-        """Highlight cells that have been modified."""
+        """Highlight cells that have been modified.
+
+        Compares current values with original values and applies
+        visual highlighting to changed cells.
+
+        Args:
+            top_left (QModelIndex, optional): Starting index of change range
+            bottom_right (QModelIndex, optional): Ending index of change range
+            roles (list, optional): List of item roles that were changed
+        """
 
         for row in range(self.temp_df.shape[0]):
             for col in range(self.temp_df.shape[1]):
@@ -911,7 +1041,11 @@ class CarrierListPane(QWidget):
             self.parent_widget.reenable_carrier_list_button()
 
     def init_tabs(self):
-        """Initialize the tabs for Carrier List and Summary."""
+        """Initialize the carrier list and summary tabs.
+
+        Creates and configures the tab widget with carrier list
+        and summary views.
+        """
         # Clear existing tabs to prevent duplication
         while self.summary_tab_widget.count():
             self.summary_tab_widget.removeTab(0)
@@ -933,7 +1067,10 @@ class CarrierListPane(QWidget):
         self.summary_tab_widget.addTab(summary_widget, "Summary")
 
     def reset_highlights(self):
-        """Remove all highlights after confirming changes."""
+        """Remove all cell highlighting from the table.
+
+        Resets background colors to default after changes are confirmed.
+        """
         print("Resetting highlights...")
         for row in range(self.carrier_df.shape[0]):
             for col in range(self.carrier_df.shape[1]):
@@ -945,7 +1082,11 @@ class CarrierListPane(QWidget):
                 )
 
     def init_carrier_list_tab(self):
-        """Initialize the Carrier List Tab."""
+        """Initialize the carrier list tab interface.
+
+        Sets up the filter input, table view, and control buttons
+        for the carrier list tab.
+        """
         layout = QVBoxLayout()
 
         # Add a filter input field
@@ -985,7 +1126,11 @@ class CarrierListPane(QWidget):
         self.carrier_list_widget.setLayout(layout)
 
     def init_summary_tab(self):
-        """Initialize the Summary Tab."""
+        """Initialize the summary tab interface.
+
+        Creates and configures the summary view showing aggregated
+        carrier information.
+        """
         layout = QVBoxLayout()
 
         # Summary table view
@@ -996,9 +1141,13 @@ class CarrierListPane(QWidget):
         self.summary_widget.setLayout(layout)
 
     def fetch_carrier_data(self):
-        """Fetch carrier data from the mandates.sqlite database.
+        """Fetch carrier data from the mandates database.
 
-        Excludes carriers with 'out of station' status.
+        Retrieves carrier information excluding those with 'out of station' status.
+
+        Returns:
+            pd.DataFrame: Carrier data with columns for name, effective date,
+                         list status, and route information
         """
         query = """
         SELECT
@@ -1037,7 +1186,11 @@ class CarrierListPane(QWidget):
             )
 
     def update_statistics(self):
-        """Update the statistics labels based on the current data"""
+        """Update the carrier statistics display.
+
+        Calculates and displays counts for each list status category
+        and updates the visual state of status filters.
+        """
         if self.proxy_model and self.proxy_model.sourceModel():
             # Get counts from the full dataset
             full_df = self.main_model.df
@@ -1066,7 +1219,14 @@ class CarrierListPane(QWidget):
                 container.style().polish(container)
 
     def filter_by_status(self, status):
-        """Filter the view based on the clicked status"""
+        """Filter the carrier list by selected status.
+
+        Updates the visual state of status filters and applies
+        the selected filter to the view.
+
+        Args:
+            status (str): The status to filter by ('all', 'otdl', 'wal', 'nl', 'ptf')
+        """
         # Clear previous selection states
         for s in ["all", "otdl", "wal", "nl", "ptf"]:
             container = getattr(self, f"{s}_container")
@@ -1090,7 +1250,11 @@ class CarrierListPane(QWidget):
         self.update_statistics()
 
     def apply_filter(self):
-        """Apply the text filter to the proxy model."""
+        """Apply the current text filter to the carrier list.
+
+        Updates the proxy model filter based on the current text input
+        and refreshes the statistics display.
+        """
         filter_text = self.filter_input.text()
         self.proxy_model.set_text_filter(filter_text)
         self.update_statistics()

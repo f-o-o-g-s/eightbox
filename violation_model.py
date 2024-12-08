@@ -1,7 +1,21 @@
-"""Data model implementations for violation-related data in the application.
+"""Data model and display logic for USPS carrier overtime violations.
 
-Provides the model classes that handle data representation and manipulation
-for various types of carrier violations and their associated information.
+This module provides the data model and display functionality for tracking and
+visualizing USPS carrier overtime violations, including:
+
+- Article 8.5.D violations (overtime off assignment)
+- Article 8.5.F violations (over 10 hours, non-scheduled day, and 5th day)
+- Maximum work hour violations (12-hour daily and 60-hour weekly limits)
+
+Key features:
+- Dynamic color coding for violations and remedies
+- Automatic contrast calculations for text readability
+- Filtering and sorting capabilities
+- Weekly and daily hour tracking
+- Specialized handling for different carrier types (OTDL, WAL, NL, PTF)
+
+The module serves as the presentation layer for violation data, handling both
+the data model and visual formatting for the violation tracking interface.
 """
 
 import pandas as pd
@@ -72,6 +86,22 @@ def calculate_optimal_gray(bg_color, target_ratio=7.0):
 
 
 class ViolationModel(QStandardItemModel):
+    """Qt data model for displaying and formatting violation data.
+
+    Handles the interface between pandas DataFrames and Qt's model/view architecture.
+    Provides functionality for:
+    - Data display and formatting
+    - Dynamic color coding for violations
+    - Automatic text contrast calculation
+    - Custom sorting behavior
+    - Cell metadata tracking
+
+    Attributes:
+        df (pd.DataFrame): The violation data being displayed
+        tab_type (ViolationType): The type of violation being displayed
+        is_summary (bool): Whether this is a summary view
+    """
+
     def __init__(self, data, tab_type: ViolationType = None, is_summary=False):
         super().__init__()
         self.df = data
@@ -104,7 +134,21 @@ class ViolationModel(QStandardItemModel):
         return super().data(index, role)
 
     def get_background_color(self, index):
-        """Get background color based on violation type and tab type."""
+        """Get background color based on violation type and tab type.
+
+        Determines cell background colors based on:
+        - Violation type (8.5.D, 8.5.F, Max12, Max60, etc.)
+        - Whether it's a summary or daily tab
+        - Column type (remedy total, weekly total, etc.)
+        - Cell value (violation thresholds)
+        - Carrier list status (for certain violations)
+
+        Args:
+            index (QModelIndex): The cell index
+
+        Returns:
+            QColor: Background color for the cell, or None for default
+        """
         row = index.row()
         col = index.column()
         col_name = self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
@@ -578,6 +622,18 @@ class ViolationModel(QStandardItemModel):
 
 
 class ViolationFilterProxyModel(QSortFilterProxyModel):
+    """Proxy model for filtering violation data in table views.
+
+    Provides filtering capabilities for:
+    - Carrier name (case-insensitive substring match)
+    - List status (exact match)
+    - Violation presence (shows only rows with violations)
+
+    Attributes:
+        filter_type (str): Type of filter to apply ('name', 'list_status', 'violations')
+        filter_text (str): Text to filter by (lowercase)
+    """
+
     def __init__(self):
         super().__init__()
         self.filter_type = "name"

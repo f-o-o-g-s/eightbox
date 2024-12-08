@@ -25,6 +25,25 @@ violation_registry: Dict[str, ViolationFunc] = {}
 
 
 def register_violation(violation_type: str) -> Callable[[ViolationFunc], ViolationFunc]:
+    """Register a violation detection function for a specific violation type.
+
+    Decorator that adds the decorated function to the violation registry,
+    allowing it to be called through the detect_violations dispatcher.
+
+    Args:
+        violation_type (str): Unique identifier for the violation type
+            (e.g., "8.5.F NS", "MAX60", "MAX12")
+
+    Returns:
+        Callable: Decorator function that registers the violation detection function
+
+    Example:
+        @register_violation("8.5.F NS")
+        def detect_85f_ns_overtime(data, date_maximized_status=None):
+            # Violation detection logic
+            return violation_data
+    """
+
     def decorator(func: ViolationFunc) -> ViolationFunc:
         violation_registry[violation_type] = func
         return func
@@ -33,15 +52,43 @@ def register_violation(violation_type: str) -> Callable[[ViolationFunc], Violati
 
 
 def detect_violations(data, violation_type, maximized_status={}):
-    """
-    Dispatch the violation detection to the appropriate registered function.
+    """Dispatch violation detection to the appropriate registered function.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data to check for violations
+        violation_type (str): Type of violation to detect (e.g., "8.5.F NS", "MAX60")
+        maximized_status (dict, optional): Date-keyed dict of OTDL maximization status
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies
+
+    Note:
+        Uses the violation registry populated by @register_violation decorator
+        to route detection to the appropriate specialized function.
     """
     violation_function = violation_registry[violation_type]
     return violation_function(data, maximized_status)
 
 
 def process_moves_vectorized(moves_str, code):
-    """Vectorized processing of moves string"""
+    """Process carrier route moves and calculate hours by assignment.
+
+    Args:
+        moves_str (str): Comma-separated move entries in format "start,end,route"
+        code (str): Carrier's assigned route code
+
+    Returns:
+        pd.Series: Contains:
+            - own_route_hours (float): Hours worked on assigned route
+            - off_route_hours (float): Hours worked on other routes
+            - formatted_moves (str): Human-readable move summary
+
+    Note:
+        - Handles empty/invalid move strings gracefully
+        - Returns 0 hours and "No Moves" for invalid input
+        - Rounds hours to 2 decimal places
+        - Used by prepare_data_for_violations for move processing
+    """
     if not isinstance(moves_str, str) or moves_str.strip().lower() in [
         "none",
         "",
@@ -95,7 +142,26 @@ def process_moves_vectorized(moves_str, code):
 
 
 def get_violation_remedies(data, violations):
-    """Vectorized remedy aggregation"""
+    """Aggregate remedy hours across multiple violation types.
+
+    Vectorized function to combine remedy hours from different violation
+    types for each carrier/date combination.
+
+    Args:
+        data (pd.DataFrame): Original carrier work hour data
+        violations (dict): Violation type to violation DataFrame mapping
+
+    Returns:
+        pd.DataFrame: Pivoted remedy data with:
+            - Carrier and list status columns
+            - Date and violation type columns
+            - Aggregated remedy hours
+
+    Note:
+        - Handles empty violation data gracefully
+        - Combines multiple violations for same carrier/date
+        - Returns empty DataFrame with correct columns if no violations
+    """
     if not violations:
         return pd.DataFrame(
             columns=[
@@ -145,8 +211,37 @@ def get_violation_remedies(data, violations):
 
 
 @register_violation("8.5.D Overtime Off Route")
-def detect_85d_overtime_off_route(data, date_maximized):
-    """Optimized 8.5.D detection with NS day handling and display indicators"""
+def detect_85d_overtime(data, date_maximized_status=None):
+    """Detect Article 8.5.D violations for overtime worked off assignment.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data containing:
+            - carrier_name: Name of the carrier
+            - list_status: WAL/NL/OTDL status
+            - total_hours: Total hours worked
+            - off_route_hours: Hours worked off assignment
+            - date: Date of potential violation
+        date_maximized_status (dict, optional): Date-keyed dict indicating if OTDL was maximized
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies. Contains ALL carriers,
+            with non-eligible carriers (OTDL/PTF) marked as "No Violation"
+
+    Note:
+        Violation occurs when:
+        - Carrier is WAL or NL
+        - Worked overtime off their assignment
+        - OTDL was not maximized that day
+
+        Remedy is lesser of:
+        - Overtime hours worked (total - 8)
+        - Hours worked off assignment
+
+        Processing:
+        - Analyzes all carriers but only applies violation logic to WAL/NL
+        - OTDL and PTF carriers are included in output but marked as "No Violation"
+        - Maintains complete carrier roster for reporting consistency
+    """
     result_df = prepare_data_for_violations(data)
 
     # Check for NS day in code
@@ -203,7 +298,37 @@ def detect_85d_overtime_off_route(data, date_maximized):
 
 @register_violation("8.5.F Overtime Over 10 Hours Off Route")
 def detect_85f_overtime_over_10_hours(data, date_maximized_status=None):
-    """Vectorized 8.5.F detection"""
+    """Detect Article 8.5.F violations for work over 10 hours off assignment.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data containing:
+            - carrier_name: Name of the carrier
+            - list_status: WAL/NL/OTDL status
+            - total_hours: Total hours worked
+            - off_route_hours: Hours worked off assignment
+            - date: Date of potential violation
+        date_maximized_status (dict, optional): Not used for this violation type
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies. Contains ALL carriers,
+            with non-eligible carriers (OTDL/PTF) marked as "No Violation"
+
+    Note:
+        Violation occurs when:
+        - Carrier is WAL or NL
+        - Worked more than 10 hours in a day
+        - Some portion was worked off assignment
+        - Not during December
+
+        Remedy is lesser of:
+        - Hours worked over 10
+        - Hours worked off assignment
+
+        Processing:
+        - Analyzes all carriers but only applies violation logic to WAL/NL
+        - OTDL and PTF carriers are included in output but marked as "No Violation"
+        - Maintains complete carrier roster for reporting consistency
+    """
     # Use the same data preparation as 8.5.D
     result_df = prepare_data_for_violations(data)
 
@@ -241,7 +366,39 @@ def detect_85f_overtime_over_10_hours(data, date_maximized_status=None):
 
 @register_violation("8.5.F 5th More Than 4 Days of Overtime in a Week")
 def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
-    """Vectorized 8.5.F 5th detection with leave handling"""
+    """Detect Article 8.5.F violations for fifth overtime day in a week.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data containing:
+            - carrier_name: Name of the carrier
+            - list_status: WAL/NL/OTDL status
+            - total_hours: Total hours worked
+            - leave_time: Hours of paid leave
+            - leave_type: Type of leave (e.g., holiday, annual)
+            - date: Date of potential violation
+        date_maximized_status (dict, optional): Not used for this violation type
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies. Contains ALL carriers,
+            with non-eligible carriers (OTDL/PTF) marked as "No Violation"
+
+    Note:
+        Violation occurs when:
+        - Carrier is WAL or NL
+        - Already worked overtime on 4 other days this service week
+        - Required to work overtime on a 5th day
+        - No days with 0.01-8.00 hours worked (excluding Sundays)
+        - Not during December
+
+        Remedy:
+        - All overtime hours worked on the 5th day (hours beyond 8)
+
+        Processing:
+        - Analyzes all carriers but only applies violation logic to WAL/NL
+        - Tracks cumulative overtime days per service week
+        - Considers paid leave in daily hour calculations
+        - Maintains complete carrier roster for reporting consistency
+    """
     # Keep all carriers but only process violations for WAL/NL
     result_df = data.copy()
     result_df["leave_time"] = pd.to_numeric(
@@ -327,7 +484,36 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
 
 @register_violation("MAX12 More Than 12 Hours Worked in a Day")
 def detect_MAX_12(data, date_maximized_status=None):
-    """Vectorized MAX12 detection"""
+    """Detect violations of maximum daily work hour limits.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data containing:
+            - carrier_name: Name of the carrier
+            - list_status: WAL/NL/OTDL/PTF status
+            - total: Total hours worked
+            - code: Route assignment code
+            - moves: Route move history
+        date_maximized_status (dict, optional): Not used for this violation type
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies. Contains ALL carriers,
+            with appropriate max hour limits applied based on status.
+
+    Note:
+        Violation occurs when carrier exceeds their maximum daily limit:
+        - WAL carriers: 11.50 hours if moved between routes, 12.00 if not
+        - NL/PTF carriers: 11.50 hours
+        - OTDL carriers: 12.00 hours
+
+        Remedy:
+        - Hours worked beyond the applicable limit (11.50/12.00)
+
+        Processing:
+        - Analyzes all carriers with appropriate limits by type
+        - Considers route moves when determining WAL carrier limits
+        - Maintains complete carrier roster for reporting consistency
+        - Rounds remedy hours to 2 decimal places
+    """
     if "list_status" not in data.columns:
         raise ValueError("The 'list_status' column is missing from the data")
 
@@ -383,7 +569,43 @@ def detect_MAX_12(data, date_maximized_status=None):
 
 @register_violation("MAX60 More Than 60 Hours Worked in a Week")
 def detect_MAX_60(data, date_maximized_status=None):
-    """Vectorized MAX60 detection"""
+    """Detect violations of maximum weekly work hour limits.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data containing:
+            - carrier_name: Name of the carrier
+            - list_status: WAL/NL/OTDL status
+            - total_hours: Total hours worked
+            - leave_time: Hours of paid leave
+            - leave_type: Type of leave (e.g., holiday, annual)
+            - date: Date of potential violation
+        date_maximized_status (dict, optional): Not used for this violation type
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies. Contains ALL carriers,
+            with non-eligible carriers (PTF) marked as "No Violation"
+
+    Note:
+        Violation occurs when:
+        - Carrier's total weekly hours exceed 60
+        - Carrier is WAL, NL, or OTDL (PTFs exempt)
+        - Not during December
+
+        Weekly hours include:
+        - Regular work hours
+        - Paid leave hours
+        - Holiday pay hours
+
+        Remedy:
+        - All hours worked beyond 60 in the service week
+
+        Processing:
+        - Analyzes all carriers except PTFs
+        - Aggregates hours across entire service week
+        - Considers all forms of paid time toward 60-hour limit
+        - Maintains complete carrier roster for reporting consistency
+        - Rounds remedy hours to 2 decimal places
+    """
     # Keep all carriers but mark eligible ones
     result_df = data.copy()
     result_df["list_status"] = result_df["list_status"].str.strip().str.lower()
@@ -466,7 +688,30 @@ def detect_MAX_60(data, date_maximized_status=None):
 
 
 def prepare_data_for_violations(data):
-    """Prepare data for violation detection with vectorized operations"""
+    """Prepare and standardize carrier data for violation detection.
+
+    Args:
+        data (pd.DataFrame): Raw carrier work hour data containing:
+            - carrier_name: Name of carrier
+            - list_status: WAL/NL/OTDL/PTF status
+            - total: Total hours worked
+            - code: Route assignment code
+            - moves: Route move history
+
+    Returns:
+        pd.DataFrame: Processed data frame with:
+            - Standardized column names and types
+            - Calculated own_route_hours and off_route_hours
+            - Formatted move summaries
+            - is_wal_nl and is_otdl_ptf flags
+            - All numeric fields converted and validated
+
+    Note:
+        - Handles data preparation for ALL carriers regardless of status
+        - Special processing for OTDL/PTF carriers (all hours as own route)
+        - Used by multiple violation detectors to ensure consistent processing
+        - Maintains complete carrier roster for reporting consistency
+    """
     result_df = data.copy()
 
     # Convert list_status to lowercase and strip
@@ -486,6 +731,27 @@ def prepare_data_for_violations(data):
 
     # Process moves for each row
     def process_moves_row(row):
+        """Process route moves and calculate hours by assignment for a single carrier row.
+
+        Args:
+            row (pd.Series): Single row of carrier data containing:
+                - moves: Comma-separated move entries ("start,end,route,...")
+                - code: Carrier's assigned route code
+                - total_hours: Total hours worked
+
+        Returns:
+            pd.Series: Contains:
+                - own_route_hours (float): Hours worked on assigned route
+                - off_route_hours (float): Hours worked on other routes
+                - formatted_moves (str): Human-readable move summary
+
+        Note:
+            - Handles empty/invalid move strings by assigning all hours to own route
+            - Processes move segments in groups of 3 (start, end, route)
+            - Rounds hours to 2 decimal places
+            - Used internally by prepare_data_for_violations
+            - Special case: Returns all hours as own_route if moves is "none"
+        """
         if not isinstance(row["moves"], str) or row["moves"].strip().lower() == "none":
             return pd.Series(
                 {
@@ -553,7 +819,26 @@ def prepare_data_for_violations(data):
 
 
 def detect_violations_optimized(clock_ring_data):
-    """Optimized version of violation detection that processes all types at once."""
+    """Process all violation types in a single optimized pass.
+
+    Args:
+        clock_ring_data (pd.DataFrame): Raw carrier clock ring data
+
+    Returns:
+        dict: Violation type to DataFrame mapping containing:
+            - 8.5.D violations
+            - 8.5.F violations
+            - 8.5.F NS violations
+            - 8.5.F 5th day violations
+            - MAX12 violations
+            - MAX60 violations
+
+    Note:
+        - Optimizes processing by preparing data once for all violation types
+        - Processes moves and groups data efficiently
+        - Maintains consistent carrier roster across all violation types
+        - Used as a faster alternative to individual violation detection
+    """
     violations = {
         "8.5.D": [],
         "8.5.F": [],
@@ -677,7 +962,39 @@ def detect_violations_optimized(clock_ring_data):
 
 @register_violation("8.5.F NS Overtime On a Non-Scheduled Day")
 def detect_85f_ns_overtime(data, date_maximized_status=None):
-    """Vectorized 8.5.F NS Day detection"""
+    """Detect Article 8.5.F violations for overtime on non-scheduled days.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data containing:
+            - carrier_name: Name of the carrier
+            - list_status: WAL/NL/OTDL status
+            - total_hours: Total hours worked
+            - code: Route assignment code (to identify NS days)
+            - date: Date of potential violation
+        date_maximized_status (dict, optional): Not used for this violation type
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies. Contains ALL carriers,
+            with non-eligible carriers (OTDL/PTF) marked as "No Violation"
+
+    Note:
+        Violation occurs when:
+        - Carrier is WAL or NL
+        - Working on their non-scheduled day
+        - Worked more than 8 hours that day
+        - Not during December
+
+        Remedy:
+        - All hours worked beyond 8 on the NS day
+        - Unlike regular overtime violations, ALL hours beyond 8 count
+          regardless of assignment
+
+        Processing:
+        - Analyzes all carriers but only applies violation logic to WAL/NL
+        - Identifies NS days through route code analysis
+        - Maintains complete carrier roster for reporting consistency
+        - Rounds remedy hours to 2 decimal places
+    """
     # Set the pandas option to opt-in to the future behavior
     pd.set_option("future.no_silent_downcasting", True)
 

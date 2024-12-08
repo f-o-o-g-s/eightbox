@@ -12,7 +12,6 @@ import sys
 import pandas as pd  # Data manipulation
 from PyQt5.QtCore import (
     Qt,
-    QTimer,
     qInstallMessageHandler,
 )
 from PyQt5.QtWidgets import (  # Specific widget import for header configuration
@@ -66,6 +65,21 @@ qInstallMessageHandler(qt_message_handler)
 
 
 class CustomTitleBar(QWidget):
+    """Custom window title bar with minimize/maximize/close controls.
+
+    Implements a draggable title bar with:
+    - Application title and branding
+    - Window control buttons (minimize, maximize/restore, close)
+    - Custom styling and hover effects
+    - Double-click maximize/restore functionality
+    - Window dragging support
+
+    Attributes:
+        parent (QWidget): Parent window containing this title bar
+        title (QLabel): Label displaying the application name
+        dragPos: Position tracking for window dragging
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
@@ -159,6 +173,34 @@ class CustomTitleBar(QWidget):
 
 
 class MainApp(QMainWindow):
+    """Main application window for violation tracking and management.
+
+    Provides the primary interface for:
+    - Loading and processing carrier clock ring data
+    - Detecting contract violations (8.5.D, 8.5.F, MAX12, MAX60)
+    - Managing OTDL maximization and assignments
+    - Viewing violation details in specialized tabs
+    - Calculating and displaying remedy totals
+    - Exporting violation data to Excel
+
+    The window uses a custom title bar and contains multiple specialized tabs
+    for different violation types. Each tab provides detailed views of specific
+    contract violations and their associated remedies.
+
+    Attributes:
+        current_data (pd.DataFrame): Currently loaded clock ring data
+        violations (dict): Detected violations organized by type
+        vio_85d_tab (Violation85dTab): Tab for 8.5.D violations
+        vio_85f_tab (Violation85fTab): Tab for 8.5.F violations
+        vio_85f_ns_tab (Violation85fNsTab): Tab for non-scheduled day violations
+        vio_85f_5th_tab (Violation85f5thTab): Tab for fifth occurrence violations
+        vio_MAX12_tab (ViolationMax12Tab): Tab for 12-hour limit violations
+        vio_MAX60_tab (ViolationMax60Tab): Tab for 60-hour limit violations
+        remedies_tab (ViolationRemediesTab): Summary tab for all violations
+        carrier_list_pane (CarrierListPane): Carrier management interface
+        otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
+    """
+
     # Class-level version info (single source of truth)
     VERSION = "2024.0.1.0"  # Year.Major.Minor.Patch
     BUILD_TIME = "2024-01-10"  # Build timestamp
@@ -408,7 +450,15 @@ class MainApp(QMainWindow):
         self.carrier_list_button.setEnabled(False)
 
     def reenable_carrier_list_button(self):
-        """Re-enable the Carrier List button when the pane is minimized."""
+        """Re-enable the Carrier List button when the pane is minimized.
+
+        Called when:
+        - Carrier List pane is closed
+        - Window state changes
+        - User minimizes the pane
+
+        Ensures the button remains interactive and properly reflects pane state.
+        """
         self.carrier_list_button.setEnabled(True)
 
     def show_date_selection_pane(self):
@@ -420,7 +470,15 @@ class MainApp(QMainWindow):
         self.date_selection_button.setEnabled(False)
 
     def reenable_date_selection_button(self):
-        """Re-enable the Date Selection button when the pane is minimized."""
+        """Re-enable the Date Selection button when the pane is minimized.
+
+        Called when:
+        - Date Selection pane is closed
+        - Window state changes
+        - User minimizes the pane
+
+        Ensures the button remains interactive and properly reflects pane state.
+        """
         self.date_selection_button.setEnabled(True)
 
     def show_otdl_maximization(self):
@@ -757,7 +815,21 @@ class MainApp(QMainWindow):
         self.violations = None
 
     def auto_detect_klusterbox_path(self):
-        """Auto-detect the location of mandates.sqlite."""
+        """Auto-detect the Klusterbox database path.
+
+        Searches for mandates.sqlite in:
+        - Current directory
+        - Common installation locations
+        - User data directories
+
+        Returns:
+            str: Path to mandates.sqlite if found, None otherwise
+
+        Note:
+            - Handles both Windows and Unix-like systems
+            - Validates database file existence
+            - Returns None if database not found
+        """
         if os.name == "nt":
             default_path = (
                 os.path.expanduser("~") + "\\Documents\\.klusterbox\\mandates.sqlite"

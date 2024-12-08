@@ -1,3 +1,33 @@
+"""Module for managing OTDL maximization tracking and Article 8.5.D compliance.
+
+This module provides functionality for tracking overtime desired list (OTDL)
+maximization requirements, specifically in relation to Article 8.5.D violations.
+Key features include:
+
+- OTDL carrier assignment tracking
+- Overtime equitability monitoring
+- Maximization status management per date
+- Automatic excusal handling for:
+  - Sundays
+  - Sick leave
+  - Annual leave
+  - Holidays
+  - NS protection
+  - Guaranteed time
+  - Hours at or above limit
+
+The module primarily supports Article 8.5.D violation processing by:
+- Tracking when OTDL was properly maximized
+- Managing excusal data for non-violations
+- Providing UI for reviewing and updating maximization status
+- Syncing with carrier list updates
+
+Note:
+    This module specifically focuses on 8.5.D violations where non-OTDL carriers
+    work overtime while OTDL carriers are available. The maximization status
+    directly affects whether these incidents are counted as violations.
+"""
+
 from datetime import datetime
 from functools import partial
 

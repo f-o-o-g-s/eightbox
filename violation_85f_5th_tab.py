@@ -10,6 +10,26 @@ from violation_types import ViolationType
 
 
 class Violation85f5thTab(BaseViolationTab):
+    """Tab for displaying and managing Article 8.5.F fifth overtime day violations.
+
+    Handles violations related to working overtime on more than 4 of 5
+    scheduled days in a service week. Provides specialized tracking and
+    display features including:
+    - Daily violation details with indicators
+    - Fifth overtime occurrence dates
+    - Weekly remedy totals per carrier
+    - List status filtering
+    - Remedy hour calculations
+    - Service week boundaries
+
+    Attributes:
+        tab_type (ViolationType): Set to EIGHT_FIVE_F_5TH for this violation type
+        showing_no_data (bool): Indicates if the "No Data" placeholder is shown
+        models (dict): Collection of models and views for each date tab
+        date_tabs (QTabWidget): Widget containing all date-specific tabs
+        summary_proxy_model (ViolationFilterProxyModel): Model for summary tab
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tab_type = ViolationType.EIGHT_FIVE_F_5TH

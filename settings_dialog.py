@@ -137,6 +137,11 @@ class SettingsDialog(QWidget):
         self.hide()
 
     def set_database_path(self):
+        """Open file dialog to select and set new database path.
+
+        Opens a file selection dialog filtered for SQLite database files.
+        If a file is selected, updates the database path and display label.
+        """
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select Database File",
