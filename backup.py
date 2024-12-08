@@ -4,6 +4,9 @@ import shutil
 import subprocess
 from datetime import datetime
 
+project_dir = os.path.dirname(os.path.abspath(__file__))
+backup_dir = os.path.join(project_dir, "backups")
+
 
 def run_pre_commit():
     """Run pre-commit hooks on all files."""
