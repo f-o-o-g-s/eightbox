@@ -1,6 +1,9 @@
-"""Handles database backup and restore operations for the application."""
+"""Handles both Git version control and full project directory backups."""
+import os
+import shutil
 import subprocess
 from datetime import datetime
+from pathlib import Path
 
 
 def run_pre_commit():
@@ -14,21 +17,49 @@ def run_pre_commit():
         return False
 
 
-def create_backup():
-    """Create a backup of the current state."""
+def create_zip_backup(project_dir, backup_dir):
+    """Create a ZIP backup of the entire project directory."""
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    project_name = os.path.basename(project_dir)
+    backup_path = os.path.join(backup_dir, f"{project_name}_backup_{timestamp}.zip")
+
+    # Directories/files to exclude from ZIP
+    exclude = {
+        "__pycache__",
+        ".git",
+        ".pytest_cache",
+        ".venv",
+        "venv",
+        "node_modules",
+        ".DS_Store",
+    }
+
+    print("\nCreating ZIP backup...")
     try:
-        # Run pre-commit hooks first
-        if not run_pre_commit():
-            return
+        # Create backup directory if it doesn't exist
+        os.makedirs(backup_dir, exist_ok=True)
 
-        # Get current timestamp
+        # Create ZIP file
+        shutil.make_archive(
+            backup_path[:-4],  # Remove .zip extension
+            "zip",
+            project_dir,
+            verbose=True,
+            logger=print,
+            # Exclude function for unwanted directories/files
+            exclude=lambda x: any(e in Path(x).parts for e in exclude),
+        )
+        print(f"\nZIP backup created at: {backup_path}")
+        return backup_path
+    except Exception as e:
+        print(f"\nError creating ZIP backup: {str(e)}")
+        return None
+
+
+def git_backup(description):
+    """Handle Git version control backup."""
+    try:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-        # Get description from user
-        print("\nWhat changes are you about to make?")
-        description = input("Description: ").strip()
-
-        # Create backup commit message
         message = f"BACKUP ({timestamp}): {description}"
 
         # Git commands - only add tracked files and respect .gitignore
@@ -47,15 +78,58 @@ def create_backup():
             try:
                 subprocess.run(["git", "add", file], check=True, capture_output=True)
             except subprocess.CalledProcessError:
-                # Skip if file doesn't exist
-                pass
+                pass  # Skip if file doesn't exist
 
         subprocess.run(["git", "commit", "-m", message], check=True)
         subprocess.run(["git", "push", "origin", "main"], check=True)
 
-        print("\nBackup created successfully!")
+        print("\nGit backup completed successfully!")
         print(f"Description: {description}")
         print(f"Timestamp: {timestamp}")
+        return True
+
+    except subprocess.CalledProcessError as e:
+        if "nothing to commit" in str(e.output):
+            print("\nNo changes to commit in Git.")
+            return True
+        print(f"\nGit backup error: {str(e)}")
+        return False
+
+
+def create_backup():
+    """Create both Git and ZIP backups of the project."""
+    try:
+        # Run pre-commit hooks first
+        if not run_pre_commit():
+            return
+
+        # Get description from user
+        print("\nWhat changes are you backing up?")
+        description = input("Description: ").strip()
+
+        # Get backup preferences
+        print("\nWhat would you like to backup?")
+        print("1. Git only (version control)")
+        print("2. ZIP only (full directory)")
+        print("3. Both Git and ZIP")
+        choice = input("Enter choice (1-3): ").strip()
+
+        # Determine project and backup directories
+        project_dir = os.path.dirname(os.path.abspath(__file__))
+        backup_dir = os.path.join(os.path.expanduser("~"), "eightbox_backups")
+
+        success = True
+        if choice in ["1", "3"]:
+            success &= git_backup(description)
+
+        if choice in ["2", "3"]:
+            zip_path = create_zip_backup(project_dir, backup_dir)
+            success &= bool(zip_path)
+
+        if success:
+            print("\nAll requested backup operations completed successfully!")
+        else:
+            print("\nSome backup operations failed. Please check the logs above.")
 
     except KeyboardInterrupt:
         print("\nBackup cancelled.")
@@ -68,12 +142,15 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help", "help"]:
         print("\nUsage: python backup.py")
-        print("Creates a backup of the current project state.")
+        print("Creates both Git and ZIP backups of the project.")
         print("\nThe script will:")
         print("1. Run pre-commit hooks (black, isort, flake8)")
-        print("2. Ask for a description of upcoming changes")
-        print("3. Add tracked changes to Git")
-        print("4. Create a commit with timestamp")
-        print("5. Push to GitHub")
+        print("2. Ask for a description of changes")
+        print("3. Offer backup options:")
+        print("   - Git backup (version control)")
+        print("   - ZIP backup (full directory)")
+        print("   - Both Git and ZIP")
+        print("4. Create selected backups")
+        print("\nZIP backups are stored in ~/eightbox_backups/")
     else:
         create_backup()
