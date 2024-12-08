@@ -32,6 +32,22 @@ def create_zip_backup(project_dir, backup_dir):
         "venv",
         "node_modules",
         ".DS_Store",
+        "output",  # Build output directory
+        "spreadsheets",  # Generated Excel files
+        "dist",  # PyInstaller dist directory
+        "build",  # PyInstaller build directory
+        ".eggs",
+        "*.pyc",
+        "*.pyo",
+        "*.pyd",
+        ".Python",
+        "develop-eggs",
+        "downloads",
+        "eggs",
+        "parts",
+        "sdist",
+        "var",
+        ".env",
     }
 
     print("\nCreating ZIP backup...")
@@ -43,15 +59,19 @@ def create_zip_backup(project_dir, backup_dir):
         def ignore_patterns(path, names):
             return {n for n in names if n in exclude}
 
+        print("Copying files...")
         shutil.copytree(project_dir, temp_dir, ignore=ignore_patterns)
 
         # Create ZIP from temporary directory
+        print("Creating ZIP archive...")
         shutil.make_archive(backup_path[:-4], "zip", temp_dir)  # Remove .zip extension
 
         # Clean up temporary directory
+        print("Cleaning up temporary files...")
         shutil.rmtree(temp_dir)
 
         print(f"\nZIP backup created at: {backup_path}")
+        print(f"Backup size: {os.path.getsize(backup_path) / (1024*1024):.1f} MB")
         return backup_path
     except Exception as e:
         print(f"\nError creating ZIP backup: {str(e)}")
