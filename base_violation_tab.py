@@ -533,27 +533,73 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
     def add_summary_tab(self, data):
         """Create or update the summary tab with weekly violation totals."""
         carrier_status = data.groupby("carrier_name")["list_status"].first()
-        value_column = "total" if "total" in data.columns else "remedy_total"
         date_column = "rings_date" if "rings_date" in data.columns else "date"
 
-        daily_totals = data.pivot_table(
-            index="carrier_name",
-            columns=date_column,
-            values=value_column,
-            aggfunc="sum",
-            fill_value=0,
-        )
+        # For MAX60 tab, we need special handling
+        if self.__class__.__name__ == "ViolationMax60Tab":
+            # Group by carrier to get weekly totals
+            weekly_data = (
+                data.groupby("carrier_name")
+                .agg(
+                    {
+                        "list_status": "first",
+                        "daily_hours": "sum",
+                    }
+                )
+                .reset_index()
+            )
 
-        weekly_totals = data.groupby("carrier_name")[value_column].sum()
+            # Calculate weekly remedy total only for eligible carriers who worked over 60 hours
+            weekly_data["Weekly Remedy Total"] = weekly_data.apply(
+                lambda row: max(0, row["daily_hours"] - 60)
+                if (
+                    row["list_status"].lower() in ["wal", "nl", "otdl"]
+                    and row["daily_hours"] > 60
+                )
+                else 0,
+                axis=1,
+            )
 
-        summary_data = pd.concat(
-            [
-                carrier_status.rename("list_status"),
-                weekly_totals.rename("Weekly Remedy Total"),
-                daily_totals,
-            ],
-            axis=1,
-        ).reset_index()
+            # Get daily totals
+            daily_totals = data.pivot_table(
+                index="carrier_name",
+                columns=date_column,
+                values="daily_hours",
+                aggfunc="sum",
+                fill_value=0,
+            )
+
+            summary_data = pd.concat(
+                [
+                    weekly_data.set_index("carrier_name")[
+                        ["list_status", "Weekly Remedy Total"]
+                    ],
+                    daily_totals,
+                ],
+                axis=1,
+            ).reset_index()
+
+        else:
+            # For other violation types, use existing logic
+            value_column = "total" if "total" in data.columns else "remedy_total"
+            daily_totals = data.pivot_table(
+                index="carrier_name",
+                columns=date_column,
+                values=value_column,
+                aggfunc="sum",
+                fill_value=0,
+            )
+
+            weekly_totals = data.groupby("carrier_name")[value_column].sum()
+
+            summary_data = pd.concat(
+                [
+                    carrier_status.rename("list_status"),
+                    weekly_totals.rename("Weekly Remedy Total"),
+                    daily_totals,
+                ],
+                axis=1,
+            ).reset_index()
 
         # Reorder columns to put list_status after carrier_name
         columns = summary_data.columns.tolist()
