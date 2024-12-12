@@ -15,7 +15,10 @@ from PyQt5.QtCore import (
     Qt,
     QTimer,
 )
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import (
+    QApplication,
+    QTableView,
+)
 
 from custom_widgets import (
     CustomErrorDialog,
@@ -303,16 +306,22 @@ class ExcelExporter:
             if subtab_name == "Summary":
                 if hasattr(current_tab, "summary_proxy_model"):
                     model = current_tab.summary_proxy_model
-                    table_view = current_tab.date_tabs.widget(subtab_idx)
+                    table_view = current_tab.date_tabs.widget(subtab_idx).findChild(
+                        QTableView
+                    )
                 else:
                     continue
             else:
                 # Get table view from the models dictionary
                 if hasattr(current_tab, "models") and subtab_name in current_tab.models:
                     model_info = current_tab.models[subtab_name]
-                    table_view = model_info["tab"]
+                    table_view = model_info["tab"].findChild(QTableView)
                 else:
                     continue
+
+            if not table_view:
+                print(f"No table view found for tab: {subtab_name}")
+                continue
 
             if not model:
                 model = table_view.model()

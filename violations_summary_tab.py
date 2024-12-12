@@ -238,7 +238,10 @@ class ViolationRemediesTab(BaseViolationTab):
 
             # Update the header with both rows
             self.update_violation_header(
-                self.date_tabs, tab_index, total_violations, carriers_violations_text
+                self.date_tabs,
+                tab_index,
+                total_violations,
+                f"{total_carriers_text}\n{carriers_violations_text}",
             )
 
         except Exception as e:

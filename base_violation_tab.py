@@ -757,7 +757,8 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 self.filter_carriers(text, "name")
 
     def _calculate_list_status_violation_count(self, df, list_status):
-        """Calculate violations for a specific list status using the same logic as the main count."""
+        """Calculate violations for a specific list
+        status using the same logic as the main count."""
         try:
             # Find list_status column using case-insensitive lookup
             list_status_col = next(
@@ -1086,7 +1087,9 @@ class ViolationRemediesTab(BaseViolationTab):
         self.tab_name = "Summary"
 
     def _calculate_list_status_carrier_count(self, df, list_status):
-        """Calculate the number of unique carriers for a specific list status in the summary view."""
+        """Calculate the number of unique carriers
+        for a specific list status in the summary view."""
+
         try:
             # Find list_status and carrier columns using case-insensitive lookup
             list_status_col = next(
@@ -1119,7 +1122,9 @@ class ViolationRemediesTab(BaseViolationTab):
             return 0
 
     def _calculate_list_status_carriers_with_violations(self, df, list_status):
-        """Calculate the number of unique carriers with violations for a specific list status in the summary view."""
+        """Calculate the number of unique carriers with
+        violations for a specific list status in the summary view."""
+
         try:
             # Find required columns using case-insensitive lookup
             list_status_col = next(
