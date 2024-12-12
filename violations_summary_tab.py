@@ -183,25 +183,31 @@ class ViolationRemediesTab(BaseViolationTab):
 
             # Create model and view
             model, view = self.create_summary_model(summary_data)
-            
+
             # Calculate total violations for each list status
             total_violations = 0
             wal_violations = 0
             nl_violations = 0
             otdl_violations = 0
             ptf_violations = 0
-            
+
             # Count carriers with violations by list status
-            carriers_with_violations = summary_data[summary_data["Weekly Remedy Total"] > 0]
-            list_status_violations = carriers_with_violations["list_status"].str.lower().value_counts()
-            
+            carriers_with_violations = summary_data[
+                summary_data["Weekly Remedy Total"] > 0
+            ]
+            list_status_violations = (
+                carriers_with_violations["list_status"].str.lower().value_counts()
+            )
+
             # Get counts for each list status
             wal_violations = list_status_violations.get("wal", 0)
             nl_violations = list_status_violations.get("nl", 0)
             otdl_violations = list_status_violations.get("otdl", 0)
             ptf_violations = list_status_violations.get("ptf", 0)
-            total_violations = sum([wal_violations, nl_violations, otdl_violations, ptf_violations])
-            
+            total_violations = sum(
+                [wal_violations, nl_violations, otdl_violations, ptf_violations]
+            )
+
             # Count total carriers by list status
             total_carriers = len(summary_data)
             list_status_counts = summary_data["list_status"].str.lower().value_counts()
@@ -209,7 +215,7 @@ class ViolationRemediesTab(BaseViolationTab):
             nl_carriers = list_status_counts.get("nl", 0)
             otdl_carriers = list_status_counts.get("otdl", 0)
             ptf_carriers = list_status_counts.get("ptf", 0)
-            
+
             # Create the header text
             total_carriers_text = (
                 f"Total Carriers: {total_carriers} | "
@@ -218,7 +224,7 @@ class ViolationRemediesTab(BaseViolationTab):
                 f"OTDL: {otdl_carriers} | "
                 f"PTF: {ptf_carriers}"
             )
-            
+
             carriers_violations_text = (
                 f"Carriers With Violations: {total_violations} | "
                 f"WAL: {wal_violations} | "
@@ -226,12 +232,14 @@ class ViolationRemediesTab(BaseViolationTab):
                 f"OTDL: {otdl_violations} | "
                 f"PTF: {ptf_violations}"
             )
-            
+
             # Add the tab
             tab_index = self.date_tabs.addTab(view, "Summary")
-            
+
             # Update the header with both rows
-            self.update_violation_header(self.date_tabs, tab_index, total_violations, carriers_violations_text)
-            
+            self.update_violation_header(
+                self.date_tabs, tab_index, total_violations, carriers_violations_text
+            )
+
         except Exception as e:
             print(f"Error during summary aggregation: {e}")

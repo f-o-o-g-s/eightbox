@@ -15,7 +15,7 @@ from PyQt5.QtCore import (
     Qt,
     QTimer,
 )
-from PyQt5.QtWidgets import QApplication, QTableView
+from PyQt5.QtWidgets import QApplication
 
 from custom_widgets import (
     CustomErrorDialog,
@@ -254,8 +254,6 @@ class ExcelExporter:
         header_text_color = calculate_optimal_gray(header_bg)
         title_text_color = calculate_optimal_gray(title_bg)
 
-        print("\nStarting Excel export...")
-
         # Update formats to use calculated text colors
         header_format = workbook.add_format(
             {
@@ -283,10 +281,9 @@ class ExcelExporter:
         # Get the currently active tab
         current_tab_index = self.main_window.central_tab_widget.currentIndex()
         current_tab = self.main_window.central_tab_widget.widget(current_tab_index)
-        current_tab_name = self.main_window.central_tab_widget.tabText(current_tab_index)
-        
-        print(f"\nProcessing main tab: {current_tab_name}")
-        print(f"Number of subtabs: {current_tab.date_tabs.count()}")
+        current_tab_name = self.main_window.central_tab_widget.tabText(
+            current_tab_index
+        )
 
         # Keep track of used worksheet names to avoid duplicates
         used_worksheet_names = set()
@@ -297,153 +294,125 @@ class ExcelExporter:
             QApplication.processEvents()  # Allow GUI to update
 
             subtab_name = current_tab.date_tabs.tabText(subtab_idx)
-            print(f"\nProcessing subtab: {subtab_name}")
 
             # Initialize model as None
             model = None
-            table_view = current_tab.date_tabs.widget(subtab_idx)
+            table_view = None
 
             # Get table view - handle Summary tab specially
             if subtab_name == "Summary":
-                print("Processing Summary tab...")
                 if hasattr(current_tab, "summary_proxy_model"):
-                    print("Found summary_proxy_model")
                     model = current_tab.summary_proxy_model
+                    table_view = current_tab.date_tabs.widget(subtab_idx)
                 else:
-                    print("No summary_proxy_model found")
                     continue
             else:
-                print("Processing regular tab...")
-                # Get model from the models dictionary
+                # Get table view from the models dictionary
                 if hasattr(current_tab, "models") and subtab_name in current_tab.models:
-                    print("Found model in models dictionary")
                     model_info = current_tab.models[subtab_name]
-                    model = model_info["model"]  # Use the base model directly
+                    table_view = model_info["tab"]
                 else:
-                    print("No model found in models dictionary")
                     continue
 
             if not model:
-                print("No model available")
+                model = table_view.model()
+            if not model:
                 continue
 
-            print("Extracting table state...")
-            try:
-                # Get data from model
-                df = model.df.copy() if hasattr(model, "df") else pd.DataFrame()
-                if df.empty:
-                    print("No data in model DataFrame")
-                    continue
+            # Extract table state using the utility function that handles proxy models
+            content_df, metadata_df, row_highlights_df = extract_table_state(table_view)
 
-                # Get formatting from table view
-                _, metadata_df, _ = extract_table_state(table_view)
-
-                print(f"Content DataFrame shape: {df.shape}")
-                print(f"Columns: {df.columns.tolist()}")
-                print(f"First few rows:\n{df.head()}")
-
-                # Create worksheet name to match GUI exactly
-                if subtab_name == "Summary":
-                    worksheet_name = "Summary"
-                else:
-                    worksheet_name = subtab_name  # Use the exact subtab name from the GUI
-
-                # Ensure unique worksheet name if needed
-                base_worksheet_name = worksheet_name
-                counter = 1
-                while worksheet_name.lower() in used_worksheet_names:
-                    # If name exists, add a number suffix
-                    suffix = f" ({counter})"
-                    # Calculate available space for the base name
-                    available_space = 31 - len(suffix)
-                    worksheet_name = f"{base_worksheet_name[:available_space]}{suffix}"
-                    counter += 1
-
-                used_worksheet_names.add(worksheet_name.lower())
-                print(f"Creating worksheet: {worksheet_name}")
-                worksheet = workbook.add_worksheet(worksheet_name)
-
-                # Write title
-                title = f"{current_tab_name} - {date_range}"
-                worksheet.merge_range(
-                    0, 0, 0, len(df.columns) - 1, title, title_format
-                )
-
-                # Write headers
-                for col, header in enumerate(df.columns):
-                    worksheet.write(1, col, header, header_format)
-
-                # Write data with formatting
-                for row in range(len(df)):
-                    for col in range(len(df.columns)):
-                        cell_format = workbook.add_format(
-                            {
-                                "border": 1,
-                                "border_color": border_color,
-                                "align": "center",
-                                "bg_color": "#1E1E1E",  # Dark gray background for unhighlighted cells
-                            }
-                        )
-
-                        # Get cell metadata if available
-                        if metadata_df is not None:
-                            try:
-                                cell_metadata = metadata_df.iloc[row, col]
-                                # Apply background color if present
-                                bg_color = cell_metadata.get("background")
-                                if bg_color:
-                                    cell_format.set_bg_color(bg_color)
-
-                                # Apply foreground color if present
-                                text_color = cell_metadata.get("foreground")
-                                if text_color:
-                                    cell_format.set_font_color(text_color)
-                                else:
-                                    # Default to white text on dark background for better visibility
-                                    cell_format.set_font_color("#FFFFFF")
-                            except (IndexError, AttributeError, KeyError):
-                                # Default formatting if metadata is not available
-                                cell_format.set_font_color("#FFFFFF")
-                        else:
-                            cell_format.set_font_color("#FFFFFF")
-
-                        value = df.iloc[row, col]
-                        worksheet.write(row + 2, col, value, cell_format)
-
-                # Auto-fit columns based on content and GUI widths
-                for col in range(len(df.columns)):
-                    # Get the column width from the GUI if available
-                    gui_width = table_view.columnWidth(col)
-                    excel_width = (
-                        gui_width / 7
-                    )  # Convert pixels to Excel units (approximate)
-
-                    # Calculate width based on content
-                    header_length = len(str(df.columns[col]))
-                    content_lengths = [
-                        len(str(df.iloc[row, col]))
-                        for row in range(len(df))
-                    ]
-                    max_content_length = max(content_lengths) if content_lengths else 0
-                    content_width = max(header_length, max_content_length)
-
-                    # Use the larger of GUI width or content width, with some padding
-                    final_width = max(excel_width, content_width + 2)
-
-                    # Ensure minimum width of 8 and maximum of 50
-                    final_width = max(8, min(50, final_width))
-
-                    worksheet.set_column(col, col, final_width)
-
-                # Freeze panes
-                worksheet.freeze_panes(2, 0)
-                print(f"Finished processing worksheet: {worksheet_name}")
-
-            except Exception as e:
-                print(f"Error processing worksheet {subtab_name}: {str(e)}")
+            if content_df is None or content_df.empty:
                 continue
 
-        print("\nExcel export completed")
+            # Create worksheet name to match GUI exactly
+            if subtab_name == "Summary":
+                worksheet_name = "Summary"
+            else:
+                worksheet_name = subtab_name  # Use the exact subtab name from the GUI
+
+            # Ensure unique worksheet name if needed
+            base_worksheet_name = worksheet_name
+            counter = 1
+            while worksheet_name.lower() in used_worksheet_names:
+                # If name exists, add a number suffix
+                suffix = f" ({counter})"
+                # Calculate available space for the base name
+                available_space = 31 - len(suffix)
+                worksheet_name = f"{base_worksheet_name[:available_space]}{suffix}"
+                counter += 1
+
+            used_worksheet_names.add(worksheet_name.lower())
+            worksheet = workbook.add_worksheet(worksheet_name)
+
+            # Write title
+            title = f"{current_tab_name} - {date_range}"
+            worksheet.merge_range(
+                0, 0, 0, len(content_df.columns) - 1, title, title_format
+            )
+
+            # Write headers
+            for col, header in enumerate(content_df.columns):
+                worksheet.write(1, col, header, header_format)
+
+            # Write data with formatting
+            for row in range(len(content_df)):
+                for col in range(len(content_df.columns)):
+                    cell_format = workbook.add_format(
+                        {
+                            "border": 1,
+                            "border_color": border_color,
+                            "align": "center",
+                            "bg_color": "#1E1E1E",  # Dark gray background for unhighlighted cells
+                        }
+                    )
+
+                    # Get cell metadata
+                    cell_metadata = metadata_df.iloc[row, col]
+
+                    # Apply background color if present
+                    bg_color = cell_metadata.get("background")
+                    if bg_color:
+                        cell_format.set_bg_color(bg_color)
+
+                    # Always apply the foreground color from metadata
+                    text_color = cell_metadata.get("foreground")
+                    if text_color:
+                        cell_format.set_font_color(text_color)
+                    else:
+                        # Default to white text on dark background for better visibility
+                        cell_format.set_font_color("#FFFFFF")
+
+                    value = content_df.iloc[row, col]
+                    worksheet.write(row + 2, col, value, cell_format)
+
+            # Auto-fit columns based on content and GUI widths
+            for col in range(len(content_df.columns)):
+                # Get the column width from the GUI if available
+                gui_width = table_view.columnWidth(col)
+                excel_width = (
+                    gui_width / 7
+                )  # Convert pixels to Excel units (approximate)
+
+                # Calculate width based on content
+                header_length = len(str(content_df.columns[col]))
+                content_lengths = [
+                    len(str(content_df.iloc[row, col]))
+                    for row in range(len(content_df))
+                ]
+                max_content_length = max(content_lengths) if content_lengths else 0
+                content_width = max(header_length, max_content_length)
+
+                # Use the larger of GUI width or content width, with some padding
+                final_width = max(excel_width, content_width + 2)
+
+                # Ensure minimum width of 8 and maximum of 50
+                final_width = max(8, min(50, final_width))
+
+                worksheet.set_column(col, col, final_width)
+
+            # Freeze panes
+            worksheet.freeze_panes(2, 0)
 
     def _sanitize_sheet_name(self, sheet_name):
         """Sanitize the sheet name to be Excel-compatible.
