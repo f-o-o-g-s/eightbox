@@ -18,11 +18,11 @@ from PyQt5.QtCore import (
     pyqtSignal,
 )
 from PyQt5.QtWidgets import (
+    QLabel,
     QTableView,
     QTabWidget,
     QVBoxLayout,
     QWidget,
-    QLabel,
 )
 
 from table_utils import setup_table_copy_functionality
@@ -66,9 +66,9 @@ class TabRefreshMixin:
             self.init_no_data_tab()
             return
 
-        current_tab = self.get_current_tab_info()
+        self.get_current_tab_info()
         self.clear_all_tabs()
-        return current_tab
+        return None
 
     def get_current_tab_info(self):
         """Get current tab index and name."""
@@ -284,7 +284,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             self.filter_carriers("", filter_type="violations")
         else:
             self.filter_carriers(status_type, filter_type="list_status")
-        
+
         # Don't call update_stats() here - let the main window handle that
 
     def update_stats(self):
@@ -299,9 +299,8 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 self._update_main_window_stats(0, 0, 0, 0, 0, 0)
                 return
 
-            current_tab = self.date_tabs.widget(current_tab_index)
             current_tab_name = self.date_tabs.tabText(current_tab_index)
-            
+
             # Get data for current tab
             df = None
             if current_tab_name in self.models:
@@ -318,7 +317,11 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             # Calculate all stats
             total_carriers = len(df)
             list_status_col = next(
-                (col for col in df.columns if col.lower() in ["list_status", "list status"]),
+                (
+                    col
+                    for col in df.columns
+                    if col.lower() in ["list_status", "list status"]
+                ),
                 None,
             )
 
@@ -341,7 +344,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 nl_carriers,
                 otdl_carriers,
                 ptf_carriers,
-                violations  # This will be replaced with self.current_violation_count
+                violations,  # This will be replaced with self.current_violation_count
             )
 
         except Exception as e:
@@ -355,12 +358,16 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             if self.__class__.__name__ == "ViolationRemediesTab":
                 numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
                 exclude_cols = ["Total Hours", "Own Route Hours", "Off Route Hours"]
-                violation_cols = [col for col in numeric_cols if col not in exclude_cols]
+                violation_cols = [
+                    col for col in numeric_cols if col not in exclude_cols
+                ]
                 return len(df[df[violation_cols].gt(0).any(axis=1)])
 
             # For regular violation tabs
             if "violation_type" in df.columns:
-                return len(df[~df["violation_type"].str.contains("No Violation", na=False)])
+                return len(
+                    df[~df["violation_type"].str.contains("No Violation", na=False)]
+                )
 
             # If no violation type column, check remedy totals
             for col in ["remedy_total", "Remedy Total", "Weekly Remedy Total"]:
@@ -381,7 +388,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         """Update the stats in the main window."""
         main_window = self.window()
         if hasattr(main_window, "update_filter_stats"):
-            main_window.update_filter_stats(total, wal, nl, otdl, ptf, self.current_violation_count)
+            main_window.update_filter_stats(
+                total, wal, nl, otdl, ptf, self.current_violation_count
+            )
 
     def init_no_data_tab(self):
         """Initialize the No Data tab."""
@@ -396,7 +405,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         layout = QVBoxLayout(container)
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setSpacing(5)
-        
+
         view = QTableView()
         if isinstance(model, ViolationModel):
             renamed_df = self._rename_columns(model.df)
@@ -468,7 +477,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             self.init_no_data_tab()
             return
 
-        current_tab = self.get_current_tab_info()
+        self.get_current_tab_info()
         self.clear_all_tabs()
 
         date_column = "rings_date" if "rings_date" in violation_data.columns else "date"
@@ -482,7 +491,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.add_summary_tab(violation_data)
 
         # Restore tab selection
-        self.restore_tab_selection(current_tab["name"])
+        self.restore_tab_selection("Summary")
 
         # After creating/updating all tabs, update the stats
         self.update_stats()
@@ -513,6 +522,10 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.models[date] = {"model": model, "proxy": proxy_model, "tab": view}
         self.date_tabs.addTab(view, str(date))
         self.configure_tab_view(view, model)
+
+        # Add violation count header
+        violations = self._calculate_violation_count(formatted_data)
+        self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations)
 
         return view
 
@@ -606,6 +619,10 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.summary_proxy_model = proxy_model
         self.date_tabs.addTab(view, "Summary")
 
+        # Add violation count header for summary tab
+        violations = self._calculate_violation_count(summary_data)
+        self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations)
+
     def create_summary_model(self, summary_data: pd.DataFrame):
         """Create a model for the summary tab.
 
@@ -677,16 +694,17 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         current_tab = tab_widget.widget(tab_index)
         if not current_tab:
             return
-        
+
         # Store the current violation count
         self.current_violation_count = violation_count
-        
+
         # Find or create the header label
         header_label = current_tab.findChild(QLabel, "violation_count_header")
         if not header_label:
             header_label = QLabel(parent=current_tab)
             header_label.setObjectName("violation_count_header")
-            header_label.setStyleSheet("""
+            header_label.setStyleSheet(
+                """
                 QLabel {
                     color: #BB86FC;
                     font-size: 12px;
@@ -696,13 +714,14 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                     background-color: #1E1E1E;
                     border-radius: 3px;
                 }
-            """)
-            
+            """
+            )
+
             layout = current_tab.layout()
             if not layout:
                 layout = QVBoxLayout(current_tab)
                 current_tab.setLayout(layout)
             layout.insertWidget(0, header_label)
-        
+
         header_label.setText(f"Carriers With Violations: {violation_count}")
-        header_label.setVisible(violation_count > 0)
+        header_label.setVisible(True)

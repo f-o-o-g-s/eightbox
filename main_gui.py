@@ -52,7 +52,6 @@ from violation_85f_tab import Violation85fTab
 from violation_detection import (
     detect_violations,
     get_violation_remedies,
-    detect_violations_optimized,
 )
 from violation_max12_tab import ViolationMax12Tab
 from violation_max60_tab import ViolationMax60Tab
@@ -521,7 +520,7 @@ class MainApp(QMainWindow):
         # Remove "Carriers With Violations: X" from the button text if it exists
         if "Carriers With Violations" in text:
             text = "Carriers With Violations"
-        
+
         btn = QPushButton(text)
         btn.setCheckable(True)
         btn.clicked.connect(self.handle_filter_click)
@@ -1075,7 +1074,9 @@ class MainApp(QMainWindow):
             clock_ring_data["carrier_name"].isin(otdl_carriers["carrier_name"])
         ].copy()
 
-    def update_violations_and_remedies(self, clock_ring_data=None, progress_callback=None):
+    def update_violations_and_remedies(
+        self, clock_ring_data=None, progress_callback=None
+    ):
         """Helper function to detect violations and update all tabs."""
         if clock_ring_data is None or clock_ring_data.empty:
             return
@@ -1095,56 +1096,70 @@ class MainApp(QMainWindow):
 
         # Calculate progress increments
         violation_detection_weight = 50  # 50% for violation detection
-        tab_update_weight = 40          # 40% for tab updates
-        remedy_weight = 10              # 10% for final remedy calculations
-        
-        progress_per_violation = violation_detection_weight / len(violation_types)
-        progress_per_tab = tab_update_weight / (len(violation_types) + 1)  # +1 for remedies tab
+        tab_update_weight = 40  # 40% for tab updates
         current_progress = 0
 
         # Detect violations (50% of progress)
         for i, (key, violation_type) in enumerate(violation_types.items()):
             if progress_callback:
-                progress_callback(int(current_progress), f"Detecting {key} violations...")
-            
+                progress_callback(
+                    int(current_progress), f"Detecting {key} violations..."
+                )
+
             self.violations[key] = detect_violations(clock_ring_data, violation_type)
-            current_progress += progress_per_violation
+            current_progress += violation_detection_weight / len(violation_types)
 
         # Update violation tabs (40% of progress)
         if progress_callback:
             progress_callback(int(current_progress), "Updating 8.5.D violations tab...")
         self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
-        current_progress += progress_per_tab
+        current_progress += tab_update_weight / (
+            len(violation_types) + 1
+        )  # +1 for remedies tab
 
         if progress_callback:
             progress_callback(int(current_progress), "Updating 8.5.F violations tab...")
         self.vio_85f_tab.refresh_data(self.violations["8.5.F"])
-        current_progress += progress_per_tab
+        current_progress += tab_update_weight / (
+            len(violation_types) + 1
+        )  # +1 for remedies tab
 
         if progress_callback:
-            progress_callback(int(current_progress), "Updating 8.5.F NS violations tab...")
+            progress_callback(
+                int(current_progress), "Updating 8.5.F NS violations tab..."
+            )
         self.vio_85f_ns_tab.refresh_data(self.violations["8.5.F NS"])
-        current_progress += progress_per_tab
+        current_progress += tab_update_weight / (
+            len(violation_types) + 1
+        )  # +1 for remedies tab
 
         if progress_callback:
-            progress_callback(int(current_progress), "Updating 8.5.F 5th violations tab...")
+            progress_callback(
+                int(current_progress), "Updating 8.5.F 5th violations tab..."
+            )
         self.vio_85f_5th_tab.refresh_data(self.violations["8.5.F 5th"])
-        current_progress += progress_per_tab
+        current_progress += tab_update_weight / (
+            len(violation_types) + 1
+        )  # +1 for remedies tab
 
         if progress_callback:
             progress_callback(int(current_progress), "Updating MAX12 violations tab...")
         self.vio_MAX12_tab.refresh_data(self.violations["MAX12"])
-        current_progress += progress_per_tab
+        current_progress += tab_update_weight / (
+            len(violation_types) + 1
+        )  # +1 for remedies tab
 
         if progress_callback:
             progress_callback(int(current_progress), "Updating MAX60 violations tab...")
         self.vio_MAX60_tab.refresh_data(self.violations["MAX60"])
-        current_progress += progress_per_tab
+        current_progress += tab_update_weight / (
+            len(violation_types) + 1
+        )  # +1 for remedies tab
 
         # Calculate and update remedies (final 10%)
         if progress_callback:
             progress_callback(90, "Calculating final remedies...")
-        
+
         remedies_data = get_violation_remedies(clock_ring_data, self.violations)
         self.remedies_tab.refresh_data(remedies_data)
 
