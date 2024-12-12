@@ -32,10 +32,14 @@ from PyQt5.QtGui import (
 
 from violation_types import ViolationType
 
+# We can remove the theme import entirely since we're calculating all text colors dynamically
+
 # fully opaque
 VIOLATION_COLOR = QColor(125, 89, 168)  # Medium dark purple (7D59A8)
 # Softer background for summary rows with violations
-SUMMARY_ROW_COLOR = QColor(215, 183, 255)  # D7B7FF is a lighter shade of purple/lavender
+SUMMARY_ROW_COLOR = QColor(
+    215, 183, 255
+)  # D7B7FF is a lighter shade of purple/lavender
 # Teal color for positive weekly totals
 WEEKLY_TOTAL_COLOR = QColor(2, 145, 132)  # Teal color for weekly remedy totals
 
@@ -82,7 +86,21 @@ def calculate_optimal_gray(bg_color, target_ratio=7.0):
 
 
 class ViolationModel(QStandardItemModel):
-    """Qt data model for displaying and formatting violation data."""
+    """Qt data model for displaying and formatting violation data.
+
+    Handles the interface between pandas DataFrames and Qt's model/view architecture.
+    Provides functionality for:
+    - Data display and formatting
+    - Dynamic color coding for violations
+    - Automatic text contrast calculation
+    - Custom sorting behavior
+    - Cell metadata tracking
+
+    Attributes:
+        df (pd.DataFrame): The violation data being displayed
+        tab_type (ViolationType): The type of violation being displayed
+        is_summary (bool): Whether this is a summary view
+    """
 
     def __init__(self, data, tab_type: ViolationType = None, is_summary=False):
         super().__init__()
@@ -92,7 +110,21 @@ class ViolationModel(QStandardItemModel):
         self.setup_model()
 
     def data(self, index, role=Qt.DisplayRole):
-        """Get data for display in the violation table."""
+        """Get data for display in the violation table.
+
+        Handles different display roles including:
+        - DisplayRole: Formatted cell values
+        - BackgroundRole: Cell background colors
+        - ForegroundRole: Text colors
+        - UserRole: Sorting values
+
+        Args:
+            index (QModelIndex): The cell index
+            role (Qt.ItemDataRole): The role being requested
+
+        Returns:
+            Various: Data appropriate for the requested role, or None if invalid
+        """
         if not index.isValid():
             return None
 
@@ -117,20 +149,35 @@ class ViolationModel(QStandardItemModel):
         return super().data(index, role)
 
     def get_background_color(self, index):
-        """Get background color based on violation type and tab type."""
+        """Get background color based on violation type and tab type.
+
+        Determines cell background colors based on:
+        - Violation type (8.5.D, 8.5.F, Max12, Max60, etc.)
+        - Whether it's a summary or daily tab
+        - Column type (remedy total, weekly total, etc.)
+        - Cell value (violation thresholds)
+        - Carrier list status (for certain violations)
+
+        Args:
+            index (QModelIndex): The cell index
+
+        Returns:
+            QColor: Background color for the cell, or None for default
+        """
         row = index.row()
         col = index.column()
-        col_name = self.headerData(col, Qt.Horizontal, Qt.DisplayRole).lower()  # Case-insensitive
+        col_name = self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
         value = self.data(index, Qt.DisplayRole)
 
         # Start with row-level highlighting for violations
         background_color = SUMMARY_ROW_COLOR if self.has_violation_in_row(row) else None
 
         # Add ViolationRemedies tab type handling
+        # (Violations Summary BIG PARENT tab)
         if self.tab_type == ViolationType.VIOLATION_REMEDIES:
             if self.is_summary:
                 # Weekly Remedy Total in teal
-                if "weekly remedy total" in col_name:
+                if col_name == "Weekly Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -138,7 +185,7 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # All other numeric columns in purple when > 0
-                elif not any(x in col_name for x in ["carrier name", "list status"]):
+                elif col_name not in ["carrier_name", "list_status"]:
                     try:
                         number = float(str(value))
                         if number > 0:
@@ -147,15 +194,15 @@ class ViolationModel(QStandardItemModel):
                         pass
             else:
                 # Daily tab formatting
-                if "remedy total" in col_name:
+                if col_name == "Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
-                            return WEEKLY_TOTAL_COLOR
+                            return WEEKLY_TOTAL_COLOR  # Using teal for Remedy Total
                     except (ValueError, TypeError, IndexError):
                         pass
                 # All other numeric columns in purple when > 0
-                elif not any(x in col_name for x in ["carrier name", "list status"]):
+                elif col_name not in ["carrier_name", "list_status"]:
                     try:
                         number = float(str(value))
                         if number > 0:
@@ -163,10 +210,11 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError):
                         pass
 
+        # Then apply specific cell colors that should override the row highlight
         elif self.tab_type == ViolationType.EIGHT_FIVE_D:
             if self.is_summary:
                 # Weekly Remedy Total in teal
-                if "weekly remedy total" in col_name:
+                if col_name == "Weekly Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -174,7 +222,10 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # Individual day columns in darker purple when > 0
-                elif not any(x in col_name for x in ["carrier name", "list status"]):
+                elif col_name not in [
+                    "Carrier Name",
+                    "List Status",
+                ]:  # Skip non-numeric columns
                     try:
                         number = float(str(value))
                         if number > 0:
@@ -183,7 +234,7 @@ class ViolationModel(QStandardItemModel):
                         pass
             else:
                 # Daily tab formatting
-                if "remedy total" in col_name and value:
+                if col_name == "Remedy Total" and value:
                     try:
                         if float(str(value)) > 0:
                             return VIOLATION_COLOR
@@ -193,83 +244,7 @@ class ViolationModel(QStandardItemModel):
         elif self.tab_type == ViolationType.EIGHT_FIVE_F:
             if self.is_summary:
                 # Weekly Remedy Total in teal
-                if "weekly remedy total" in col_name:
-                    try:
-                        number = float(str(value).split()[0])
-                        if number > 0:
-                            return WEEKLY_TOTAL_COLOR
-                    except (ValueError, TypeError, IndexError):
-                        pass
-                # Check if current date column exists in the violation_dates
-                elif not any(x in col_name for x in ["carrier name", "list status", "violation dates"]):
-                    try:
-                        # Try to find violation_dates column
-                        violation_dates_col = None
-                        for i, col in enumerate(self.df.columns):
-                            if "violation_dates" in col.lower():
-                                violation_dates_col = i
-                                break
-                        
-                        if violation_dates_col is not None:
-                            violation_dates = self.data(
-                                self.index(row, violation_dates_col), Qt.DisplayRole
-                            )
-                            if violation_dates and col_name in str(violation_dates):
-                                return VIOLATION_COLOR
-                    except (ValueError, TypeError):
-                        pass
-            else:
-                # Daily tab formatting
-                if "remedy total" in col_name:
-                    try:
-                        number = float(str(value).split()[0])
-                        if number > 0:
-                            return VIOLATION_COLOR
-                    except (ValueError, TypeError, IndexError):
-                        pass
-
-        elif self.tab_type == ViolationType.EIGHT_FIVE_F_5TH:
-            if self.is_summary:
-                # Weekly Remedy Total in teal
-                if "weekly remedy total" in col_name:
-                    try:
-                        number = float(str(value).split()[0])
-                        if number > 0:
-                            return WEEKLY_TOTAL_COLOR
-                    except (ValueError, TypeError, IndexError):
-                        pass
-                # Check if current date column exists in the violation_dates
-                elif not any(x in col_name for x in ["carrier name", "list status", "violation dates"]):
-                    try:
-                        # Try to find violation_dates column
-                        violation_dates_col = None
-                        for i, col in enumerate(self.df.columns):
-                            if "violation_dates" in col.lower():
-                                violation_dates_col = i
-                                break
-                        
-                        if violation_dates_col is not None:
-                            violation_dates = self.data(
-                                self.index(row, violation_dates_col), Qt.DisplayRole
-                            )
-                            if violation_dates and col_name in str(violation_dates):
-                                return VIOLATION_COLOR
-                    except (ValueError, TypeError):
-                        pass
-            else:
-                # Daily tab formatting
-                if "remedy total" in col_name:
-                    try:
-                        number = float(str(value).split()[0])
-                        if number > 0:
-                            return VIOLATION_COLOR
-                    except (ValueError, TypeError, IndexError):
-                        pass
-
-        elif self.tab_type == ViolationType.EIGHT_FIVE_F_NS:
-            if self.is_summary:
-                # Weekly Remedy Total in teal
-                if "weekly remedy total" in col_name:
+                if col_name == "Weekly Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -277,7 +252,10 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # Individual day columns in darker purple when > 0
-                elif not any(x in col_name for x in ["carrier name", "list status"]):
+                elif col_name not in [
+                    "Carrier Name",
+                    "List Status",
+                ]:  # Skip non-numeric columns
                     try:
                         number = float(str(value))
                         if number > 0:
@@ -286,7 +264,68 @@ class ViolationModel(QStandardItemModel):
                         pass
             else:
                 # Daily tab formatting
-                if "remedy total" in col_name:
+                if col_name == "Remedy Total" and value:
+                    try:
+                        if float(str(value)) > 0:
+                            return VIOLATION_COLOR
+                    except ValueError:
+                        pass
+
+        # Then apply specific cell colors that should override the row highlight
+        elif self.tab_type == ViolationType.EIGHT_FIVE_F_5TH:
+            if self.is_summary:
+                # Weekly Remedy Total in teal
+                if col_name == "Weekly Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return WEEKLY_TOTAL_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+                # Individual day columns in darker purple when > 0
+                elif col_name not in [
+                    "Carrier Name",
+                    "List Status",
+                ]:  # Skip non-numeric columns
+                    try:
+                        number = float(str(value))
+                        if number > 0:
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError):
+                        pass
+            else:
+                # Daily tab formatting
+                if col_name == "Remedy Total" and value:
+                    try:
+                        if float(str(value)) > 0:
+                            return VIOLATION_COLOR
+                    except ValueError:
+                        pass
+
+        elif self.tab_type == ViolationType.EIGHT_FIVE_F_NS:
+            if self.is_summary:
+                # Weekly Remedy Total in teal
+                if col_name == "Weekly Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return WEEKLY_TOTAL_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+                # Individual day columns in darker purple when > 0
+                elif col_name not in [
+                    "Carrier Name",
+                    "List Status",
+                ]:  # Skip non-numeric columns
+                    try:
+                        number = float(str(value))
+                        if number > 0:
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError):
+                        pass
+            else:
+                # Daily tab formatting
+                if col_name == "Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -297,7 +336,7 @@ class ViolationModel(QStandardItemModel):
         elif self.tab_type == ViolationType.MAX_12:
             if self.is_summary:
                 # Weekly Remedy Total in teal
-                if "weekly remedy total" in col_name:
+                if col_name == "Weekly Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -305,32 +344,30 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # Check daily hours against carrier type limit
-                elif not any(x in col_name for x in ["carrier name", "list status"]):
+                elif col_name not in ["Carrier Name", "List Status"]:
                     try:
-                        # Get list_status for this row (case-insensitive)
-                        list_status_col = None
-                        for i, col in enumerate(self.df.columns):
-                            if col.lower() in ["list status", "list_status"]:
-                                list_status_col = i
-                                break
-                        
-                        if list_status_col is not None:
-                            list_status = str(
-                                self.data(self.index(row, list_status_col), Qt.DisplayRole)
-                            ).lower()
+                        # Get list_status for this row
+                        list_status_col = next(
+                            i
+                            for i, col in enumerate(self.df.columns)
+                            if col in ["List Status", "list_status"]
+                        )
+                        list_status = str(
+                            self.data(self.index(row, list_status_col), Qt.DisplayRole)
+                        ).lower()
 
-                            # Set hour limit based on list_status
-                            hour_limit = 12.00 if list_status == "otdl" else 11.50
+                        # Set hour limit based on list_status
+                        hour_limit = 12.00 if list_status == "otdl" else 11.50
 
-                            # Check if hours exceed limit
-                            number = float(str(value))
-                            if number > hour_limit:
-                                return VIOLATION_COLOR
-                    except (ValueError, TypeError):
+                        # Check if hours exceed limit
+                        number = float(str(value))
+                        if number > hour_limit:
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError, IndexError):
                         pass
             else:
-                # Daily tab formatting
-                if "remedy total" in col_name:
+                # Daily tab formatting - same as other violation types
+                if col_name == "Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -341,7 +378,7 @@ class ViolationModel(QStandardItemModel):
         elif self.tab_type == ViolationType.MAX_60:
             if self.is_summary:
                 # Weekly Remedy Total in teal
-                if "weekly remedy total" in col_name:
+                if col_name == "Weekly Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -349,18 +386,21 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # Highlight Cumulative Hours > 60 in darker purple (except for PTF)
-                elif "cumulative hours" in col_name:
+                elif col_name == "Cumulative Hours":
                     try:
-                        # Find list status column (case-insensitive)
+                        # Find list status column by checking headers
                         list_status_col = None
-                        for i, col in enumerate(self.df.columns):
-                            if col.lower() in ["list status", "list_status"]:
+                        for i in range(self.columnCount()):
+                            header = self.headerData(i, Qt.Horizontal, Qt.DisplayRole)
+                            if header in ["List Status", "list_status"]:
                                 list_status_col = i
                                 break
-                        
+
                         if list_status_col is not None:
                             list_status = str(
-                                self.data(self.index(row, list_status_col), Qt.DisplayRole)
+                                self.data(
+                                    self.index(row, list_status_col), Qt.DisplayRole
+                                )
                             ).lower()
 
                             # Only highlight if not PTF and hours > 60
@@ -371,8 +411,8 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError):
                         pass
             else:
-                # Daily tab formatting
-                if "remedy total" in col_name:
+                # Daily tab formatting - same as other violation types
+                if col_name == "Remedy Total":
                     try:
                         number = float(str(value).split()[0])
                         if number > 0:
@@ -385,11 +425,12 @@ class ViolationModel(QStandardItemModel):
     def has_violation_in_row(self, row):
         """Check if the row contains any violations."""
         for col in range(self.columnCount()):
-            header = self.headerData(col, Qt.Horizontal, Qt.DisplayRole).lower()
-            if "violation type" in header:
+            header = self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+            if header in ["violation_type", "Violation Type"]:
                 value = self.data(self.index(row, col), Qt.DisplayRole)
+                # Check for both types of non-violation messages
                 return not (value.startswith("No Violation"))
-            elif any(x in header for x in ["weekly remedy total", "remedy total"]):
+            elif header in ["Weekly Remedy Total", "Remedy Total"]:
                 value = self.data(self.index(row, col), Qt.DisplayRole)
                 try:
                     return float(str(value).replace(",", "")) > 0.00
@@ -402,8 +443,10 @@ class ViolationModel(QStandardItemModel):
         background_color = self.get_background_color(index)
 
         if background_color is None:
-            # Use white text on dark theme
-            return calculate_optimal_gray(QColor(18, 18, 18))
+            # Use white text on dark theme (assuming dark theme background)
+            return calculate_optimal_gray(
+                QColor(18, 18, 18)  # #121212 (MATERIAL_BACKGROUND)
+            )
 
         # Handle QBrush objects
         if isinstance(background_color, QBrush):
@@ -457,9 +500,9 @@ class ViolationModel(QStandardItemModel):
     def get_violation_column(self):
         """Get the index of the violation_type column."""
         try:
-            return next(i for i, col in enumerate(self.df.columns) 
-                       if col.lower() == "violation_type")
-        except StopIteration:
+            return self.df.columns.get_loc("violation_type")
+        except KeyError:
+            # If violation_type column doesn't exist, return carrier_name column (0)
             return 0
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
@@ -469,25 +512,118 @@ class ViolationModel(QStandardItemModel):
                 return str(self.df.columns[section])
         return super().headerData(section, orientation, role)
 
+    def get_cell_metadata(self, index):
+        """Get metadata for a specific cell including background and text colors."""
+        if not index.isValid():
+            return None
+
+        metadata = {
+            "value": self.data(index, Qt.DisplayRole),
+            "background": None,
+            "text_color": None,
+        }
+
+        # Get background color
+        background = self.get_background_color(index)
+        if background:
+            metadata["background"] = background.name()
+
+        # Get text color based on background
+        foreground = self.data(index, Qt.ForegroundRole)
+        if isinstance(foreground, QBrush):
+            metadata["text_color"] = foreground.color().name()
+
+        return metadata
+
+    def get_table_state(self):
+        """Extract the complete state of the table.
+
+        Returns:
+            tuple: (content_df, metadata_df, row_highlights_df)
+                - content_df: DataFrame containing cell values
+                - metadata_df: DataFrame containing cell formatting metadata
+                - row_highlights_df: DataFrame containing row highlight information
+        """
+        # Get column headers
+        headers = [
+            self.headerData(i, Qt.Horizontal, Qt.DisplayRole)
+            for i in range(self.columnCount())
+        ]
+
+        # Extract content
+        content_data = []
+        metadata_data = []
+        row_highlights = []
+
+        for row in range(self.rowCount()):
+            row_content = []
+            row_metadata = []
+            has_highlight = False
+
+            for col in range(self.columnCount()):
+                index = self.index(row, col)
+
+                # Get display value
+                value = self.data(index, Qt.DisplayRole)
+                if value is None:
+                    value = ""
+                row_content.append(value)
+
+                # Get formatting metadata
+                bg_color = self.get_background_color(index)
+                fg_color = self.get_foreground_color(index)
+
+                # Convert QColor to string or None
+                bg_color_str = bg_color.name() if isinstance(bg_color, QColor) else None
+                fg_color_str = fg_color.name() if isinstance(fg_color, QColor) else None
+
+                metadata = {"background": bg_color_str, "foreground": fg_color_str}
+                row_metadata.append(metadata)
+
+                # Check for highlights - only if we have a valid background color
+                if bg_color_str and bg_color_str.lower() != "#000000":
+                    has_highlight = True
+
+            content_data.append(row_content)
+            metadata_data.append(row_metadata)
+            row_highlights.append(has_highlight)
+
+        # Create DataFrames with explicit dtypes to avoid ambiguous truth values
+        content_df = pd.DataFrame(content_data, columns=headers)
+        metadata_df = pd.DataFrame(metadata_data, columns=headers)
+        row_highlights_df = pd.DataFrame({"highlighted": row_highlights}, dtype=bool)
+
+        return content_df, metadata_df, row_highlights_df
+
     def sort(self, column, order):
         """Override sort to use numeric sorting for numeric columns."""
         try:
             self.layoutAboutToBeChanged.emit()
-            header = self.headerData(column, Qt.Horizontal, Qt.DisplayRole).lower()
+            header = self.headerData(column, Qt.Horizontal, Qt.DisplayRole)
+
+            # Get the actual column name from the DataFrame
             df_column = self.df.columns[column]
 
             # List of columns that should be sorted numerically
+            # (includes both display names and df names)
             numeric_columns = {
-                "weekly remedy total",
-                "remedy total",
-                "own route hours",
-                "off route hours",
-                "total hours",
-                "daily hours",
-                "cumulative hours",
+                "Weekly Remedy Total",
+                "Remedy Total",
+                "Own Route Hours",
+                "Off Route Hours",
+                "Total Hours",
+                "Daily Hours",
+                "Cumulative Hours",
+                "weekly_remedy_total",
+                "remedy_total",
+                "own_route_hours",
+                "off_route_hours",
+                "total_hours",
+                "daily_hours",
+                "cumulative_hours",
             }
 
-            if header in numeric_columns or df_column.lower() in numeric_columns:
+            if header in numeric_columns or df_column in numeric_columns:
                 # Sort using the numeric values
                 self.df = self.df.sort_values(
                     by=df_column,
@@ -508,9 +644,31 @@ class ViolationModel(QStandardItemModel):
         except Exception as e:
             print(f"Sorting error: {e}")
 
+    def get_violation_type_display(self, violation_type):
+        """Get the display name for a violation type.
+
+        Converts internal violation type codes to human-readable display names.
+
+        Args:
+            violation_type (str): The internal violation type code
+
+        Returns:
+            str: The human-readable display name for the violation type
+        """
+
 
 class ViolationFilterProxyModel(QSortFilterProxyModel):
-    """Proxy model for filtering violation data in table views."""
+    """Proxy model for filtering violation data in table views.
+
+    Provides filtering capabilities for:
+    - Carrier name (case-insensitive substring match)
+    - List status (exact match)
+    - Violation presence (shows only rows with violations)
+
+    Attributes:
+        filter_type (str): Type of filter to apply ('name', 'list_status', 'violations')
+        filter_text (str): Text to filter by (lowercase)
+    """
 
     def __init__(self):
         super().__init__()
@@ -519,22 +677,46 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
         self.setSortRole(Qt.UserRole)
 
     def set_filter(self, text, filter_type="name"):
-        """Set the current filter criteria."""
+        """Set the current filter criteria.
+
+        Args:
+            text (str): The filter text to match against
+            filter_type (str): The type of filter to apply
+                (e.g. 'name', 'list_status', 'violations')
+        """
         self.filter_type = filter_type
         self.filter_text = text.lower() if text else ""
         self.invalidateFilter()
 
     def filterAcceptsRow(self, source_row, source_parent):
-        """Determine if a row should be included in the filtered view."""
+        """Determine if a row should be included in the filtered view.
+
+        Implements the filtering logic for violations based on:
+        - List status (WAL, NL, OTDL, etc.)
+        - Violation type
+        - Custom text filters
+
+        Args:
+            source_row (int): Row index in the source model
+            source_parent (QModelIndex): Parent index in source model
+
+        Returns:
+            bool: True if row should be shown, False if filtered out
+        """
         source_model = self.sourceModel()
 
         if not self.filter_text and self.filter_type != "violations":
             return True
 
         if self.filter_type == "name":
-            # Get carrier name column (case-insensitive)
-            carrier_col = next((i for i, col in enumerate(source_model.df.columns) 
-                              if col.lower() in ["carrier_name", "carrier name"]), None)
+            # Get carrier name column
+            carrier_col = None
+            for col in range(source_model.columnCount(source_parent)):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and header.lower() in ["carrier_name", "carrier name"]:
+                    carrier_col = col
+                    break
+
             if carrier_col is not None:
                 idx = source_model.index(source_row, carrier_col, source_parent)
                 name = str(source_model.data(idx, Qt.DisplayRole)).lower()
@@ -542,9 +724,14 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             return False
 
         elif self.filter_type == "list_status":
-            # Get list status column (case-insensitive)
-            status_col = next((i for i, col in enumerate(source_model.df.columns) 
-                             if col.lower() in ["list_status", "list status"]), None)
+            # Get list status column
+            status_col = None
+            for col in range(source_model.columnCount(source_parent)):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and header.lower() in ["list_status", "list status"]:
+                    status_col = col
+                    break
+
             if status_col is not None:
                 idx = source_model.index(source_row, status_col, source_parent)
                 status = str(source_model.data(idx, Qt.DisplayRole)).lower()
@@ -552,9 +739,14 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             return False
 
         elif self.filter_type == "violations":
-            # Check remedy total column (case-insensitive)
-            remedy_col = next((i for i, col in enumerate(source_model.df.columns) 
-                             if col.lower() in ["remedy_total", "remedy total"]), None)
+            # Check remedy total column
+            remedy_col = None
+            for col in range(source_model.columnCount(source_parent)):
+                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                if header and header.lower() in ["remedy_total", "remedy total"]:
+                    remedy_col = col
+                    break
+
             if remedy_col is not None:
                 idx = source_model.index(source_row, remedy_col, source_parent)
                 remedy = source_model.data(idx, Qt.DisplayRole)

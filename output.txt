@@ -1,0 +1,94 @@
+Initializing OTDL maximization pane...
+OTDL pane initialized with carrier_list_pane: True
+Connecting to carrier list updates in OTDL pane init
+Connecting carrier list signal to OTDL pane...
+OTDL pane initialization complete
+Initializing 8.5.D Violations Tab
+Initializing 8.5.F Violations Tab
+Initializing 8.5.F NS Violations Tab
+Initializing 8.5.F 5th Violations Tab
+Initializing Violations Summary Tab
+
+DEBUG - Columns in raw date_data:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
+
+DEBUG - Columns after formatting:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
+
+DEBUG - All columns in model DataFrame:
+['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - 85F_5th_date column NOT found!
+Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - Columns in raw date_data:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
+
+DEBUG - Columns after formatting:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
+
+DEBUG - All columns in model DataFrame:
+['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - 85F_5th_date column NOT found!
+Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - Columns in raw date_data:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
+
+DEBUG - Columns after formatting:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
+
+DEBUG - All columns in model DataFrame:
+['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - 85F_5th_date column NOT found!
+Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - Columns in raw date_data:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
+
+DEBUG - Columns after formatting:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
+
+DEBUG - All columns in model DataFrame:
+['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - 85F_5th_date column NOT found!
+Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - Columns in raw date_data:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
+
+DEBUG - Columns after formatting:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
+
+DEBUG - All columns in model DataFrame:
+['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - 85F_5th_date column NOT found!
+Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - Columns in raw date_data:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
+
+DEBUG - Columns after formatting:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
+
+DEBUG - All columns in model DataFrame:
+['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - 85F_5th_date column NOT found!
+Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - Columns in raw date_data:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
+
+DEBUG - Columns after formatting:
+['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
+
+DEBUG - All columns in model DataFrame:
+['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+
+DEBUG - 85F_5th_date column NOT found!
+Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
