@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QVBoxLayout,
     QWidget,
+    QLabel,
 )
 
 from table_utils import setup_table_copy_functionality
@@ -217,6 +218,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.current_filter = ""
         self.current_filter_type = "name"
         self.tab_type = None  # Will be set by subclasses
+        self.current_violation_count = 0
 
         self._init_ui()
 
@@ -274,11 +276,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.update_stats()
 
     def handle_global_filter_click(self, status_type):
-        """Handle global filter click from another tab.
-
-        Args:
-            status_type (str): The status to filter by
-        """
+        """Handle global filter click from another tab."""
         # Apply the filter
         if status_type == "all":
             self.filter_carriers("")
@@ -286,9 +284,11 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             self.filter_carriers("", filter_type="violations")
         else:
             self.filter_carriers(status_type, filter_type="list_status")
+        
+        # Don't call update_stats() here - let the main window handle that
 
     def update_stats(self):
-        """Update the statistics display in the filter buttons."""
+        """Update the statistics display in the filter buttons and headers."""
         try:
             if self.showing_no_data:
                 self._update_main_window_stats(0, 0, 0, 0, 0, 0)
@@ -300,21 +300,14 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 return
 
             current_tab = self.date_tabs.widget(current_tab_index)
-            if not current_tab:
-                self._update_main_window_stats(0, 0, 0, 0, 0, 0)
-                return
-
-            # Get the model and data
+            current_tab_name = self.date_tabs.tabText(current_tab_index)
+            
+            # Get data for current tab
             df = None
-
-            # Try to get data from the current tab's model
-            if current_tab_name := self.date_tabs.tabText(current_tab_index):
-                if current_tab_name == "Summary" and self.summary_proxy_model:
-                    source_model = self.summary_proxy_model.sourceModel()
-                    if source_model:
-                        df = source_model.df
-                elif current_tab_name in self.models:
-                    source_model = self.models[current_tab_name]["model"]
+            if current_tab_name in self.models:
+                proxy_model = self.models[current_tab_name].get("proxy")
+                if proxy_model:
+                    source_model = proxy_model.sourceModel()
                     if source_model:
                         df = source_model.df
 
@@ -322,14 +315,10 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 self._update_main_window_stats(0, 0, 0, 0, 0, 0)
                 return
 
-            # Calculate totals
+            # Calculate all stats
             total_carriers = len(df)
             list_status_col = next(
-                (
-                    col
-                    for col in df.columns
-                    if col.lower() in ["list_status", "list status"]
-                ),
+                (col for col in df.columns if col.lower() in ["list_status", "list status"]),
                 None,
             )
 
@@ -341,68 +330,58 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             else:
                 wal_carriers = nl_carriers = otdl_carriers = ptf_carriers = 0
 
-            violations = self._calculate_violations(df)
+            # Calculate and store violation count
+            violations = self._calculate_violation_count(df)
+            self.update_violation_header(self.date_tabs, current_tab_index, violations)
 
-            # Update stats in main window
+            # Update main window stats
             self._update_main_window_stats(
                 total_carriers,
                 wal_carriers,
                 nl_carriers,
                 otdl_carriers,
                 ptf_carriers,
-                violations,
+                violations  # This will be replaced with self.current_violation_count
             )
 
-        except Exception:
+        except Exception as e:
+            print(f"Error updating stats: {str(e)}")
             self._update_main_window_stats(0, 0, 0, 0, 0, 0)
 
-    def _calculate_violations(self, df):
-        """Calculate the total number of violations in the given data."""
+    def _calculate_violation_count(self, df):
+        """Calculate the number of carriers with violations in the current view."""
         try:
             # For Summary tab, check numeric columns for any non-zero values
-            if self.__class__.__name__ == "ViolationsSummaryTab":
+            if self.__class__.__name__ == "ViolationRemediesTab":
                 numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
-                # Exclude certain columns that shouldn't be counted for violations
                 exclude_cols = ["Total Hours", "Own Route Hours", "Off Route Hours"]
-                violation_cols = [
-                    col for col in numeric_cols if col not in exclude_cols
-                ]
+                violation_cols = [col for col in numeric_cols if col not in exclude_cols]
                 return len(df[df[violation_cols].gt(0).any(axis=1)])
 
             # For regular violation tabs
             if "violation_type" in df.columns:
-                return len(
-                    df[~df["violation_type"].str.contains("No Violation", na=False)]
-                )
+                return len(df[~df["violation_type"].str.contains("No Violation", na=False)])
 
             # If no violation type column, check remedy totals
             for col in ["remedy_total", "Remedy Total", "Weekly Remedy Total"]:
                 if col in df.columns:
                     return len(df[pd.to_numeric(df[col], errors="coerce") > 0])
 
-            # As a last resort, check if any numeric columns have values > 0
+            # Check for highlighted rows (violations) in any numeric columns
             numeric_cols = df.select_dtypes(include=["float64", "int64"]).columns
             if len(numeric_cols) > 0:
                 return len(df[df[numeric_cols].gt(0).any(axis=1)])
 
             return 0
-        except Exception:
+        except Exception as e:
+            print(f"Error calculating violation count: {str(e)}")
             return 0
 
     def _update_main_window_stats(self, total, wal, nl, otdl, ptf, violations):
-        """Update the stats in the main window.
-
-        Args:
-            total (int): Total number of carriers
-            wal (int): Number of WAL carriers
-            nl (int): Number of NL carriers
-            otdl (int): Number of OTDL carriers
-            ptf (int): Number of PTF carriers
-            violations (int): Number of carriers with violations
-        """
+        """Update the stats in the main window."""
         main_window = self.window()
         if hasattr(main_window, "update_filter_stats"):
-            main_window.update_filter_stats(total, wal, nl, otdl, ptf, violations)
+            main_window.update_filter_stats(total, wal, nl, otdl, ptf, self.current_violation_count)
 
     def init_no_data_tab(self):
         """Initialize the No Data tab."""
@@ -413,8 +392,12 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def create_table_view(self, model, proxy_model=None):
         """Create and configure a table view for violation data."""
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setSpacing(5)
+        
         view = QTableView()
-
         if isinstance(model, ViolationModel):
             renamed_df = self._rename_columns(model.df)
             model.df = renamed_df
@@ -427,8 +410,8 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         if proxy_model:
             proxy_model.sort(0, Qt.AscendingOrder)
 
-        view.resizeColumnsToContents()
-        return view
+        layout.addWidget(view)
+        return container
 
     def _rename_columns(self, df):
         """Rename DataFrame columns to user-friendly display names."""
@@ -500,6 +483,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
         # Restore tab selection
         self.restore_tab_selection(current_tab["name"])
+
+        # After creating/updating all tabs, update the stats
+        self.update_stats()
 
     def restore_tab_selection(self, current_tab_name):
         """Restore the previously selected tab."""
@@ -685,3 +671,38 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             text = self.parent().global_carrier_filter.text()
             if text:
                 self.filter_carriers(text, "name")
+
+    def update_violation_header(self, tab_widget, tab_index, violation_count):
+        """Update the violation count header for the current tab."""
+        current_tab = tab_widget.widget(tab_index)
+        if not current_tab:
+            return
+        
+        # Store the current violation count
+        self.current_violation_count = violation_count
+        
+        # Find or create the header label
+        header_label = current_tab.findChild(QLabel, "violation_count_header")
+        if not header_label:
+            header_label = QLabel(parent=current_tab)
+            header_label.setObjectName("violation_count_header")
+            header_label.setStyleSheet("""
+                QLabel {
+                    color: #BB86FC;
+                    font-size: 12px;
+                    font-weight: bold;
+                    padding: 5px;
+                    margin: 5px;
+                    background-color: #1E1E1E;
+                    border-radius: 3px;
+                }
+            """)
+            
+            layout = current_tab.layout()
+            if not layout:
+                layout = QVBoxLayout(current_tab)
+                current_tab.setLayout(layout)
+            layout.insertWidget(0, header_label)
+        
+        header_label.setText(f"Carriers With Violations: {violation_count}")
+        header_label.setVisible(violation_count > 0)

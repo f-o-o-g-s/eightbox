@@ -52,6 +52,7 @@ from violation_85f_tab import Violation85fTab
 from violation_detection import (
     detect_violations,
     get_violation_remedies,
+    detect_violations_optimized,
 )
 from violation_max12_tab import ViolationMax12Tab
 from violation_max60_tab import ViolationMax60Tab
@@ -493,7 +494,7 @@ class MainApp(QMainWindow):
         self.nl_btn = self.create_filter_button("NL: 0")
         self.otdl_btn = self.create_filter_button("OTDL: 0")
         self.ptf_btn = self.create_filter_button("PTF: 0")
-        self.violations_btn = self.create_filter_button("Carriers With Violations: 0")
+        self.violations_btn = self.create_filter_button("Carriers With Violations")
 
         # Add buttons to layout
         for btn in [
@@ -517,6 +518,10 @@ class MainApp(QMainWindow):
 
     def create_filter_button(self, text):
         """Create a styled filter button for list status filtering."""
+        # Remove "Carriers With Violations: X" from the button text if it exists
+        if "Carriers With Violations" in text:
+            text = "Carriers With Violations"
+        
         btn = QPushButton(text)
         btn.setCheckable(True)
         btn.clicked.connect(self.handle_filter_click)
@@ -555,22 +560,13 @@ class MainApp(QMainWindow):
             self.apply_global_status_filter("violations")
 
     def update_filter_stats(self, total, wal, nl, otdl, ptf, violations):
-        """Update the filter button statistics.
-
-        Args:
-            total (int): Total number of carriers
-            wal (int): Number of WAL carriers
-            nl (int): Number of NL carriers
-            otdl (int): Number of OTDL carriers
-            ptf (int): Number of PTF carriers
-            violations (int): Number of carriers with violations
-        """
+        """Update the filter button statistics."""
         self.total_btn.setText(f"Total Carriers: {total}")
         self.wal_btn.setText(f"WAL: {wal}")
         self.nl_btn.setText(f"NL: {nl}")
         self.otdl_btn.setText(f"OTDL: {otdl}")
         self.ptf_btn.setText(f"PTF: {ptf}")
-        self.violations_btn.setText(f"Carriers With Violations: {violations}")
+        self.violations_btn.setText("Carriers With Violations")
 
         # Force button update
         for btn in [
@@ -584,13 +580,12 @@ class MainApp(QMainWindow):
             btn.update()
 
     def apply_global_status_filter(self, status):
-        """Apply the global status filter to all tabs.
-
-        Args:
-            status (str): The status to filter by ('all', 'wal', 'nl', etc.)
-        """
+        """Apply the global status filter to all tabs."""
         # Store current filter state
         self.current_status_filter = status
+
+        # Get the current active tab
+        current_tab = self.central_tab_widget.currentWidget()
 
         # Apply filter to each violation tab
         for tab in [
@@ -604,7 +599,9 @@ class MainApp(QMainWindow):
         ]:
             if hasattr(tab, "handle_global_filter_click"):
                 tab.handle_global_filter_click(status)
-                tab.update_stats()
+                # Only update stats for the currently visible tab
+                if tab == current_tab:
+                    tab.update_stats()
 
     def init_85d_tab(self):
         """Initialize the Article 8.5.D violation tab."""
@@ -735,48 +732,45 @@ class MainApp(QMainWindow):
         )
         progress.setCancelButton(None)
         progress.setWindowModality(Qt.WindowModal)
-        progress.setValue(0)
         progress.show()
 
-        # Store reference to prevent garbage collection
-        self.progress_dialog = progress
-
-        try:
-            # Ensure UI updates by processing events
+        def update_progress(value, message):
+            progress.setValue(value)
+            progress.setLabelText(message)
             QApplication.processEvents()
 
-            # Ensure the DateSelectionPane is initialized
+        try:
+            # Initial setup (10%)
+            update_progress(0, "Initializing...")
+            QApplication.processEvents()
+
+            # Validate the date selection
             if (
                 not hasattr(self, "date_selection_pane")
                 or self.date_selection_pane is None
             ):
-                QMessageBox.critical(
-                    self, "Error", "Date Selection Pane is not initialized."
-                )
-                return
+                raise AttributeError("Date selection pane is not initialized.")
 
-            # Access the calendar from the DateSelectionPane
+            if (
+                not hasattr(self.date_selection_pane, "calendar")
+                or self.date_selection_pane.calendar is None
+            ):
+                raise AttributeError("Calendar widget is not initialized.")
+
+            # Get the selected date from the calendar
             selected_date = self.date_selection_pane.calendar.selectedDate()
-            if selected_date.dayOfWeek() != 6:  # Ensure the selected date is a Saturday
-                QMessageBox.warning(self, "Invalid Date", "Please select a Saturday.")
-                return
+            if not selected_date.isValid():
+                raise ValueError("No valid date selected in the calendar.")
 
-            progress.setValue(20)
-            progress.setLabelText("Clearing existing data...")
-            QApplication.processEvents()
-
-            progress.setValue(30)
-            progress.setLabelText("Fetching clock ring data...")
+            # Fetch clock ring data (20%)
+            update_progress(10, "Fetching clock ring data...")
             start_date = selected_date.toString("yyyy-MM-dd")
             end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
-
-            # Update the date range display
             self.update_date_range_display(start_date, end_date)
-
             clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
 
-            progress.setValue(40)
-            progress.setLabelText("Processing carrier list...")
+            # Process carrier list (30%)
+            update_progress(20, "Processing carrier list...")
             try:
                 with open("carrier_list.json", "r") as json_file:
                     carrier_list = pd.DataFrame(json.load(json_file))
@@ -835,9 +829,8 @@ class MainApp(QMainWindow):
                     f"Failed to process carrier list: {str(e)}\nProceeding with default values.",
                 )
 
-            # Continue with the rest of the processing
-            progress.setValue(60)
-            progress.setLabelText("Initializing violation tabs...")
+            # Clear existing data (35%)
+            update_progress(30, "Clearing existing data...")
             self.vio_85d_tab.refresh_data(pd.DataFrame())
             self.vio_85f_tab.refresh_data(pd.DataFrame())
             self.vio_85f_ns_tab.refresh_data(pd.DataFrame())
@@ -846,17 +839,18 @@ class MainApp(QMainWindow):
             self.vio_MAX60_tab.refresh_data(pd.DataFrame())
             self.remedies_tab.refresh_data(pd.DataFrame())
 
-            progress.setValue(80)
-            progress.setLabelText("Updating OTDL data...")
+            # Process violations (40-90%)
+            update_progress(40, "Processing violations...")
+            self.update_violations_and_remedies(clock_ring_data, update_progress)
+
+            # Update OTDL data (95%)
+            update_progress(95, "Updating OTDL data...")
             if self.otdl_maximization_pane is None:
                 self.otdl_maximization_pane = OTDLMaximizationPane(self)
             self.otdl_maximization_pane.refresh_data(clock_ring_data, clock_ring_data)
 
-            progress.setValue(90)
-            progress.setLabelText("Calculating violations...")
-            self.update_violations_and_remedies(clock_ring_data)
-
-            progress.setValue(100)
+            # Complete (100%)
+            update_progress(100, "Complete")
             self.statusBar().showMessage("Date range processing complete", 5000)
 
         except Exception as e:
@@ -865,7 +859,7 @@ class MainApp(QMainWindow):
                 self, "Error", f"An unexpected error occurred: {str(e)}"
             )
         finally:
-            # Clean up
+            progress.close()
             self.progress_dialog = None
 
     def retry_apply_date_range(self):
@@ -1081,7 +1075,7 @@ class MainApp(QMainWindow):
             clock_ring_data["carrier_name"].isin(otdl_carriers["carrier_name"])
         ].copy()
 
-    def update_violations_and_remedies(self, clock_ring_data=None):
+    def update_violations_and_remedies(self, clock_ring_data=None, progress_callback=None):
         """Helper function to detect violations and update all tabs."""
         if clock_ring_data is None or clock_ring_data.empty:
             return
@@ -1096,22 +1090,66 @@ class MainApp(QMainWindow):
             "MAX60": "MAX60 More Than 60 Hours Worked in a Week",
         }
 
-        # Detect violations
+        # Initialize violations dictionary
         self.violations = {}
-        for key, violation_type in violation_types.items():
+
+        # Calculate progress increments
+        violation_detection_weight = 50  # 50% for violation detection
+        tab_update_weight = 40          # 40% for tab updates
+        remedy_weight = 10              # 10% for final remedy calculations
+        
+        progress_per_violation = violation_detection_weight / len(violation_types)
+        progress_per_tab = tab_update_weight / (len(violation_types) + 1)  # +1 for remedies tab
+        current_progress = 0
+
+        # Detect violations (50% of progress)
+        for i, (key, violation_type) in enumerate(violation_types.items()):
+            if progress_callback:
+                progress_callback(int(current_progress), f"Detecting {key} violations...")
+            
             self.violations[key] = detect_violations(clock_ring_data, violation_type)
+            current_progress += progress_per_violation
 
-        # Update violation tabs
+        # Update violation tabs (40% of progress)
+        if progress_callback:
+            progress_callback(int(current_progress), "Updating 8.5.D violations tab...")
         self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
-        self.vio_85f_tab.refresh_data(self.violations["8.5.F"])
-        self.vio_85f_ns_tab.refresh_data(self.violations["8.5.F NS"])
-        self.vio_85f_5th_tab.refresh_data(self.violations["8.5.F 5th"])
-        self.vio_MAX12_tab.refresh_data(self.violations["MAX12"])
-        self.vio_MAX60_tab.refresh_data(self.violations["MAX60"])
+        current_progress += progress_per_tab
 
-        # Calculate and update remedies
+        if progress_callback:
+            progress_callback(int(current_progress), "Updating 8.5.F violations tab...")
+        self.vio_85f_tab.refresh_data(self.violations["8.5.F"])
+        current_progress += progress_per_tab
+
+        if progress_callback:
+            progress_callback(int(current_progress), "Updating 8.5.F NS violations tab...")
+        self.vio_85f_ns_tab.refresh_data(self.violations["8.5.F NS"])
+        current_progress += progress_per_tab
+
+        if progress_callback:
+            progress_callback(int(current_progress), "Updating 8.5.F 5th violations tab...")
+        self.vio_85f_5th_tab.refresh_data(self.violations["8.5.F 5th"])
+        current_progress += progress_per_tab
+
+        if progress_callback:
+            progress_callback(int(current_progress), "Updating MAX12 violations tab...")
+        self.vio_MAX12_tab.refresh_data(self.violations["MAX12"])
+        current_progress += progress_per_tab
+
+        if progress_callback:
+            progress_callback(int(current_progress), "Updating MAX60 violations tab...")
+        self.vio_MAX60_tab.refresh_data(self.violations["MAX60"])
+        current_progress += progress_per_tab
+
+        # Calculate and update remedies (final 10%)
+        if progress_callback:
+            progress_callback(90, "Calculating final remedies...")
+        
         remedies_data = get_violation_remedies(clock_ring_data, self.violations)
         self.remedies_tab.refresh_data(remedies_data)
+
+        if progress_callback:
+            progress_callback(100, "Complete")
 
     def on_carrier_data_updated(self, _):
         """Handle updates to the carrier list and refresh all tabs.
@@ -1427,6 +1465,9 @@ class MainApp(QMainWindow):
         Args:
             text (str): The filter text to apply
         """
+        # Get the current active tab
+        current_tab = self.central_tab_widget.currentWidget()
+
         # Apply filter to each violation tab
         for tab in [
             self.vio_85d_tab,
@@ -1439,6 +1480,9 @@ class MainApp(QMainWindow):
         ]:
             if hasattr(tab, "filter_carriers"):
                 tab.filter_carriers(text, "name")
+                # Only update stats for the currently visible tab
+                if tab == current_tab:
+                    tab.update_stats()
 
     def on_carrier_filter_changed(self, text):
         """Handle changes to the carrier filter text.
