@@ -335,7 +335,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
             # Calculate and store violation count
             violations = self._calculate_violation_count(df)
-            
+
             # Update the table header with violation count
             self.update_violation_header(self.date_tabs, current_tab_index, violations)
 
@@ -346,7 +346,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 nl_carriers,
                 otdl_carriers,
                 ptf_carriers,
-                violations
+                violations,
             )
 
         except Exception as e:
@@ -388,7 +388,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def _update_main_window_stats(self, total, wal, nl, otdl, ptf, violations):
         """Update internal stats tracking.
-        
+
         Args:
             total (int): Total number of carriers
             wal (int): Number of WAL carriers
@@ -399,16 +399,16 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         """
         # Store stats internally for filtering purposes
         self.current_stats = {
-            'total': total,
-            'wal': wal,
-            'nl': nl,
-            'otdl': otdl,
-            'ptf': ptf,
-            'violations': violations
+            "total": total,
+            "wal": wal,
+            "nl": nl,
+            "otdl": otdl,
+            "ptf": ptf,
+            "violations": violations,
         }
-        
+
         # Call parent's update_filter_stats with empty implementation
-        if hasattr(self.parent(), 'update_filter_stats'):
+        if hasattr(self.parent(), "update_filter_stats"):
             self.parent().update_filter_stats(total, wal, nl, otdl, ptf, violations)
 
     def init_no_data_tab(self):
@@ -941,25 +941,30 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
     @staticmethod
     def format_header_text(count, is_total=True):
         """Format header text with consistent styling.
-        
+
         Args:
             count: The number to display in parentheses
-            is_total: If True, formats for Total Carriers, if False, formats for Carriers With Violations
+            is_total: If True, formats for Total Carriers,
+                     if False, formats for Carriers With Violations
         """
+        TOTAL_TEXT = "Total Carriers:           | "
+        VIOLATIONS_TEXT = "Carriers With Violations: | "
+
+        prefix = f"({count:02d})"
         if is_total:
-            return f"({count:02d}) Total Carriers:           | "
+            return f"{prefix} {TOTAL_TEXT}"
         else:
-            return f"({count:02d}) Carriers With Violations: | "
+            return f"{prefix} {VIOLATIONS_TEXT}"
 
     def format_list_status_counts(self, wal, nl, otdl, ptf):
         """Format the list status counts with consistent styling.
-        
+
         Args:
             wal: Count of WAL carriers
             nl: Count of NL carriers
             otdl: Count of OTDL carriers
             ptf: Count of PTF carriers
-            
+
         Returns:
             str: Formatted string like "WAL: XX | NL: XX | OTDL: XX | PTF: XX"
                 where XX are zero-padded two-digit numbers
@@ -1084,21 +1089,19 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 )
 
                 # Format the header texts using the centralized formatting methods
-                total_carriers_text = (
-                    self.format_header_text(total_carriers, True) +
-                    self.format_list_status_counts(
-                        wal_carriers, nl_carriers, otdl_carriers, ptf_carriers
-                    )
+                total_carriers_text = self.format_header_text(
+                    total_carriers, True
+                ) + self.format_list_status_counts(
+                    wal_carriers, nl_carriers, otdl_carriers, ptf_carriers
                 )
 
-                carriers_violations_text = (
-                    self.format_header_text(total_carriers_violations, False) +
-                    self.format_list_status_counts(
-                        wal_carriers_violations,
-                        nl_carriers_violations,
-                        otdl_carriers_violations,
-                        ptf_carriers_violations
-                    )
+                carriers_violations_text = self.format_header_text(
+                    total_carriers_violations, False
+                ) + self.format_list_status_counts(
+                    wal_carriers_violations,
+                    nl_carriers_violations,
+                    otdl_carriers_violations,
+                    ptf_carriers_violations,
                 )
 
                 total_carriers_label.setText(total_carriers_text)
@@ -1112,10 +1115,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                         "Total Violations", "Carriers With Violations"
                     )
                 else:
-                    carriers_violations_text = (
-                        self.format_header_text(violation_count, False) +
-                        self.format_list_status_counts(0, 0, 0, 0)
-                    )
+                    carriers_violations_text = self.format_header_text(
+                        violation_count, False
+                    ) + self.format_list_status_counts(0, 0, 0, 0)
         else:
             total_carriers_text = "No carrier data available"
             if custom_header_text:
@@ -1123,10 +1125,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                     "Total Violations", "Carriers With Violations"
                 )
             else:
-                carriers_violations_text = (
-                    self.format_header_text(violation_count, False) +
-                    self.format_list_status_counts(0, 0, 0, 0)
-                )
+                carriers_violations_text = self.format_header_text(
+                    violation_count, False
+                ) + self.format_list_status_counts(0, 0, 0, 0)
 
 
 class ViolationRemediesTab(BaseViolationTab):

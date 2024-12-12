@@ -217,18 +217,16 @@ class ViolationRemediesTab(BaseViolationTab):
             ptf_carriers = list_status_counts.get("ptf", 0)
 
             # Create the header text
-            total_carriers_text = (
-                self.format_header_text(total_carriers, True) +
-                self.format_list_status_counts(
-                    wal_carriers, nl_carriers, otdl_carriers, ptf_carriers
-                )
+            total_carriers_text = self.format_header_text(
+                total_carriers, True
+            ) + self.format_list_status_counts(
+                wal_carriers, nl_carriers, otdl_carriers, ptf_carriers
             )
 
-            carriers_violations_text = (
-                self.format_header_text(total_violations, False) +
-                self.format_list_status_counts(
-                    wal_violations, nl_violations, otdl_violations, ptf_violations
-                )
+            carriers_violations_text = self.format_header_text(
+                total_violations, False
+            ) + self.format_list_status_counts(
+                wal_violations, nl_violations, otdl_violations, ptf_violations
             )
 
             # Add the tab
@@ -238,7 +236,8 @@ class ViolationRemediesTab(BaseViolationTab):
             self.update_violation_header(
                 self.date_tabs,
                 tab_index,
-                total_violations
+                total_violations,
+                custom_header_text=[total_carriers_text, carriers_violations_text],
             )
 
         except Exception as e:
