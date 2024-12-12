@@ -525,7 +525,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
         # Add violation count header
         violations = self._calculate_violation_count(formatted_data)
-        self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations)
+        self.update_violation_header(
+            self.date_tabs, self.date_tabs.count() - 1, violations
+        )
 
         return view
 
@@ -621,7 +623,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
         # Add violation count header for summary tab
         violations = self._calculate_violation_count(summary_data)
-        self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations)
+        self.update_violation_header(
+            self.date_tabs, self.date_tabs.count() - 1, violations
+        )
 
     def create_summary_model(self, summary_data: pd.DataFrame):
         """Create a model for the summary tab.
