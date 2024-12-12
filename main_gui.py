@@ -488,11 +488,11 @@ class MainApp(QMainWindow):
         filter_layout.setSpacing(4)  # Spacing between buttons
 
         # Create status filter buttons with stats
-        self.total_btn = self.create_filter_button("Total Carriers: 0")
-        self.wal_btn = self.create_filter_button("WAL: 0")
-        self.nl_btn = self.create_filter_button("NL: 0")
-        self.otdl_btn = self.create_filter_button("OTDL: 0")
-        self.ptf_btn = self.create_filter_button("PTF: 0")
+        self.total_btn = self.create_filter_button("All Carriers")
+        self.wal_btn = self.create_filter_button("WAL")
+        self.nl_btn = self.create_filter_button("NL")
+        self.otdl_btn = self.create_filter_button("OTDL")
+        self.ptf_btn = self.create_filter_button("PTF")
         self.violations_btn = self.create_filter_button("Carriers With Violations")
 
         # Add buttons to layout
@@ -517,10 +517,6 @@ class MainApp(QMainWindow):
 
     def create_filter_button(self, text):
         """Create a styled filter button for list status filtering."""
-        # Remove "Carriers With Violations: X" from the button text if it exists
-        if "Carriers With Violations" in text:
-            text = "Carriers With Violations"
-
         btn = QPushButton(text)
         btn.setCheckable(True)
         btn.clicked.connect(self.handle_filter_click)
@@ -559,24 +555,9 @@ class MainApp(QMainWindow):
             self.apply_global_status_filter("violations")
 
     def update_filter_stats(self, total, wal, nl, otdl, ptf, violations):
-        """Update the filter button statistics."""
-        self.total_btn.setText(f"Total Carriers: {total}")
-        self.wal_btn.setText(f"WAL: {wal}")
-        self.nl_btn.setText(f"NL: {nl}")
-        self.otdl_btn.setText(f"OTDL: {otdl}")
-        self.ptf_btn.setText(f"PTF: {ptf}")
-        self.violations_btn.setText("Carriers With Violations")
-
-        # Force button update
-        for btn in [
-            self.total_btn,
-            self.wal_btn,
-            self.nl_btn,
-            self.otdl_btn,
-            self.ptf_btn,
-            self.violations_btn,
-        ]:
-            btn.update()
+        """Update internal stats without modifying button text."""
+        # Store stats internally if needed but don't update button text
+        pass
 
     def apply_global_status_filter(self, status):
         """Apply the global status filter to all tabs."""

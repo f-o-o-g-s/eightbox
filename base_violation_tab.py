@@ -288,7 +288,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         # Don't call update_stats() here - let the main window handle that
 
     def update_stats(self):
-        """Update the statistics display in the filter buttons and headers."""
+        """Update the statistics display in table headers."""
         try:
             if self.showing_no_data:
                 self._update_main_window_stats(0, 0, 0, 0, 0, 0)
@@ -335,16 +335,18 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
             # Calculate and store violation count
             violations = self._calculate_violation_count(df)
+            
+            # Update the table header with violation count
             self.update_violation_header(self.date_tabs, current_tab_index, violations)
 
-            # Update main window stats
+            # Update internal stats
             self._update_main_window_stats(
                 total_carriers,
                 wal_carriers,
                 nl_carriers,
                 otdl_carriers,
                 ptf_carriers,
-                violations,  # This will be replaced with self.current_violation_count
+                violations
             )
 
         except Exception as e:
@@ -385,12 +387,29 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             return 0
 
     def _update_main_window_stats(self, total, wal, nl, otdl, ptf, violations):
-        """Update the stats in the main window."""
-        main_window = self.window()
-        if hasattr(main_window, "update_filter_stats"):
-            main_window.update_filter_stats(
-                total, wal, nl, otdl, ptf, self.current_violation_count
-            )
+        """Update internal stats tracking.
+        
+        Args:
+            total (int): Total number of carriers
+            wal (int): Number of WAL carriers
+            nl (int): Number of NL carriers
+            otdl (int): Number of OTDL carriers
+            ptf (int): Number of PTF carriers
+            violations (int): Number of carriers with violations
+        """
+        # Store stats internally for filtering purposes
+        self.current_stats = {
+            'total': total,
+            'wal': wal,
+            'nl': nl,
+            'otdl': otdl,
+            'ptf': ptf,
+            'violations': violations
+        }
+        
+        # Call parent's update_filter_stats with empty implementation
+        if hasattr(self.parent(), 'update_filter_stats'):
+            self.parent().update_filter_stats(total, wal, nl, otdl, ptf, violations)
 
     def init_no_data_tab(self):
         """Initialize the No Data tab."""
