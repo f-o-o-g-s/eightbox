@@ -919,6 +919,39 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             )
             return 0
 
+    @staticmethod
+    def format_header_text(count, is_total=True):
+        """Format header text with consistent styling.
+        
+        Args:
+            count: The number to display in parentheses
+            is_total: If True, formats for Total Carriers, if False, formats for Carriers With Violations
+        """
+        if is_total:
+            return f"({count:02d}) Total Carriers:           | "
+        else:
+            return f"({count:02d}) Carriers With Violations: | "
+
+    def format_list_status_counts(self, wal, nl, otdl, ptf):
+        """Format the list status counts with consistent styling.
+        
+        Args:
+            wal: Count of WAL carriers
+            nl: Count of NL carriers
+            otdl: Count of OTDL carriers
+            ptf: Count of PTF carriers
+            
+        Returns:
+            str: Formatted string like "WAL: XX | NL: XX | OTDL: XX | PTF: XX"
+                where XX are zero-padded two-digit numbers
+        """
+        return (
+            f"WAL: {wal:02d} | "
+            f"NL: {nl:02d} | "
+            f"OTDL: {otdl:02d} | "
+            f"PTF: {ptf:02d}"
+        )
+
     def update_violation_header(
         self, tab_widget, tab_index, violation_count, custom_header_text=None
     ):
@@ -957,9 +990,10 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             style = """
                 QLabel {
                     color: #BB86FC;
+                    font-family: 'Consolas', 'Courier New', monospace;
                     font-size: 12px;
                     font-weight: bold;
-                    padding: 3px;
+                    padding: 3px 6px;
                     background-color: #1E1E1E;
                     border-radius: 3px;
                 }
@@ -1030,28 +1064,28 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                     + otdl_carriers_violations
                 )
 
-                # Format the header texts
+                # Format the header texts using the centralized formatting methods
                 total_carriers_text = (
-                    f"Total Carriers: {total_carriers} | "
-                    f"WAL: {wal_carriers} | "
-                    f"NL: {nl_carriers} | "
-                    f"OTDL: {otdl_carriers} | "
-                    f"PTF: {ptf_carriers}"
+                    self.format_header_text(total_carriers, True) +
+                    self.format_list_status_counts(
+                        wal_carriers, nl_carriers, otdl_carriers, ptf_carriers
+                    )
                 )
 
-                # Use custom header text for violations if provided, otherwise calculate
-                if custom_header_text:
-                    carriers_violations_text = custom_header_text.replace(
-                        "Total Violations", "Carriers With Violations"
+                carriers_violations_text = (
+                    self.format_header_text(total_carriers_violations, False) +
+                    self.format_list_status_counts(
+                        wal_carriers_violations,
+                        nl_carriers_violations,
+                        otdl_carriers_violations,
+                        ptf_carriers_violations
                     )
-                else:
-                    carriers_violations_text = (
-                        f"Carriers With Violations: {total_carriers_violations} | "
-                        f"WAL: {wal_carriers_violations} | "
-                        f"NL: {nl_carriers_violations} | "
-                        f"OTDL: {otdl_carriers_violations} | "
-                        f"PTF: {ptf_carriers_violations}"
-                    )
+                )
+
+                total_carriers_label.setText(total_carriers_text)
+                carriers_with_violations_label.setText(carriers_violations_text)
+                total_carriers_label.setVisible(True)
+                carriers_with_violations_label.setVisible(True)
             else:
                 total_carriers_text = "No carrier data available"
                 if custom_header_text:
@@ -1060,7 +1094,8 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                     )
                 else:
                     carriers_violations_text = (
-                        f"Carriers With Violations: {violation_count}"
+                        self.format_header_text(violation_count, False) +
+                        self.format_list_status_counts(0, 0, 0, 0)
                     )
         else:
             total_carriers_text = "No carrier data available"
@@ -1070,13 +1105,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 )
             else:
                 carriers_violations_text = (
-                    f"Carriers With Violations: {violation_count}"
+                    self.format_header_text(violation_count, False) +
+                    self.format_list_status_counts(0, 0, 0, 0)
                 )
-
-        total_carriers_label.setText(total_carriers_text)
-        carriers_with_violations_label.setText(carriers_violations_text)
-        total_carriers_label.setVisible(True)
-        carriers_with_violations_label.setVisible(True)
 
 
 class ViolationRemediesTab(BaseViolationTab):
