@@ -237,6 +237,9 @@ class MainApp(QMainWindow):
         super().__init__()
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
 
+        # Track active progress dialogs
+        self.active_progress_dialogs = []
+
         # Create the excel exporter first
         self.excel_exporter = ExcelExporter(self)
 
@@ -654,7 +657,26 @@ class MainApp(QMainWindow):
         self.remedies_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
 
     def apply_date_range(self):
-        """Apply the selected date range and update all tabs."""
+        """Apply the selected date range and process violations."""
+        # First check: Database path validation
+        if not os.path.exists(self.mandates_db_path):
+            QMessageBox.critical(
+                self,
+                "Database Not Found",
+                "Please configure the database path before proceeding.",
+            )
+            self.open_settings_dialog()
+            if (
+                hasattr(self, "carrier_list_pane")
+                and self.carrier_list_pane is not None
+            ):
+                if hasattr(self.carrier_list_pane, "data_updated"):
+                    self.carrier_list_pane.data_updated.connect(
+                        lambda: self.retry_apply_date_range()
+                    )
+            return
+
+        # Second check: Carrier List validation
         if not os.path.exists("carrier_list.json"):
             response = CustomWarningDialog.warning(
                 self,
@@ -678,7 +700,7 @@ class MainApp(QMainWindow):
                     )
             return
 
-        # Second check: Carrier List content validation
+        # Third check: Carrier List content validation
         try:
             with open("carrier_list.json", "r") as json_file:
                 carrier_list = pd.DataFrame(json.load(json_file))
@@ -707,11 +729,9 @@ class MainApp(QMainWindow):
             return
 
         # Create and show custom progress dialog
-        progress = CustomProgressDialog(
-            "Processing data...", "", 0, 100, self, title="Processing Date Range"
+        progress = self.create_progress_dialog(
+            "Processing Date Range", "Processing data..."
         )
-        progress.setCancelButton(None)
-        progress.setWindowModality(Qt.WindowModal)
         progress.show()
 
         def update_progress(value, message):
@@ -839,8 +859,7 @@ class MainApp(QMainWindow):
                 self, "Error", f"An unexpected error occurred: {str(e)}"
             )
         finally:
-            progress.close()
-            self.progress_dialog = None
+            self.cleanup_progress_dialog(progress)
 
     def retry_apply_date_range(self):
         """Retry apply_date_range after carrier list is saved."""
@@ -1566,6 +1585,32 @@ class MainApp(QMainWindow):
             self.otdl_maximization_pane.show()
             self.otdl_maximization_pane.setMinimumSize(1053, 681)
             self.otdl_maximization_button.setChecked(True)
+
+    def create_progress_dialog(self, title="Processing...", initial_text=""):
+        """Create and track a new progress dialog.
+
+        Args:
+            title (str): Title for the progress dialog
+            initial_text (str): Initial message to display
+
+        Returns:
+            CustomProgressDialog: The created progress dialog
+        """
+        progress = CustomProgressDialog(initial_text, "", 0, 100, self, title=title)
+        progress.setCancelButton(None)
+        progress.setWindowModality(Qt.WindowModal)
+        self.active_progress_dialogs.append(progress)
+        return progress
+
+    def cleanup_progress_dialog(self, progress):
+        """Clean up and close a progress dialog.
+
+        Args:
+            progress (CustomProgressDialog): The progress dialog to clean up
+        """
+        if progress in self.active_progress_dialogs:
+            self.active_progress_dialogs.remove(progress)
+        progress.close()
 
 
 if __name__ == "__main__":

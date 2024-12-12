@@ -11,10 +11,7 @@ to Excel workbooks, with features including:
 import os
 
 import pandas as pd
-from PyQt5.QtCore import (
-    Qt,
-    QTimer,
-)
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QApplication,
     QTableView,
@@ -23,7 +20,6 @@ from PyQt5.QtWidgets import (
 from custom_widgets import (
     CustomErrorDialog,
     CustomMessageBox,
-    CustomProgressDialog,
     CustomWarningDialog,
 )
 from table_utils import extract_table_state
@@ -66,85 +62,51 @@ class ExcelExporter:
         self.date_range = None
 
     def export_all_violations(self):
-        """Export all violation tabs to separate Excel files.
-
-        Creates individual Excel files for each violation tab in the application,
-        with proper formatting and data organization. Shows a progress dialog
-        during the export process.
-
-        The files are organized in folders by date range and include:
-        - Formatted data with proper column types
-        - Headers and footers
-        - Consistent styling
-        - Cell background colors
-        - Column widths and alignments
-
-        Raises:
-            AttributeError: If required UI components are not initialized
-            ValueError: If date selection is invalid
-            Exception: For other export-related errors
-        """
+        """Export all violation tabs to Excel files."""
         try:
-            # Get the selected date range
-            date_range = self._get_date_range()
+            # Get the current date range
+            self.date_range = self._get_date_range()
 
             # Setup folders
             base_folder_path = os.path.join(os.getcwd(), "spreadsheets")
             os.makedirs(base_folder_path, exist_ok=True)
-            date_range_folder = os.path.join(base_folder_path, date_range)
-            os.makedirs(date_range_folder, exist_ok=True)
-
-            print(f"Exporting violations for date range: {date_range}")
+            self.folder_path = os.path.join(base_folder_path, self.date_range)
+            os.makedirs(self.folder_path, exist_ok=True)
 
             # Initialize export parameters
             self.tab_indices_to_process = list(
                 range(self.main_window.central_tab_widget.count())
             )
-            self.folder_path = date_range_folder
-            self.date_range = date_range
 
-            # Initialize the progress dialog
-            self.progress_dialog = CustomProgressDialog(
-                "Exporting tabs...",
-                "Cancel",
-                0,
-                len(self.tab_indices_to_process),
-                self.main_window,
-                title="Export Progress",
+            # Create progress dialog
+            self.progress_dialog = self.main_window.create_progress_dialog(
+                "Exporting Violations", "Preparing to export..."
             )
-            self.progress_dialog.setWindowTitle("Export Progress")
-            self.progress_dialog.setWindowModality(Qt.WindowModal)
-            self.progress_dialog.setValue(0)
+            self.progress_dialog.setRange(0, len(self.tab_indices_to_process))
+            self.progress_dialog.show()
 
-            # Start processing tabs
+            # Start the export process
             self.current_tab_index = 0
-            self.timer = QTimer(self.main_window)
+            self.timer = QTimer()
             self.timer.timeout.connect(self.process_next_tab_with_progress)
-            self.timer.start(200)
+            self.timer.start(100)  # Process a tab every 100ms
 
         except (AttributeError, ValueError) as e:
             CustomErrorDialog.error(
                 self.main_window, "Export Failed", f"Error: {str(e)}"
             )
-            print(f"Export failed with error: {str(e)}")
         except Exception as e:
-            print(f"Export failed with error: {e}")
             CustomErrorDialog.error(
-                self.main_window, "Export Failed", f"An error occurred: {str(e)}"
+                self.main_window,
+                "Export Failed",
+                f"An unexpected error occurred: {str(e)}",
             )
 
     def process_next_tab_with_progress(self):
-        """Process the next tab in the export queue.
-
-        Updates the progress dialog and handles the export of the current tab.
-        Continues until all tabs are processed or the user cancels.
-
-        Note:
-            This method is called repeatedly by a timer to provide a responsive UI
-            during the export process.
-        """
+        """Process the next tab in the export queue."""
         if self.progress_dialog.wasCanceled():
             self.timer.stop()
+            self.main_window.cleanup_progress_dialog(self.progress_dialog)
             CustomWarningDialog.warning(
                 self.main_window, "Export Canceled", "The export process was canceled."
             )
@@ -173,6 +135,7 @@ class ExcelExporter:
         else:
             self.timer.stop()
             self.progress_dialog.setValue(len(self.tab_indices_to_process))
+            self.main_window.cleanup_progress_dialog(self.progress_dialog)
 
             # Use custom message box instead of QMessageBox
             msg_box = CustomMessageBox(
@@ -212,38 +175,33 @@ class ExcelExporter:
             raise
 
     def _get_date_range(self):
-        """Get the selected date range for file naming.
+        """Get the current date range from the main window.
 
         Returns:
-            str: Date range in format "MM-DD-YYYY to MM-DD-YYYY"
+            str: Date range in format 'YYYY-MM-DD to YYYY-MM-DD'
 
         Raises:
-            AttributeError: If date selection components are not initialized
-            ValueError: If selected date is invalid or not a Saturday
+            AttributeError: If date selection pane is not initialized
+            ValueError: If no valid date is selected
         """
         if (
             not hasattr(self.main_window, "date_selection_pane")
             or self.main_window.date_selection_pane is None
         ):
-            raise AttributeError(
-                "Cannot Generate Spreadsheets Without Setting A Date First."
-            )
+            raise AttributeError("Date selection pane is not initialized")
 
         if (
             not hasattr(self.main_window.date_selection_pane, "calendar")
             or self.main_window.date_selection_pane.calendar is None
         ):
-            raise AttributeError("Calendar widget is not initialized.")
+            raise AttributeError("Calendar widget is not initialized")
 
         selected_date = self.main_window.date_selection_pane.calendar.selectedDate()
         if not selected_date.isValid():
-            raise ValueError("No valid date selected in the calendar.")
+            raise ValueError("No valid date selected in the calendar")
 
-        if selected_date.dayOfWeek() != 6:
-            raise ValueError("Selected date must be a Saturday.")
-
-        start_date = selected_date.toString("MM-dd-yyyy")
-        end_date = selected_date.addDays(6).toString("MM-dd-yyyy")
+        start_date = selected_date.toString("yyyy-MM-dd")
+        end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
         return f"{start_date} to {end_date}"
 
     def _write_excel_file(self, writer, date_range):
