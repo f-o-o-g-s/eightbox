@@ -449,13 +449,15 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         """Maintain active filters when switching between tabs."""
         if self.current_filter or self.current_filter_type != "name":
             self.filter_carriers(self.current_filter, self.current_filter_type)
-        self._resize_columns_on_current_tab(index)
-
-    def _resize_columns_on_current_tab(self, index):
-        """Resize columns to fit their contents on the current tab."""
+        
+        # Resize columns for the newly selected tab
         current_widget = self.date_tabs.widget(index)
-        if isinstance(current_widget, QTableView):
-            current_widget.resizeColumnsToContents()
+        if isinstance(current_widget, QWidget):
+            table_view = current_widget.findChild(QTableView)
+            if table_view and table_view.model():
+                header = table_view.horizontalHeader()
+                for col in range(table_view.model().columnCount()):
+                    header.setSectionResizeMode(col, header.ResizeToContents)
 
     def init_ui(self, initial_data=None):
         """Initialize the UI with optional initial data.
@@ -508,11 +510,18 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
     def create_tab_for_date(self, date, date_data):
         """Create a tab showing violations for a specific date."""
+        print(f"\nCreating tab for date: {date}")
+        print(f"Columns in date_data: {date_data.columns.tolist()}")
+        print(f"List status values: {date_data['list_status'].unique() if 'list_status' in date_data.columns else 'No list_status column'}")
+        
         display_columns = self.get_display_columns()
         formatted_data = self.format_display_data(date_data)
 
         if display_columns:
             formatted_data = formatted_data[display_columns]
+
+        print(f"Columns after formatting: {formatted_data.columns.tolist()}")
+        print(f"List status after formatting: {formatted_data['list_status'].unique() if 'list_status' in formatted_data.columns else 'No list_status column'}")
 
         model = ViolationModel(formatted_data, tab_type=self.tab_type, is_summary=False)
         proxy_model = ViolationFilterProxyModel()
@@ -523,11 +532,29 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.date_tabs.addTab(view, str(date))
         self.configure_tab_view(view, model)
 
-        # Add violation count header
+        # Calculate violation counts and create header text
         violations = self._calculate_violation_count(formatted_data)
-        self.update_violation_header(
-            self.date_tabs, self.date_tabs.count() - 1, violations
-        )
+        print(f"Total violations: {violations}")
+        
+        if 'list_status' in formatted_data.columns:
+            ptf_violations = self._calculate_list_status_violation_count(formatted_data, 'ptf')
+            wal_violations = self._calculate_list_status_violation_count(formatted_data, 'wal')
+            nl_violations = self._calculate_list_status_violation_count(formatted_data, 'nl')
+            otdl_violations = self._calculate_list_status_violation_count(formatted_data, 'otdl')
+
+            print(f"List status violations - WAL: {wal_violations}, NL: {nl_violations}, OTDL: {otdl_violations}, PTF: {ptf_violations}")
+
+            header_text = (
+                f"Total Violations: {violations}  |  "
+                f"WAL: {wal_violations}  |  "
+                f"NL: {nl_violations}  |  "
+                f"OTDL: {otdl_violations}  |  "
+                f"PTF: {ptf_violations}"
+            )
+            self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations, header_text)
+        else:
+            print("No list_status column found in formatted_data")
+            self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations)
 
         return view
 
@@ -623,9 +650,23 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
         # Add violation count header for summary tab
         violations = self._calculate_violation_count(summary_data)
-        self.update_violation_header(
-            self.date_tabs, self.date_tabs.count() - 1, violations
-        )
+        if 'list_status' in summary_data.columns:
+            # Calculate violations for each list status using the same logic
+            ptf_violations = self._calculate_list_status_violation_count(summary_data, 'ptf')
+            wal_violations = self._calculate_list_status_violation_count(summary_data, 'wal')
+            nl_violations = self._calculate_list_status_violation_count(summary_data, 'nl')
+            otdl_violations = self._calculate_list_status_violation_count(summary_data, 'otdl')
+
+            header_text = (
+                f"Total Violations: {violations}  |  "
+                f"WAL: {wal_violations}  |  "
+                f"NL: {nl_violations}  |  "
+                f"OTDL: {otdl_violations}  |  "
+                f"PTF: {ptf_violations}"
+            )
+            self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations, header_text)
+        else:
+            self.update_violation_header(self.date_tabs, self.date_tabs.count() - 1, violations)
 
     def create_summary_model(self, summary_data: pd.DataFrame):
         """Create a model for the summary tab.
@@ -693,39 +734,302 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             if text:
                 self.filter_carriers(text, "name")
 
-    def update_violation_header(self, tab_widget, tab_index, violation_count):
+    def _calculate_list_status_violation_count(self, df, list_status):
+        """Calculate violations for a specific list status using the same logic as the main count."""
+        try:
+            # Find list_status column using case-insensitive lookup
+            list_status_col = next((col for col in df.columns if col.lower() in ["list_status", "list status"]), None)
+            if not list_status_col:
+                print(f"Could not find list_status column in {df.columns.tolist()}")
+                return 0
+            
+            # Filter for the specific list status (case-insensitive)
+            status_mask = df[list_status_col].str.lower() == list_status.lower()
+            filtered_df = df[status_mask]
+
+            # For Summary tab, check numeric columns for any non-zero values
+            if self.__class__.__name__ == "ViolationRemediesTab":
+                numeric_cols = filtered_df.select_dtypes(include=["float64", "int64"]).columns
+                exclude_cols = ["Total Hours", "Own Route Hours", "Off Route Hours"]
+                violation_cols = [col for col in numeric_cols if col not in exclude_cols]
+                return len(filtered_df[filtered_df[violation_cols].gt(0).any(axis=1)])
+
+            # For regular violation tabs
+            violation_type_col = next((col for col in filtered_df.columns if col.lower() == "violation_type"), None)
+            if violation_type_col:
+                return len(filtered_df[~filtered_df[violation_type_col].str.contains("No Violation", na=False)])
+
+            # If no violation type column, check remedy totals
+            remedy_cols = ["remedy_total", "Remedy Total", "Weekly Remedy Total"]
+            for col in remedy_cols:
+                remedy_col = next((c for c in filtered_df.columns if c.lower() == col.lower()), None)
+                if remedy_col:
+                    return len(filtered_df[pd.to_numeric(filtered_df[remedy_col], errors="coerce") > 0])
+
+            # Check for highlighted rows (violations) in any numeric columns
+            numeric_cols = filtered_df.select_dtypes(include=["float64", "int64"]).columns
+            if len(numeric_cols) > 0:
+                return len(filtered_df[filtered_df[numeric_cols].gt(0).any(axis=1)])
+
+            return 0
+        except Exception as e:
+            print(f"Error calculating {list_status} violation count: {str(e)}")
+            return 0
+
+    def _calculate_list_status_carrier_count(self, df, list_status):
+        """Calculate the number of unique carriers for a specific list status."""
+        try:
+            # Find list_status and carrier columns using case-insensitive lookup
+            list_status_col = next((col for col in df.columns if col.lower() in ["list_status", "list status"]), None)
+            carrier_col = next((col for col in df.columns if col.lower() in ["carrier_name", "carrier name"]), None)
+            
+            if not list_status_col or not carrier_col:
+                print(f"Could not find required columns in {df.columns.tolist()}")
+                return 0
+            
+            # Filter for the specific list status and count unique carriers
+            status_mask = df[list_status_col].str.lower() == list_status.lower()
+            return len(df[status_mask][carrier_col].unique())
+            
+        except Exception as e:
+            print(f"Error calculating carrier count for {list_status}: {str(e)}")
+            return 0
+
+    def _calculate_list_status_carriers_with_violations(self, df, list_status):
+        """Calculate the number of unique carriers with violations for a specific list status."""
+        try:
+            # Find required columns using case-insensitive lookup
+            list_status_col = next((col for col in df.columns if col.lower() in ["list_status", "list status"]), None)
+            carrier_col = next((col for col in df.columns if col.lower() in ["carrier_name", "carrier name"]), None)
+            
+            if not list_status_col or not carrier_col:
+                print(f"Could not find required columns in {df.columns.tolist()}")
+                return 0
+            
+            # Filter for the specific list status
+            status_mask = df[list_status_col].str.lower() == list_status.lower()
+            filtered_df = df[status_mask]
+            
+            # Get carriers with violations
+            violation_type_col = next((col for col in filtered_df.columns if col.lower() == "violation_type"), None)
+            if violation_type_col:
+                violation_mask = ~filtered_df[violation_type_col].str.contains("No Violation", na=False)
+                return len(filtered_df[violation_mask][carrier_col].unique())
+            
+            # If no violation type column, check remedy totals
+            remedy_cols = ["remedy_total", "Remedy Total", "Weekly Remedy Total"]
+            for col in remedy_cols:
+                remedy_col = next((c for c in filtered_df.columns if c.lower() == col.lower()), None)
+                if remedy_col:
+                    violation_mask = pd.to_numeric(filtered_df[remedy_col], errors="coerce") > 0
+                    return len(filtered_df[violation_mask][carrier_col].unique())
+            
+            return 0
+        except Exception as e:
+            print(f"Error calculating carriers with violations for {list_status}: {str(e)}")
+            return 0
+
+    def update_violation_header(self, tab_widget, tab_index, violation_count, custom_header_text=None):
         """Update the violation count header for the current tab."""
+        print(f"\nUpdating header for tab index: {tab_index}")
+        print(f"Custom header text provided: {custom_header_text is not None}")
+        
         current_tab = tab_widget.widget(tab_index)
         if not current_tab:
+            print("No current tab found")
             return
 
         # Store the current violation count
         self.current_violation_count = violation_count
 
-        # Find or create the header label
-        header_label = current_tab.findChild(QLabel, "violation_count_header")
-        if not header_label:
-            header_label = QLabel(parent=current_tab)
-            header_label.setObjectName("violation_count_header")
-            header_label.setStyleSheet(
-                """
+        # Find or create the header widget
+        header_widget = current_tab.findChild(QWidget, "violation_header_widget")
+        if not header_widget:
+            print("Creating new header widget")
+            header_widget = QWidget(parent=current_tab)
+            header_widget.setObjectName("violation_header_widget")
+            
+            # Create vertical layout for the labels
+            header_layout = QVBoxLayout(header_widget)
+            header_layout.setSpacing(2)
+            header_layout.setContentsMargins(5, 5, 5, 5)
+            
+            # Create two labels
+            total_carriers_label = QLabel(parent=header_widget)
+            total_carriers_label.setObjectName("total_carriers_label")
+            carriers_with_violations_label = QLabel(parent=header_widget)
+            carriers_with_violations_label.setObjectName("carriers_with_violations_label")
+            
+            # Add labels to layout
+            header_layout.addWidget(total_carriers_label)
+            header_layout.addWidget(carriers_with_violations_label)
+            
+            # Style the labels
+            style = """
                 QLabel {
                     color: #BB86FC;
                     font-size: 12px;
                     font-weight: bold;
-                    padding: 5px;
-                    margin: 5px;
+                    padding: 3px;
                     background-color: #1E1E1E;
                     border-radius: 3px;
                 }
             """
-            )
-
+            total_carriers_label.setStyleSheet(style)
+            carriers_with_violations_label.setStyleSheet(style)
+            
+            # Add header widget to tab layout
             layout = current_tab.layout()
             if not layout:
                 layout = QVBoxLayout(current_tab)
                 current_tab.setLayout(layout)
-            layout.insertWidget(0, header_label)
+            layout.insertWidget(0, header_widget)
+        
+        # Get the labels
+        total_carriers_label = header_widget.findChild(QLabel, "total_carriers_label")
+        carriers_with_violations_label = header_widget.findChild(QLabel, "carriers_with_violations_label")
 
-        header_label.setText(f"Carriers With Violations: {violation_count}")
-        header_label.setVisible(True)
+        if custom_header_text:
+            print(f"Using custom header text: {custom_header_text}")
+            total_carriers_label.setText(custom_header_text)
+            carriers_with_violations_label.setVisible(False)
+            return
+
+        # Get the current tab's data
+        df = None
+        table_view = current_tab.findChild(QTableView)
+        if table_view and table_view.model():
+            model = table_view.model()
+            if isinstance(model, QSortFilterProxyModel):
+                model = model.sourceModel()
+            if hasattr(model, 'df'):
+                df = model.df
+                print(f"Found DataFrame with columns: {df.columns.tolist()}")
+
+        if df is not None:
+            # Find list_status column using case-insensitive lookup
+            list_status_col = next((col for col in df.columns if col.lower() in ["list_status", "list status"]), None)
+            if list_status_col:
+                print("Calculating statistics from model data")
+                
+                # Calculate total carriers for each list status
+                ptf_carriers = self._calculate_list_status_carrier_count(df, 'ptf')
+                wal_carriers = self._calculate_list_status_carrier_count(df, 'wal')
+                nl_carriers = self._calculate_list_status_carrier_count(df, 'nl')
+                otdl_carriers = self._calculate_list_status_carrier_count(df, 'otdl')
+                total_carriers = ptf_carriers + wal_carriers + nl_carriers + otdl_carriers
+
+                # Calculate carriers with violations for each list status
+                ptf_carriers_violations = self._calculate_list_status_carriers_with_violations(df, 'ptf')
+                wal_carriers_violations = self._calculate_list_status_carriers_with_violations(df, 'wal')
+                nl_carriers_violations = self._calculate_list_status_carriers_with_violations(df, 'nl')
+                otdl_carriers_violations = self._calculate_list_status_carriers_with_violations(df, 'otdl')
+                total_carriers_violations = (ptf_carriers_violations + wal_carriers_violations + 
+                                          nl_carriers_violations + otdl_carriers_violations)
+
+                # Format the header texts
+                total_carriers_text = (
+                    f"Total Carriers: {total_carriers}  |  "
+                    f"WAL: {wal_carriers}  |  "
+                    f"NL: {nl_carriers}  |  "
+                    f"OTDL: {otdl_carriers}  |  "
+                    f"PTF: {ptf_carriers}"
+                )
+                
+                carriers_violations_text = (
+                    f"Carriers with Violations: {total_carriers_violations}  |  "
+                    f"WAL: {wal_carriers_violations}  |  "
+                    f"NL: {nl_carriers_violations}  |  "
+                    f"OTDL: {otdl_carriers_violations}  |  "
+                    f"PTF: {ptf_carriers_violations}"
+                )
+            else:
+                print(f"Could not find list_status column in {df.columns.tolist()}")
+                total_carriers_text = "No carrier data available"
+                carriers_violations_text = f"Total Violations: {violation_count}"
+        else:
+            print("No DataFrame found in model")
+            total_carriers_text = "No carrier data available"
+            carriers_violations_text = f"Total Violations: {violation_count}"
+
+        print(f"Setting header texts to:\n{total_carriers_text}\n{carriers_violations_text}")
+        total_carriers_label.setText(total_carriers_text)
+        carriers_with_violations_label.setText(carriers_violations_text)
+        total_carriers_label.setVisible(True)
+        carriers_with_violations_label.setVisible(True)
+
+
+class ViolationRemediesTab(BaseViolationTab):
+    """Tab for displaying violation remedies summary."""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.tab_name = "Summary"
+        
+    def _calculate_list_status_carrier_count(self, df, list_status):
+        """Calculate the number of unique carriers for a specific list status in the summary view."""
+        try:
+            # Find list_status and carrier columns using case-insensitive lookup
+            list_status_col = next((col for col in df.columns if col.lower() in ["list_status", "list status"]), None)
+            carrier_col = next((col for col in df.columns if col.lower() in ["carrier_name", "carrier name"]), None)
+            
+            if not list_status_col or not carrier_col:
+                print(f"Could not find required columns in {df.columns.tolist()}")
+                return 0
+            
+            # Filter for the specific list status and count unique carriers
+            status_mask = df[list_status_col].str.lower() == list_status.lower()
+            return len(df[status_mask][carrier_col].unique())
+            
+        except Exception as e:
+            print(f"Error calculating carrier count for {list_status}: {str(e)}")
+            return 0
+            
+    def _calculate_list_status_carriers_with_violations(self, df, list_status):
+        """Calculate the number of unique carriers with violations for a specific list status in the summary view."""
+        try:
+            # Find required columns using case-insensitive lookup
+            list_status_col = next((col for col in df.columns if col.lower() in ["list_status", "list status"]), None)
+            carrier_col = next((col for col in df.columns if col.lower() in ["carrier_name", "carrier name"]), None)
+            
+            if not list_status_col or not carrier_col:
+                print(f"Could not find required columns in {df.columns.tolist()}")
+                return 0
+            
+            # Filter for the specific list status
+            status_mask = df[list_status_col].str.lower() == list_status.lower()
+            filtered_df = df[status_mask]
+            
+            # For summary tab, check Weekly Remedy Total column
+            remedy_col = next((col for col in filtered_df.columns if col.lower() == "weekly remedy total"), None)
+            if remedy_col:
+                violation_mask = pd.to_numeric(filtered_df[remedy_col], errors="coerce") > 0
+                return len(filtered_df[violation_mask][carrier_col].unique())
+            
+            return 0
+        except Exception as e:
+            print(f"Error calculating carriers with violations for {list_status}: {str(e)}")
+            return 0
+            
+    def _calculate_list_status_violation_count(self, df, list_status):
+        """Calculate violations for a specific list status in the summary view."""
+        try:
+            # Find list_status column using case-insensitive lookup
+            list_status_col = next((col for col in df.columns if col.lower() in ["list_status", "list status"]), None)
+            if not list_status_col:
+                print(f"Could not find list_status column in {df.columns.tolist()}")
+                return 0
+                
+            # Filter for the specific list status
+            status_mask = df[list_status_col].str.lower() == list_status.lower()
+            filtered_df = df[status_mask]
+            
+            # For Summary tab, check Weekly Remedy Total column
+            remedy_col = next((col for col in filtered_df.columns if col.lower() == "weekly remedy total"), None)
+            if remedy_col:
+                return len(filtered_df[pd.to_numeric(filtered_df[remedy_col], errors="coerce") > 0])
+            
+            return 0
+        except Exception as e:
+            print(f"Error calculating {list_status} violation count: {str(e)}")
+            return 0
