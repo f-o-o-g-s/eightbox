@@ -889,12 +889,6 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         total_carriers_label = header_widget.findChild(QLabel, "total_carriers_label")
         carriers_with_violations_label = header_widget.findChild(QLabel, "carriers_with_violations_label")
 
-        if custom_header_text:
-            print(f"Using custom header text: {custom_header_text}")
-            total_carriers_label.setText(custom_header_text)
-            carriers_with_violations_label.setVisible(False)
-            return
-
         # Get the current tab's data
         df = None
         table_view = current_tab.findChild(QTableView)
@@ -929,28 +923,40 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
                 # Format the header texts
                 total_carriers_text = (
-                    f"Total Carriers: {total_carriers}  |  "
-                    f"WAL: {wal_carriers}  |  "
-                    f"NL: {nl_carriers}  |  "
-                    f"OTDL: {otdl_carriers}  |  "
+                    f"Total Carriers: {total_carriers} | "
+                    f"WAL: {wal_carriers} | "
+                    f"NL: {nl_carriers} | "
+                    f"OTDL: {otdl_carriers} | "
                     f"PTF: {ptf_carriers}"
                 )
                 
-                carriers_violations_text = (
-                    f"Carriers with Violations: {total_carriers_violations}  |  "
-                    f"WAL: {wal_carriers_violations}  |  "
-                    f"NL: {nl_carriers_violations}  |  "
-                    f"OTDL: {otdl_carriers_violations}  |  "
-                    f"PTF: {ptf_carriers_violations}"
-                )
+                # Use custom header text for violations if provided, otherwise calculate
+                if custom_header_text:
+                    print(f"Using custom header text: {custom_header_text}")
+                    # Convert "Total Violations" to "Carriers With Violations" in custom text
+                    carriers_violations_text = custom_header_text.replace("Total Violations", "Carriers With Violations")
+                else:
+                    carriers_violations_text = (
+                        f"Carriers With Violations: {total_carriers_violations} | "
+                        f"WAL: {wal_carriers_violations} | "
+                        f"NL: {nl_carriers_violations} | "
+                        f"OTDL: {otdl_carriers_violations} | "
+                        f"PTF: {ptf_carriers_violations}"
+                    )
             else:
                 print(f"Could not find list_status column in {df.columns.tolist()}")
                 total_carriers_text = "No carrier data available"
-                carriers_violations_text = f"Total Violations: {violation_count}"
+                if custom_header_text:
+                    carriers_violations_text = custom_header_text.replace("Total Violations", "Carriers With Violations")
+                else:
+                    carriers_violations_text = f"Carriers With Violations: {violation_count}"
         else:
             print("No DataFrame found in model")
             total_carriers_text = "No carrier data available"
-            carriers_violations_text = f"Total Violations: {violation_count}"
+            if custom_header_text:
+                carriers_violations_text = custom_header_text.replace("Total Violations", "Carriers With Violations")
+            else:
+                carriers_violations_text = f"Carriers With Violations: {violation_count}"
 
         print(f"Setting header texts to:\n{total_carriers_text}\n{carriers_violations_text}")
         total_carriers_label.setText(total_carriers_text)
