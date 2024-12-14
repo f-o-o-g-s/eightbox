@@ -24,6 +24,7 @@ class ViolationRemediesTab(BaseViolationTab):
     - 8.5.F violations (regular day overtime)
     - 8.5.F NS violations (non-scheduled day)
     - 8.5.F 5th day violations
+    - 8.5.G violations (OTDL not maximized)
     - MAX12 violations (12-hour limit)
     - MAX60 violations (weekly limit)
 
@@ -37,6 +38,7 @@ class ViolationRemediesTab(BaseViolationTab):
         "8.5.F",
         "8.5.F NS",
         "8.5.F 5th",
+        "8.5.G",
         "MAX12",
         "MAX60",
     ]
