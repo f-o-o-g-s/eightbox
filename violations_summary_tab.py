@@ -94,8 +94,9 @@ class ViolationRemediesTab(BaseViolationTab):
                                'date_violation_type' containing remedy totals
         """
         print("\nDEBUG: ViolationRemediesTab.refresh_data called")
-        print(f"DEBUG: Data empty? {data.empty if isinstance(data, pd.DataFrame) else 'Not a DataFrame'}")
-        
+        is_empty = data.empty if isinstance(data, pd.DataFrame) else "Not a DataFrame"
+        print(f"DEBUG: Data empty? {is_empty}")
+
         if not isinstance(data, pd.DataFrame) or data.empty:
             print("DEBUG: Data is empty, initializing no data tab")
             self.init_no_data_tab()
@@ -112,73 +113,90 @@ class ViolationRemediesTab(BaseViolationTab):
             self.showing_no_data = False
 
             # Get all unique dates from column names
-            all_dates = sorted(set(
-                col.split('_')[0] for col in data.columns 
-                if '_' in col and col not in ['carrier_name', 'list_status']
-            ))
+            all_dates = sorted(
+                set(
+                    col.split("_")[0]
+                    for col in data.columns
+                    if "_" in col and col not in ["carrier_name", "list_status"]
+                )
+            )
             print(f"DEBUG: Found dates: {all_dates}")
 
             # Process each date
             for date in all_dates:
                 print(f"\nDEBUG: Processing date {date}")
                 date_data = pd.DataFrame()
-                
+
                 # Start with carrier info
-                date_data['carrier_name'] = data['carrier_name']
-                date_data['list_status'] = data['list_status']
-                
+                date_data["carrier_name"] = data["carrier_name"]
+                date_data["list_status"] = data["list_status"]
+
                 # Add each violation type's remedy total for this date
                 for violation_type in self.VIOLATION_ORDER:
                     # Find the column for this date and violation type
                     col_name = next(
-                        (col for col in data.columns 
-                         if col.startswith(f"{date}_{violation_type}")
-                         and not col.startswith(f"{date}_No Violation")),
-                        None
+                        (
+                            col
+                            for col in data.columns
+                            if col.startswith(f"{date}_{violation_type}")
+                            and not col.startswith(f"{date}_No Violation")
+                        ),
+                        None,
                     )
                     if col_name:
                         date_data[violation_type] = data[col_name]
                     else:
                         date_data[violation_type] = 0
-                
+
                 # Add daily remedy total
-                violation_columns = [col for col in date_data.columns if col in self.VIOLATION_ORDER]
-                date_data['Remedy Total'] = date_data[violation_columns].sum(axis=1).round(2)
-                
+                violation_columns = [
+                    col for col in date_data.columns if col in self.VIOLATION_ORDER
+                ]
+                date_data["Remedy Total"] = (
+                    date_data[violation_columns].sum(axis=1).round(2)
+                )
+
                 print(f"DEBUG: Date {date} data shape: {date_data.shape}")
                 print(f"DEBUG: Date {date} columns: {date_data.columns.tolist()}")
-                
+
                 self.create_tab_for_date(date, date_data)
 
             # Create summary data
             print("\nDEBUG: Creating summary data")
             summary_data = pd.DataFrame()
-            
+
             # Start with carrier info
-            summary_data['carrier_name'] = data['carrier_name']
-            summary_data['list_status'] = data['list_status']
-            
+            summary_data["carrier_name"] = data["carrier_name"]
+            summary_data["list_status"] = data["list_status"]
+
             # For each violation type, sum up all dates
             for violation_type in self.VIOLATION_ORDER:
                 # Find all columns for this violation type
                 violation_cols = [
-                    col for col in data.columns 
-                    if '_' in col 
-                    and col.split('_', 1)[1].startswith(violation_type)
-                    and not col.split('_', 1)[1].startswith('No Violation')
+                    col
+                    for col in data.columns
+                    if "_" in col
+                    and col.split("_", 1)[1].startswith(violation_type)
+                    and not col.split("_", 1)[1].startswith("No Violation")
                 ]
                 if violation_cols:
-                    summary_data[violation_type] = data[violation_cols].sum(axis=1).round(2)
+                    summary_data[violation_type] = (
+                        data[violation_cols].sum(axis=1).round(2)
+                    )
                 else:
                     summary_data[violation_type] = 0
-            
+
             # Add Weekly Remedy Total
-            violation_columns = [col for col in summary_data.columns if col in self.VIOLATION_ORDER]
-            summary_data['Weekly Remedy Total'] = summary_data[violation_columns].sum(axis=1).round(2)
-            
+            violation_columns = [
+                col for col in summary_data.columns if col in self.VIOLATION_ORDER
+            ]
+            summary_data["Weekly Remedy Total"] = (
+                summary_data[violation_columns].sum(axis=1).round(2)
+            )
+
             print(f"DEBUG: Summary data shape: {summary_data.shape}")
             print(f"DEBUG: Summary columns: {summary_data.columns.tolist()}")
-            
+
             # Add summary tab
             print("DEBUG: Adding summary tab")
             self.add_summary_tab(summary_data)
@@ -190,6 +208,7 @@ class ViolationRemediesTab(BaseViolationTab):
         except Exception as e:
             print(f"ERROR in refresh_data: {str(e)}")
             import traceback
+
             traceback.print_exc()
             self.init_no_data_tab()
             return
@@ -214,13 +233,13 @@ class ViolationRemediesTab(BaseViolationTab):
             print(f"DEBUG: Added summary tab at index {tab_index}")
 
             # Calculate total violations for each list status
-            carriers_with_violations = data[
-                data["Weekly Remedy Total"] > 0
-            ]
+            carriers_with_violations = data[data["Weekly Remedy Total"] > 0]
             list_status_violations = (
                 carriers_with_violations["list_status"].str.lower().value_counts()
             )
-            print(f"DEBUG: Carriers with violations by status: {list_status_violations.to_dict()}")
+            print(
+                f"DEBUG: Carriers with violations by status: {list_status_violations.to_dict()}"
+            )
 
             # Get counts for each list status
             wal_violations = list_status_violations.get("wal", 0)
@@ -259,10 +278,11 @@ class ViolationRemediesTab(BaseViolationTab):
                 self.date_tabs,
                 tab_index,
                 total_violations,
-                [total_carriers_text, carriers_violations_text]
+                [total_carriers_text, carriers_violations_text],
             )
 
         except Exception as e:
             print(f"ERROR in add_summary_tab: {str(e)}")
             import traceback
+
             traceback.print_exc()
