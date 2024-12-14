@@ -706,7 +706,18 @@ def detect_MAX_60(data, date_maximized_status=None):
         }
     )
 
-    return result
+    return result[
+        [
+            "carrier_name",
+            "list_status",
+            "violation_type",
+            "date",
+            "remedy_total",
+            "daily_hours",
+            "cumulative_hours",
+            "display_indicator",
+        ]
+    ]
 
 
 def prepare_data_for_violations(data):
@@ -719,6 +730,7 @@ def prepare_data_for_violations(data):
             - total: Total hours worked
             - code: Route assignment code
             - moves: Route move history
+            - hour_limit: Maximum daily hours (optional, defaults based on status)
 
     Returns:
         pd.DataFrame: Processed data frame with:
@@ -727,12 +739,14 @@ def prepare_data_for_violations(data):
             - Formatted move summaries
             - is_wal_nl and is_otdl_ptf flags
             - All numeric fields converted and validated
+            - Hour limits set based on carrier status
 
     Note:
         - Handles data preparation for ALL carriers regardless of status
         - Special processing for OTDL/PTF carriers (all hours as own route)
         - Used by multiple violation detectors to ensure consistent processing
         - Maintains complete carrier roster for reporting consistency
+        - Sets appropriate hour limits based on carrier status
     """
     result_df = data.copy()
 
@@ -746,6 +760,26 @@ def prepare_data_for_violations(data):
     result_df["total_hours"] = pd.to_numeric(
         result_df["total"], errors="coerce"
     ).fillna(0)
+
+    # Handle hour limits with defaults based on status
+    result_df["hour_limit"] = pd.to_numeric(
+        result_df.get("hour_limit", 12.00), errors="coerce"
+    ).fillna(12.00)
+
+    # Set default hour limits based on list status if not specified
+    result_df.loc[result_df["list_status"] == "wal", "hour_limit"] = result_df.loc[
+        result_df["list_status"] == "wal", "hour_limit"
+    ].fillna(12.00)
+    result_df.loc[
+        result_df["list_status"].isin(["nl", "ptf"]), "hour_limit"
+    ] = result_df.loc[
+        result_df["list_status"].isin(["nl", "ptf"]), "hour_limit"
+    ].fillna(
+        11.50
+    )
+    result_df.loc[result_df["list_status"] == "otdl", "hour_limit"] = result_df.loc[
+        result_df["list_status"] == "otdl", "hour_limit"
+    ].fillna(12.00)
 
     # Initialize hours columns
     result_df["own_route_hours"] = 0.0
@@ -840,11 +874,12 @@ def prepare_data_for_violations(data):
     return result_df
 
 
-def detect_violations_optimized(clock_ring_data):
+def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
     """Process all violation types in a single optimized pass.
 
     Args:
         clock_ring_data (pd.DataFrame): Raw carrier clock ring data
+        date_maximized_status (dict, optional): Date-keyed dict indicating if OTDL was maximized
 
     Returns:
         dict: Violation type to DataFrame mapping containing:
@@ -854,6 +889,7 @@ def detect_violations_optimized(clock_ring_data):
             - 8.5.F 5th day violations
             - MAX12 violations
             - MAX60 violations
+            - 8.5.G violations
 
     Note:
         - Optimizes processing by preparing data once for all violation types
@@ -868,12 +904,16 @@ def detect_violations_optimized(clock_ring_data):
         "8.5.F 5th": [],
         "MAX12": [],
         "MAX60": [],
+        "8.5.G": [],  # Add 8.5.G violations
     }
 
     # Pre-process data once
     data = clock_ring_data.copy()
     data["total_hours"] = pd.to_numeric(data["total"], errors="coerce").fillna(0)
     data["list_status"] = data["list_status"].str.strip().str.lower()
+    data["hour_limit"] = pd.to_numeric(
+        data.get("hour_limit", 12.00), errors="coerce"
+    ).fillna(12.00)
 
     # Process moves once for all carriers
     moves_result = data.apply(
@@ -888,11 +928,11 @@ def detect_violations_optimized(clock_ring_data):
     for (carrier, date), group in carrier_date_groups:
         list_status = group["list_status"].iloc[0]
         total_hours = group["total_hours"].sum()
+        off_route_hours = group["off_route_hours"].sum()
 
         # Only process WAL/NL violations for eligible carriers
         if list_status in ["wal", "nl"]:
             # 8.5.D
-            off_route_hours = group["off_route_hours"].sum()
             if off_route_hours > 0:
                 violations["8.5.D"].append(
                     {
@@ -919,6 +959,84 @@ def detect_violations_optimized(clock_ring_data):
                         "list_status": list_status,
                     }
                 )
+
+                # Check for 8.5.G violations when WAL/NL works overtime off route
+                if off_route_hours > 0:
+                    # Check if OTDL was maximized for this date
+                    is_maximized = (
+                        date_maximized_status.get(date, False)
+                        if date_maximized_status is not None
+                        else False
+                    )
+
+                    # Only process if OTDL was not maximized
+                    if not is_maximized:
+                        # Get all OTDL carriers for this date
+                        otdl_carriers = data[
+                            (data["rings_date"] == date)
+                            & (data["list_status"] == "otdl")
+                        ].groupby("carrier_name")
+
+                        overtime_worked = total_hours - 8  # Calculate WAL/NL overtime
+
+                        # Check each OTDL carrier
+                        for otdl_carrier, otdl_group in otdl_carriers:
+                            otdl_hours = otdl_group["total_hours"].sum()
+                            hour_limit = pd.to_numeric(
+                                otdl_group["hour_limit"].iloc[0]
+                                if "hour_limit" in otdl_group.columns
+                                else 12.00,
+                                errors="coerce",
+                            ).fillna(12.00)
+
+                            # If OTDL carrier could have worked more hours
+                            if otdl_hours < hour_limit:
+                                potential_remedy = min(
+                                    hour_limit
+                                    - otdl_hours,  # Hours OTDL could have worked
+                                    overtime_worked,  # Hours WAL/NL worked overtime
+                                )
+                                if potential_remedy > 0:
+                                    violations["8.5.G"].append(
+                                        {
+                                            "carrier_name": otdl_carrier,
+                                            "date": date,
+                                            "violation_type": "8.5.G OTDL Not Maximized",
+                                            "remedy_total": round(potential_remedy, 2),
+                                            "total_hours": otdl_hours,
+                                            "hour_limit": hour_limit,
+                                            "list_status": "otdl",
+                                            "trigger_carrier": carrier,
+                                            "trigger_hours": total_hours,
+                                            "off_route_hours": off_route_hours,
+                                        }
+                                    )
+                    else:
+                        # Add entries for OTDL carriers on maximized dates
+                        otdl_carriers = data[
+                            (data["rings_date"] == date)
+                            & (data["list_status"] == "otdl")
+                        ]
+                        for _, otdl_row in otdl_carriers.iterrows():
+                            violations["8.5.G"].append(
+                                {
+                                    "carrier_name": otdl_row["carrier_name"],
+                                    "date": date,
+                                    "violation_type": "No Violation (OTDL Maxed)",
+                                    "remedy_total": 0.0,
+                                    "total_hours": pd.to_numeric(
+                                        otdl_row["total"], errors="coerce"
+                                    ).fillna(0),
+                                    "hour_limit": pd.to_numeric(
+                                        otdl_row.get("hour_limit", 12.00),
+                                        errors="coerce",
+                                    ).fillna(12.00),
+                                    "list_status": "otdl",
+                                    "trigger_carrier": carrier,
+                                    "trigger_hours": total_hours,
+                                    "off_route_hours": off_route_hours,
+                                }
+                            )
 
         # Process MAX12 for all carriers
         if total_hours > 12:
