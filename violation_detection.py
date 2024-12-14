@@ -186,11 +186,6 @@ def get_violation_remedies(data, violations):
             - Carrier and list status columns
             - Date and violation type columns
             - Aggregated remedy hours
-
-    Note:
-        - Handles empty violation data gracefully
-        - Combines multiple violations for same carrier/date
-        - Returns empty DataFrame with correct columns if no violations
     """
     if not violations:
         return pd.DataFrame(
@@ -207,11 +202,24 @@ def get_violation_remedies(data, violations):
     remedy_dfs = []
     for violation_type, violation_data in violations.items():
         if not violation_data.empty:
-            grouped = violation_data.groupby(["date", "carrier_name", "list_status"])[
-                "remedy_total"
-            ].sum()
-            remedy_df = grouped.reset_index()
-            remedy_df["violation_type"] = violation_type
+            # Ensure violation_type is properly set in the data
+            violation_data = violation_data.copy()
+            if "violation_type" not in violation_data.columns:
+                violation_data["violation_type"] = violation_type
+
+            # Select only necessary columns
+            columns_to_keep = [
+                "date",
+                "carrier_name",
+                "list_status",
+                "remedy_total",
+                "violation_type",
+            ]
+            existing_columns = [
+                col for col in columns_to_keep if col in violation_data.columns
+            ]
+            remedy_df = violation_data[existing_columns]
+
             remedy_dfs.append(remedy_df)
 
     if not remedy_dfs:
@@ -228,50 +236,27 @@ def get_violation_remedies(data, violations):
     # Combine all remedies
     remedy_data = pd.concat(remedy_dfs, ignore_index=True)
 
-    # Create pivot table in one operation
+    # Create pivot table with flattened column names
     pivot_remedy_data = remedy_data.pivot_table(
         index=["carrier_name", "list_status"],
         columns=["date", "violation_type"],
         values="remedy_total",
         aggfunc="sum",
         fill_value=0,
-    ).reset_index()
+    )
+
+    # Flatten column names and reset index
+    pivot_remedy_data.columns = [
+        f"{date}_{vtype}" for date, vtype in pivot_remedy_data.columns
+    ]
+    pivot_remedy_data = pivot_remedy_data.reset_index()
 
     return pivot_remedy_data
 
 
 @register_violation("8.5.D Overtime Off Route")
 def detect_85d_overtime(data, date_maximized_status=None):
-    """Detect Article 8.5.D violations for overtime worked off assignment.
-
-    Args:
-        data (pd.DataFrame): Carrier work hour data containing:
-            - carrier_name: Name of the carrier
-            - list_status: WAL/NL/OTDL status
-            - total_hours: Total hours worked
-            - off_route_hours: Hours worked off assignment
-            - date: Date of potential violation
-        date_maximized_status (dict, optional): Date-keyed dict indicating if OTDL was maximized
-
-    Returns:
-        pd.DataFrame: Detected violations with calculated remedies. Contains ALL carriers,
-            with non-eligible carriers (OTDL/PTF) marked as "No Violation"
-
-    Note:
-        Violation occurs when:
-        - Carrier is WAL or NL
-        - Worked overtime off their assignment
-        - OTDL was not maximized that day
-
-        Remedy is lesser of:
-        - Overtime hours worked (total - 8)
-        - Hours worked off assignment
-
-        Processing:
-        - Analyzes all carriers but only applies violation logic to WAL/NL
-        - OTDL and PTF carriers are included in output but marked as "No Violation"
-        - Maintains complete carrier roster for reporting consistency
-    """
+    """Detect Article 8.5.D violations for overtime worked off assignment."""
     result_df = prepare_data_for_violations(data)
 
     # Check for NS day in code
@@ -279,12 +264,17 @@ def detect_85d_overtime(data, date_maximized_status=None):
         result_df["code"].str.strip().str.lower().str.contains("ns day", na=False)
     )
 
+    # Initialize violation_type column with "No Violation"
+    result_df["violation_type"] = "No Violation"
+
     # Handle maximized dates
     maximized_dates = result_df["rings_date"].map(
         lambda x: date_maximized_status.get(x, False)
         if date_maximized_status
         else False
     )
+
+    # Set "No Violation (OTDL Maxed)" for maximized dates
     result_df.loc[maximized_dates, "violation_type"] = "No Violation (OTDL Maxed)"
 
     # Add display indicator
@@ -307,10 +297,9 @@ def detect_85d_overtime(data, date_maximized_status=None):
         ),
     )
 
-    # Set violation types using numpy where
-    result_df.loc[~maximized_dates, "violation_type"] = np.where(
-        result_df["remedy_total"] > 0, "8.5.D Overtime Off Route", "No Violation"
-    )
+    # Set violation types for non-maximized dates with violations
+    mask_has_violation = (result_df["remedy_total"] > 0) & (~maximized_dates)
+    result_df.loc[mask_has_violation, "violation_type"] = "8.5.D Overtime Off Route"
 
     return result_df[
         [
@@ -731,33 +720,7 @@ def detect_MAX_60(data, date_maximized_status=None):
 
 
 def prepare_data_for_violations(data):
-    """Prepare and standardize carrier data for violation detection.
-
-    Args:
-        data (pd.DataFrame): Raw carrier work hour data containing:
-            - carrier_name: Name of carrier
-            - list_status: WAL/NL/OTDL/PTF status
-            - total: Total hours worked
-            - code: Route assignment code
-            - moves: Route move history
-            - hour_limit: Maximum daily hours (optional, defaults based on status)
-
-    Returns:
-        pd.DataFrame: Processed data frame with:
-            - Standardized column names and types
-            - Calculated own_route_hours and off_route_hours
-            - Formatted move summaries
-            - is_wal_nl and is_otdl_ptf flags
-            - All numeric fields converted and validated
-            - Hour limits set based on carrier status
-
-    Note:
-        - Handles data preparation for ALL carriers regardless of status
-        - Special processing for OTDL/PTF carriers (all hours as own route)
-        - Used by multiple violation detectors to ensure consistent processing
-        - Maintains complete carrier roster for reporting consistency
-        - Sets appropriate hour limits based on carrier status
-    """
+    """Prepare and standardize carrier data for violation detection."""
     result_df = data.copy()
 
     # Convert list_status to lowercase and strip
@@ -771,105 +734,29 @@ def prepare_data_for_violations(data):
         result_df["total"], errors="coerce"
     ).fillna(0)
 
-    # Handle hour limits with defaults based on status
-    result_df["hour_limit"] = pd.to_numeric(
-        result_df.get("hour_limit", 12.00), errors="coerce"
-    ).fillna(12.00)
+    # Set default hour limits based on list status
+    status_limits = {"wal": 12.00, "nl": 11.50, "ptf": 11.50, "otdl": 12.00}
 
-    # Set default hour limits based on list status if not specified
-    result_df.loc[result_df["list_status"] == "wal", "hour_limit"] = result_df.loc[
-        result_df["list_status"] == "wal", "hour_limit"
-    ].fillna(12.00)
-    result_df.loc[
-        result_df["list_status"].isin(["nl", "ptf"]), "hour_limit"
-    ] = result_df.loc[
-        result_df["list_status"].isin(["nl", "ptf"]), "hour_limit"
-    ].fillna(
-        11.50
-    )
-    result_df.loc[result_df["list_status"] == "otdl", "hour_limit"] = result_df.loc[
-        result_df["list_status"] == "otdl", "hour_limit"
-    ].fillna(12.00)
+    # First ensure hour_limit exists as a column
+    if "hour_limit" not in result_df.columns:
+        result_df["hour_limit"] = 12.00  # Default value
+
+    # Convert hour_limit to numeric, handling any non-numeric values
+    result_df["hour_limit"] = pd.to_numeric(result_df["hour_limit"], errors="coerce")
+
+    # Apply status-based defaults where hour_limit is missing
+    for status, limit in status_limits.items():
+        mask = (result_df["list_status"] == status) & (result_df["hour_limit"].isna())
+        result_df.loc[mask, "hour_limit"] = limit
+
+    # Fill any remaining NaN values with default 12.00
+    result_df["hour_limit"] = result_df["hour_limit"].fillna(12.00)
 
     # Initialize hours columns
     result_df["own_route_hours"] = 0.0
     result_df["off_route_hours"] = 0.0
 
     # Process moves for each row
-    def process_moves_row(row):
-        """Process route moves and calculate hours by assignment for a single carrier row.
-
-        Args:
-            row (pd.Series): Single row of carrier data containing:
-                - moves: Comma-separated move entries ("start,end,route,...")
-                - code: Carrier's assigned route code
-                - total_hours: Total hours worked
-
-        Returns:
-            pd.Series: Contains:
-                - own_route_hours (float): Hours worked on assigned route
-                - off_route_hours (float): Hours worked on other routes
-                - formatted_moves (str): Human-readable move summary
-
-        Note:
-            - Handles empty/invalid move strings by assigning all hours to own route
-            - Processes move segments in groups of 3 (start, end, route)
-            - Rounds hours to 2 decimal places
-            - Used internally by prepare_data_for_violations
-            - Special case: Returns all hours as own_route if moves is "none"
-        """
-        if not isinstance(row["moves"], str) or row["moves"].strip().lower() == "none":
-            return pd.Series(
-                {
-                    "own_route_hours": row[
-                        "total_hours"
-                    ],  # All hours go to own route if no moves
-                    "off_route_hours": 0.0,
-                    "formatted_moves": "No Moves",
-                }
-            )
-
-        own_hours = 0.0
-        off_hours = 0.0
-
-        try:
-            moves_segments = row["moves"].split(",")
-            for i in range(0, len(moves_segments), 3):
-                start_time = float(moves_segments[i].strip())
-                end_time = float(moves_segments[i + 1].strip())
-                route = moves_segments[i + 2].strip()
-                hours = max(0, end_time - start_time)
-
-                if route.lower() == row["code"].lower():
-                    own_hours += hours
-                else:
-                    off_hours += hours
-
-            # Add remaining time to own_route_hours
-            remaining_hours = max(0, row["total_hours"] - (own_hours + off_hours))
-            own_hours += remaining_hours
-
-            return pd.Series(
-                {
-                    "own_route_hours": round(own_hours, 2),
-                    "off_route_hours": round(off_hours, 2),
-                    "formatted_moves": process_moves_vectorized(
-                        row["moves"], row["code"]
-                    )["formatted_moves"],
-                }
-            )
-        except (ValueError, IndexError):
-            return pd.Series(
-                {
-                    "own_route_hours": row[
-                        "total_hours"
-                    ],  # Default to all hours as own route
-                    "off_route_hours": 0.0,
-                    "formatted_moves": "No Moves",
-                }
-            )
-
-    # Apply the moves processing
     moves_data = result_df.apply(process_moves_row, axis=1)
     result_df[["own_route_hours", "off_route_hours", "formatted_moves"]] = moves_data
 
@@ -882,6 +769,60 @@ def prepare_data_for_violations(data):
     result_df.loc[otdl_ptf_mask, "formatted_moves"] = "No Moves"
 
     return result_df
+
+
+def process_moves_row(row):
+    """Process route moves and calculate hours by assignment for a single carrier row."""
+    if not isinstance(row["moves"], str) or row["moves"].strip().lower() == "none":
+        return pd.Series(
+            {
+                "own_route_hours": row[
+                    "total_hours"
+                ],  # All hours go to own route if no moves
+                "off_route_hours": 0.0,
+                "formatted_moves": "No Moves",
+            }
+        )
+
+    own_hours = 0.0
+    off_hours = 0.0
+
+    try:
+        moves_segments = row["moves"].split(",")
+        for i in range(0, len(moves_segments), 3):
+            start_time = float(moves_segments[i].strip())
+            end_time = float(moves_segments[i + 1].strip())
+            route = moves_segments[i + 2].strip()
+            hours = max(0, end_time - start_time)
+
+            if route.lower() == row["code"].lower():
+                own_hours += hours
+            else:
+                off_hours += hours
+
+        # Add remaining time to own_route_hours
+        remaining_hours = max(0, row["total_hours"] - (own_hours + off_hours))
+        own_hours += remaining_hours
+
+        return pd.Series(
+            {
+                "own_route_hours": round(own_hours, 2),
+                "off_route_hours": round(off_hours, 2),
+                "formatted_moves": process_moves_vectorized(row["moves"], row["code"])[
+                    "formatted_moves"
+                ],
+            }
+        )
+    except (ValueError, IndexError):
+        return pd.Series(
+            {
+                "own_route_hours": row[
+                    "total_hours"
+                ],  # Default to all hours as own route
+                "off_route_hours": 0.0,
+                "formatted_moves": "No Moves",
+            }
+        )
 
 
 def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
@@ -1251,6 +1192,36 @@ def detect_85g_violations(data, date_maximized_status=None):
             else:
                 is_maximized = date_maximized_status.get(date, False)
 
+        # If OTDL is maximized, add "No Violation (OTDL Maxed)" entries for all carriers
+        if is_maximized:
+            for carrier in all_carriers:
+                carrier_data = day_data[day_data["carrier_name"] == carrier]
+                if not carrier_data.empty:
+                    try:
+                        hour_limit = float(carrier_data["hour_limit"].iloc[0])
+                        total_hours = float(carrier_data["total_hours"].iloc[0])
+                        list_status = carrier_data["list_status"].iloc[0]
+                    except (ValueError, TypeError, IndexError):
+                        hour_limit = 12.00
+                        total_hours = 0.0
+                        list_status = "unknown"
+
+                    violations.append(
+                        {
+                            "carrier_name": carrier,
+                            "date": date,
+                            "violation_type": "No Violation (OTDL Maxed)",
+                            "remedy_total": 0.0,
+                            "total_hours": total_hours,
+                            "hour_limit": hour_limit,
+                            "list_status": list_status,
+                            "trigger_carrier": "",
+                            "trigger_hours": 0,
+                            "off_route_hours": 0,
+                        }
+                    )
+            continue
+
         # Find ANY WAL/NL carrier working overtime off route (trigger condition)
         # Similar to 8.5.D logic - just need total > 8 and any off-route hours
         wal_nl_overtime = day_data[
@@ -1262,7 +1233,7 @@ def detect_85g_violations(data, date_maximized_status=None):
         # Find OTDL carriers
         day_otdl_carriers = day_data[day_data["list_status"] == "otdl"]
 
-        if not is_maximized and not wal_nl_overtime.empty:
+        if not wal_nl_overtime.empty:
             # Get the WAL/NL carrier who worked the most overtime for trigger info
             trigger_carrier = wal_nl_overtime.loc[
                 wal_nl_overtime["total_hours"].idxmax()

@@ -1042,30 +1042,72 @@ class MainApp(QMainWindow):
         if "8.5.D" not in self.violations and "8.5.G" not in self.violations:
             return
 
-        # Update violations for the specified date
-        clock_ring_data = self.fetch_clock_ring_data()
-        if clock_ring_data.empty:
+        try:
+            # Get the selected date from the calendar
+            selected_date = self.date_selection_pane.calendar.selectedDate()
+            if not selected_date.isValid():
+                raise ValueError("No valid date selected in the calendar.")
+
+            start_date = selected_date.toString("yyyy-MM-dd")
+            end_date = selected_date.addDays(7).toString("yyyy-MM-dd")
+
+            # First fetch clock ring data
+            clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
+            if clock_ring_data.empty:
+                return
+
+            # Then load and merge carrier list data
+            try:
+                with open("carrier_list.json", "r") as json_file:
+                    carrier_list = pd.DataFrame(json.load(json_file))
+
+                # Ensure carrier_name is properly formatted for merge
+                carrier_list["carrier_name"] = (
+                    carrier_list["carrier_name"].str.strip().str.lower()
+                )
+                clock_ring_data["carrier_name"] = (
+                    clock_ring_data["carrier_name"].str.strip().str.lower()
+                )
+
+                # Drop existing list_status and hour_limit if they exist
+                if "list_status" in clock_ring_data.columns:
+                    clock_ring_data = clock_ring_data.drop(columns=["list_status"])
+                if "hour_limit" in clock_ring_data.columns:
+                    clock_ring_data = clock_ring_data.drop(columns=["hour_limit"])
+
+                # Merge with carrier list
+                clock_ring_data = clock_ring_data.merge(
+                    carrier_list[["carrier_name", "list_status", "hour_limit"]],
+                    on="carrier_name",
+                    how="left",
+                )
+            except Exception as e:
+                print(f"Error loading carrier list: {str(e)}")
+                return
+
+            # Create a date_maximized_status dict for violation detection
+            date_maximized_status = {date: {"is_maximized": maximized_status}}
+
+            # Redetect all affected violations
+            if "8.5.D" in self.violations:
+                self.violations["8.5.D"] = detect_violations(
+                    clock_ring_data, "8.5.D Overtime Off Route", date_maximized_status
+                )
+                self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
+
+            if "8.5.G" in self.violations:
+                self.violations["8.5.G"] = detect_violations(
+                    clock_ring_data, "8.5.G", date_maximized_status
+                )
+                self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
+
+            # Update remedies data and refresh summary tabs
+            remedies_data = get_violation_remedies(clock_ring_data, self.violations)
+            self.remedies_tab.refresh_data(remedies_data)
+
+        except Exception as e:
+            print(f"Error in handle_maximized_status_change: {str(e)}")
             return
-
-        # Create a date_maximized_status dict for violation detection
-        date_maximized_status = {date: {"is_maximized": maximized_status}}
-
-        # Redetect all affected violations
-        if "8.5.D" in self.violations:
-            self.violations["8.5.D"] = detect_violations(
-                clock_ring_data, "8.5.D Overtime Off Route", date_maximized_status
-            )
-            self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
-
-        if "8.5.G" in self.violations:
-            self.violations["8.5.G"] = detect_violations(
-                clock_ring_data, "8.5.G OTDL Not Maximized", date_maximized_status
-            )
-            self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
-
-        # Update remedies data and refresh summary tabs
-        remedies_data = get_violation_remedies(clock_ring_data, self.violations)
-        self.remedies_tab.refresh_data(remedies_data)
 
     def on_carrier_list_updated(self, updated_carrier_data):
         """Update OTDL Maximization Pane when the carrier list changes."""
