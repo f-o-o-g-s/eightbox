@@ -93,17 +93,9 @@ class ViolationRemediesTab(BaseViolationTab):
             data (pd.DataFrame): DataFrame containing all violation data with columns like
                                'date_violation_type' containing remedy totals
         """
-        print("\nDEBUG: ViolationRemediesTab.refresh_data called")
-        is_empty = data.empty if isinstance(data, pd.DataFrame) else "Not a DataFrame"
-        print(f"DEBUG: Data empty? {is_empty}")
-
         if not isinstance(data, pd.DataFrame) or data.empty:
-            print("DEBUG: Data is empty, initializing no data tab")
             self.init_no_data_tab()
             return
-
-        print(f"DEBUG: Original data shape: {data.shape}")
-        print(f"DEBUG: Original columns: {data.columns.tolist()}")
 
         try:
             # Clear existing tabs
@@ -120,11 +112,9 @@ class ViolationRemediesTab(BaseViolationTab):
                     if "_" in col and col not in ["carrier_name", "list_status"]
                 )
             )
-            print(f"DEBUG: Found dates: {all_dates}")
 
             # Process each date
             for date in all_dates:
-                print(f"\nDEBUG: Processing date {date}")
                 date_data = pd.DataFrame()
 
                 # Start with carrier info
@@ -156,13 +146,9 @@ class ViolationRemediesTab(BaseViolationTab):
                     date_data[violation_columns].sum(axis=1).round(2)
                 )
 
-                print(f"DEBUG: Date {date} data shape: {date_data.shape}")
-                print(f"DEBUG: Date {date} columns: {date_data.columns.tolist()}")
-
                 self.create_tab_for_date(date, date_data)
 
             # Create summary data
-            print("\nDEBUG: Creating summary data")
             summary_data = pd.DataFrame()
 
             # Start with carrier info
@@ -194,21 +180,12 @@ class ViolationRemediesTab(BaseViolationTab):
                 summary_data[violation_columns].sum(axis=1).round(2)
             )
 
-            print(f"DEBUG: Summary data shape: {summary_data.shape}")
-            print(f"DEBUG: Summary columns: {summary_data.columns.tolist()}")
-
-            # Add summary tab
-            print("DEBUG: Adding summary tab")
+            # Add summary tab and make it active
             self.add_summary_tab(summary_data)
-
-            # Set Summary tab as active
-            print("DEBUG: Setting Summary tab as active")
             self.date_tabs.setCurrentIndex(0)
 
         except Exception as e:
-            print(f"ERROR in refresh_data: {str(e)}")
             import traceback
-
             traceback.print_exc()
             self.init_no_data_tab()
             return
@@ -220,25 +197,16 @@ class ViolationRemediesTab(BaseViolationTab):
             data (pd.DataFrame): DataFrame with weekly violation totals
         """
         try:
-            print("\nDEBUG: Starting summary tab creation")
-            print(f"DEBUG: Input data shape: {data.shape}")
-            print(f"DEBUG: Input data columns: {data.columns.tolist()}")
-
             # Create model and view
-            print("DEBUG: Creating model and view")
             model, view = self.create_summary_model(data)
 
             # Add the tab
             tab_index = self.date_tabs.addTab(view, "Summary")
-            print(f"DEBUG: Added summary tab at index {tab_index}")
 
             # Calculate total violations for each list status
             carriers_with_violations = data[data["Weekly Remedy Total"] > 0]
             list_status_violations = (
                 carriers_with_violations["list_status"].str.lower().value_counts()
-            )
-            print(
-                f"DEBUG: Carriers with violations by status: {list_status_violations.to_dict()}"
             )
 
             # Get counts for each list status
@@ -257,7 +225,6 @@ class ViolationRemediesTab(BaseViolationTab):
             nl_carriers = list_status_counts.get("nl", 0)
             otdl_carriers = list_status_counts.get("otdl", 0)
             ptf_carriers = list_status_counts.get("ptf", 0)
-            print(f"DEBUG: Total carriers by status: {list_status_counts.to_dict()}")
 
             # Create the header text
             total_carriers_text = self.format_header_text(
@@ -273,7 +240,6 @@ class ViolationRemediesTab(BaseViolationTab):
             )
 
             # Update the header with both rows
-            print("DEBUG: Updating header")
             self.update_violation_header(
                 self.date_tabs,
                 tab_index,
@@ -282,7 +248,5 @@ class ViolationRemediesTab(BaseViolationTab):
             )
 
         except Exception as e:
-            print(f"ERROR in add_summary_tab: {str(e)}")
             import traceback
-
             traceback.print_exc()
