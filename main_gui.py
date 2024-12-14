@@ -638,7 +638,7 @@ class MainApp(QMainWindow):
         """Initialize and add the 8.5.G Tab."""
         self.vio_85g_tab = Violation85gTab()
         self.central_tab_widget.addTab(self.vio_85g_tab, "8.5.G Violations")
-        self.vio_85g_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
+        self.vio_85g_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_MAX12_tab(self):
         """Initialize the Maximum 12-Hour Rule violation tab.
