@@ -235,6 +235,9 @@ class PandasTableModel(QAbstractTableModel):
 
         if role == Qt.DisplayRole:
             value = self.df.iloc[index.row(), index.column()]
+            # Format hour_limit with 2 decimal places
+            if self.df.columns[index.column()] == "hour_limit":
+                return f"{float(value):.2f}" if pd.notna(value) else ""
             return str(value) if pd.notna(value) else ""
 
         if role == Qt.ForegroundRole:
@@ -760,7 +763,7 @@ class CarrierListPane(QWidget):
             "carrier_name": str,
             "list_status": str,
             "route_s": str,
-            "hour_limit": str,
+            "hour_limit": float,
             "effective_date": str,
         }
 
@@ -784,7 +787,10 @@ class CarrierListPane(QWidget):
         # Set default values for missing data
         df["list_status"] = df["list_status"].fillna("nl")  # Default to no-list
         df["route_s"] = df["route_s"].fillna("")
-        df["hour_limit"] = df["hour_limit"].fillna("12hr")  # Default to 12 hours
+        df["hour_limit"] = df["hour_limit"].fillna(12.00)  # Default to 12.00 hours
+
+        # Convert any 0.0 hour limits to 12.00
+        df.loc[df["hour_limit"] == 0.0, "hour_limit"] = 12.00
 
         # Ensure datetime formatting
         df["effective_date"] = pd.to_datetime(df["effective_date"]).fillna(
@@ -933,20 +939,28 @@ class CarrierListPane(QWidget):
         # Populate the hour_limit_dropdown based on initial list_status
         def update_hour_limit_options():
             hour_limit_dropdown.clear()
-            if list_status_dropdown.currentText() == "otdl":
-                hour_limit_dropdown.addItems(["12hr", "11hr", "10hr"])
+            if list_status_dropdown.currentText().lower() == "otdl":
+                hour_limit_dropdown.addItems(["12.00", "11.00", "10.00"])
             else:
-                hour_limit_dropdown.addItems(["12hr", "11hr", "10hr", "(none)"])
+                hour_limit_dropdown.addItems(["12.00", "11.00", "10.00", "(none)"])
 
         update_hour_limit_options()
         list_status_dropdown.currentTextChanged.connect(update_hour_limit_options)
 
         # Ensure `hour_limit` is a string and set the current selection
-        current_hour_limit = carrier_data["hour_limit"] or "(none)"
-        if str(current_hour_limit) in hour_limit_dropdown.itemText(
-            hour_limit_dropdown.currentIndex()
-        ):
-            hour_limit_dropdown.setCurrentText(str(current_hour_limit))
+        current_hour_limit = carrier_data["hour_limit"]
+        if current_hour_limit is not None:
+            try:
+                current_hour_limit = f"{float(current_hour_limit):.2f}"
+            except (ValueError, TypeError):
+                current_hour_limit = "(none)"
+        else:
+            current_hour_limit = "(none)"
+
+        if current_hour_limit in [
+            hour_limit_dropdown.itemText(i) for i in range(hour_limit_dropdown.count())
+        ]:
+            hour_limit_dropdown.setCurrentText(current_hour_limit)
         else:
             hour_limit_dropdown.setCurrentText("(none)")
 
@@ -963,7 +977,7 @@ class CarrierListPane(QWidget):
             selected_hour_limit = hour_limit_dropdown.currentText()
             self.main_model.df.loc[sorted_df_index, "list_status"] = new_list_status
             self.main_model.df.loc[sorted_df_index, "hour_limit"] = (
-                None if selected_hour_limit == "(none)" else selected_hour_limit
+                None if selected_hour_limit == "(none)" else float(selected_hour_limit)
             )
 
             # Refresh the proxy model
@@ -1214,13 +1228,25 @@ class CarrierListPane(QWidget):
                 # Drop the station column after filtering to maintain the original structure
                 df.drop(columns=["station"], inplace=True)
 
+                # Add hour_limit column with default value of 12.00
+                if "hour_limit" not in df.columns:
+                    df["hour_limit"] = 12.00
+
                 return df
 
         except Exception as e:
             CustomNotificationDialog.show_notification(self, "Database Error", str(e))
             return pd.DataFrame(
-                columns=["carrier_name", "effective_date", "list_status", "route_s"]
-            )
+                columns=[
+                    "carrier_name",
+                    "effective_date",
+                    "list_status",
+                    "route_s",
+                    "hour_limit",
+                ]
+            ).assign(
+                hour_limit=12.00
+            )  # Set default hour_limit in empty DataFrame too
 
     def update_statistics(self):
         """Update the carrier statistics display.

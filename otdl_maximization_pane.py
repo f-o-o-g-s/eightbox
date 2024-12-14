@@ -469,30 +469,27 @@ class OTDLMaximizationPane(QWidget):
                 if not otdl_data.loc[
                     otdl_data["carrier_name"] == carrier, "hour_limit"
                 ].empty
-                else "12hr"
+                else 12.00
             )
 
             # Ensure hour_limit is valid
-            if hour_limit and "hr" in hour_limit:
-                try:
-                    hour_limit_value = float(hour_limit.replace("hr", "").strip())
-                except ValueError:
-                    print(
-                        f"Invalid hour limit value: {hour_limit}, defaulting to 12 hours."
-                    )
-                    hour_limit_value = 12.0
-            else:
-                hour_limit_value = 12.0  # Default to 12 hours
+            try:
+                hour_limit_value = float(hour_limit) if hour_limit else 12.00
+            except (ValueError, TypeError):
+                print(
+                    f"Invalid hour limit value: {hour_limit}, defaulting to 12.00 hours."
+                )
+                hour_limit_value = 12.00
 
             # Create and style Hour Limit column item
-            hour_limit_item = QTableWidgetItem(hour_limit)
+            hour_limit_item = QTableWidgetItem(f"{hour_limit_value:.2f}")
             hour_limit_item.setFlags(
                 Qt.ItemIsSelectable | Qt.ItemIsEnabled
             )  # Non-editable
             hour_limit_item.setBackground(row_color)  # Keep alternating row color
 
             # Highlight non-default hour limits
-            if hour_limit_value != 12.0:
+            if hour_limit_value != 12.00:
                 hour_limit_item.setForeground(QColor("#BB86FC"))  # Keep Material purple
             else:
                 hour_limit_item.setForeground(
