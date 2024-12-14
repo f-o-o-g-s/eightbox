@@ -1039,40 +1039,33 @@ class MainApp(QMainWindow):
 
     def handle_maximized_status_change(self, date, maximized_status):
         """Handle changes to OTDL maximization status"""
-        if "8.5.D" not in self.violations:
+        if "8.5.D" not in self.violations and "8.5.G" not in self.violations:
             return
 
-        # Update 8.5.D violations for the specified date
-        violation_85d_data = self.violations["8.5.D"]
-        date_mask = violation_85d_data["date"] == date
+        # Update violations for the specified date
+        clock_ring_data = self.fetch_clock_ring_data()
+        if clock_ring_data.empty:
+            return
 
-        if maximized_status:
-            # Mark all 8.5.D violations for the date as maximized
-            violation_85d_data.loc[
-                date_mask, "violation_type"
-            ] = "No Violation (OTDL Maxed)"
-            violation_85d_data.loc[date_mask, "remedy_total"] = 0.00
+        # Create a date_maximized_status dict for violation detection
+        date_maximized_status = {date: {"is_maximized": maximized_status}}
 
-            # Refresh the 8.5.D tab with updated data
-            self.vio_85d_tab.refresh_data(violation_85d_data)
-
-            # Update remedies data and refresh summary tabs
-            remedies_data = get_violation_remedies(
-                self.fetch_clock_ring_data(), self.violations
+        # Redetect all affected violations
+        if "8.5.D" in self.violations:
+            self.violations["8.5.D"] = detect_violations(
+                clock_ring_data, "8.5.D Overtime Off Route", date_maximized_status
             )
-            self.remedies_tab.refresh_data(remedies_data)
-        else:
-            # Redetect violations and update all related views
-            clock_ring_data = self.fetch_clock_ring_data()
-            if not clock_ring_data.empty:
-                # Update violations
-                self.violations["8.5.D"] = detect_violations(
-                    clock_ring_data, "8.5.D Overtime Off Route"
-                )
-                # Refresh all affected tabs
-                self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
-                remedies_data = get_violation_remedies(clock_ring_data, self.violations)
-                self.remedies_tab.refresh_data(remedies_data)
+            self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
+
+        if "8.5.G" in self.violations:
+            self.violations["8.5.G"] = detect_violations(
+                clock_ring_data, "8.5.G OTDL Not Maximized", date_maximized_status
+            )
+            self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
+
+        # Update remedies data and refresh summary tabs
+        remedies_data = get_violation_remedies(clock_ring_data, self.violations)
+        self.remedies_tab.refresh_data(remedies_data)
 
     def on_carrier_list_updated(self, updated_carrier_data):
         """Update OTDL Maximization Pane when the carrier list changes."""
@@ -1096,13 +1089,13 @@ class MainApp(QMainWindow):
         if clock_ring_data is None or clock_ring_data.empty:
             return
 
-        # Define violation types
+        # Define violation types and their display names
         violation_types = {
             "8.5.D": "8.5.D Overtime Off Route",
             "8.5.F": "8.5.F Overtime Over 10 Hours Off Route",
             "8.5.F NS": "8.5.F NS Overtime On a Non-Scheduled Day",
             "8.5.F 5th": "8.5.F 5th More Than 4 Days of Overtime in a Week",
-            "8.5.G": "8.5.G OTDL Not Maximized",
+            "8.5.G": "8.5.G",
             "MAX12": "MAX12 More Than 12 Hours Worked in a Day",
             "MAX60": "MAX60 More Than 60 Hours Worked in a Week",
         }
@@ -1110,84 +1103,74 @@ class MainApp(QMainWindow):
         # Initialize violations dictionary
         self.violations = {}
 
+        # Get unique dates from clock ring data and initialize date_maximized_status
+        unique_dates = (
+            pd.to_datetime(clock_ring_data["rings_date"])
+            .dt.strftime("%Y-%m-%d")
+            .unique()
+        )
+        date_maximized_status = {date: {"is_maximized": False} for date in unique_dates}
+
         # Calculate progress increments
-        violation_detection_weight = 50  # 50% for violation detection
-        tab_update_weight = 40  # 40% for tab updates
+        total_steps = len(violation_types) * 2  # Detection and tab updates
+        progress_per_step = 90 / total_steps  # Save 10% for remedies
         current_progress = 0
 
-        # Detect violations (50% of progress)
-        for i, (key, violation_type) in enumerate(violation_types.items()):
-            if progress_callback:
-                progress_callback(
-                    int(current_progress), f"Detecting {key} violations..."
+        try:
+            # Detect violations (45% of progress)
+            for key, violation_type in violation_types.items():
+                if progress_callback:
+                    progress_callback(
+                        int(current_progress), f"Detecting {key} violations..."
+                    )
+
+                self.violations[key] = detect_violations(
+                    clock_ring_data,
+                    violation_type,
+                    date_maximized_status if key in ["8.5.D", "8.5.G"] else None,
                 )
+                current_progress += progress_per_step
+                if progress_callback:
+                    progress_callback(
+                        int(current_progress), f"Detected {key} violations"
+                    )
 
-            self.violations[key] = detect_violations(clock_ring_data, violation_type)
-            current_progress += violation_detection_weight / len(violation_types)
+            # Update violation tabs (45% of progress)
+            tab_updates = [
+                (self.vio_85d_tab, "8.5.D", "8.5.D violations"),
+                (self.vio_85f_tab, "8.5.F", "8.5.F violations"),
+                (self.vio_85f_ns_tab, "8.5.F NS", "8.5.F NS violations"),
+                (self.vio_85f_5th_tab, "8.5.F 5th", "8.5.F 5th violations"),
+                (self.vio_85g_tab, "8.5.G", "8.5.G violations"),
+                (self.vio_MAX12_tab, "MAX12", "MAX12 violations"),
+                (self.vio_MAX60_tab, "MAX60", "MAX60 violations"),
+            ]
 
-        # Update violation tabs (40% of progress)
-        if progress_callback:
-            progress_callback(int(current_progress), "Updating 8.5.D violations tab...")
-        self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
-        current_progress += tab_update_weight / (
-            len(violation_types) + 1
-        )  # +1 for remedies tab
+            for tab, key, description in tab_updates:
+                if progress_callback:
+                    progress_callback(
+                        int(current_progress), f"Updating {description} tab..."
+                    )
+                tab.refresh_data(self.violations[key])
+                current_progress += progress_per_step
+                if progress_callback:
+                    progress_callback(
+                        int(current_progress), f"Updated {description} tab"
+                    )
 
-        if progress_callback:
-            progress_callback(int(current_progress), "Updating 8.5.F violations tab...")
-        self.vio_85f_tab.refresh_data(self.violations["8.5.F"])
-        current_progress += tab_update_weight / (
-            len(violation_types) + 1
-        )  # +1 for remedies tab
+            # Calculate and update remedies (final 10%)
+            if progress_callback:
+                progress_callback(90, "Calculating final remedies...")
 
-        if progress_callback:
-            progress_callback(
-                int(current_progress), "Updating 8.5.F NS violations tab..."
-            )
-        self.vio_85f_ns_tab.refresh_data(self.violations["8.5.F NS"])
-        current_progress += tab_update_weight / (
-            len(violation_types) + 1
-        )  # +1 for remedies tab
+            remedies_data = get_violation_remedies(clock_ring_data, self.violations)
+            self.remedies_tab.refresh_data(remedies_data)
 
-        if progress_callback:
-            progress_callback(
-                int(current_progress), "Updating 8.5.F 5th violations tab..."
-            )
-        self.vio_85f_5th_tab.refresh_data(self.violations["8.5.F 5th"])
-        current_progress += tab_update_weight / (
-            len(violation_types) + 1
-        )  # +1 for remedies tab
+            if progress_callback:
+                progress_callback(100, "Complete")
 
-        if progress_callback:
-            progress_callback(int(current_progress), "Updating 8.5.G violations tab...")
-        self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
-        current_progress += tab_update_weight / (
-            len(violation_types) + 1
-        )  # +1 for remedies tab
-
-        if progress_callback:
-            progress_callback(int(current_progress), "Updating MAX12 violations tab...")
-        self.vio_MAX12_tab.refresh_data(self.violations["MAX12"])
-        current_progress += tab_update_weight / (
-            len(violation_types) + 1
-        )  # +1 for remedies tab
-
-        if progress_callback:
-            progress_callback(int(current_progress), "Updating MAX60 violations tab...")
-        self.vio_MAX60_tab.refresh_data(self.violations["MAX60"])
-        current_progress += tab_update_weight / (
-            len(violation_types) + 1
-        )  # +1 for remedies tab
-
-        # Calculate and update remedies (final 10%)
-        if progress_callback:
-            progress_callback(90, "Calculating final remedies...")
-
-        remedies_data = get_violation_remedies(clock_ring_data, self.violations)
-        self.remedies_tab.refresh_data(remedies_data)
-
-        if progress_callback:
-            progress_callback(100, "Complete")
+        except Exception as e:
+            print(f"Error in update_violations_and_remedies: {str(e)}")
+            raise
 
     def on_carrier_data_updated(self, _):
         """Handle updates to the carrier list and refresh all tabs.

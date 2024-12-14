@@ -71,13 +71,13 @@ def register_violation(violation_type: str) -> Callable[[ViolationFunc], Violati
     return decorator
 
 
-def detect_violations(data, violation_type, maximized_status={}):
+def detect_violations(data, violation_type, date_maximized_status=None):
     """Dispatch violation detection to the appropriate registered function.
 
     Args:
         data (pd.DataFrame): Carrier work hour data to check for violations
         violation_type (str): Type of violation to detect (e.g., "8.5.F NS", "MAX60")
-        maximized_status (dict, optional): Date-keyed dict of OTDL maximization status
+        date_maximized_status (dict, optional): Date-keyed dict of OTDL maximization status
 
     Returns:
         pd.DataFrame: Detected violations with calculated remedies
@@ -86,8 +86,18 @@ def detect_violations(data, violation_type, maximized_status={}):
         Uses the violation registry populated by @register_violation decorator
         to route detection to the appropriate specialized function.
     """
+    if date_maximized_status is None:
+        date_maximized_status = {}
+
+    # Convert date_maximized_status values to simple boolean if needed
+    if any(isinstance(v, dict) for v in date_maximized_status.values()):
+        date_maximized_status = {
+            k: v.get("is_maximized", False) if isinstance(v, dict) else v
+            for k, v in date_maximized_status.items()
+        }
+
     violation_function = violation_registry[violation_type]
-    return violation_function(data, maximized_status)
+    return violation_function(data, date_maximized_status)
 
 
 def process_moves_vectorized(moves_str, code):
@@ -904,7 +914,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
         "8.5.F 5th": [],
         "MAX12": [],
         "MAX60": [],
-        "8.5.G": [],  # Add 8.5.G violations
+        "8.5.G": [],
     }
 
     # Pre-process data once
@@ -938,7 +948,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                     {
                         "carrier_name": carrier,
                         "date": date,
-                        "violation_type": "8.5.D",
+                        "violation_type": "8.5.D Overtime Off Route",
                         "remedy_total": off_route_hours,
                         "total_hours": total_hours,
                         "own_route_hours": group["own_route_hours"].sum(),
@@ -953,7 +963,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                     {
                         "carrier_name": carrier,
                         "date": date,
-                        "violation_type": "8.5.F",
+                        "violation_type": "8.5.F Overtime Over 10 Hours Off Route",
                         "remedy_total": total_hours - 8,
                         "total_hours": total_hours,
                         "list_status": list_status,
@@ -963,11 +973,14 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                 # Check for 8.5.G violations when WAL/NL works overtime off route
                 if off_route_hours > 0:
                     # Check if OTDL was maximized for this date
-                    is_maximized = (
-                        date_maximized_status.get(date, False)
-                        if date_maximized_status is not None
-                        else False
-                    )
+                    is_maximized = False
+                    if date_maximized_status is not None:
+                        if isinstance(date_maximized_status.get(date), dict):
+                            is_maximized = date_maximized_status[date].get(
+                                "is_maximized", False
+                            )
+                        else:
+                            is_maximized = date_maximized_status.get(date, False)
 
                     # Only process if OTDL was not maximized
                     if not is_maximized:
@@ -1001,7 +1014,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                                         {
                                             "carrier_name": otdl_carrier,
                                             "date": date,
-                                            "violation_type": "8.5.G OTDL Not Maximized",
+                                            "violation_type": "8.5.G",
                                             "remedy_total": round(potential_remedy, 2),
                                             "total_hours": otdl_hours,
                                             "hour_limit": hour_limit,
@@ -1022,7 +1035,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                                 {
                                     "carrier_name": otdl_row["carrier_name"],
                                     "date": date,
-                                    "violation_type": "No Violation (OTDL Maxed)",
+                                    "violation_type": "8.5.G",
                                     "remedy_total": 0.0,
                                     "total_hours": pd.to_numeric(
                                         otdl_row["total"], errors="coerce"
@@ -1044,7 +1057,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                 {
                     "carrier_name": carrier,
                     "date": date,
-                    "violation_type": "MAX12",
+                    "violation_type": "MAX12 More Than 12 Hours Worked in a Day",
                     "remedy_total": total_hours - 12,
                     "total_hours": total_hours,
                     "list_status": list_status,
@@ -1067,7 +1080,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                     {
                         "carrier_name": carrier,
                         "date": date,
-                        "violation_type": "MAX60",
+                        "violation_type": "MAX60 More Than 60 Hours Worked in a Week",
                         "remedy_total": daily_hours,
                         "total_hours": daily_hours,
                         "cumulative_hours": cum_hours,
@@ -1089,7 +1102,7 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                     {
                         "carrier_name": carrier,
                         "date": fifth_day,
-                        "violation_type": "8.5.F 5th",
+                        "violation_type": "8.5.F 5th More Than 4 Days of Overtime in a Week",
                         "remedy_total": fifth_day_hours,
                         "total_hours": fifth_day_hours,
                         "list_status": list_status,
@@ -1191,3 +1204,127 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
             "total_hours",
         ]
     ].rename(columns={"rings_date": "date"})
+
+
+@register_violation("8.5.G")
+def detect_85g_violations(data, date_maximized_status=None):
+    """Detect Article 8.5.G violations for OTDL carriers not maximized.
+
+    Args:
+        data (pd.DataFrame): Carrier work hour data containing:
+            - carrier_name: Name of the carrier
+            - list_status: WAL/NL/OTDL status
+            - total_hours: Total hours worked
+            - hour_limit: Maximum daily hours for OTDL carriers
+            - date: Date of potential violation
+        date_maximized_status (dict, optional): Date-keyed dict indicating if OTDL was maximized
+
+    Returns:
+        pd.DataFrame: Detected violations with calculated remedies.
+
+    Note:
+        Violation occurs when:
+        - ANY WAL/NL carrier works overtime off their assignment
+        - OTDL carrier could have worked more hours (is below their limit)
+        - OTDL was not maximized that day
+
+        Remedy is calculated as:
+        - The difference between the OTDL carrier's hour_limit and their total_hours
+        - Each OTDL carrier's remedy is independent of how much overtime WAL/NL worked
+    """
+    result_df = prepare_data_for_violations(data)
+    violations = []
+
+    # Get all unique dates and carriers to ensure complete coverage
+    all_dates = result_df["rings_date"].unique()
+    otdl_carriers = result_df[result_df["list_status"] == "otdl"][
+        "carrier_name"
+    ].unique()
+
+    # Process each date
+    for date in all_dates:
+        day_data = result_df[result_df["rings_date"] == date]
+
+        # Check if OTDL was maximized for this date
+        is_maximized = False
+        if date_maximized_status is not None:
+            if isinstance(date_maximized_status.get(date), dict):
+                is_maximized = date_maximized_status[date].get("is_maximized", False)
+            else:
+                is_maximized = date_maximized_status.get(date, False)
+
+        # Find ANY WAL/NL carrier working overtime off route (trigger condition)
+        wal_nl_overtime = day_data[
+            (day_data["list_status"].isin(["wal", "nl"]))
+            & (day_data["total_hours"] > 8)
+            & (day_data["off_route_hours"] > 0)  # Only consider those working off route
+        ]
+
+        # Find OTDL carriers
+        day_otdl_carriers = day_data[day_data["list_status"] == "otdl"]
+
+        if not is_maximized and not wal_nl_overtime.empty:
+            # Get the WAL/NL carrier who worked the most overtime for trigger info
+            trigger_carrier = wal_nl_overtime.loc[
+                wal_nl_overtime["total_hours"].idxmax()
+            ]
+
+            # Check each OTDL carrier once
+            for _, otdl in day_otdl_carriers.iterrows():
+                otdl_hours = otdl["total_hours"]
+                try:
+                    hour_limit = float(otdl.get("hour_limit", 12.00))
+                except (ValueError, TypeError):
+                    hour_limit = 12.00
+
+                # If OTDL carrier is below their limit, they get a remedy
+                if otdl_hours < hour_limit:
+                    # Remedy is simply how many more hours they could have worked
+                    potential_remedy = hour_limit - otdl_hours
+                    if potential_remedy > 0:
+                        violations.append(
+                            {
+                                "carrier_name": otdl["carrier_name"],
+                                "date": date,
+                                "violation_type": "8.5.G",
+                                "remedy_total": round(potential_remedy, 2),
+                                "total_hours": otdl_hours,
+                                "hour_limit": hour_limit,
+                                "list_status": "otdl",
+                                "trigger_carrier": trigger_carrier["carrier_name"],
+                                "trigger_hours": trigger_carrier["total_hours"],
+                                "off_route_hours": trigger_carrier["off_route_hours"],
+                            }
+                        )
+
+        # Add "No Violation" entries for OTDL carriers not already in violations for this date
+        violation_carriers = {
+            v["carrier_name"] for v in violations if v["date"] == date
+        }
+        for carrier in otdl_carriers:
+            if carrier not in violation_carriers:
+                carrier_data = day_data[day_data["carrier_name"] == carrier]
+                if not carrier_data.empty:
+                    try:
+                        hour_limit = float(carrier_data["hour_limit"].iloc[0])
+                        total_hours = float(carrier_data["total_hours"].iloc[0])
+                    except (ValueError, TypeError, IndexError):
+                        hour_limit = 12.00
+                        total_hours = 0.0
+
+                    violations.append(
+                        {
+                            "carrier_name": carrier,
+                            "date": date,
+                            "violation_type": "8.5.G",
+                            "remedy_total": 0.0,
+                            "total_hours": total_hours,
+                            "hour_limit": hour_limit,
+                            "list_status": "otdl",
+                            "trigger_carrier": "",
+                            "trigger_hours": 0,
+                            "off_route_hours": 0,
+                        }
+                    )
+
+    return pd.DataFrame(violations) if violations else pd.DataFrame()
