@@ -1086,18 +1086,33 @@ class MainApp(QMainWindow):
                 return
 
             # Create a date_maximized_status dict for violation detection
-            date_maximized_status = {date: {"is_maximized": maximized_status}}
+            # For 8.5.D we just need is_maximized
+            date_maximized_status_85d = {date: {"is_maximized": maximized_status}}
+
+            # For 8.5.G we need both is_maximized and excused_carriers
+            date_maximized_status_85g = {
+                date: {
+                    "is_maximized": maximized_status,
+                    "excused_carriers": self.otdl_maximization_pane.get_excused_carriers(
+                        date
+                    )
+                    if hasattr(self.otdl_maximization_pane, "get_excused_carriers")
+                    else [],
+                }
+            }
 
             # Redetect all affected violations
             if "8.5.D" in self.violations:
                 self.violations["8.5.D"] = detect_violations(
-                    clock_ring_data, "8.5.D Overtime Off Route", date_maximized_status
+                    clock_ring_data,
+                    "8.5.D Overtime Off Route",
+                    date_maximized_status_85d,
                 )
                 self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
 
             if "8.5.G" in self.violations:
                 self.violations["8.5.G"] = detect_violations(
-                    clock_ring_data, "8.5.G", date_maximized_status
+                    clock_ring_data, "8.5.G", date_maximized_status_85g
                 )
                 self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
 

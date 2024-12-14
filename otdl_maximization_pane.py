@@ -719,3 +719,23 @@ class OTDLMaximizationPane(QWidget):
             apply_button.clicked.connect(partial(self.apply_changes_for_date, date))
             self.table.setCellWidget(apply_row_index, col_idx, apply_button)
         self.adjust_window_size()
+
+    def get_excused_carriers(self, date):
+        """Get list of excused carriers for a given date.
+
+        Args:
+            date (str): Date in YYYY-MM-DD format
+
+        Returns:
+            list: List of carrier names who are excused from working to their hour limit
+        """
+        excused_carriers = []
+
+        # Check if we have excusal data for this date
+        if date in self.date_maximized:
+            # Get all carriers marked as excused
+            for carrier_name, excused in self.date_maximized[date].items():
+                if carrier_name != "is_maximized" and excused:
+                    excused_carriers.append(carrier_name)
+
+        return excused_carriers

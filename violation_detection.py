@@ -1159,6 +1159,7 @@ def detect_85g_violations(data, date_maximized_status=None):
             - hour_limit: Maximum daily hours for OTDL carriers
             - date: Date of potential violation
         date_maximized_status (dict, optional): Date-keyed dict indicating if OTDL was maximized
+            and which carriers are excused from working to their limit
 
     Returns:
         pd.DataFrame: Detected violations with calculated remedies.
@@ -1168,6 +1169,7 @@ def detect_85g_violations(data, date_maximized_status=None):
         - ANY WAL/NL carrier works overtime (>8 hours) AND has off-route hours
         - OTDL carrier could have worked more hours (is below their limit)
         - OTDL was not maximized that day
+        - OTDL carrier is not excused from working to their limit
 
         Remedy is calculated as:
         - The difference between the OTDL carrier's hour_limit and their total_hours
@@ -1186,9 +1188,13 @@ def detect_85g_violations(data, date_maximized_status=None):
 
         # Check if OTDL was maximized for this date
         is_maximized = False
+        excused_carriers = []
         if date_maximized_status is not None:
             if isinstance(date_maximized_status.get(date), dict):
                 is_maximized = date_maximized_status[date].get("is_maximized", False)
+                excused_carriers = date_maximized_status[date].get(
+                    "excused_carriers", []
+                )
             else:
                 is_maximized = date_maximized_status.get(date, False)
 
@@ -1247,7 +1253,25 @@ def detect_85g_violations(data, date_maximized_status=None):
                 except (ValueError, TypeError):
                     hour_limit = 12.00
 
-                # If OTDL carrier is below their limit, they get a remedy
+                # Skip excused carriers
+                if otdl["carrier_name"] in excused_carriers:
+                    violations.append(
+                        {
+                            "carrier_name": otdl["carrier_name"],
+                            "date": date,
+                            "violation_type": "No Violation (Excused)",
+                            "remedy_total": 0.0,
+                            "total_hours": otdl_hours,
+                            "hour_limit": hour_limit,
+                            "list_status": "otdl",
+                            "trigger_carrier": trigger_carrier["carrier_name"],
+                            "trigger_hours": trigger_carrier["total_hours"],
+                            "off_route_hours": trigger_carrier["off_route_hours"],
+                        }
+                    )
+                    continue
+
+                # If OTDL carrier is below their limit and not excused, they get a remedy
                 if otdl_hours < hour_limit:
                     # Remedy is simply how many more hours they could have worked
                     potential_remedy = hour_limit - otdl_hours
@@ -1286,7 +1310,9 @@ def detect_85g_violations(data, date_maximized_status=None):
 
                     # Set appropriate violation type based on list status and hours worked
                     if list_status == "otdl":
-                        if total_hours >= hour_limit:
+                        if carrier in excused_carriers:
+                            violation_type = "No Violation (Excused)"
+                        elif total_hours >= hour_limit:
                             violation_type = "No Violation (Maximized)"
                         else:
                             violation_type = "No Violation"
