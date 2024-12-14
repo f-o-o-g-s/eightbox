@@ -456,6 +456,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             "own_route_hours": "Own Route Hours",
             "off_route_hours": "Off Route Hours",
             "moves": "Moves",
+            "hour_limit": "Hour Limit",
+            "trigger_carrier": "Trigger Carrier",
+            "trigger_hours": "Trigger Hours",
         }
         existing_columns = {
             col: new_name for col, new_name in rename_map.items() if col in df.columns
