@@ -1224,7 +1224,7 @@ def detect_85g_violations(data, date_maximized_status=None):
 
     Note:
         Violation occurs when:
-        - ANY WAL/NL carrier works overtime off their assignment
+        - ANY WAL/NL carrier works overtime (>8 hours) AND has off-route hours
         - OTDL carrier could have worked more hours (is below their limit)
         - OTDL was not maximized that day
 
@@ -1237,9 +1237,7 @@ def detect_85g_violations(data, date_maximized_status=None):
 
     # Get all unique dates and carriers to ensure complete coverage
     all_dates = result_df["rings_date"].unique()
-    otdl_carriers = result_df[result_df["list_status"] == "otdl"][
-        "carrier_name"
-    ].unique()
+    all_carriers = result_df["carrier_name"].unique()
 
     # Process each date
     for date in all_dates:
@@ -1254,10 +1252,11 @@ def detect_85g_violations(data, date_maximized_status=None):
                 is_maximized = date_maximized_status.get(date, False)
 
         # Find ANY WAL/NL carrier working overtime off route (trigger condition)
+        # Similar to 8.5.D logic - just need total > 8 and any off-route hours
         wal_nl_overtime = day_data[
             (day_data["list_status"].isin(["wal", "nl"]))
-            & (day_data["total_hours"] > 8)
-            & (day_data["off_route_hours"] > 0)  # Only consider those working off route
+            & (day_data["total_hours"] > 8)  # Overtime
+            & (day_data["off_route_hours"] > 0)  # Any work off their assignment
         ]
 
         # Find OTDL carriers
@@ -1286,7 +1285,7 @@ def detect_85g_violations(data, date_maximized_status=None):
                             {
                                 "carrier_name": otdl["carrier_name"],
                                 "date": date,
-                                "violation_type": "8.5.G",
+                                "violation_type": "8.5.G OTDL Not Maximized",
                                 "remedy_total": round(potential_remedy, 2),
                                 "total_hours": otdl_hours,
                                 "hour_limit": hour_limit,
@@ -1297,30 +1296,41 @@ def detect_85g_violations(data, date_maximized_status=None):
                             }
                         )
 
-        # Add "No Violation" entries for OTDL carriers not already in violations for this date
+        # Add appropriate "No Violation" entries for all carriers
         violation_carriers = {
             v["carrier_name"] for v in violations if v["date"] == date
         }
-        for carrier in otdl_carriers:
+        for carrier in all_carriers:
             if carrier not in violation_carriers:
                 carrier_data = day_data[day_data["carrier_name"] == carrier]
                 if not carrier_data.empty:
                     try:
                         hour_limit = float(carrier_data["hour_limit"].iloc[0])
                         total_hours = float(carrier_data["total_hours"].iloc[0])
+                        list_status = carrier_data["list_status"].iloc[0]
                     except (ValueError, TypeError, IndexError):
                         hour_limit = 12.00
                         total_hours = 0.0
+                        list_status = "unknown"
+
+                    # Set appropriate violation type based on list status and hours worked
+                    if list_status == "otdl":
+                        if total_hours >= hour_limit:
+                            violation_type = "No Violation (Maximized)"
+                        else:
+                            violation_type = "No Violation"
+                    else:
+                        violation_type = "No Violation (Non OTDL)"
 
                     violations.append(
                         {
                             "carrier_name": carrier,
                             "date": date,
-                            "violation_type": "8.5.G",
+                            "violation_type": violation_type,
                             "remedy_total": 0.0,
                             "total_hours": total_hours,
                             "hour_limit": hour_limit,
-                            "list_status": "otdl",
+                            "list_status": list_status,
                             "trigger_carrier": "",
                             "trigger_hours": 0,
                             "off_route_hours": 0,
