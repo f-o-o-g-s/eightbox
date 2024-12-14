@@ -420,6 +420,39 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
 
+        elif self.tab_type == ViolationType.EIGHT_FIVE_G:
+            if self.is_summary:
+                # Weekly Remedy Total in teal
+                if col_name == "Weekly Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return WEEKLY_TOTAL_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+                # Individual day columns in darker purple when > 0
+                elif col_name not in [
+                    "Carrier Name",
+                    "List Status",
+                    "Hour Limit",
+                    "Trigger Carrier",
+                ]:  # Skip non-numeric columns
+                    try:
+                        number = float(str(value))
+                        if number > 0:
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError):
+                        pass
+            else:
+                # Daily tab formatting
+                if col_name == "Remedy Total":
+                    try:
+                        number = float(str(value).split()[0])
+                        if number > 0:
+                            return VIOLATION_COLOR
+                    except (ValueError, TypeError, IndexError):
+                        pass
+
         return background_color
 
     def has_violation_in_row(self, row):

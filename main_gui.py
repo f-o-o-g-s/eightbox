@@ -49,6 +49,7 @@ from violation_85d_tab import Violation85dTab
 from violation_85f_5th_tab import Violation85f5thTab
 from violation_85f_ns_tab import Violation85fNsTab
 from violation_85f_tab import Violation85fTab
+from violation_85g_tab import Violation85gTab
 from violation_detection import (
     detect_violations,
     get_violation_remedies,
@@ -223,6 +224,7 @@ class MainApp(QMainWindow):
         vio_85f_tab (Violation85fTab): Tab for 8.5.F violations
         vio_85f_ns_tab (Violation85fNsTab): Tab for non-scheduled day violations
         vio_85f_5th_tab (Violation85f5thTab): Tab for fifth occurrence violations
+        vio_85g_tab (Violation85gTab): Tab for 8.5.G violations
         vio_MAX12_tab (ViolationMax12Tab): Tab for 12-hour limit violations
         vio_MAX60_tab (ViolationMax60Tab): Tab for 60-hour limit violations
         remedies_tab (ViolationRemediesTab): Summary tab for all violations
@@ -314,6 +316,7 @@ class MainApp(QMainWindow):
         self.init_85f_tab()
         self.init_85f_ns_tab()
         self.init_85f_5th_tab()
+        self.init_85g_tab()
         self.init_MAX12_tab()
         self.init_MAX60_tab()
         self.init_remedies_tab()
@@ -576,6 +579,7 @@ class MainApp(QMainWindow):
             self.vio_85f_tab,
             self.vio_85f_ns_tab,
             self.vio_85f_5th_tab,
+            self.vio_85g_tab,
             self.vio_MAX12_tab,
             self.vio_MAX60_tab,
             self.remedies_tab,
@@ -626,6 +630,15 @@ class MainApp(QMainWindow):
         self.vio_85f_5th_tab.refresh_data(
             pd.DataFrame()
         )  # Start with an empty DataFrame
+
+    def init_85g_tab(self):
+        """Initialize the Article 8.5.G violation tab."""
+        print("Initializing 8.5.G Violations Tab")  # Debugging statement
+
+        """Initialize and add the 8.5.G Tab."""
+        self.vio_85g_tab = Violation85gTab()
+        self.central_tab_widget.addTab(self.vio_85g_tab, "8.5.G Violations")
+        self.vio_85g_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_MAX12_tab(self):
         """Initialize the Maximum 12-Hour Rule violation tab.
@@ -835,6 +848,7 @@ class MainApp(QMainWindow):
             self.vio_85f_tab.refresh_data(pd.DataFrame())
             self.vio_85f_ns_tab.refresh_data(pd.DataFrame())
             self.vio_85f_5th_tab.refresh_data(pd.DataFrame())
+            self.vio_85g_tab.refresh_data(pd.DataFrame())
             self.vio_MAX12_tab.refresh_data(pd.DataFrame())
             self.vio_MAX60_tab.refresh_data(pd.DataFrame())
             self.remedies_tab.refresh_data(pd.DataFrame())
@@ -894,6 +908,7 @@ class MainApp(QMainWindow):
         self.vio_85f_tab = None
         self.vio_85f_ns_tab = None
         self.vio_85f_5th_tab = None
+        self.vio_85g_tab = None
         self.vio_MAX12_tab = None
         self.vio_MAX60_tab = None
         self.remedies_tab = None
@@ -1087,6 +1102,7 @@ class MainApp(QMainWindow):
             "8.5.F": "8.5.F Overtime Over 10 Hours Off Route",
             "8.5.F NS": "8.5.F NS Overtime On a Non-Scheduled Day",
             "8.5.F 5th": "8.5.F 5th More Than 4 Days of Overtime in a Week",
+            "8.5.G": "8.5.G OTDL Not Maximized",
             "MAX12": "MAX12 More Than 12 Hours Worked in a Day",
             "MAX60": "MAX60 More Than 60 Hours Worked in a Week",
         }
@@ -1138,6 +1154,13 @@ class MainApp(QMainWindow):
                 int(current_progress), "Updating 8.5.F 5th violations tab..."
             )
         self.vio_85f_5th_tab.refresh_data(self.violations["8.5.F 5th"])
+        current_progress += tab_update_weight / (
+            len(violation_types) + 1
+        )  # +1 for remedies tab
+
+        if progress_callback:
+            progress_callback(int(current_progress), "Updating 8.5.G violations tab...")
+        self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
         current_progress += tab_update_weight / (
             len(violation_types) + 1
         )  # +1 for remedies tab
@@ -1465,6 +1488,8 @@ class MainApp(QMainWindow):
             return self.vio_85f_ns_tab
         elif violation_type == "8.5.F 5th":
             return self.vio_85f_5th_tab
+        elif violation_type == "8.5.G":
+            return self.vio_85g_tab
         elif violation_type == "MAX12":
             return self.vio_MAX12_tab
         elif violation_type == "MAX60":
@@ -1489,6 +1514,7 @@ class MainApp(QMainWindow):
             self.vio_85f_tab,
             self.vio_85f_ns_tab,
             self.vio_85f_5th_tab,
+            self.vio_85g_tab,
             self.vio_MAX12_tab,
             self.vio_MAX60_tab,
             self.remedies_tab,
@@ -1511,6 +1537,7 @@ class MainApp(QMainWindow):
             self.vio_85f_tab,
             self.vio_85f_ns_tab,
             self.vio_85f_5th_tab,
+            self.vio_85g_tab,
             self.vio_MAX12_tab,
             self.vio_MAX60_tab,
             self.remedies_tab,

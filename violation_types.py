@@ -23,6 +23,7 @@ class ViolationType(Enum):
         EIGHT_FIVE_F: Article 8.5.F - Over 10 hours (regular day)
         EIGHT_FIVE_F_NS: Article 8.5.F - Over 8 hours (non-scheduled day)
         EIGHT_FIVE_F_5TH: Article 8.5.F - 5th overtime day
+        EIGHT_FIVE_G: Article 8.5.G - OTDL not maximized
         MAX_12: Maximum 12-hour rule (11.5 for non-OTDL)
         MAX_60: Maximum 60-hour weekly limit
         VIOLATION_REMEDIES: Combined violation summary view
@@ -32,6 +33,7 @@ class ViolationType(Enum):
     EIGHT_FIVE_F = "85f"
     EIGHT_FIVE_F_NS = "85f_ns"
     EIGHT_FIVE_F_5TH = "85f_5th"
+    EIGHT_FIVE_G = "85g"
     MAX_12 = "max12"
     MAX_60 = "max60"
     VIOLATION_REMEDIES = "ViolationRemedies"
