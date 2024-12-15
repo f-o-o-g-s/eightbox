@@ -235,8 +235,8 @@ class MainApp(QMainWindow):
         otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
     """
 
-    VERSION = "2024.0.4.1"  # Updated by release.py
-    BUILD_TIME = "2024-12-15 14:16"  # Updated by release.py
+    VERSION = "2024.0.4.2"  # Updated by release.py
+    BUILD_TIME = "2024-12-15 16:10"  # Updated by release.py
 
     def __init__(self):
         super().__init__()
