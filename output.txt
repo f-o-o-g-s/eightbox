@@ -7,88 +7,1474 @@ Initializing 8.5.D Violations Tab
 Initializing 8.5.F Violations Tab
 Initializing 8.5.F NS Violations Tab
 Initializing 8.5.F 5th Violations Tab
+Initializing 8.5.G Violations Tab
 Initializing Violations Summary Tab
-
-DEBUG - Columns in raw date_data:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
-
-DEBUG - Columns after formatting:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
-
-DEBUG - All columns in model DataFrame:
-['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - 85F_5th_date column NOT found!
-Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - Columns in raw date_data:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
-
-DEBUG - Columns after formatting:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
-
-DEBUG - All columns in model DataFrame:
-['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - 85F_5th_date column NOT found!
-Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - Columns in raw date_data:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
-
-DEBUG - Columns after formatting:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
-
-DEBUG - All columns in model DataFrame:
-['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - 85F_5th_date column NOT found!
-Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - Columns in raw date_data:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
-
-DEBUG - Columns after formatting:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
-
-DEBUG - All columns in model DataFrame:
-['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - 85F_5th_date column NOT found!
-Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - Columns in raw date_data:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
-
-DEBUG - Columns after formatting:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
-
-DEBUG - All columns in model DataFrame:
-['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - 85F_5th_date column NOT found!
-Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - Columns in raw date_data:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
-
-DEBUG - Columns after formatting:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
-
-DEBUG - All columns in model DataFrame:
-['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - 85F_5th_date column NOT found!
-Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - Columns in raw date_data:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date']
-
-DEBUG - Columns after formatting:
-['carrier_name', 'date', 'list_status', 'violation_type', 'remedy_total', 'total_hours', 'display_indicator', '85F_5th_date', 'daily_hours']
-
-DEBUG - All columns in model DataFrame:
-['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
-
-DEBUG - 85F_5th_date column NOT found!
-Available columns: ['Carrier Name', 'List Status', 'Date', 'Daily Hours', 'Total Hours', 'Remedy Total', 'Violation Type']
+Initial columns: ['carrier_name', 'rings_date', 'total', 'moves', 'code', 'leave_type', 'leave_time', 'display_indicators', 'effective_date', 'list_status', 'route_s', 'hour_limit']
+Columns after preparation: ['carrier_name', 'rings_date', 'total', 'moves', 'code', 'leave_type', 'leave_time', 'display_indicators', 'effective_date', 'list_status', 'route_s', 'hour_limit', 'is_wal_nl', 'total_hours', 'own_route_hours', 'off_route_hours', 'formatted_moves']
+Available columns: ['carrier_name', 'rings_date', 'total', 'moves', 'code', 'leave_type', 'leave_time', 'display_indicators', 'effective_date', 'list_status', 'route_s', 'hour_limit', 'is_wal_nl', 'total_hours', 'own_route_hours', 'off_route_hours', 'formatted_moves', 'display_indicator']
+Leave types present: ['none' 0 'annual' 'sick' 'guaranteed']
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: No Violation (Maximized), remedy: 0.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: No Violation (Maximized), remedy: 0.0
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Auto Excused), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Maximized), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: No Violation (Maximized), remedy: 0.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: No Violation (Maximized), remedy: 0.0
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: No Violation (Maximized), remedy: 0.0
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: No Violation (Maximized), remedy: 0.0
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: No Violation (Maximized), remedy: 0.0
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: No Violation (Auto Excused), remedy: 0.0
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier barnes, r - manually excused: False
+Checking remaining carrier bliss, a - manually excused: False
+Checking remaining carrier boutwell, s - manually excused: False
+Checking remaining carrier burton, b - manually excused: False
+Checking remaining carrier corbin, t - manually excused: False
+Checking remaining carrier crowley, t - manually excused: False
+Checking remaining carrier dover, m - manually excused: False
+Checking remaining carrier gaglia, d - manually excused: False
+Checking remaining carrier gates iii, d - manually excused: False
+Checking remaining carrier gilman, j - manually excused: False
+Checking remaining carrier hackmann, m - manually excused: False
+Checking remaining carrier occhipinti, a - manually excused: False
+Checking remaining carrier stidham, c - manually excused: False
+Checking remaining carrier stuber, j - manually excused: False
+Checking remaining carrier washington, s - manually excused: False
+Checking remaining carrier wick, r - manually excused: False
+Checking remaining carrier wood, t - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: No Violation (Maximized), remedy: 0.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: No Violation (Maximized), remedy: 0.0
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Maximized), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Maximized), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: No Violation (Maximized), remedy: 0.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: No Violation (Maximized), remedy: 0.0
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: 8.5.G OTDL Not Maximized, remedy: 4.15
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: No Violation (Maximized), remedy: 0.0
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: No Violation (Maximized), remedy: 0.0
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: No Violation (Auto Excused), remedy: 0.0
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: No Violation (Maximized), remedy: 0.0
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: No Violation (Maximized), remedy: 0.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 1.53
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Auto Excused), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: 8.5.G OTDL Not Maximized, remedy: 1.74
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: No Violation (Maximized), remedy: 0.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 0.18
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: 8.5.G OTDL Not Maximized, remedy: 0.02
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: 8.5.G OTDL Not Maximized, remedy: 0.43
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: 8.5.G OTDL Not Maximized, remedy: 2.75
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: 8.5.G OTDL Not Maximized, remedy: 0.97
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: 8.5.G OTDL Not Maximized, remedy: 0.41
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: No Violation (Maximized), remedy: 0.0
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Auto Excused), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 1.85
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Auto Excused), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Auto Excused), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 0.7
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: 8.5.G OTDL Not Maximized, remedy: 0.51
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: 8.5.G OTDL Not Maximized, remedy: 1.73
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: 8.5.G OTDL Not Maximized, remedy: 0.01
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: 8.5.G OTDL Not Maximized, remedy: 2.88
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: No Violation (Maximized), remedy: 0.0
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: 8.5.G OTDL Not Maximized, remedy: 0.01
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Maximized), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: 8.5.G OTDL Not Maximized, remedy: 2.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Auto Excused), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: No Violation (Maximized), remedy: 0.0
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: No Violation (Maximized), remedy: 0.0
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: No Violation (Maximized), remedy: 0.0
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: 8.5.G OTDL Not Maximized, remedy: 2.81
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: 8.5.G OTDL Not Maximized, remedy: 0.01
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: 8.5.G OTDL Not Maximized, remedy: 0.98
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 1.75
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: 8.5.G OTDL Not Maximized, remedy: 0.05
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: 8.5.G OTDL Not Maximized, remedy: 2.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Auto Excused), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: 8.5.G OTDL Not Maximized, remedy: 4.47
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 0.1
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: 8.5.G OTDL Not Maximized, remedy: 4.47
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: No Violation (Auto Excused), remedy: 0.0
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: 8.5.G OTDL Not Maximized, remedy: 4.47
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: No Violation (Auto Excused), remedy: 0.0
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: 8.5.G OTDL Not Maximized, remedy: 0.18
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: No Violation (Maximized), remedy: 0.0
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Auto Excused), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Checkbox changed for gates iii, d on 2024-09-28: excused=True
+Updated excusal_data: True
+Updated date_maximized: True
+Applying changes for date: 2024-09-28
+Emitting signal: date=2024-09-28, maximized_status=False
+Initial columns: ['carrier_name', 'rings_date', 'total', 'moves', 'code', 'leave_type', 'leave_time', 'display_indicators', 'list_status', 'hour_limit']
+Columns after preparation: ['carrier_name', 'rings_date', 'total', 'moves', 'code', 'leave_type', 'leave_time', 'display_indicators', 'list_status', 'hour_limit', 'is_wal_nl', 'total_hours', 'own_route_hours', 'off_route_hours', 'formatted_moves']
+Available columns: ['carrier_name', 'rings_date', 'total', 'moves', 'code', 'leave_type', 'leave_time', 'display_indicators', 'list_status', 'hour_limit', 'is_wal_nl', 'total_hours', 'own_route_hours', 'off_route_hours', 'formatted_moves', 'display_indicator']
+Leave types present: ['none' 0 'annual' 'sick' 'guaranteed']
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: No Violation (Maximized), remedy: 0.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: No Violation (Maximized), remedy: 0.0
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Auto Excused), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Maximized), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: No Violation (Maximized), remedy: 0.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: No Violation (Maximized), remedy: 0.0
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: No Violation (Maximized), remedy: 0.0
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: No Violation (Maximized), remedy: 0.0
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: No Violation (Maximized), remedy: 0.0
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: No Violation (Auto Excused), remedy: 0.0
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: 8.5.G OTDL Not Maximized, remedy: 4.08
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Processing date 2024-09-29 - maximized: False, excused carriers: []
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier barnes, r - manually excused: False
+Checking remaining carrier bliss, a - manually excused: False
+Checking remaining carrier boutwell, s - manually excused: False
+Checking remaining carrier burton, b - manually excused: False
+Checking remaining carrier corbin, t - manually excused: False
+Checking remaining carrier crowley, t - manually excused: False
+Checking remaining carrier dover, m - manually excused: False
+Checking remaining carrier gaglia, d - manually excused: False
+Checking remaining carrier gates iii, d - manually excused: False
+Checking remaining carrier gilman, j - manually excused: False
+Checking remaining carrier hackmann, m - manually excused: False
+Checking remaining carrier occhipinti, a - manually excused: False
+Checking remaining carrier stidham, c - manually excused: False
+Checking remaining carrier stuber, j - manually excused: False
+Checking remaining carrier washington, s - manually excused: False
+Checking remaining carrier wick, r - manually excused: False
+Checking remaining carrier wood, t - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Processing date 2024-09-30 - maximized: False, excused carriers: []
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: No Violation (Maximized), remedy: 0.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: No Violation (Maximized), remedy: 0.0
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Maximized), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Maximized), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: No Violation (Maximized), remedy: 0.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: No Violation (Maximized), remedy: 0.0
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: 8.5.G OTDL Not Maximized, remedy: 4.15
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: No Violation (Maximized), remedy: 0.0
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: No Violation (Maximized), remedy: 0.0
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: No Violation (Auto Excused), remedy: 0.0
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: No Violation (Maximized), remedy: 0.0
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Processing date 2024-10-01 - maximized: False, excused carriers: []
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: No Violation (Maximized), remedy: 0.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 1.53
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Auto Excused), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: 8.5.G OTDL Not Maximized, remedy: 1.74
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: No Violation (Maximized), remedy: 0.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 0.18
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: 8.5.G OTDL Not Maximized, remedy: 0.02
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: 8.5.G OTDL Not Maximized, remedy: 0.43
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: 8.5.G OTDL Not Maximized, remedy: 2.75
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: 8.5.G OTDL Not Maximized, remedy: 0.97
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: 8.5.G OTDL Not Maximized, remedy: 0.41
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: No Violation (Maximized), remedy: 0.0
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Processing date 2024-10-02 - maximized: False, excused carriers: []
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Auto Excused), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 1.85
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Auto Excused), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: No Violation (Maximized), remedy: 0.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Auto Excused), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 0.7
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: 8.5.G OTDL Not Maximized, remedy: 0.51
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: 8.5.G OTDL Not Maximized, remedy: 1.73
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: 8.5.G OTDL Not Maximized, remedy: 0.01
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: 8.5.G OTDL Not Maximized, remedy: 2.88
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: No Violation (Maximized), remedy: 0.0
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: 8.5.G OTDL Not Maximized, remedy: 0.01
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Processing date 2024-10-03 - maximized: False, excused carriers: []
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: No Violation (Maximized), remedy: 0.0
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: No Violation (Maximized), remedy: 0.0
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: 8.5.G OTDL Not Maximized, remedy: 2.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Auto Excused), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: No Violation (Maximized), remedy: 0.0
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: No Violation (Maximized), remedy: 0.0
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: No Violation (Maximized), remedy: 0.0
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: No Violation (Maximized), remedy: 0.0
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: 8.5.G OTDL Not Maximized, remedy: 3.88
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: 8.5.G OTDL Not Maximized, remedy: 2.81
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: 8.5.G OTDL Not Maximized, remedy: 0.01
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Maximized), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False
+Processing date 2024-10-04 - maximized: False, excused carriers: []
+Checking carrier barnes, r - manually excused: False
+Final violation type for barnes, r: 8.5.G OTDL Not Maximized, remedy: 0.98
+Checking carrier bliss, a - manually excused: False
+Final violation type for bliss, a: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier boutwell, s - manually excused: False
+Final violation type for boutwell, s: 8.5.G OTDL Not Maximized, remedy: 1.75
+Checking carrier burton, b - manually excused: False
+Final violation type for burton, b: 8.5.G OTDL Not Maximized, remedy: 0.05
+Checking carrier corbin, t - manually excused: False
+Final violation type for corbin, t: 8.5.G OTDL Not Maximized, remedy: 2.0
+Checking carrier crowley, t - manually excused: False
+Final violation type for crowley, t: No Violation (Auto Excused), remedy: 0.0
+Checking carrier dover, m - manually excused: False
+Final violation type for dover, m: 8.5.G OTDL Not Maximized, remedy: 4.0
+Checking carrier gaglia, d - manually excused: False
+Final violation type for gaglia, d: 8.5.G OTDL Not Maximized, remedy: 4.47
+Checking carrier gates iii, d - manually excused: False
+Final violation type for gates iii, d: 8.5.G OTDL Not Maximized, remedy: 0.1
+Checking carrier gilman, j - manually excused: False
+Final violation type for gilman, j: 8.5.G OTDL Not Maximized, remedy: 4.47
+Checking carrier hackmann, m - manually excused: False
+Final violation type for hackmann, m: No Violation (Auto Excused), remedy: 0.0
+Checking carrier occhipinti, a - manually excused: False
+Final violation type for occhipinti, a: 8.5.G OTDL Not Maximized, remedy: 4.47
+Checking carrier stidham, c - manually excused: False
+Final violation type for stidham, c: No Violation (Maximized), remedy: 0.0
+Checking carrier stuber, j - manually excused: False
+Final violation type for stuber, j: No Violation (Auto Excused), remedy: 0.0
+Checking carrier washington, s - manually excused: False
+Final violation type for washington, s: 8.5.G OTDL Not Maximized, remedy: 0.18
+Checking carrier wick, r - manually excused: False
+Final violation type for wick, r: No Violation (Maximized), remedy: 0.0
+Checking carrier wood, t - manually excused: False
+Final violation type for wood, t: No Violation (Auto Excused), remedy: 0.0
+Checking remaining carrier cerise, s - manually excused: False
+Checking remaining carrier coates, d - manually excused: False
+Checking remaining carrier cummins, z - manually excused: False
+Checking remaining carrier petersen, b - manually excused: False
+Checking remaining carrier sundheim, k - manually excused: False
+Checking remaining carrier vogel, o - manually excused: False
+Checking remaining carrier wallace, t - manually excused: False
+Checking remaining carrier allen, c - manually excused: False
+Checking remaining carrier angel, k - manually excused: False
+Checking remaining carrier aquilar, d - manually excused: False
+Checking remaining carrier arellano, j - manually excused: False
+Checking remaining carrier arredondo, m - manually excused: False
+Checking remaining carrier avent sandridge, s - manually excused: False
+Checking remaining carrier berg, m - manually excused: False
+Checking remaining carrier boespflug, t - manually excused: False
+Checking remaining carrier cardwell, l - manually excused: False
+Checking remaining carrier craig, z - manually excused: False
+Checking remaining carrier creech, n - manually excused: False
+Checking remaining carrier darlington, k - manually excused: False
+Checking remaining carrier gierke, v - manually excused: False
+Checking remaining carrier habets, m - manually excused: False
+Checking remaining carrier hackmann, p - manually excused: False
+Checking remaining carrier harman jr, d - manually excused: False
+Checking remaining carrier kass, p - manually excused: False
+Checking remaining carrier kautz, k - manually excused: False
+Checking remaining carrier kennedy-senn, k - manually excused: False
+Checking remaining carrier langford, t - manually excused: False
+Checking remaining carrier lott i, j - manually excused: False
+Checking remaining carrier loyning, j - manually excused: False
+Checking remaining carrier lundgren, m - manually excused: False
+Checking remaining carrier madtson, j - manually excused: False
+Checking remaining carrier millan, c - manually excused: False
+Checking remaining carrier mockel jr, r - manually excused: False
+Checking remaining carrier morales, d - manually excused: False
+Checking remaining carrier navarro, o - manually excused: False
+Checking remaining carrier ortmann, t - manually excused: False
+Checking remaining carrier pardy, n - manually excused: False
+Checking remaining carrier pearson, t - manually excused: False
+Checking remaining carrier peterson, r - manually excused: False
+Checking remaining carrier raisl, d - manually excused: False
+Checking remaining carrier rathmel, d - manually excused: False
+Checking remaining carrier reamy, p - manually excused: False
+Checking remaining carrier reynolds, n - manually excused: False
+Checking remaining carrier risla, k - manually excused: False
+Checking remaining carrier rogge, g - manually excused: False
+Checking remaining carrier ryan, a - manually excused: False
+Checking remaining carrier saueressig, s - manually excused: False
+Checking remaining carrier schulz, p - manually excused: False
+Checking remaining carrier senn, d - manually excused: False
+Checking remaining carrier smart, d - manually excused: False
+Checking remaining carrier smith, z - manually excused: False
+Checking remaining carrier sollars, s - manually excused: False
+Checking remaining carrier southmayd, j - manually excused: False
+Checking remaining carrier stefano, p - manually excused: False
+Checking remaining carrier strending, b - manually excused: False
+Checking remaining carrier suazo, m - manually excused: False
+Checking remaining carrier wintermote, c - manually excused: False
+Checking remaining carrier wood, d - manually excused: False
+Checking remaining carrier ball, s - manually excused: False
+Checking remaining carrier bare, j - manually excused: False
+Checking remaining carrier couch, c - manually excused: False
+Checking remaining carrier dukart, b - manually excused: False
+Checking remaining carrier fiedler, m - manually excused: False
+Checking remaining carrier harrell, c - manually excused: False
+Checking remaining carrier hill, d - manually excused: False
+Checking remaining carrier horton, s - manually excused: False
+Checking remaining carrier matthaes, d - manually excused: False
+Checking remaining carrier mohr, d - manually excused: False
+Checking remaining carrier oftedal, g - manually excused: False
+Checking remaining carrier sewell, k - manually excused: False
+Checking remaining carrier tamblyn, c - manually excused: False
+Checking remaining carrier yasko ii, m - manually excused: False

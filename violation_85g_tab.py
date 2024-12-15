@@ -45,6 +45,7 @@ class Violation85gTab(BaseViolationTab):
             "hour_limit",
             "total_hours",
             "remedy_total",
+            "display_indicators",  # Changed from display_indicator
             "violation_type",  # Shows "8.5.G OTDL Not Maximized" or "8.5.G Trigger (No Remedy)"
             "trigger_carrier",  # WAL/NL carrier that triggered the violation
             "trigger_hours",  # Hours worked by trigger carrier
@@ -84,9 +85,9 @@ class Violation85gTab(BaseViolationTab):
                 formatted["violation_type"] == "8.5.G", "violation_type"
             ] = "8.5.G OTDL Not Maximized"
 
-            # Hide trigger info for non-violations
+            # Hide trigger info and display indicator for non-violations
             no_violation_mask = formatted["remedy_total"] == 0
-            for col in ["trigger_carrier", "trigger_hours", "off_route_hours"]:
+            for col in ["trigger_carrier", "trigger_hours", "off_route_hours", "display_indicator"]:
                 if col in formatted.columns:
                     formatted.loc[no_violation_mask, col] = ""
 

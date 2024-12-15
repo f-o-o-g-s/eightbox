@@ -1020,54 +1020,28 @@ class MainApp(QMainWindow):
         self.carrier_list_pane.request_apply_date_range.connect(self.apply_date_range)
         self.carrier_list_pane.hide()
 
-    def init_otdl_maximization_pane(self):
-        """Initialize the OTDL maximization pane."""
-        print("Initializing OTDL maximization pane...")
-
-        self.otdl_maximization_pane = OTDLMaximizationPane(
-            parent=self, carrier_list_pane=self.carrier_list_pane
-        )
-
-        # Explicitly connect the signal
-        print("Connecting carrier list signal to OTDL pane...")
-        self.carrier_list_pane.carrier_list_updated.connect(
-            self.otdl_maximization_pane.handle_carrier_list_update
-        )
-
-        print("OTDL pane initialization complete")
-        self.otdl_maximization_pane.hide()
-
     def handle_maximized_status_change(self, date, maximized_status):
         """Handle changes to OTDL maximization status"""
         if "8.5.D" not in self.violations and "8.5.G" not in self.violations:
             return
 
         try:
-            # Get the selected date from the calendar
-            selected_date = self.date_selection_pane.calendar.selectedDate()
-            if not selected_date.isValid():
-                raise ValueError("No valid date selected in the calendar.")
+            # Convert date to string format if it isn't already
+            date_str = str(date)
 
-            start_date = selected_date.toString("yyyy-MM-dd")
-            end_date = selected_date.addDays(7).toString("yyyy-MM-dd")
-
-            # First fetch clock ring data
-            clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
+            # Only fetch data for the specific date being updated
+            clock_ring_data = self.fetch_clock_ring_data(date_str, date_str)
             if clock_ring_data.empty:
                 return
 
-            # Then load and merge carrier list data
+            # Load and merge carrier list data
             try:
                 with open("carrier_list.json", "r") as json_file:
                     carrier_list = pd.DataFrame(json.load(json_file))
 
                 # Ensure carrier_name is properly formatted for merge
-                carrier_list["carrier_name"] = (
-                    carrier_list["carrier_name"].str.strip().str.lower()
-                )
-                clock_ring_data["carrier_name"] = (
-                    clock_ring_data["carrier_name"].str.strip().str.lower()
-                )
+                carrier_list["carrier_name"] = carrier_list["carrier_name"].str.strip().str.lower()
+                clock_ring_data["carrier_name"] = clock_ring_data["carrier_name"].str.strip().str.lower()
 
                 # Drop existing list_status and hour_limit if they exist
                 if "list_status" in clock_ring_data.columns:
@@ -1085,44 +1059,92 @@ class MainApp(QMainWindow):
                 print(f"Error loading carrier list: {str(e)}")
                 return
 
-            # Create a date_maximized_status dict for violation detection
-            # For 8.5.D we just need is_maximized
-            date_maximized_status_85d = {date: {"is_maximized": maximized_status}}
+            # Get excused carriers from OTDL maximization pane
+            excused_carriers = []
+            if hasattr(self.otdl_maximization_pane, "get_excused_carriers"):
+                excused_carriers = self.otdl_maximization_pane.get_excused_carriers(date_str)
 
-            # For 8.5.G we need both is_maximized and excused_carriers
-            date_maximized_status_85g = {
-                date: {
+            # Create date_maximized_status dicts for both violation types
+            date_maximized_status = {
+                date_str: {
                     "is_maximized": maximized_status,
-                    "excused_carriers": self.otdl_maximization_pane.get_excused_carriers(
-                        date
-                    )
-                    if hasattr(self.otdl_maximization_pane, "get_excused_carriers")
-                    else [],
+                    "excused_carriers": excused_carriers
                 }
             }
 
-            # Redetect all affected violations
+            # Update 8.5.D violations
             if "8.5.D" in self.violations:
-                self.violations["8.5.D"] = detect_violations(
+                new_violations = detect_violations(
                     clock_ring_data,
                     "8.5.D Overtime Off Route",
-                    date_maximized_status_85d,
+                    date_maximized_status,
                 )
+                
+                # Convert current violations to DataFrame if it's a list
+                if isinstance(self.violations["8.5.D"], list):
+                    current_violations = pd.DataFrame(self.violations["8.5.D"])
+                else:
+                    current_violations = self.violations["8.5.D"]
+
+                # Filter out the current date's violations and append new ones
+                if not current_violations.empty:
+                    current_violations = current_violations[current_violations["date"] != date_str]
+                
+                # Concatenate with new violations
+                if not new_violations.empty:
+                    self.violations["8.5.D"] = pd.concat([current_violations, new_violations], ignore_index=True)
+                else:
+                    self.violations["8.5.D"] = current_violations
+
                 self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
 
+            # Update 8.5.G violations
             if "8.5.G" in self.violations:
-                self.violations["8.5.G"] = detect_violations(
-                    clock_ring_data, "8.5.G", date_maximized_status_85g
+                new_violations = detect_violations(
+                    clock_ring_data, 
+                    "8.5.G", 
+                    date_maximized_status
                 )
-                self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
+                
+                # Convert current violations to DataFrame if it's a list
+                if isinstance(self.violations["8.5.G"], list):
+                    current_violations = pd.DataFrame(self.violations["8.5.G"])
+                else:
+                    current_violations = self.violations["8.5.G"]
 
-            # Update remedies data and refresh summary tabs
-            remedies_data = get_violation_remedies(clock_ring_data, self.violations)
-            self.remedies_tab.refresh_data(remedies_data)
+                # Filter out the current date's violations and append new ones
+                if not current_violations.empty:
+                    current_violations = current_violations[current_violations["date"] != date_str]
+                
+                # Concatenate with new violations
+                if not new_violations.empty:
+                    self.violations["8.5.G"] = pd.concat([current_violations, new_violations], ignore_index=True)
+                else:
+                    self.violations["8.5.G"] = current_violations
+
+                self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
 
         except Exception as e:
             print(f"Error in handle_maximized_status_change: {str(e)}")
-            return
+            import traceback
+            traceback.print_exc()
+
+    def init_otdl_maximization_pane(self):
+        """Initialize the OTDL maximization pane."""
+        print("Initializing OTDL maximization pane...")
+
+        self.otdl_maximization_pane = OTDLMaximizationPane(
+            parent=self, carrier_list_pane=self.carrier_list_pane
+        )
+
+        # Explicitly connect the signal
+        print("Connecting carrier list signal to OTDL pane...")
+        self.carrier_list_pane.carrier_list_updated.connect(
+            self.otdl_maximization_pane.handle_carrier_list_update
+        )
+
+        print("OTDL pane initialization complete")
+        self.otdl_maximization_pane.hide()
 
     def on_carrier_list_updated(self, updated_carrier_data):
         """Update OTDL Maximization Pane when the carrier list changes."""

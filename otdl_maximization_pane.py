@@ -293,14 +293,18 @@ class OTDLMaximizationPane(QWidget):
     def checkbox_state_changed(self, carrier_name, date, state):
         """Handle checkbox state changes for excusal."""
         excused = state == Qt.Checked
+        print(f"Checkbox changed for {carrier_name} on {date}: excused={excused}")
 
         # Ensure date_maximized[date] is a dictionary
         if not isinstance(self.date_maximized.get(date), dict):
             self.date_maximized[date] = {}
 
         # Update excusal data
-        self.excusal_data[(carrier_name, date)] = excused
-        self.date_maximized[date][carrier_name] = excused
+        self.excusal_data[(str(carrier_name), str(date))] = excused
+        self.date_maximized[str(date)][str(carrier_name)] = excused
+
+        print(f"Updated excusal_data: {self.excusal_data.get((str(carrier_name), str(date)))}")
+        print(f"Updated date_maximized: {self.date_maximized[str(date)].get(str(carrier_name))}")
 
         # Update the UI row color for the specific date
         self.update_maximized_status_row(date)
@@ -722,20 +726,59 @@ class OTDLMaximizationPane(QWidget):
 
     def get_excused_carriers(self, date):
         """Get list of excused carriers for a given date.
-
+        
+        This includes carriers who are:
+        - Manually excused via checkbox
+        - Automatically excused due to:
+            - Sundays
+            - Sick leave
+            - Annual leave
+            - Holidays
+            - NS protection
+            - Guaranteed time
+            - Already at/above their hour limit
+        
         Args:
             date (str): Date in YYYY-MM-DD format
-
+        
         Returns:
             list: List of carrier names who are excused from working to their hour limit
         """
-        excused_carriers = []
-
-        # Check if we have excusal data for this date
+        excused_carriers = set()  # Use a set to avoid duplicates
+        
+        # Get all carriers who are manually excused via checkbox from date_maximized
         if date in self.date_maximized:
-            # Get all carriers marked as excused
             for carrier_name, excused in self.date_maximized[date].items():
                 if carrier_name != "is_maximized" and excused:
-                    excused_carriers.append(carrier_name)
-
-        return excused_carriers
+                    excused_carriers.add(str(carrier_name))
+        
+        # Check excusal_data dictionary for manual excusals
+        for (carrier, excusal_date), excused in self.excusal_data.items():
+            if excusal_date == date and excused:
+                excused_carriers.add(str(carrier))
+        
+        # Get carriers who are automatically excused
+        if self.clock_ring_data is not None:
+            date_data = self.clock_ring_data[self.clock_ring_data["rings_date"] == date]
+            
+            for _, row in date_data.iterrows():
+                carrier_name = str(row["carrier_name"])
+                    
+                # Get indicator and hours
+                indicator = row.get("display_indicators", "")  # Changed from display_indicator
+                total_hours = pd.to_numeric(row.get("total", 0), errors="coerce")
+                hour_limit = pd.to_numeric(row.get("hour_limit", 12.00), errors="coerce")
+                
+                # Check if automatically excused
+                if is_automatically_excused(
+                    indicator,
+                    carrier_name=carrier_name,
+                    date=date,
+                    excusal_data=self.excusal_data,
+                    total=total_hours,
+                    hour_limit=hour_limit
+                ):
+                    excused_carriers.add(carrier_name)
+        
+        # Convert all carrier names to strings and return as sorted list
+        return sorted(excused_carriers)
