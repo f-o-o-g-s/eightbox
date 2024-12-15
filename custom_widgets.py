@@ -922,7 +922,10 @@ class NewCarriersDialog(QDialog):
             }
             QCheckBox::indicator:checked {
                 background-color: #BB86FC;
-                image: url(check.png);  /* We'll create this checkmark icon */
+                image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb\
+3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJ\
+NMTAgM0w0LjUgOC41TDIgNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91b\
+mQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
             }
             QCheckBox::indicator:hover {
                 border-color: #9965DA;

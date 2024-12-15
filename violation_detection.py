@@ -319,8 +319,20 @@ def detect_85d_overtime(data, date_maximized_status=None):
     # Add display indicator
     result_df["display_indicator"] = result_df.apply(set_display, axis=1)
 
-    # Calculate eligible carriers (WAL/NL and not maximized)
-    mask_eligible = (result_df["is_wal_nl"]) & (~maximized_dates)
+    # Check for valid moves (not empty, none, or no moves)
+    has_valid_moves = (
+        result_df["moves"].notna()
+        & (result_df["moves"].str.strip().str.lower() != "none")
+        & (result_df["moves"].str.strip() != "")
+        & (result_df["moves"].str.strip().str.lower() != "no moves")
+    )
+
+    # Calculate eligible carriers - require moves only for non-NS days
+    mask_eligible = (
+        (result_df["is_wal_nl"])
+        & (~maximized_dates)
+        & (result_df["is_ns_day"] | has_valid_moves)
+    )
 
     # Vectorized remedy calculation - different for NS days
     result_df["remedy_total"] = np.where(
