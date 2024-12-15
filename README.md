@@ -5,37 +5,48 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 ## Features
 
 ### Violation Tracking
-- 8.5.D Violations
+- 8.5.D Violations (Overtime Off Route)
 - 8.5.F Violations (Regular, Non-Scheduled, 5th Day)
-- MAX12 Violations
-- MAX60 Violations
-- Comprehensive violation summaries
+- 8.5.G Violations (OTDL Maximization)
+- MAX12 Violations (12-Hour Daily Limit)
+- MAX60 Violations (60-Hour Weekly Limit)
+- Comprehensive violation summaries with remedy calculations
+
+### OTDL Management
+- OTDL Maximization tracking and status management
+- Carrier excusal system for 8.5.G violations
+- Single-click application of changes across multiple dates
+- Real-time violation updates when maximization status changes
 
 ### Data Management
 - Import carrier data from JSON
 - Customizable carrier list management
 - Date-based violation filtering
-- Excel export functionality for all violation types
+- Excel export functionality with consistent carrier name sorting
+- Progress tracking for long operations
 
 ### User Interface
-- Modern PyQt5 interface
-- Dark theme support
+- Modern PyQt5 interface with Material Dark theme
 - Tabbed interface for different violation types
-- Documentation viewer
+- Global carrier filtering across all tabs
+- Comprehensive documentation for all violation types
+- Real-time progress feedback for long operations
 
 ## Requirements
 
 ### Runtime Dependencies
-- Python 3.7-3.11 (3.11 recommended)
-- PyQt5 5.15.x
-- pandas
-- openpyxl (for Excel export)
+- Python 3.11 or higher
+- PyQt5 >= 5.15.2
+- pandas >= 2.2.3
+- openpyxl >= 3.1.5
+- numpy >= 1.24.0
+- xlsxwriter >= 3.1.2
+- PyGithub >= 2.1.1 (for release management)
 - sqlite3 (included with Python)
 
 ### Development Dependencies
 - black (code formatting)
 - flake8 (style guide)
-- mypy (type checking)
 - isort (import sorting)
 
 ## Setup
@@ -48,8 +59,17 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 This project uses:
 - black for code formatting
 - flake8 for style guide enforcement
-- mypy for type checking
 - isort for import sorting
+
+## Version History
+
+### 2024.0.4.0
+- Added 8.5.G violation detection and OTDL Maximization integration
+- Added comprehensive documentation for all violation types
+- Improved UI with single Apply button for OTDL Maximization
+- Enhanced Excel export with consistent carrier name sorting
+- Added progress dialogs for better user feedback
+- Fixed various bugs and improved overall stability
 
 ## License
 MIT License

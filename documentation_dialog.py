@@ -70,7 +70,8 @@ class DocumentationDialog(QDialog):
         """
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setSizeGripEnabled(True)
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(600, 400)
+        self.resize(950, 800)
 
         # Create main layout
         layout = QVBoxLayout()

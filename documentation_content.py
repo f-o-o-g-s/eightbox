@@ -366,6 +366,53 @@ color: #BB86FC;'>Hours</th>
     </td>
 </tr></table>
 
+<table style='width: 100%; border: none;'><tr>
+    <td style='width: 60%; vertical-align: top; padding-right: 20px;'>
+        <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+            Example 3 - Small Remedy:
+            <br><br>
+            • WAL carrier works 10 hours (2 hours overtime)
+            <br>
+            • OTDL carrier worked 11.50 hours
+            <br>
+            • OTDL carrier's limit is 12 hours
+            <br>
+            • OTDL carrier was not excused
+            <br><br>
+            Remedy Calculation:
+            <br>
+            • Available hours = 12 - 11.50 = 0.50 hours
+            <br>
+            • Remedy = 0.50 hours (Any available time generates a remedy)
+        </p>
+    </td>
+    
+    <td style='width: 40%; vertical-align: top;'>
+        <table style='width: 100%; border-collapse: collapse; \
+background-color: #2D2D2D;'>
+            <tr style='background-color: #1E1E1E;'>
+                <th style='padding: 8px; border: 1px solid #444; \
+color: #BB86FC;'>Date</th>
+                <th style='padding: 8px; border: 1px solid #444; \
+color: #BB86FC;'>Hours</th>
+            </tr>
+            <tr><td style='padding: 8px; border: 1px solid #444;'>Sat</td>
+                <td style='padding: 8px; border: 1px solid #444;'>0.00</td></tr>
+            <tr><td style='padding: 8px; border: 1px solid #444;'>Mon</td>
+                <td style='padding: 8px; border: 1px solid #444;'>9.50</td></tr>
+            <tr><td style='padding: 8px; border: 1px solid #444;'>Tue</td>
+                <td style='padding: 8px; border: 1px solid #444;'>10.50</td></tr>
+            <tr><td style='padding: 8px; border: 1px solid #444;'>Wed</td>
+                <td style='padding: 8px; border: 1px solid #444;'>10.00</td></tr>
+            <tr><td style='padding: 8px; border: 1px solid #444;'>Thu</td>
+                <td style='padding: 8px; border: 1px solid #444;'>9.25</td></tr>
+            <tr style='background-color: #BB86FC; color: #000000;'>
+                <td style='padding: 8px; border: 1px solid #444;'>Fri</td>
+                <td style='padding: 8px; border: 1px solid #444;'>11.50</td></tr>
+        </table>
+    </td>
+</tr></table>
+
 <h3 style='color: #03DAC6;'>No Violation Cases:</h3>
 <ul>
     <li>When the carrier is on the OTDL</li>
@@ -528,10 +575,18 @@ DOCUMENTATION_85G = """
 <ul>
     <li>A WAL or NL carrier works overtime off their assignment</li>
     <li>An OTDL carrier was available to work (not excused)</li>
-    <li>The available OTDL carrier had not reached their daily limit (12 hours)</li>
-    <li>The available OTDL carrier had not reached their weekly limit (60 hours)</li>
-    <li>It is not during the month of December</li>
+    <li>The available OTDL carrier had not reached their daily limit (12 hours, or more in December)</li>
+    <li>The available OTDL carrier had not reached their weekly limit (60 hours, or more in December)</li>
 </ul>
+
+<h3 style='color: #03DAC6;'>Special Notes About December:</h3>
+<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+    During December (penalty overtime exclusion period):
+    <br>• OTDL carriers may work beyond 12 hours per day and 60 hours per week
+    <br>• Management may, but is not required to, assign OTDL carriers beyond these limits
+    <br>• The requirement to maximize OTDL carriers before using WAL/NL carriers still applies
+    <br>• Violations still occur if WAL/NL carriers work overtime when OTDL carriers are available
+</p>
 
 <h3 style='color: #03DAC6;'>How is the Remedy Calculated?</h3>
 <p>To calculate the remedy amount:</p>
@@ -576,15 +631,36 @@ DOCUMENTATION_85G = """
                 <br><br>
                 • WAL carrier works 10 hours (2 hours overtime)
                 <br>
+                • OTDL carrier worked 12.00 hours
+                <br>
+                • OTDL carrier's limit is 12 hours
+                <br>
+                • OTDL carrier is maximized
+                <br><br>
+                Result:
+                <br>
+                • No violation - OTDL carrier at maximum limit
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style='padding-top: 20px;'>
+            <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+                Example 3 - Small Remedy:
+                <br><br>
+                • WAL carrier works 10 hours (2 hours overtime)
+                <br>
                 • OTDL carrier worked 11.50 hours
                 <br>
                 • OTDL carrier's limit is 12 hours
                 <br>
-                • Remaining time too small to be useful
+                • OTDL carrier was not excused
                 <br><br>
-                Result:
+                Remedy Calculation:
                 <br>
-                • No violation - OTDL effectively maximized
+                • Available hours = 12 - 11.50 = 0.50 hours
+                <br>
+                • Remedy = 0.50 hours (Any available time generates a remedy)
             </p>
         </td>
     </tr>
@@ -594,16 +670,15 @@ DOCUMENTATION_85G = """
 <ul>
     <li>When OTDL carriers are marked as maximized for the day</li>
     <li>When OTDL carriers are excused (sick, annual, holiday, etc.)</li>
-    <li>When OTDL carriers have reached their hour limits</li>
+    <li>When OTDL carriers have reached their hour limits (12/60, or higher in December)</li>
     <li>When no WAL/NL carriers work overtime off assignment</li>
-    <li>During the month of December (penalty overtime exclusion period)</li>
     <li>On Sundays</li>
 </ul>
 
 <h3 style='color: #03DAC6;'>Special Notes:</h3>
 <ul>
     <li>Excusal reasons are tracked in the OTDL Maximization pane</li>
-    <li>Each OTDL carrier's hour limit can be customized</li>
+    <li>Each OTDL carrier's hour limit can be customized in The Carrier List</li>
     <li>The OTDL Maximization pane allows marking entire days as maximized</li>
     <li>Individual carriers can be excused for specific dates</li>
 </ul>
