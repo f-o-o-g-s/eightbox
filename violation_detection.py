@@ -1229,20 +1229,13 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
 @register_violation("8.5.G")
 def detect_85g_violations(data, date_maximized_status=None):
     """Detect Article 8.5.G violations for OTDL carriers not maximized."""
-    # Debug print before preparation
-    print("Initial columns:", data.columns.tolist())
     
     # First prepare the basic data
     result_df = prepare_data_for_violations(data)
     
-    # Debug print after preparation
-    print("Columns after preparation:", result_df.columns.tolist())
     
     # Then add display indicators specifically for 8.5.G processing
     result_df = generate_display_indicators(result_df)
-    print("Available columns:", result_df.columns.tolist())
-    print("Leave types present:", result_df["leave_type"].unique())
-
     violations = []
 
     # Get all unique dates and carriers to ensure complete coverage
@@ -1273,8 +1266,6 @@ def detect_85g_violations(data, date_maximized_status=None):
             is_maximized = bool(date_status)
             excused_carriers = []
             carrier_excusals = {}
-            
-        print(f"Processing date {date_str} - maximized: {is_maximized}, excused carriers: {excused_carriers}")
 
         day_data = result_df[result_df["rings_date"] == date]
 
@@ -1381,11 +1372,9 @@ def detect_85g_violations(data, date_maximized_status=None):
                     carrier_name_str in excused_carriers or
                     carrier_excusals.get(carrier_name_str, False)
                 )
-                print(f"Checking carrier {carrier_name_str} - manually excused: {is_manually_excused}")
 
                 # Determine violation type and remedy
                 if is_manually_excused:
-                    print(f"Carrier {carrier_name_str} is manually excused")
                     violation_type = "No Violation (Manually Excused)"
                     remedy_total = 0.0
                 elif is_auto_excused or is_sunday:
@@ -1399,8 +1388,6 @@ def detect_85g_violations(data, date_maximized_status=None):
                     # Calculate remedy as simply hour_limit - total_hours
                     remedy_total = hour_limit - otdl_hours
                     remedy_total = max(0, round(remedy_total, 2))  # Ensure non-negative and rounded
-
-                print(f"Final violation type for {carrier_name_str}: {violation_type}, remedy: {remedy_total}")
 
                 violations.append({
                     "carrier_name": carrier_name_str,
@@ -1449,7 +1436,6 @@ def detect_85g_violations(data, date_maximized_status=None):
                         carrier_str in excused_carriers or
                         carrier_excusals.get(carrier_str, False)
                     )
-                    print(f"Checking remaining carrier {carrier_str} - manually excused: {is_manually_excused}")
 
                     # Set appropriate violation type based on list status and excusal
                     if list_status == "otdl":
