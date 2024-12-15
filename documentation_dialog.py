@@ -27,6 +27,7 @@ from documentation_content import (
     DOCUMENTATION_85F,
     DOCUMENTATION_85F_5TH,
     DOCUMENTATION_85F_NS,
+    DOCUMENTATION_85G,
     DOCUMENTATION_MAX12,
     DOCUMENTATION_MAX60,
 )
@@ -163,6 +164,7 @@ class DocumentationDialog(QDialog):
             ("8.5.F", DOCUMENTATION_85F),
             ("8.5.F NS", DOCUMENTATION_85F_NS),
             ("8.5.F 5th", DOCUMENTATION_85F_5TH),
+            ("8.5.G", DOCUMENTATION_85G),
             ("MAX12", DOCUMENTATION_MAX12),
             ("MAX60", DOCUMENTATION_MAX60),
         ]

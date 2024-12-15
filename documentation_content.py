@@ -514,4 +514,99 @@ available for additional overtime (except in December)</li>
 </ul>
 """
 
+DOCUMENTATION_85G = """
+<h2 style='color: #BB86FC;'>Article 8.5.G - OTDL Not Maximized</h2>
+
+<h3 style='color: #03DAC6;'>Contract Language:</h3>
+<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+    "Full-time employees not on the 'Overtime Desired' list may be required to work overtime only if all available employees on the 
+    'Overtime Desired' list have worked up to twelve (12) hours in a day or sixty (60) hours in a service week."
+</p>
+
+<h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
+<p>A violation occurs when ALL of these conditions are met:</p>
+<ul>
+    <li>A WAL or NL carrier works overtime off their assignment</li>
+    <li>An OTDL carrier was available to work (not excused)</li>
+    <li>The available OTDL carrier had not reached their daily limit (12 hours)</li>
+    <li>The available OTDL carrier had not reached their weekly limit (60 hours)</li>
+    <li>It is not during the month of December</li>
+</ul>
+
+<h3 style='color: #03DAC6;'>How is the Remedy Calculated?</h3>
+<p>To calculate the remedy amount:</p>
+<ol>
+    <li>For each OTDL carrier:
+        <br>• Determine their hour limit (usually 12.00)
+        <br>• Calculate how many more hours they could have worked
+        <br>• Remedy = hour_limit - total_hours
+    </li>
+    <li>Special Cases:
+        <br>• If carrier is excused (sick, annual, holiday, etc.), no violation occurs
+        <br>• If carrier has reached their hour limit, no violation occurs
+        <br>• If OTDL is marked as maximized for the day, no violation occurs
+    </li>
+</ol>
+
+<h3 style='color: #03DAC6;'>Example:</h3>
+<table style='width: 100%; border: none; border-collapse: separate; border-spacing: 20px 0;'>
+    <tr>
+        <td style='width: 50%; vertical-align: top;'>
+            <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+                Example 1 - Violation:
+                <br><br>
+                • WAL carrier works 10 hours (2 hours overtime)
+                <br>
+                • OTDL carrier only worked 8 hours
+                <br>
+                • OTDL carrier's limit is 12 hours
+                <br>
+                • OTDL carrier was not excused
+                <br><br>
+                Remedy Calculation:
+                <br>
+                • Available hours = 12 - 8 = 4 hours
+                <br>
+                • Remedy = 4.00 hours
+            </p>
+        </td>
+        <td style='width: 50%; vertical-align: top;'>
+            <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+                Example 2 - No Violation:
+                <br><br>
+                • WAL carrier works 10 hours (2 hours overtime)
+                <br>
+                • OTDL carrier worked 11.50 hours
+                <br>
+                • OTDL carrier's limit is 12 hours
+                <br>
+                • Remaining time too small to be useful
+                <br><br>
+                Result:
+                <br>
+                • No violation - OTDL effectively maximized
+            </p>
+        </td>
+    </tr>
+</table>
+
+<h3 style='color: #03DAC6;'>No Violation Cases:</h3>
+<ul>
+    <li>When OTDL carriers are marked as maximized for the day</li>
+    <li>When OTDL carriers are excused (sick, annual, holiday, etc.)</li>
+    <li>When OTDL carriers have reached their hour limits</li>
+    <li>When no WAL/NL carriers work overtime off assignment</li>
+    <li>During the month of December (penalty overtime exclusion period)</li>
+    <li>On Sundays</li>
+</ul>
+
+<h3 style='color: #03DAC6;'>Special Notes:</h3>
+<ul>
+    <li>Excusal reasons are tracked in the OTDL Maximization pane</li>
+    <li>Each OTDL carrier's hour limit can be customized</li>
+    <li>The OTDL Maximization pane allows marking entire days as maximized</li>
+    <li>Individual carriers can be excused for specific dates</li>
+</ul>
+"""
+
 # Continue with other documentation strings
