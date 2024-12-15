@@ -204,7 +204,7 @@ class CustomTitleBar(QWidget):
         Args:
             event (QMouseEvent): The mouse double-click event
         """
-        self.maximize_restore()
+        self.toggle_maximize()
 
 
 class MainApp(QMainWindow):
@@ -1040,8 +1040,12 @@ class MainApp(QMainWindow):
                     carrier_list = pd.DataFrame(json.load(json_file))
 
                 # Ensure carrier_name is properly formatted for merge
-                carrier_list["carrier_name"] = carrier_list["carrier_name"].str.strip().str.lower()
-                clock_ring_data["carrier_name"] = clock_ring_data["carrier_name"].str.strip().str.lower()
+                carrier_list["carrier_name"] = (
+                    carrier_list["carrier_name"].str.strip().str.lower()
+                )
+                clock_ring_data["carrier_name"] = (
+                    clock_ring_data["carrier_name"].str.strip().str.lower()
+                )
 
                 # Drop existing list_status and hour_limit if they exist
                 if "list_status" in clock_ring_data.columns:
@@ -1062,13 +1066,15 @@ class MainApp(QMainWindow):
             # Get excused carriers from OTDL maximization pane
             excused_carriers = []
             if hasattr(self.otdl_maximization_pane, "get_excused_carriers"):
-                excused_carriers = self.otdl_maximization_pane.get_excused_carriers(date_str)
+                excused_carriers = self.otdl_maximization_pane.get_excused_carriers(
+                    date_str
+                )
 
             # Create date_maximized_status dicts for both violation types
             date_maximized_status = {
                 date_str: {
                     "is_maximized": maximized_status,
-                    "excused_carriers": excused_carriers
+                    "excused_carriers": excused_carriers,
                 }
             }
 
@@ -1079,7 +1085,7 @@ class MainApp(QMainWindow):
                     "8.5.D Overtime Off Route",
                     date_maximized_status,
                 )
-                
+
                 # Convert current violations to DataFrame if it's a list
                 if isinstance(self.violations["8.5.D"], list):
                     current_violations = pd.DataFrame(self.violations["8.5.D"])
@@ -1088,11 +1094,15 @@ class MainApp(QMainWindow):
 
                 # Filter out the current date's violations and append new ones
                 if not current_violations.empty:
-                    current_violations = current_violations[current_violations["date"] != date_str]
-                
+                    current_violations = current_violations[
+                        current_violations["date"] != date_str
+                    ]
+
                 # Concatenate with new violations
                 if not new_violations.empty:
-                    self.violations["8.5.D"] = pd.concat([current_violations, new_violations], ignore_index=True)
+                    self.violations["8.5.D"] = pd.concat(
+                        [current_violations, new_violations], ignore_index=True
+                    )
                 else:
                     self.violations["8.5.D"] = current_violations
 
@@ -1101,11 +1111,9 @@ class MainApp(QMainWindow):
             # Update 8.5.G violations
             if "8.5.G" in self.violations:
                 new_violations = detect_violations(
-                    clock_ring_data, 
-                    "8.5.G", 
-                    date_maximized_status
+                    clock_ring_data, "8.5.G", date_maximized_status
                 )
-                
+
                 # Convert current violations to DataFrame if it's a list
                 if isinstance(self.violations["8.5.G"], list):
                     current_violations = pd.DataFrame(self.violations["8.5.G"])
@@ -1114,11 +1122,15 @@ class MainApp(QMainWindow):
 
                 # Filter out the current date's violations and append new ones
                 if not current_violations.empty:
-                    current_violations = current_violations[current_violations["date"] != date_str]
-                
+                    current_violations = current_violations[
+                        current_violations["date"] != date_str
+                    ]
+
                 # Concatenate with new violations
                 if not new_violations.empty:
-                    self.violations["8.5.G"] = pd.concat([current_violations, new_violations], ignore_index=True)
+                    self.violations["8.5.G"] = pd.concat(
+                        [current_violations, new_violations], ignore_index=True
+                    )
                 else:
                     self.violations["8.5.G"] = current_violations
 
@@ -1127,6 +1139,7 @@ class MainApp(QMainWindow):
         except Exception as e:
             print(f"Error in handle_maximized_status_change: {str(e)}")
             import traceback
+
             traceback.print_exc()
 
     def init_otdl_maximization_pane(self):

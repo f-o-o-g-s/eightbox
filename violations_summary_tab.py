@@ -184,8 +184,9 @@ class ViolationRemediesTab(BaseViolationTab):
             self.add_summary_tab(summary_data)
             self.date_tabs.setCurrentIndex(0)
 
-        except Exception as e:
+        except Exception:
             import traceback
+
             traceback.print_exc()
             self.init_no_data_tab()
             return
@@ -247,6 +248,23 @@ class ViolationRemediesTab(BaseViolationTab):
                 [total_carriers_text, carriers_violations_text],
             )
 
-        except Exception as e:
+        except Exception:
             import traceback
+
             traceback.print_exc()
+
+    def handle_tab_change(self, index):
+        """Handle tab change events."""
+        try:
+            self.update_stats()
+        except Exception:
+            pass
+
+    def handle_global_filter_click(self, status):
+        """Handle global filter button clicks."""
+        try:
+            self.current_filter = status
+            self.current_filter_type = "status"
+            self.filter_carriers(status, "status")
+        except Exception:
+            pass

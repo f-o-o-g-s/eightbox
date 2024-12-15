@@ -87,7 +87,12 @@ class Violation85gTab(BaseViolationTab):
 
             # Hide trigger info and display indicator for non-violations
             no_violation_mask = formatted["remedy_total"] == 0
-            for col in ["trigger_carrier", "trigger_hours", "off_route_hours", "display_indicator"]:
+            for col in [
+                "trigger_carrier",
+                "trigger_hours",
+                "off_route_hours",
+                "display_indicator",
+            ]:
                 if col in formatted.columns:
                     formatted.loc[no_violation_mask, col] = ""
 

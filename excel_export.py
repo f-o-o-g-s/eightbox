@@ -290,8 +290,12 @@ class ExcelExporter:
             content_df, metadata_df, row_highlights_df = extract_table_state(table_view)
 
             # Sort by carrier name for Excel export
-            if content_df is not None and not content_df.empty and 'Carrier Name' in content_df.columns:
-                content_df = content_df.sort_values('Carrier Name', ascending=True)
+            if (
+                content_df is not None
+                and not content_df.empty
+                and "Carrier Name" in content_df.columns
+            ):
+                content_df = content_df.sort_values("Carrier Name", ascending=True)
                 # Reset index to ensure we write rows in sorted order
                 content_df = content_df.reset_index(drop=True)
                 # Reorder metadata to match the sorted content

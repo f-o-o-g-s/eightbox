@@ -192,7 +192,11 @@ def get_violation_remedies(data, violations):
     if not violations:
         # Return empty DataFrame with carrier_name and list_status from original data
         result = pd.DataFrame()
-        if not data.empty and "carrier_name" in data.columns and "list_status" in data.columns:
+        if (
+            not data.empty
+            and "carrier_name" in data.columns
+            and "list_status" in data.columns
+        ):
             result["carrier_name"] = data["carrier_name"]
             result["list_status"] = data["list_status"]
         return result
@@ -203,7 +207,7 @@ def get_violation_remedies(data, violations):
         if not violation_data.empty:
             # Ensure violation_type is properly set in the data
             violation_data = violation_data.copy()
-            
+
             # Map full violation types to short types
             violation_type_map = {
                 "8.5.D Overtime Off Route": "8.5.D",
@@ -214,10 +218,10 @@ def get_violation_remedies(data, violations):
                 "MAX12 More Than 12 Hours Worked in a Day": "MAX12",
                 "MAX60 More Than 60 Hours Worked in a Week": "MAX60",
             }
-            
+
             # Use the short type if it's a full type, otherwise use as is
             short_type = violation_type_map.get(violation_type, violation_type)
-            
+
             # Select only necessary columns
             columns_to_keep = [
                 "date",
@@ -236,7 +240,11 @@ def get_violation_remedies(data, violations):
     if not remedy_dfs:
         # Return empty DataFrame with carrier_name and list_status from original data
         result = pd.DataFrame()
-        if not data.empty and "carrier_name" in data.columns and "list_status" in data.columns:
+        if (
+            not data.empty
+            and "carrier_name" in data.columns
+            and "list_status" in data.columns
+        ):
             result["carrier_name"] = data["carrier_name"]
             result["list_status"] = data["list_status"]
         return result
@@ -245,21 +253,24 @@ def get_violation_remedies(data, violations):
     remedy_data = pd.concat(remedy_dfs, ignore_index=True)
 
     # Ensure we have all carriers from the original data
-    if not data.empty and "carrier_name" in data.columns and "list_status" in data.columns:
+    if (
+        not data.empty
+        and "carrier_name" in data.columns
+        and "list_status" in data.columns
+    ):
         # Get unique carrier data
         unique_carriers = data[["carrier_name", "list_status"]].drop_duplicates()
-        
+
         # Merge with remedy data to ensure all carriers are included
         remedy_data = pd.merge(
-            unique_carriers,
-            remedy_data,
-            on=["carrier_name", "list_status"],
-            how="left"
+            unique_carriers, remedy_data, on=["carrier_name", "list_status"], how="left"
         )
-        
+
         # Fill NaN values
         remedy_data["remedy_total"] = remedy_data["remedy_total"].fillna(0)
-        remedy_data["date"] = remedy_data["date"].fillna(remedy_data["date"].iloc[0] if not remedy_data.empty else "")
+        remedy_data["date"] = remedy_data["date"].fillna(
+            remedy_data["date"].iloc[0] if not remedy_data.empty else ""
+        )
         remedy_data["violation_type"] = remedy_data["violation_type"].fillna("")
 
     # Create pivot table with flattened column names
@@ -761,7 +772,7 @@ def prepare_data_for_violations(data):
     result_df["total_hours"] = pd.to_numeric(
         result_df["total"], errors="coerce"
     ).fillna(0)
-    
+
     # Ensure leave_time is numeric
     if "leave_time" in result_df.columns:
         result_df["leave_time"] = pd.to_numeric(
@@ -809,44 +820,62 @@ def generate_display_indicators(data):
     """Generate display indicators for a DataFrame."""
     result_df = data.copy()
     result_df["display_indicator"] = ""
-    
+
     # Ensure code column exists
     if "code" not in result_df.columns:
         result_df["code"] = ""
-    
+
     # Check for NS day in code (case insensitive)
-    ns_mask = result_df["code"].astype(str).str.strip().str.lower().str.contains("ns day", na=False)
+    ns_mask = (
+        result_df["code"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .str.contains("ns day", na=False)
+    )
     result_df.loc[ns_mask, "display_indicator"] += "(NS day) "
-    
+
     # Check for NS protection (case insensitive)
-    ns_protect_mask = result_df["code"].astype(str).str.strip().str.lower().str.contains("ns protect", na=False)
+    ns_protect_mask = (
+        result_df["code"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .str.contains("ns protect", na=False)
+    )
     result_df.loc[ns_protect_mask, "display_indicator"] += "(NS protect) "
-    
+
     # Add leave type indicators if leave_type column exists
     if "leave_type" in result_df.columns:
         # Convert leave_type to string, strip whitespace, and convert to lowercase
         leave_types = result_df["leave_type"].astype(str).str.strip().str.lower()
         leave_time = pd.to_numeric(result_df["leave_time"], errors="coerce").fillna(0)
-        
+
         leave_type_map = {
             "sick": "(sick)",
             "annual": "(annual)",
             "holiday": "(holiday)",
             "guaranteed": "(guaranteed)",
         }
-        
+
         for leave_type, indicator in leave_type_map.items():
             # Check if leave type matches and has positive leave time
             leave_mask = (leave_types == leave_type) & (leave_time > 0)
             result_df.loc[leave_mask, "display_indicator"] += f"{indicator} "
-            
+
         # Special handling for guaranteed time (might be in code column)
-        guaranteed_mask = result_df["code"].astype(str).str.strip().str.lower().str.contains("guaranteed", na=False)
+        guaranteed_mask = (
+            result_df["code"]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .str.contains("guaranteed", na=False)
+        )
         result_df.loc[guaranteed_mask, "display_indicator"] += "(guaranteed) "
-    
+
     # Clean up any double spaces and strip
     result_df["display_indicator"] = result_df["display_indicator"].str.strip()
-    
+
     return result_df
 
 
@@ -998,7 +1027,6 @@ def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
                         date_status = date_maximized_status[date]
                         if isinstance(date_status, dict):
                             is_maximized = date_status.get("is_maximized", False)
-                            excused_carriers = date_status.get("excused_carriers", [])
                         else:
                             is_maximized = date_status.get(date, False)
 
@@ -1229,14 +1257,13 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
 @register_violation("8.5.G")
 def detect_85g_violations(data, date_maximized_status=None):
     """Detect Article 8.5.G violations for OTDL carriers not maximized."""
-    
+
     # First prepare the basic data
     result_df = prepare_data_for_violations(data)
-    
-    
+
     # Then add display indicators specifically for 8.5.G processing
     result_df = generate_display_indicators(result_df)
-    violations = []
+    violations = {}  # Change to dict to track carrier/date combinations
 
     # Get all unique dates and carriers to ensure complete coverage
     all_dates = result_df["rings_date"].unique()
@@ -1244,24 +1271,32 @@ def detect_85g_violations(data, date_maximized_status=None):
 
     # Define auto-excusal indicators
     auto_excusal_indicators = {
-        "(sick)", "(NS protect)", "(holiday)",
-        "(guaranteed)", "(annual)"
+        "(sick)",
+        "(NS protect)",
+        "(holiday)",
+        "(guaranteed)",
+        "(annual)",
     }
 
     # Process each date
     for date in all_dates:
         # Convert date to string format
         date_str = str(date)
-        
+
         # Get maximized status and excused carriers for this date
-        date_status = date_maximized_status.get(date_str, {}) if date_maximized_status else {}
-        
+        date_status = (
+            date_maximized_status.get(date_str, {}) if date_maximized_status else {}
+        )
+
         # Handle both boolean and dictionary values
         if isinstance(date_status, dict):
             is_maximized = date_status.get("is_maximized", False)
             excused_carriers = [str(c) for c in date_status.get("excused_carriers", [])]
-            carrier_excusals = {str(k): v for k, v in date_status.items() 
-                              if k not in ["is_maximized", "excused_carriers"]}
+            carrier_excusals = {
+                str(k): v
+                for k, v in date_status.items()
+                if k not in ["is_maximized", "excused_carriers"]
+            }
         else:
             is_maximized = bool(date_status)
             excused_carriers = []
@@ -1278,28 +1313,34 @@ def detect_85g_violations(data, date_maximized_status=None):
                         hour_limit = float(carrier_data["hour_limit"].iloc[0])
                         total_hours = float(carrier_data["total_hours"].iloc[0])
                         list_status = carrier_data["list_status"].iloc[0]
-                        display_indicators = str(carrier_data["display_indicators"].iloc[0]).strip()
-                    except (ValueError, TypeError, IndexError):
+                        display_indicators = str(
+                            carrier_data["display_indicators"].iloc[0]
+                        ).strip()
+                    except (ValueError, TypeError, IndexError) as e:
+                        print(f"Error processing carrier data: {e}")
                         hour_limit = 12.00
                         total_hours = 0.0
                         list_status = "unknown"
                         display_indicators = ""
 
                     # Check for automatic excusal conditions
-                    is_auto_excused = any(indicator in display_indicators 
-                                        for indicator in auto_excusal_indicators)
-                    
+                    is_auto_excused = any(
+                        indicator in display_indicators
+                        for indicator in auto_excusal_indicators
+                    )
+
                     try:
                         day_of_week = pd.to_datetime(date).strftime("%A")
                         is_sunday = day_of_week == "Sunday"
-                    except:
+                    except Exception as e:
+                        print(f"Error determining day of week: {e}")
                         is_sunday = False
 
                     # Check if carrier is manually excused
                     carrier_str = str(carrier)
                     is_manually_excused = (
-                        carrier_str in excused_carriers or
-                        carrier_excusals.get(carrier_str, False)
+                        carrier_str in excused_carriers
+                        or carrier_excusals.get(carrier_str, False)
                     )
 
                     # Determine violation type based on excusal status
@@ -1310,7 +1351,8 @@ def detect_85g_violations(data, date_maximized_status=None):
                     else:
                         violation_type = "No Violation (OTDL Maxed)"
 
-                    violations.append({
+                    # Use carrier/date as key to prevent duplicates
+                    violations[(carrier_str, date_str)] = {
                         "carrier_name": carrier,
                         "date": date_str,
                         "violation_type": violation_type,
@@ -1322,13 +1364,13 @@ def detect_85g_violations(data, date_maximized_status=None):
                         "trigger_hours": 0,
                         "off_route_hours": 0,
                         "display_indicators": display_indicators,
-                    })
+                    }
             continue
 
         # Find ANY WAL/NL carrier working overtime (trigger condition)
         wal_nl_overtime = day_data[
-            (day_data["list_status"].isin(["wal", "nl"])) &
-            (day_data["total_hours"] > 8)  # Overtime
+            (day_data["list_status"].isin(["wal", "nl"]))
+            & (day_data["total_hours"] > 8)  # Overtime
         ]
 
         # Find OTDL carriers
@@ -1336,41 +1378,47 @@ def detect_85g_violations(data, date_maximized_status=None):
 
         if not wal_nl_overtime.empty:
             # Get the WAL/NL carrier who worked the most overtime for trigger info
-            trigger_carrier = wal_nl_overtime.loc[wal_nl_overtime["total_hours"].idxmax()]
-            trigger_overtime = trigger_carrier["total_hours"] - 8  # Calculate overtime worked
+            trigger_carrier = wal_nl_overtime.loc[
+                wal_nl_overtime["total_hours"].idxmax()
+            ]
 
             # Check each OTDL carrier once
             for _, otdl in day_otdl_carriers.iterrows():
                 # Ensure numeric conversion for hours
                 try:
                     otdl_hours = float(otdl["total_hours"])
-                except (ValueError, TypeError):
+                except (ValueError, TypeError) as e:
+                    print(f"Error converting OTDL hours: {e}")
                     otdl_hours = 0.0
-                
+
                 try:
                     hour_limit = float(otdl.get("hour_limit", 12.00))
-                except (ValueError, TypeError):
+                except (ValueError, TypeError) as e:
+                    print(f"Error converting hour limit: {e}")
                     hour_limit = 12.00
 
                 # Check for automatic excusal conditions
                 display_indicators = str(otdl.get("display_indicators", "")).strip()
-                is_auto_excused = any(indicator in display_indicators 
-                                    for indicator in auto_excusal_indicators)
+                is_auto_excused = any(
+                    indicator in display_indicators
+                    for indicator in auto_excusal_indicators
+                )
 
                 # Get day of week for Sunday check
                 try:
                     day_of_week = pd.to_datetime(date).strftime("%A")
                     is_sunday = day_of_week == "Sunday"
-                except:
+                except Exception as e:
+                    print(f"Error determining day of week: {e}")
                     is_sunday = False
 
                 # Check if carrier is manually excused
                 carrier_name_str = str(otdl["carrier_name"])
-                
+
                 # Check both excused_carriers list and carrier_excusals dictionary
                 is_manually_excused = (
-                    carrier_name_str in excused_carriers or
-                    carrier_excusals.get(carrier_name_str, False)
+                    carrier_name_str in excused_carriers
+                    or carrier_excusals.get(carrier_name_str, False)
                 )
 
                 # Determine violation type and remedy
@@ -1387,9 +1435,12 @@ def detect_85g_violations(data, date_maximized_status=None):
                     violation_type = "8.5.G OTDL Not Maximized"
                     # Calculate remedy as simply hour_limit - total_hours
                     remedy_total = hour_limit - otdl_hours
-                    remedy_total = max(0, round(remedy_total, 2))  # Ensure non-negative and rounded
+                    remedy_total = max(
+                        0, round(remedy_total, 2)
+                    )  # Ensure non-negative and rounded
 
-                violations.append({
+                # Use carrier/date as key to prevent duplicates
+                violations[(carrier_name_str, date_str)] = {
                     "carrier_name": carrier_name_str,
                     "date": date_str,
                     "violation_type": violation_type,
@@ -1399,42 +1450,49 @@ def detect_85g_violations(data, date_maximized_status=None):
                     "list_status": "otdl",
                     "trigger_carrier": str(trigger_carrier["carrier_name"]),
                     "trigger_hours": float(trigger_carrier["total_hours"]),
-                    "off_route_hours": float(trigger_carrier.get("off_route_hours", 0)),
+                    "off_route_hours": float(
+                        trigger_carrier.get("off_route_hours", 0)
+                    ),
                     "display_indicators": display_indicators,
-                })
+                }
 
         # Add appropriate "No Violation" entries for remaining carriers
-        violation_carriers = {v["carrier_name"] for v in violations if v["date"] == date_str}
         for carrier in all_carriers:
             carrier_str = str(carrier)
-            if carrier_str not in violation_carriers:
+            if (carrier_str, date_str) not in violations:
                 carrier_data = day_data[day_data["carrier_name"] == carrier]
                 if not carrier_data.empty:
                     try:
                         hour_limit = float(carrier_data["hour_limit"].iloc[0])
                         total_hours = float(carrier_data["total_hours"].iloc[0])
                         list_status = carrier_data["list_status"].iloc[0]
-                        display_indicators = str(carrier_data["display_indicators"].iloc[0]).strip()
-                    except (ValueError, TypeError, IndexError):
+                        display_indicators = str(
+                            carrier_data["display_indicators"].iloc[0]
+                        ).strip()
+                    except (ValueError, TypeError, IndexError) as e:
+                        print(f"Error processing carrier data: {e}")
                         hour_limit = 12.00
                         total_hours = 0.0
                         list_status = "unknown"
                         display_indicators = ""
 
                     # Check for automatic excusal conditions
-                    is_auto_excused = any(indicator in display_indicators 
-                                        for indicator in auto_excusal_indicators)
-                    
+                    is_auto_excused = any(
+                        indicator in display_indicators
+                        for indicator in auto_excusal_indicators
+                    )
+
                     try:
                         day_of_week = pd.to_datetime(date).strftime("%A")
                         is_sunday = day_of_week == "Sunday"
-                    except:
+                    except Exception as e:
+                        print(f"Error determining day of week: {e}")
                         is_sunday = False
 
                     # Check if carrier is manually excused
                     is_manually_excused = (
-                        carrier_str in excused_carriers or
-                        carrier_excusals.get(carrier_str, False)
+                        carrier_str in excused_carriers
+                        or carrier_excusals.get(carrier_str, False)
                     )
 
                     # Set appropriate violation type based on list status and excusal
@@ -1450,7 +1508,8 @@ def detect_85g_violations(data, date_maximized_status=None):
                     else:
                         violation_type = "No Violation (Non OTDL)"
 
-                    violations.append({
+                    # Use carrier/date as key to prevent duplicates
+                    violations[(carrier_str, date_str)] = {
                         "carrier_name": carrier_str,
                         "date": date_str,
                         "violation_type": violation_type,
@@ -1462,6 +1521,8 @@ def detect_85g_violations(data, date_maximized_status=None):
                         "trigger_hours": 0,
                         "off_route_hours": 0,
                         "display_indicators": display_indicators,
-                    })
+                    }
 
-    return pd.DataFrame(violations) if violations else pd.DataFrame()
+    # Convert violations dictionary to DataFrame
+    violations_list = list(violations.values())
+    return pd.DataFrame(violations_list) if violations_list else pd.DataFrame()
