@@ -391,8 +391,8 @@ class ViolationModel(QStandardItemModel):
                             return WEEKLY_TOTAL_COLOR
                     except (ValueError, TypeError, IndexError):
                         pass
-                # Highlight Cumulative Hours > 60 in darker purple (except for PTF)
-                elif col_name == "Cumulative Hours":
+                # Highlight Total Weekly Hours > 60 in darker purple (except for PTF)
+                elif col_name == "Total Weekly Hours":
                     try:
                         # Find list status column by checking headers
                         list_status_col = None
