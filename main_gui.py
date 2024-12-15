@@ -11,6 +11,7 @@ import sys
 
 import pandas as pd  # Data manipulation
 from PyQt5.QtCore import (
+    QRect,
     Qt,
     QTimer,
     qInstallMessageHandler,
@@ -34,6 +35,7 @@ from carrier_list_pane import CarrierListPane
 from custom_widgets import (
     CustomInfoDialog,
     CustomProgressDialog,
+    CustomSizeGrip,
     CustomWarningDialog,
 )
 
@@ -238,6 +240,36 @@ class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+        self.setMinimumSize(800, 600)
+
+        # Add resize attributes
+        self._resizing = False
+        self._resize_edge = None
+        self._last_edge = None
+        self.MARGINS = 10
+
+        # Set mouse tracking to ensure we get all mouse move events
+        self.setMouseTracking(True)
+        self.setAttribute(Qt.WA_Hover, True)
+
+        # Create a transparent widget to handle resize events
+        self._resize_frame = QWidget(self)
+        self._resize_frame.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self._resize_frame.setStyleSheet("background: transparent;")
+        self._resize_frame.setMouseTracking(True)
+
+        # Install event filter on the main window
+        self.installEventFilter(self)
+
+        # Apply material dark theme
+        apply_material_dark_theme(QApplication.instance())
+
+        # Set initial window geometry
+        self.setWindowTitle("Eightbox - Branch 815 - Violation Detection")
+        self.setGeometry(100, 100, 1200, 800)
+
+        # Hide status bar
+        self.statusBar().hide()
 
         # Track active progress dialogs
         self.active_progress_dialogs = []
@@ -255,23 +287,11 @@ class MainApp(QMainWindow):
         container_layout.setSpacing(0)
         container.setLayout(container_layout)
 
-        # Add custom title bar
+        # Add custom title bar FIRST
         self.title_bar = CustomTitleBar(self)
         container_layout.addWidget(self.title_bar)
 
-        # Apply material dark theme
-        apply_material_dark_theme(QApplication.instance())
-
-        self.setWindowTitle("Eightbox - Branch 815 - Violation Detection")
-        self.setGeometry(100, 100, 1200, 800)
-
-        # Hide status bar
-        self.statusBar().hide()
-
-        # Initialize database path
-        self.mandates_db_path = self.auto_detect_klusterbox_path()
-
-        # Create a widget to hold the menu and main content
+        # Create menu content widget
         menu_content_widget = QWidget()
         menu_content_layout = QVBoxLayout()
         menu_content_layout.setContentsMargins(0, 0, 0, 0)
@@ -282,15 +302,8 @@ class MainApp(QMainWindow):
         self.init_menu_toolbar()
         menu_content_layout.addWidget(self.menuBar())
 
-        # Initialize dynamic panes
-        self.date_selection_pane = None
-        self.init_carrier_list_pane()
-        self.init_otdl_maximization_pane()
-
         # Main layout with buttons and central tab widget
         self.main_layout = QVBoxLayout()
-
-        # Initialize top button row (utility buttons only)
         self.init_top_button_row()
 
         # Central tab widget for reports
@@ -300,9 +313,6 @@ class MainApp(QMainWindow):
         # Initialize bottom filter row
         self.init_filter_button_row()
 
-        # Connect the main tab change signal
-        self.central_tab_widget.currentChanged.connect(self.handle_main_tab_change)
-
         # Add main layout to menu content layout
         menu_content_layout.addLayout(self.main_layout)
 
@@ -310,6 +320,14 @@ class MainApp(QMainWindow):
         container_layout.addWidget(menu_content_widget)
 
         self.setCentralWidget(container)
+
+        # Initialize database path
+        self.mandates_db_path = self.auto_detect_klusterbox_path()
+
+        # Initialize dynamic panes
+        self.date_selection_pane = None
+        self.init_carrier_list_pane()
+        self.init_otdl_maximization_pane()
 
         # Initialize Violation Tabs
         self.init_85d_tab()
@@ -327,6 +345,143 @@ class MainApp(QMainWindow):
         export_all_action = QAction("Generate All Excel Spreadsheets", self)
         export_all_action.triggered.connect(self.excel_exporter.export_all_violations)
         self.file_menu.addAction(export_all_action)
+
+        # Create custom size grip
+        self.size_grip = CustomSizeGrip(self)
+        self.size_grip.setStyleSheet("background: transparent;")
+
+    def _get_resize_edge(self, pos):
+        """Determine which edge to resize based on mouse position."""
+        margin = self.MARGINS
+        width = self.width()
+        height = self.height()
+
+        x = pos.x()
+        y = pos.y()
+
+        # Skip edge detection if we're over certain widgets
+        child = self.childAt(pos)
+        if child and isinstance(child, (QMenuBar, CustomTitleBar)):
+            return None
+
+        # Define regions
+        left_edge = x <= margin
+        right_edge = x >= width - margin
+        bottom_edge = y >= height - margin
+
+        # Check bottom corners first
+        if left_edge and bottom_edge:
+            return "bottomleft"
+        if right_edge and bottom_edge:
+            return "bottomright"
+
+        # Then check edges
+        if left_edge:
+            return "left"
+        if right_edge:
+            return "right"
+        if bottom_edge:
+            return "bottom"
+
+        return None
+
+    def mouseMoveEvent(self, event):
+        """Handle mouse move for resizing and cursor updates."""
+        if self._resizing and self._resize_edge:
+            # Handle resizing
+            delta = event.globalPos() - self._resize_start_pos
+            new_geometry = QRect(self._resize_start_geometry)
+
+            if self._resize_edge == "right":
+                new_geometry.setRight(new_geometry.right() + delta.x())
+            elif self._resize_edge == "bottom":
+                new_geometry.setBottom(new_geometry.bottom() + delta.y())
+            elif self._resize_edge == "left":
+                new_geometry.setLeft(new_geometry.left() + delta.x())
+            elif self._resize_edge == "bottomleft":
+                new_geometry.setBottomLeft(new_geometry.bottomLeft() + delta)
+            elif self._resize_edge == "bottomright":
+                new_geometry.setBottomRight(new_geometry.bottomRight() + delta)
+
+            new_size = new_geometry.size()
+            new_size = new_size.expandedTo(self.minimumSize())
+            new_geometry.setSize(new_size)
+
+            self.setGeometry(new_geometry)
+            event.accept()
+            return
+
+        # Handle cursor updates
+        edge = self._get_resize_edge(event.pos())
+
+        # Always update cursor based on position
+        if edge:
+            if edge in ("left", "right"):
+                QApplication.changeOverrideCursor(Qt.SizeHorCursor)
+            elif edge == "bottom":
+                QApplication.changeOverrideCursor(Qt.SizeVerCursor)
+            elif edge == "bottomleft":
+                QApplication.changeOverrideCursor(Qt.SizeBDiagCursor)
+            elif edge == "bottomright":
+                QApplication.changeOverrideCursor(Qt.SizeFDiagCursor)
+            event.accept()
+        else:
+            QApplication.restoreOverrideCursor()
+            event.ignore()
+            super().mouseMoveEvent(event)
+
+    def mousePressEvent(self, event):
+        """Handle mouse press for resizing."""
+        if event.button() == Qt.LeftButton:
+            edge = self._get_resize_edge(event.pos())
+            if edge:
+                self._resizing = True
+                self._resize_edge = edge
+                self._resize_start_pos = event.globalPos()
+                self._resize_start_geometry = self.geometry()
+                event.accept()
+                return
+        event.ignore()
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        """Handle mouse release for resizing."""
+        was_resizing = self._resizing
+        if was_resizing:
+            self._resizing = False
+            self._resize_edge = None
+
+            # Update cursor based on current position
+            edge = self._get_resize_edge(event.pos())
+            if edge:
+                if edge in ("left", "right"):
+                    QApplication.changeOverrideCursor(Qt.SizeHorCursor)
+                elif edge == "bottom":
+                    QApplication.changeOverrideCursor(Qt.SizeVerCursor)
+                elif edge == "bottomleft":
+                    QApplication.changeOverrideCursor(Qt.SizeBDiagCursor)
+                elif edge == "bottomright":
+                    QApplication.changeOverrideCursor(Qt.SizeFDiagCursor)
+            else:
+                QApplication.restoreOverrideCursor()
+            event.accept()
+        else:
+            event.ignore()
+            super().mouseReleaseEvent(event)
+
+    def leaveEvent(self, event):
+        """Reset cursor when mouse leaves the window."""
+        QApplication.restoreOverrideCursor()
+        self._resizing = False
+        self._resize_edge = None
+        super().leaveEvent(event)
+
+    def enterEvent(self, event):
+        """Reset cursor state when mouse enters the window."""
+        QApplication.restoreOverrideCursor()
+        self._resizing = False
+        self._resize_edge = None
+        super().enterEvent(event)
 
     def handle_main_tab_change(self, index):
         """Handle switching between main violation tabs.
@@ -445,12 +600,7 @@ class MainApp(QMainWindow):
         self.main_layout.addWidget(button_container)
 
     def init_filter_button_row(self):
-        """Create a horizontal row for filter buttons at the bottom.
-
-        Contains:
-        - Status filter buttons with carrier stats
-        - Date range display
-        """
+        """Create a horizontal row for filter buttons at the bottom."""
         # Create filter row
         filter_row = QWidget()
         filter_row.setStyleSheet(
@@ -489,9 +639,10 @@ class MainApp(QMainWindow):
         """
         )
 
+        # Create main filter layout
         filter_layout = QHBoxLayout()
-        filter_layout.setContentsMargins(8, 12, 8, 12)  # Added vertical padding
-        filter_layout.setSpacing(4)  # Spacing between buttons
+        filter_layout.setContentsMargins(8, 12, 8, 12)
+        filter_layout.setSpacing(4)
 
         # Create status filter buttons with stats
         self.total_btn = self.create_filter_button("All Carriers")
@@ -515,7 +666,7 @@ class MainApp(QMainWindow):
         # Add date range label
         self.date_range_label = QLabel("Selected Date Range: ")
         self.date_range_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        filter_layout.addStretch()  # This pushes the date range to the right
+        filter_layout.addStretch()
         filter_layout.addWidget(self.date_range_label)
 
         filter_row.setLayout(filter_layout)
@@ -1752,6 +1903,15 @@ class MainApp(QMainWindow):
         if progress in self.active_progress_dialogs:
             self.active_progress_dialogs.remove(progress)
         progress.close()
+
+    def resizeEvent(self, event):
+        """Handle window resize events."""
+        super().resizeEvent(event)
+        # Update size grip position and ensure it stays visible
+        self.size_grip.move(
+            self.width() - 20, self.height() - 20
+        )  # Adjusted for new size
+        self.size_grip.raise_()
 
 
 if __name__ == "__main__":

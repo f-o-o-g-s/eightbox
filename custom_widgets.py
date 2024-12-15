@@ -10,7 +10,11 @@ from PyQt5.QtCore import (
     Qt,
     QTimer,
 )
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import (
+    QColor,
+    QPainter,
+    QPixmap,
+)
 from PyQt5.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -21,6 +25,7 @@ from PyQt5.QtWidgets import (
     QProgressBar,
     QProgressDialog,
     QPushButton,
+    QSizeGrip,
     QVBoxLayout,
     QWidget,
 )
@@ -1047,6 +1052,41 @@ class NewCarriersDialog(QDialog):
         return []
 
 
+class CustomSizeGrip(QSizeGrip):
+    """Custom size grip widget with classic Windows-style diagonal dots."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(20, 20)
+
+    def paintEvent(self, event):
+        """Paint the classic diagonal dot pattern."""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # Define dot color
+        dot_color = QColor("#666666")
+        hover_color = QColor("#999999")
+
+        # Use hover color if mouse is over the grip
+        if self.underMouse():
+            dot_color = hover_color
+
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(dot_color)
+
+        # Draw dots in a diagonal pattern
+        dot_size = 2
+        spacing = 4
+
+        # Start from bottom-right corner, going up and left
+        for i in range(4):  # Number of rows
+            for j in range(4 - i):  # Dots in each row, decreasing as we go up
+                x = self.width() - (4 - i) * spacing + j * spacing
+                y = self.height() - (i + 1) * spacing
+                painter.drawEllipse(x, y, dot_size, dot_size)
+
+
 # Make sure these classes are available for import
 __all__ = [
     "CustomTitleBarWidget",
@@ -1058,4 +1098,5 @@ __all__ = [
     "CustomErrorDialog",
     "ConfirmDialog",
     "NewCarriersDialog",
+    "CustomSizeGrip",
 ]
