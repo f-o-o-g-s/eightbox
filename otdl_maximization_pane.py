@@ -39,17 +39,21 @@ from PyQt5.QtCore import (
 )
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
+    QApplication,
     QCheckBox,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QPushButton,
+    QProgressDialog,
+    QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
-from custom_widgets import CustomTitleBarWidget
+from custom_widgets import CustomTitleBarWidget, CustomProgressDialog
 from table_utils import setup_table_copy_functionality
 from theme import (
     COLOR_NO_HIGHLIGHT,
@@ -106,7 +110,7 @@ class OTDLMaximizationPane(QWidget):
     distribution among carriers on the overtime desired list.
     """
 
-    date_maximized_updated = pyqtSignal(str, bool)
+    date_maximized_updated = pyqtSignal(str, object)
 
     def __init__(self, parent=None, carrier_list_pane=None):
         super().__init__(parent)
@@ -114,13 +118,8 @@ class OTDLMaximizationPane(QWidget):
         self.parent_widget = parent
         self.parent_main = parent
 
-        print(
-            f"OTDL pane initialized with carrier_list_pane: {carrier_list_pane is not None}"
-        )
-
         # Connect to carrier list updates if available
         if carrier_list_pane:
-            print("Connecting to carrier list updates in OTDL pane init")
             carrier_list_pane.carrier_list_updated.connect(
                 self.handle_carrier_list_update
             )
@@ -130,7 +129,7 @@ class OTDLMaximizationPane(QWidget):
 
         # Main layout
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(1, 1, 1, 1)
         main_layout.setSpacing(0)
 
         # Add custom title bar
@@ -140,14 +139,74 @@ class OTDLMaximizationPane(QWidget):
         # Content widget to hold the table
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(10, 10, 10, 10)
+        content_layout.setContentsMargins(2, 2, 2, 2)
+        content_layout.setSpacing(10)
 
-        # Add table to content layout
+        # Add table to content layout with expanding size policy
         self.table = QTableWidget()
+        self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)
+        header.setDefaultSectionSize(100)  # Set a reasonable default width for all columns
+        
+        # Connect table changes to window resizing
+        self.table.itemChanged.connect(lambda: self.adjust_window_size())
+        
         setup_table_copy_functionality(self.table)
         content_layout.addWidget(self.table)
 
-        # Add content widget to main layout
+        # Create Apply button container (store as instance variable)
+        self.button_container = QWidget()
+        button_layout = QHBoxLayout(self.button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+
+        apply_button = QPushButton("Apply All Changes")
+        apply_button.setStyleSheet(
+            f"""
+            QPushButton {{
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                border: 1px solid #3D3D3D;
+                border-bottom: 2px solid #1D1D1D;
+                padding: 8px 24px;
+                font-weight: 500;
+                min-height: 32px;
+                border-radius: 4px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }}
+            QPushButton:hover {{
+                background-color: #353535;
+                border: 1px solid #454545;
+                border-bottom: 2px solid #252525;
+                color: #CBB0FF;
+            }}
+            QPushButton:pressed {{
+                background-color: #252525;
+                border: 1px solid #353535;
+                border-top: 2px solid #151515;
+                border-bottom: 1px solid #353535;
+                padding-top: 9px;
+                color: #BB86FC;
+            }}
+            QPushButton:disabled {{
+                background-color: #252525;
+                color: {calculate_optimal_gray(QColor('#252525')).name()};
+                border: 1px solid #2D2D2D;
+            }}
+            """
+        )
+        apply_button.clicked.connect(self.apply_all_changes)
+        button_layout.addStretch()
+        button_layout.addWidget(apply_button)
+        button_layout.addStretch()
+
+        # Add button container below the table
+        content_layout.addWidget(self.button_container)
+
+        # Make content widget expand to fill space
+        content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         main_layout.addWidget(content_widget)
 
         # Initialize tracking dictionaries
@@ -172,18 +231,13 @@ class OTDLMaximizationPane(QWidget):
 
     def handle_carrier_list_update(self, updated_carrier_df):
         """Handle updates to the carrier list."""
-        print("OTDL pane received carrier list update:")
-        print(updated_carrier_df)
         if hasattr(self, "clock_ring_data") and self.clock_ring_data is not None:
-            print("Refreshing OTDL view with updated carrier list")
             # Reset maximization state
             self.date_maximized = {}
             self.cached_date_maximized = {}
             self.excusal_data = {}
             # Refresh the data
             self.refresh_data(self.clock_ring_data, updated_carrier_df)
-        else:
-            print("No clock ring data available for refresh")
 
     def adjust_window_size(self):
         """Adjust the window size based on the table contents."""
@@ -197,30 +251,54 @@ class OTDLMaximizationPane(QWidget):
             + sum(
                 [self.table.columnWidth(i) for i in range(self.table.columnCount())]
             )  # Sum of all column widths
-            + 20
-        )  # Reduced padding
+            + 20  # Minimal padding
+        )
 
         # Calculate total height needed including all rows
         total_row_height = 0
         for row in range(self.table.rowCount()):
             total_row_height += self.table.rowHeight(row)
 
+        # Calculate height including all components with proper spacing
         height = (
             self.table.horizontalHeader().height()  # Height of column headers
             + total_row_height  # Sum of all row heights
             + self.title_bar.height()  # Title bar height
-            + 40
-        )  # Reduced padding
+            + self.button_container.sizeHint().height()  # Height of button container
+            + 40  # Additional padding (20px above and below the button)
+        )
 
-        # Disable scrollbars
-        self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # Get screen dimensions
+        screen = QApplication.primaryScreen().availableGeometry()
+        
+        # Cap width at 90% of screen width if needed
+        if width > screen.width() * 0.9:
+            width = int(screen.width() * 0.9)
+            self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        else:
+            self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        # Set the final window size with minimal padding
-        final_width = width + 10  # Minimal extra padding
-        final_height = height + 10  # Minimal extra padding
+        # Cap height at 90% of screen height if needed
+        if height > screen.height() * 0.9:
+            height = int(screen.height() * 0.9)
+            self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        else:
+            # Always disable vertical scrollbar and show full content
+            self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        self.setFixedSize(final_width, final_height)
+        # Set the final window size
+        self.setFixedSize(width, height)
+
+        # Calculate space available for table
+        available_table_height = (
+            height 
+            - self.title_bar.height() 
+            - self.button_container.sizeHint().height() 
+            - 40  # Match the padding we added above
+        )
+
+        # Set table height to fill available space minus button and padding
+        self.table.setFixedHeight(available_table_height)
 
     def minimize_to_button(self):
         """Custom minimize handler that properly hides the window"""
@@ -246,38 +324,45 @@ class OTDLMaximizationPane(QWidget):
     def set_violation_data(self, violation_data):
         """Set a copy of the violation data."""
         self.violation_data = violation_data
-        print("Violation data set in OTDLMaximizationPane.")
 
     def apply_all_changes(self):
-        """Apply maximized status changes for all dates at once."""
-        print("Applying changes for all dates")
-
+        """Gather all maximization changes and emit them as a batch."""
         # Cache the current state
         self.cached_date_maximized = {
             key: value.copy() for key, value in self.date_maximized.items()
         }
 
-        # First process all changes without emitting signals
-        for date in self.date_maximized.keys():
+        # Gather all changes
+        changes = {}
+        for date in sorted(self.date_maximized.keys()):
+            # Get all excused carriers for this date
+            excused_carriers = self.get_excused_carriers(date)
+            
+            # Get all OTDL carriers for this date
+            otdl_carriers = set()
+            if self.clock_ring_data is not None:
+                date_data = self.clock_ring_data[self.clock_ring_data["rings_date"] == date]
+                otdl_carriers = set(date_data[date_data["list_status"] == "otdl"]["carrier_name"].unique())
+            
+            # A date is maximized if all OTDL carriers are excused
+            maximized_status = len(otdl_carriers) > 0 and all(
+                str(carrier) in excused_carriers for carrier in otdl_carriers
+            )
+            
+            # Store the change
+            changes[date] = {
+                "is_maximized": maximized_status,
+                "excused_carriers": excused_carriers
+            }
+            
+            # Update internal state
             if isinstance(self.date_maximized.get(date), dict):
-                maximized_status = all(self.date_maximized[date].values())
                 self.date_maximized[date]["is_maximized"] = maximized_status
             else:
-                default_status = self.get_default_maximized_status(date)
-                self.date_maximized[date] = {"is_maximized": default_status}
+                self.date_maximized[date] = {"is_maximized": maximized_status}
 
-            # Update the UI
-            self.update_maximized_status_row(date)
-
-        # Now emit signals for all dates at once
-        for date in self.date_maximized.keys():
-            print(
-                f"Emitting signal: date={date}, "
-                f"maximized_status={self.date_maximized[date]['is_maximized']}"
-            )
-            self.date_maximized_updated.emit(
-                date, self.date_maximized[date]["is_maximized"]
-            )
+        # Emit a single signal with all changes
+        self.date_maximized_updated.emit("all", changes)
 
         # Reload the cached state to keep toggles responsive
         self.reload_cached_state()
@@ -296,7 +381,6 @@ class OTDLMaximizationPane(QWidget):
     def checkbox_state_changed(self, carrier_name, date, state):
         """Handle checkbox state changes for excusal."""
         excused = state == Qt.Checked
-        print(f"Checkbox changed for {carrier_name} on {date}: excused={excused}")
 
         # Ensure date_maximized[date] is a dictionary
         if not isinstance(self.date_maximized.get(date), dict):
@@ -306,70 +390,38 @@ class OTDLMaximizationPane(QWidget):
         self.excusal_data[(str(carrier_name), str(date))] = excused
         self.date_maximized[str(date)][str(carrier_name)] = excused
 
-        print(
-            f"Updated excusal_data: {self.excusal_data.get((str(carrier_name), str(date)))}"
-        )
-        print(
-            f"Updated date_maximized: {self.date_maximized[str(date)].get(str(carrier_name))}"
-        )
-
         # Update the UI row color for the specific date
         self.update_maximized_status_row(date)
 
     def update_maximized_status_row(self, date=None):
-        """Update the Maximized Status row for the given date."""
-        maximized_row_index = (
-            self.table.rowCount() - 2
-        )  # Index for the Maximized Status row
+        """Update the maximized status in the internal state without UI updates."""
         unique_dates = sorted(self.date_maximized.keys())
 
-        if date:
-            if date in unique_dates:
-                col_idx = unique_dates.index(date) + 2  # Adjust for table layout
-                carriers_excused = self.date_maximized.get(date, {})
-                if not isinstance(carriers_excused, dict):
-                    print(f"Error: self.date_maximized[{date}] is not a dictionary.")
-                    return
-
-                maximized_status = all(carriers_excused.values())
-                status_text = f"Maximized: {maximized_status}"
-                status_item = QTableWidgetItem(status_text)
-                status_item.setTextAlignment(Qt.AlignCenter)
-                status_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-
-                # Calculate background color based on row index
-                maximized_row_color = (
-                    COLOR_ROW_HIGHLIGHT
-                    if maximized_row_index % 2 == 0
-                    else COLOR_NO_HIGHLIGHT
-                )
-                status_item.setBackground(maximized_row_color)
-
-                # Set text color based on maximized status
-                if maximized_status:
-                    status_item.setForeground(
-                        QColor("#BB86FC")
-                    )  # Material purple for True
-                else:
-                    # Use calculated optimal gray for false status
-                    status_item.setForeground(
-                        calculate_optimal_gray(maximized_row_color)
-                    )
-
-                self.table.setItem(maximized_row_index, col_idx, status_item)
-
-        # Update all dates if no specific date is provided
-        for col_idx, date in enumerate(unique_dates, start=2):
+        if date and date in unique_dates:
             carriers_excused = self.date_maximized.get(date, {})
             if not isinstance(carriers_excused, dict):
-                print(f"Error: self.date_maximized[{date}] is not a dictionary.")
+                return
+
+            # Update internal state only
+            maximized_status = all(carriers_excused.values())
+            if isinstance(self.date_maximized[date], dict):
+                self.date_maximized[date]["is_maximized"] = maximized_status
+
+        # Update all dates if no specific date is provided
+        for date in unique_dates:
+            carriers_excused = self.date_maximized.get(date, {})
+            if not isinstance(carriers_excused, dict):
                 continue
+            
+            # Update internal state only
+            maximized_status = all(carriers_excused.values())
+            if isinstance(self.date_maximized[date], dict):
+                self.date_maximized[date]["is_maximized"] = maximized_status
 
     def refresh_data(self, clock_ring_data, carrier_list_data):
         """Store latest clock ring data and refresh view."""
         self.clock_ring_data = clock_ring_data  # Store for future refreshes
 
-        """Refresh the table with updated clock ring and carrier data."""
         # Filter for OTDL carriers
         otdl_data = carrier_list_data[carrier_list_data["list_status"] == "otdl"]
         otdl_names = otdl_data["carrier_name"].unique()
@@ -406,10 +458,9 @@ class OTDLMaximizationPane(QWidget):
             f"background-color: {COLOR_NO_HIGHLIGHT.name()}; color: {COLOR_TEXT_LIGHT.name()};"
         )
 
-        self.table.setRowCount(
-            len(otdl_names) + 3
-        )  # +3 for Day Names row, Maximized Status row, and Apply buttons
-        self.table.setColumnCount(len(unique_dates) + 3)  # +3 for Weekly Hours
+        # Set row count: carriers + day names row (removed maximized status row)
+        self.table.setRowCount(len(otdl_names) + 1)
+        self.table.setColumnCount(len(unique_dates) + 3)  # +3 for Carrier Name, Hour Limit, Weekly Hours
 
         # Set headers
         self.table.setHorizontalHeaderLabels(
@@ -418,6 +469,11 @@ class OTDLMaximizationPane(QWidget):
         # Set custom header colors
         header = self.table.horizontalHeader()
         header_bg = QColor("#37474F")  # Material Blue Grey 800
+        
+        # Set resize modes for columns
+        header.setSectionResizeMode(QHeaderView.Interactive)  # Default mode for all columns
+        header.setSectionResizeMode(len(unique_dates) + 2, QHeaderView.Stretch)  # Make Weekly Hours column stretch
+        
         header.setStyleSheet(
             f"""
             QHeaderView::section {{
@@ -644,96 +700,7 @@ class OTDLMaximizationPane(QWidget):
             )  # Replace COLOR_TEXT_LIGHT
             self.table.setItem(row_idx, len(unique_dates) + 2, weekly_hours_item)
 
-            # Add Maximized Status row (this is now the last row)
-            maximized_row_index = len(otdl_names) + 1  # +1 for Day Names row
-            self.table.setRowCount(maximized_row_index + 1)  # +1 for Maximized Status row
-
-            # Calculate the row color based on the maximized row index
-            maximized_row_color = (
-                COLOR_ROW_HIGHLIGHT
-                if maximized_row_index % 2 == 0
-                else COLOR_NO_HIGHLIGHT
-            )
-
-            for col_idx, date in enumerate(unique_dates, start=2):
-                for carrier in otdl_names:
-                    if carrier not in self.date_maximized[date]:
-                        self.date_maximized[date][
-                            carrier
-                        ] = False  # Default to not excused
-
-                carriers_excused = list(self.date_maximized[date].values())
-                maximized_status = all(carriers_excused)
-
-                status_text = f"Maximized: {maximized_status}"
-                status_item = QTableWidgetItem(status_text)
-                status_item.setTextAlignment(Qt.AlignCenter)
-                status_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-
-                # Use the alternating row color as background
-                status_item.setBackground(maximized_row_color)
-
-                # Set text color based on maximized status
-                if maximized_status:
-                    status_item.setForeground(QColor("#BB86FC"))  # Keep Material purple for True
-                else:
-                    # Use calculated optimal gray instead of COLOR_TEXT_DIM
-                    status_item.setForeground(calculate_optimal_gray(maximized_row_color))
-
-                self.table.setItem(maximized_row_index, col_idx, status_item)
-
-        # Add single Apply button at the bottom
-        button_container = QWidget()
-        button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(10, 10, 10, 10)
-
-        apply_button = QPushButton("Apply All Changes")
-        apply_button.setStyleSheet(
-            f"""
-            QPushButton {{
-                background-color: #2D2D2D;
-                color: #BB86FC;
-                border: 1px solid #3D3D3D;
-                border-bottom: 2px solid #1D1D1D;
-                padding: 8px 24px;
-                font-weight: 500;
-                min-height: 32px;
-                border-radius: 4px;
-                font-size: 14px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }}
-            QPushButton:hover {{
-                background-color: #353535;
-                border: 1px solid #454545;
-                border-bottom: 2px solid #252525;
-                color: #CBB0FF;
-            }}
-            QPushButton:pressed {{
-                background-color: #252525;
-                border: 1px solid #353535;
-                border-top: 2px solid #151515;
-                border-bottom: 1px solid #353535;
-                padding-top: 9px;
-                color: #BB86FC;
-            }}
-            QPushButton:disabled {{
-                background-color: #252525;
-                color: {calculate_optimal_gray(QColor('#252525')).name()};
-                border: 1px solid #2D2D2D;
-            }}
-            """
-        )
-        apply_button.clicked.connect(self.apply_all_changes)
-        button_layout.addStretch()
-        button_layout.addWidget(apply_button)
-        button_layout.addStretch()
-
-        # Add button container below the table
-        content_layout = self.findChild(QVBoxLayout, "")
-        if content_layout:
-            content_layout.addWidget(button_container)
-
+        # Adjust window size after table update
         self.adjust_window_size()
 
     def get_excused_carriers(self, date):

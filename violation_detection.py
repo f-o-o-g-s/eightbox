@@ -786,13 +786,13 @@ def prepare_data_for_violations(data):
     if "hour_limit" not in result_df.columns:
         result_df["hour_limit"] = 12.00  # Default value
 
-    # Convert hour_limit to numeric, handling any non-numeric values
-    result_df["hour_limit"] = pd.to_numeric(result_df["hour_limit"], errors="coerce")
+    # Convert hour_limit to numeric as float64, handling any non-numeric values
+    result_df["hour_limit"] = pd.to_numeric(result_df["hour_limit"], errors="coerce", downcast=None).astype('float64')
 
     # Apply status-based defaults where hour_limit is missing
     for status, limit in status_limits.items():
         mask = (result_df["list_status"] == status) & (result_df["hour_limit"].isna())
-        result_df.loc[mask, "hour_limit"] = limit
+        result_df.loc[mask, "hour_limit"] = float(limit)
 
     # Fill any remaining NaN values with default 12.00
     result_df["hour_limit"] = result_df["hour_limit"].fillna(12.00)

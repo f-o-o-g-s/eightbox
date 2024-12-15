@@ -1020,72 +1020,95 @@ class MainApp(QMainWindow):
         self.carrier_list_pane.request_apply_date_range.connect(self.apply_date_range)
         self.carrier_list_pane.hide()
 
-    def handle_maximized_status_change(self, date, maximized_status):
+    def handle_maximized_status_change(self, date_str, changes):
         """Handle changes to OTDL maximization status"""
         if "8.5.D" not in self.violations and "8.5.G" not in self.violations:
             return
 
-        try:
-            # Convert date to string format if it isn't already
-            date_str = str(date)
+        # If it's not a batch update (old signal format), convert to batch format
+        if not isinstance(changes, dict):
+            changes = {
+                date_str: {
+                    "is_maximized": changes,
+                    "excused_carriers": self.otdl_maximization_pane.get_excused_carriers(date_str)
+                }
+            }
 
-            # Get the full date range that includes our target date
+        # Create and show progress dialog immediately
+        progress = CustomProgressDialog(
+            "Starting update...",
+            None,  # No cancel button
+            0,     # Minimum value
+            100,   # Maximum value
+            self,  # Parent widget
+            "Updating Remedies"
+        )
+        progress.setWindowModality(Qt.ApplicationModal)
+        progress.show()
+        QApplication.processEvents()
+
+        try:
+            # Phase 1: Initial Setup (0-10%)
+            progress.setLabelText("Initializing date range...")
+            progress.setValue(5)
+            QApplication.processEvents()
+            
             selected_date = self.date_selection_pane.calendar.selectedDate()
             start_date = selected_date.toString("yyyy-MM-dd")
             end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
 
-            # Fetch data for the entire week
+            # Phase 2: Loading Data (10-30%)
+            progress.setLabelText("Loading clock ring data...")
+            progress.setValue(10)
+            QApplication.processEvents()
+            
             clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
             if clock_ring_data.empty:
                 return
 
-            # Load and merge carrier list data
-            try:
-                with open("carrier_list.json", "r") as json_file:
-                    carrier_list = pd.DataFrame(json.load(json_file))
+            # Phase 3: Processing Data (30-60%)
+            progress.setLabelText("Loading carrier list...")
+            progress.setValue(20)
+            QApplication.processEvents()
 
-                # Ensure carrier_name is properly formatted for merge
-                carrier_list["carrier_name"] = (
-                    carrier_list["carrier_name"].str.strip().str.lower()
-                )
-                clock_ring_data["carrier_name"] = (
-                    clock_ring_data["carrier_name"].str.strip().str.lower()
-                )
+            with open("carrier_list.json", "r") as json_file:
+                carrier_list = pd.DataFrame(json.load(json_file))
 
-                # Drop existing list_status and hour_limit if they exist
-                if "list_status" in clock_ring_data.columns:
-                    clock_ring_data = clock_ring_data.drop(columns=["list_status"])
-                if "hour_limit" in clock_ring_data.columns:
-                    clock_ring_data = clock_ring_data.drop(columns=["hour_limit"])
+            # Phase 4: Processing Data (30-60%)
+            progress.setLabelText("Processing carrier data...")
+            progress.setValue(30)
+            QApplication.processEvents()
 
-                # Merge with carrier list
-                clock_ring_data = clock_ring_data.merge(
-                    carrier_list[["carrier_name", "list_status", "hour_limit"]],
-                    on="carrier_name",
-                    how="left",
-                )
-            except Exception as e:
-                print(f"Error loading carrier list: {str(e)}")
-                return
+            carrier_list["carrier_name"] = carrier_list["carrier_name"].str.strip().str.lower()
+            clock_ring_data["carrier_name"] = clock_ring_data["carrier_name"].str.strip().str.lower()
 
-            # Get excused carriers from OTDL maximization pane
-            excused_carriers = []
-            if hasattr(self.otdl_maximization_pane, "get_excused_carriers"):
-                excused_carriers = self.otdl_maximization_pane.get_excused_carriers(
-                    date_str
-                )
+            # Phase 5: Merging Data (60-80%)
+            progress.setLabelText("Merging carrier data...")
+            progress.setValue(40)
+            QApplication.processEvents()
 
-            # Create date_maximized_status dict for all dates
+            if "list_status" in clock_ring_data.columns:
+                clock_ring_data = clock_ring_data.drop(columns=["list_status"])
+            if "hour_limit" in clock_ring_data.columns:
+                clock_ring_data = clock_ring_data.drop(columns=["hour_limit"])
+
+            clock_ring_data = clock_ring_data.merge(
+                carrier_list[["carrier_name", "list_status", "hour_limit"]],
+                on="carrier_name",
+                how="left",
+            )
+
+            # Phase 6: Updating Status (60-80%)
+            progress.setLabelText("Processing maximization status...")
+            progress.setValue(60)
+            QApplication.processEvents()
+
             date_maximized_status = {}
             for d in pd.date_range(start_date, end_date):
                 d_str = d.strftime("%Y-%m-%d")
-                if d_str == date_str:
-                    date_maximized_status[d_str] = {
-                        "is_maximized": maximized_status,
-                        "excused_carriers": excused_carriers,
-                    }
+                if d_str in changes:
+                    date_maximized_status[d_str] = changes[d_str]
                 else:
-                    # Preserve existing status for other dates
                     if hasattr(self.otdl_maximization_pane, "date_maximized"):
                         existing_status = self.otdl_maximization_pane.date_maximized.get(d_str, {})
                         if isinstance(existing_status, dict):
@@ -1093,8 +1116,12 @@ class MainApp(QMainWindow):
                         else:
                             date_maximized_status[d_str] = {"is_maximized": False}
 
-            # Update 8.5.D violations
+            # Phase 7: Updating Violations (80-95%)
             if "8.5.D" in self.violations:
+                progress.setLabelText("Updating 8.5.D violations...")
+                progress.setValue(80)
+                QApplication.processEvents()
+                
                 new_violations = detect_violations(
                     clock_ring_data,
                     "8.5.D Overtime Off Route",
@@ -1103,18 +1130,36 @@ class MainApp(QMainWindow):
                 self.violations["8.5.D"] = new_violations
                 self.vio_85d_tab.refresh_data(new_violations)
 
-            # Update 8.5.G violations
             if "8.5.G" in self.violations:
+                progress.setLabelText("Updating 8.5.G violations...")
+                progress.setValue(85)
+                QApplication.processEvents()
+                
                 new_violations = detect_violations(
                     clock_ring_data, "8.5.G", date_maximized_status
                 )
                 self.violations["8.5.G"] = new_violations
                 self.vio_85g_tab.refresh_data(new_violations)
 
+            # Phase 8: Updating Summary (95-100%)
+            progress.setLabelText("Updating violation summary...")
+            progress.setValue(95)
+            QApplication.processEvents()
+
+            # Calculate and update remedies
+            remedies_data = get_violation_remedies(clock_ring_data, self.violations)
+            self.remedies_tab.refresh_data(remedies_data)
+
+            progress.setLabelText("Update complete")
+            progress.setValue(100)
+            QApplication.processEvents()
+
         except Exception as e:
             print(f"Error in handle_maximized_status_change: {str(e)}")
             import traceback
             traceback.print_exc()
+        finally:
+            progress.close()
 
     def init_otdl_maximization_pane(self):
         """Initialize the OTDL maximization pane."""
@@ -1124,7 +1169,12 @@ class MainApp(QMainWindow):
             parent=self, carrier_list_pane=self.carrier_list_pane
         )
 
-        # Explicitly connect the signal
+        # Connect the signal with the new signature
+        self.otdl_maximization_pane.date_maximized_updated.connect(
+            self.handle_maximized_status_change
+        )
+
+        # Explicitly connect the carrier list signal
         print("Connecting carrier list signal to OTDL pane...")
         self.carrier_list_pane.carrier_list_updated.connect(
             self.otdl_maximization_pane.handle_carrier_list_update
