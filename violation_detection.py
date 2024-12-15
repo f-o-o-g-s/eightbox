@@ -1278,7 +1278,7 @@ def detect_85g_violations(data, date_maximized_status=None):
 
         day_data = result_df[result_df["rings_date"] == date]
 
-        # If OTDL is maximized, add "No Violation (OTDL Maxed)" entries for all carriers
+        # If OTDL is maximized, add appropriate entries for all carriers
         if is_maximized:
             for carrier in all_carriers:
                 carrier_data = day_data[day_data["carrier_name"] == carrier]
@@ -1334,11 +1334,10 @@ def detect_85g_violations(data, date_maximized_status=None):
                     })
             continue
 
-        # Find ANY WAL/NL carrier working overtime off route (trigger condition)
+        # Find ANY WAL/NL carrier working overtime (trigger condition)
         wal_nl_overtime = day_data[
             (day_data["list_status"].isin(["wal", "nl"])) &
-            (day_data["total_hours"] > 8) &  # Overtime
-            (day_data["off_route_hours"] > 0)  # Any work off their assignment
+            (day_data["total_hours"] > 8)  # Overtime
         ]
 
         # Find OTDL carriers
@@ -1397,9 +1396,8 @@ def detect_85g_violations(data, date_maximized_status=None):
                     remedy_total = 0.0
                 else:
                     violation_type = "8.5.G OTDL Not Maximized"
-                    # Calculate remedy (minimum of available hours and trigger overtime)
-                    potential_hours = hour_limit - otdl_hours
-                    remedy_total = min(potential_hours, trigger_overtime)
+                    # Calculate remedy as simply hour_limit - total_hours
+                    remedy_total = hour_limit - otdl_hours
                     remedy_total = max(0, round(remedy_total, 2))  # Ensure non-negative and rounded
 
                 print(f"Final violation type for {carrier_name_str}: {violation_type}, remedy: {remedy_total}")
@@ -1414,7 +1412,7 @@ def detect_85g_violations(data, date_maximized_status=None):
                     "list_status": "otdl",
                     "trigger_carrier": str(trigger_carrier["carrier_name"]),
                     "trigger_hours": float(trigger_carrier["total_hours"]),
-                    "off_route_hours": float(trigger_carrier["off_route_hours"]),
+                    "off_route_hours": float(trigger_carrier.get("off_route_hours", 0)),
                     "display_indicators": display_indicators,
                 })
 
