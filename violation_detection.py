@@ -1287,15 +1287,42 @@ def detect_85g_violations(data, date_maximized_status=None):
                         hour_limit = float(carrier_data["hour_limit"].iloc[0])
                         total_hours = float(carrier_data["total_hours"].iloc[0])
                         list_status = carrier_data["list_status"].iloc[0]
+                        display_indicators = str(carrier_data["display_indicators"].iloc[0]).strip()
                     except (ValueError, TypeError, IndexError):
                         hour_limit = 12.00
                         total_hours = 0.0
                         list_status = "unknown"
+                        display_indicators = ""
+
+                    # Check for automatic excusal conditions
+                    is_auto_excused = any(indicator in display_indicators 
+                                        for indicator in auto_excusal_indicators)
+                    
+                    try:
+                        day_of_week = pd.to_datetime(date).strftime("%A")
+                        is_sunday = day_of_week == "Sunday"
+                    except:
+                        is_sunday = False
+
+                    # Check if carrier is manually excused
+                    carrier_str = str(carrier)
+                    is_manually_excused = (
+                        carrier_str in excused_carriers or
+                        carrier_excusals.get(carrier_str, False)
+                    )
+
+                    # Determine violation type based on excusal status
+                    if is_manually_excused:
+                        violation_type = "No Violation (Manually Excused)"
+                    elif is_auto_excused or is_sunday:
+                        violation_type = "No Violation (Auto Excused)"
+                    else:
+                        violation_type = "No Violation (OTDL Maxed)"
 
                     violations.append({
                         "carrier_name": carrier,
                         "date": date_str,
-                        "violation_type": "No Violation (OTDL Maxed)",
+                        "violation_type": violation_type,
                         "remedy_total": 0.0,
                         "total_hours": total_hours,
                         "hour_limit": hour_limit,
@@ -1303,6 +1330,7 @@ def detect_85g_violations(data, date_maximized_status=None):
                         "trigger_carrier": "",
                         "trigger_hours": 0,
                         "off_route_hours": 0,
+                        "display_indicators": display_indicators,
                     })
             continue
 
