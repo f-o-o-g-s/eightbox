@@ -584,8 +584,14 @@ class MainApp(QMainWindow):
             self.vio_MAX60_tab,
             self.remedies_tab,
         ]:
-            if hasattr(tab, "handle_global_filter_click"):
-                tab.handle_global_filter_click(status)
+            if hasattr(tab, "filter_carriers"):
+                if status == "violations":
+                    tab.filter_carriers("", filter_type="violations")
+                elif status == "all":
+                    tab.filter_carriers("")
+                else:
+                    tab.filter_carriers(status, filter_type="list_status")
+                
                 # Only update stats for the currently visible tab
                 if tab == current_tab:
                     tab.update_stats()
