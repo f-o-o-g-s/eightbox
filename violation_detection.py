@@ -1361,12 +1361,15 @@ def detect_85g_violations(data, date_maximized_status=None):
                     )
 
                     # Determine violation type based on excusal status
-                    if is_manually_excused:
-                        violation_type = "No Violation (Manually Excused)"
-                    elif is_auto_excused or is_sunday:
+                    # First check auto-excusal, then manual excusal
+                    if is_auto_excused or is_sunday:
                         violation_type = "No Violation (Auto Excused)"
-                    else:
+                    elif is_manually_excused:
                         violation_type = "No Violation (OTDL Maxed)"
+                    elif total_hours >= hour_limit:
+                        violation_type = "No Violation (Maximized)"
+                    else:
+                        violation_type = "No Violation"
 
                     # Use carrier/date as key to prevent duplicates
                     violations[(carrier_str, date_str)] = {
@@ -1439,11 +1442,12 @@ def detect_85g_violations(data, date_maximized_status=None):
                 )
 
                 # Determine violation type and remedy
-                if is_manually_excused:
-                    violation_type = "No Violation (Manually Excused)"
-                    remedy_total = 0.0
-                elif is_auto_excused or is_sunday:
+                # First check auto-excusal, then manual excusal
+                if is_auto_excused or is_sunday:
                     violation_type = "No Violation (Auto Excused)"
+                    remedy_total = 0.0
+                elif is_manually_excused:
+                    violation_type = "No Violation (Manually Excused)"
                     remedy_total = 0.0
                 elif otdl_hours >= hour_limit:
                     violation_type = "No Violation (Maximized)"
@@ -1451,10 +1455,7 @@ def detect_85g_violations(data, date_maximized_status=None):
                 else:
                     violation_type = "8.5.G OTDL Not Maximized"
                     # Calculate remedy as simply hour_limit - total_hours
-                    remedy_total = hour_limit - otdl_hours
-                    remedy_total = max(
-                        0, round(remedy_total, 2)
-                    )  # Ensure non-negative and rounded
+                    remedy_total = max(0, round(hour_limit - otdl_hours, 2))
 
                 # Use carrier/date as key to prevent duplicates
                 violations[(carrier_name_str, date_str)] = {
@@ -1512,10 +1513,10 @@ def detect_85g_violations(data, date_maximized_status=None):
 
                     # Set appropriate violation type based on list status and excusal
                     if list_status == "otdl":
-                        if is_manually_excused:
-                            violation_type = "No Violation (Manually Excused)"
-                        elif is_auto_excused or is_sunday:
+                        if is_auto_excused or is_sunday:
                             violation_type = "No Violation (Auto Excused)"
+                        elif is_manually_excused:
+                            violation_type = "No Violation (Manually Excused)"
                         elif total_hours >= hour_limit:
                             violation_type = "No Violation (Maximized)"
                         else:
