@@ -431,12 +431,26 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             model.df = renamed_df
             model.layoutChanged.emit()
 
-        view.setModel(proxy_model if proxy_model else model)
+        # Set up the model and sorting
+        if proxy_model:
+            view.setModel(proxy_model)
+            proxy_model.setDynamicSortFilter(True)
+            proxy_model.setSortRole(Qt.UserRole)  # Use UserRole for sorting
+        else:
+            view.setModel(model)
+        
         view.setSortingEnabled(True)
         setup_table_copy_functionality(view)
 
+        # Configure the header for better sorting behavior
+        header = view.horizontalHeader()
+        header.setSectionsClickable(True)
+        header.setSortIndicatorShown(True)
+        
+        # Initial sort on first column
         if proxy_model:
             proxy_model.sort(0, Qt.AscendingOrder)
+            header.sortIndicatorChanged.connect(proxy_model.sort)
 
         layout.addWidget(view)
         return container
