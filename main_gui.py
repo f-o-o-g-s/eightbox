@@ -1030,7 +1030,9 @@ class MainApp(QMainWindow):
             changes = {
                 date_str: {
                     "is_maximized": changes,
-                    "excused_carriers": self.otdl_maximization_pane.get_excused_carriers(date_str)
+                    "excused_carriers": self.otdl_maximization_pane.get_excused_carriers(
+                        date_str
+                    ),
                 }
             }
 
@@ -1038,10 +1040,10 @@ class MainApp(QMainWindow):
         progress = CustomProgressDialog(
             "Starting update...",
             None,  # No cancel button
-            0,     # Minimum value
-            100,   # Maximum value
+            0,  # Minimum value
+            100,  # Maximum value
             self,  # Parent widget
-            "Updating Remedies"
+            "Updating Remedies",
         )
         progress.setWindowModality(Qt.ApplicationModal)
         progress.show()
@@ -1052,7 +1054,7 @@ class MainApp(QMainWindow):
             progress.setLabelText("Initializing date range...")
             progress.setValue(5)
             QApplication.processEvents()
-            
+
             selected_date = self.date_selection_pane.calendar.selectedDate()
             start_date = selected_date.toString("yyyy-MM-dd")
             end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
@@ -1061,7 +1063,7 @@ class MainApp(QMainWindow):
             progress.setLabelText("Loading clock ring data...")
             progress.setValue(10)
             QApplication.processEvents()
-            
+
             clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
             if clock_ring_data.empty:
                 return
@@ -1079,8 +1081,12 @@ class MainApp(QMainWindow):
             progress.setValue(30)
             QApplication.processEvents()
 
-            carrier_list["carrier_name"] = carrier_list["carrier_name"].str.strip().str.lower()
-            clock_ring_data["carrier_name"] = clock_ring_data["carrier_name"].str.strip().str.lower()
+            carrier_list["carrier_name"] = (
+                carrier_list["carrier_name"].str.strip().str.lower()
+            )
+            clock_ring_data["carrier_name"] = (
+                clock_ring_data["carrier_name"].str.strip().str.lower()
+            )
 
             # Phase 5: Merging Data (60-80%)
             progress.setLabelText("Merging carrier data...")
@@ -1110,7 +1116,9 @@ class MainApp(QMainWindow):
                     date_maximized_status[d_str] = changes[d_str]
                 else:
                     if hasattr(self.otdl_maximization_pane, "date_maximized"):
-                        existing_status = self.otdl_maximization_pane.date_maximized.get(d_str, {})
+                        existing_status = (
+                            self.otdl_maximization_pane.date_maximized.get(d_str, {})
+                        )
                         if isinstance(existing_status, dict):
                             date_maximized_status[d_str] = existing_status
                         else:
@@ -1121,7 +1129,7 @@ class MainApp(QMainWindow):
                 progress.setLabelText("Updating 8.5.D violations...")
                 progress.setValue(80)
                 QApplication.processEvents()
-                
+
                 new_violations = detect_violations(
                     clock_ring_data,
                     "8.5.D Overtime Off Route",
@@ -1134,7 +1142,7 @@ class MainApp(QMainWindow):
                 progress.setLabelText("Updating 8.5.G violations...")
                 progress.setValue(85)
                 QApplication.processEvents()
-                
+
                 new_violations = detect_violations(
                     clock_ring_data, "8.5.G", date_maximized_status
                 )
@@ -1157,6 +1165,7 @@ class MainApp(QMainWindow):
         except Exception as e:
             print(f"Error in handle_maximized_status_change: {str(e)}")
             import traceback
+
             traceback.print_exc()
         finally:
             progress.close()

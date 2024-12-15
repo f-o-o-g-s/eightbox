@@ -45,7 +45,6 @@ from PyQt5.QtWidgets import (
     QHeaderView,
     QLabel,
     QPushButton,
-    QProgressDialog,
     QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
@@ -53,7 +52,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from custom_widgets import CustomTitleBarWidget, CustomProgressDialog
+from custom_widgets import CustomTitleBarWidget
 from table_utils import setup_table_copy_functionality
 from theme import (
     COLOR_NO_HIGHLIGHT,
@@ -147,11 +146,13 @@ class OTDLMaximizationPane(QWidget):
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
-        header.setDefaultSectionSize(100)  # Set a reasonable default width for all columns
-        
+        header.setDefaultSectionSize(
+            100
+        )  # Set a reasonable default width for all columns
+
         # Connect table changes to window resizing
         self.table.itemChanged.connect(lambda: self.adjust_window_size())
-        
+
         setup_table_copy_functionality(self.table)
         content_layout.addWidget(self.table)
 
@@ -270,7 +271,7 @@ class OTDLMaximizationPane(QWidget):
 
         # Get screen dimensions
         screen = QApplication.primaryScreen().availableGeometry()
-        
+
         # Cap width at 90% of screen width if needed
         if width > screen.width() * 0.9:
             width = int(screen.width() * 0.9)
@@ -291,9 +292,9 @@ class OTDLMaximizationPane(QWidget):
 
         # Calculate space available for table
         available_table_height = (
-            height 
-            - self.title_bar.height() 
-            - self.button_container.sizeHint().height() 
+            height
+            - self.title_bar.height()
+            - self.button_container.sizeHint().height()
             - 40  # Match the padding we added above
         )
 
@@ -337,24 +338,30 @@ class OTDLMaximizationPane(QWidget):
         for date in sorted(self.date_maximized.keys()):
             # Get all excused carriers for this date
             excused_carriers = self.get_excused_carriers(date)
-            
+
             # Get all OTDL carriers for this date
             otdl_carriers = set()
             if self.clock_ring_data is not None:
-                date_data = self.clock_ring_data[self.clock_ring_data["rings_date"] == date]
-                otdl_carriers = set(date_data[date_data["list_status"] == "otdl"]["carrier_name"].unique())
-            
+                date_data = self.clock_ring_data[
+                    self.clock_ring_data["rings_date"] == date
+                ]
+                otdl_carriers = set(
+                    date_data[date_data["list_status"] == "otdl"][
+                        "carrier_name"
+                    ].unique()
+                )
+
             # A date is maximized if all OTDL carriers are excused
             maximized_status = len(otdl_carriers) > 0 and all(
                 str(carrier) in excused_carriers for carrier in otdl_carriers
             )
-            
+
             # Store the change
             changes[date] = {
                 "is_maximized": maximized_status,
-                "excused_carriers": excused_carriers
+                "excused_carriers": excused_carriers,
             }
-            
+
             # Update internal state
             if isinstance(self.date_maximized.get(date), dict):
                 self.date_maximized[date]["is_maximized"] = maximized_status
@@ -412,7 +419,7 @@ class OTDLMaximizationPane(QWidget):
             carriers_excused = self.date_maximized.get(date, {})
             if not isinstance(carriers_excused, dict):
                 continue
-            
+
             # Update internal state only
             maximized_status = all(carriers_excused.values())
             if isinstance(self.date_maximized[date], dict):
@@ -460,7 +467,9 @@ class OTDLMaximizationPane(QWidget):
 
         # Set row count: carriers + day names row (removed maximized status row)
         self.table.setRowCount(len(otdl_names) + 1)
-        self.table.setColumnCount(len(unique_dates) + 3)  # +3 for Carrier Name, Hour Limit, Weekly Hours
+        self.table.setColumnCount(
+            len(unique_dates) + 3
+        )  # +3 for Carrier Name, Hour Limit, Weekly Hours
 
         # Set headers
         self.table.setHorizontalHeaderLabels(
@@ -469,11 +478,15 @@ class OTDLMaximizationPane(QWidget):
         # Set custom header colors
         header = self.table.horizontalHeader()
         header_bg = QColor("#37474F")  # Material Blue Grey 800
-        
+
         # Set resize modes for columns
-        header.setSectionResizeMode(QHeaderView.Interactive)  # Default mode for all columns
-        header.setSectionResizeMode(len(unique_dates) + 2, QHeaderView.Stretch)  # Make Weekly Hours column stretch
-        
+        header.setSectionResizeMode(
+            QHeaderView.Interactive
+        )  # Default mode for all columns
+        header.setSectionResizeMode(
+            len(unique_dates) + 2, QHeaderView.Stretch
+        )  # Make Weekly Hours column stretch
+
         header.setStyleSheet(
             f"""
             QHeaderView::section {{
