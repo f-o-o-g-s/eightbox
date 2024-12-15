@@ -282,16 +282,22 @@ class ViolationModel(QStandardItemModel):
                             return WEEKLY_TOTAL_COLOR
                     except (ValueError, TypeError, IndexError):
                         pass
-                # Individual day columns in darker purple when > 0
-                elif col_name not in [
-                    "Carrier Name",
-                    "List Status",
-                ]:  # Skip non-numeric columns
+                # Individual day columns in darker purple only for violation date
+                elif col_name not in ["Carrier Name", "List Status"]:
                     try:
-                        number = float(str(value))
-                        if number > 0:
-                            return VIOLATION_COLOR
-                    except (ValueError, TypeError):
+                        # Get the carrier's row data
+                        row_data = self.df.iloc[index.row()]
+                        violation_date = row_data.get("85F_5th_date", None)
+
+                        # Only highlight if this column is the violation date
+                        if violation_date and str(col_name) == str(violation_date):
+                            try:
+                                number = float(str(value))
+                                if number > 0:
+                                    return VIOLATION_COLOR
+                            except (ValueError, TypeError):
+                                pass
+                    except (ValueError, TypeError, AttributeError, KeyError):
                         pass
             else:
                 # Daily tab formatting
@@ -697,17 +703,47 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
     - Carrier name (case-insensitive substring match)
     - List status (exact match)
     - Violation presence (shows only rows with violations)
+    - Column visibility control
 
     Attributes:
         filter_type (str): Type of filter to apply ('name', 'list_status', 'violations')
         filter_text (str): Text to filter by (lowercase)
+        hidden_columns (set): Set of column names to hide
     """
 
     def __init__(self):
         super().__init__()
         self.filter_type = "name"
         self.filter_text = ""
+        self.hidden_columns = set()
         self.setSortRole(Qt.UserRole)
+
+    def set_hidden_columns(self, columns):
+        """Set columns to hide from view.
+
+        Args:
+            columns (list): List of column names to hide
+        """
+        self.hidden_columns = set(columns)
+        self.invalidateFilter()
+
+    def filterAcceptsColumn(self, source_column, source_parent):
+        """Determine if a column should be shown in the view.
+
+        Args:
+            source_column (int): Column index in source model
+            source_parent (QModelIndex): Parent index in source model
+
+        Returns:
+            bool: True if column should be shown, False if hidden
+        """
+        source_model = self.sourceModel()
+        if source_model:
+            column_name = source_model.headerData(
+                source_column, Qt.Horizontal, Qt.DisplayRole
+            )
+            return column_name not in self.hidden_columns
+        return True
 
     def set_filter(self, text, filter_type="name"):
         """Set the current filter criteria.

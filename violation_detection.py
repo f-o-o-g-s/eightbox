@@ -539,7 +539,22 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
                 }
             )
 
-    return pd.DataFrame(base_result).sort_values(["date", "carrier_name"])
+    # After creating the base_result DataFrame
+    result_df = pd.DataFrame(base_result)
+
+    # Return the DataFrame with all necessary columns
+    return result_df[
+        [
+            "carrier_name",
+            "list_status",
+            "violation_type",
+            "date",
+            "remedy_total",
+            "total_hours",
+            "display_indicator",
+            "85F_5th_date",
+        ]
+    ]
 
 
 @register_violation("MAX12 More Than 12 Hours Worked in a Day")
