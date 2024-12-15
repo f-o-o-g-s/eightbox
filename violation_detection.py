@@ -1450,9 +1450,7 @@ def detect_85g_violations(data, date_maximized_status=None):
                     "list_status": "otdl",
                     "trigger_carrier": str(trigger_carrier["carrier_name"]),
                     "trigger_hours": float(trigger_carrier["total_hours"]),
-                    "off_route_hours": float(
-                        trigger_carrier.get("off_route_hours", 0)
-                    ),
+                    "off_route_hours": float(trigger_carrier.get("off_route_hours", 0)),
                     "display_indicators": display_indicators,
                 }
 
