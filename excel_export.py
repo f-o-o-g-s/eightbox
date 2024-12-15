@@ -289,6 +289,14 @@ class ExcelExporter:
             # Extract table state using the utility function that handles proxy models
             content_df, metadata_df, row_highlights_df = extract_table_state(table_view)
 
+            # Sort by carrier name for Excel export
+            if content_df is not None and not content_df.empty and 'Carrier Name' in content_df.columns:
+                content_df = content_df.sort_values('Carrier Name', ascending=True)
+                # Reset index to ensure we write rows in sorted order
+                content_df = content_df.reset_index(drop=True)
+                # Reorder metadata to match the sorted content
+                metadata_df = metadata_df.reindex(content_df.index)
+
             if content_df is None or content_df.empty:
                 continue
 
@@ -322,7 +330,7 @@ class ExcelExporter:
             for col, header in enumerate(content_df.columns):
                 worksheet.write(1, col, header, header_format)
 
-            # Write data with formatting
+            # Write data with formatting - using DataFrame's order
             for row in range(len(content_df)):
                 for col in range(len(content_df.columns)):
                     cell_format = workbook.add_format(
