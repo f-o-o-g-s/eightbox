@@ -438,7 +438,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             proxy_model.setSortRole(Qt.UserRole)  # Use UserRole for sorting
         else:
             view.setModel(model)
-        
+
         view.setSortingEnabled(True)
         setup_table_copy_functionality(view)
 
@@ -446,7 +446,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         header = view.horizontalHeader()
         header.setSectionsClickable(True)
         header.setSortIndicatorShown(True)
-        
+
         # Initial sort on first column
         if proxy_model:
             proxy_model.sort(0, Qt.AscendingOrder)
