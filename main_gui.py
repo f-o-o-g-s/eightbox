@@ -591,7 +591,7 @@ class MainApp(QMainWindow):
                     tab.filter_carriers("")
                 else:
                     tab.filter_carriers(status, filter_type="list_status")
-                
+
                 # Only update stats for the currently visible tab
                 if tab == current_tab:
                     tab.update_stats()
