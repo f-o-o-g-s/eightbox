@@ -42,4 +42,5 @@ class Violation85dTab(BaseViolationTab):
             "off_route_hours",
             "moves",
             "remedy_total",
+            "violation_type",
         ]

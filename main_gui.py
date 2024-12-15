@@ -1029,8 +1029,13 @@ class MainApp(QMainWindow):
             # Convert date to string format if it isn't already
             date_str = str(date)
 
-            # Only fetch data for the specific date being updated
-            clock_ring_data = self.fetch_clock_ring_data(date_str, date_str)
+            # Get the full date range that includes our target date
+            selected_date = self.date_selection_pane.calendar.selectedDate()
+            start_date = selected_date.toString("yyyy-MM-dd")
+            end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
+
+            # Fetch data for the entire week
+            clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
             if clock_ring_data.empty:
                 return
 
@@ -1070,13 +1075,23 @@ class MainApp(QMainWindow):
                     date_str
                 )
 
-            # Create date_maximized_status dicts for both violation types
-            date_maximized_status = {
-                date_str: {
-                    "is_maximized": maximized_status,
-                    "excused_carriers": excused_carriers,
-                }
-            }
+            # Create date_maximized_status dict for all dates
+            date_maximized_status = {}
+            for d in pd.date_range(start_date, end_date):
+                d_str = d.strftime("%Y-%m-%d")
+                if d_str == date_str:
+                    date_maximized_status[d_str] = {
+                        "is_maximized": maximized_status,
+                        "excused_carriers": excused_carriers,
+                    }
+                else:
+                    # Preserve existing status for other dates
+                    if hasattr(self.otdl_maximization_pane, "date_maximized"):
+                        existing_status = self.otdl_maximization_pane.date_maximized.get(d_str, {})
+                        if isinstance(existing_status, dict):
+                            date_maximized_status[d_str] = existing_status
+                        else:
+                            date_maximized_status[d_str] = {"is_maximized": False}
 
             # Update 8.5.D violations
             if "8.5.D" in self.violations:
@@ -1085,61 +1100,20 @@ class MainApp(QMainWindow):
                     "8.5.D Overtime Off Route",
                     date_maximized_status,
                 )
-
-                # Convert current violations to DataFrame if it's a list
-                if isinstance(self.violations["8.5.D"], list):
-                    current_violations = pd.DataFrame(self.violations["8.5.D"])
-                else:
-                    current_violations = self.violations["8.5.D"]
-
-                # Filter out the current date's violations and append new ones
-                if not current_violations.empty:
-                    current_violations = current_violations[
-                        current_violations["date"] != date_str
-                    ]
-
-                # Concatenate with new violations
-                if not new_violations.empty:
-                    self.violations["8.5.D"] = pd.concat(
-                        [current_violations, new_violations], ignore_index=True
-                    )
-                else:
-                    self.violations["8.5.D"] = current_violations
-
-                self.vio_85d_tab.refresh_data(self.violations["8.5.D"])
+                self.violations["8.5.D"] = new_violations
+                self.vio_85d_tab.refresh_data(new_violations)
 
             # Update 8.5.G violations
             if "8.5.G" in self.violations:
                 new_violations = detect_violations(
                     clock_ring_data, "8.5.G", date_maximized_status
                 )
-
-                # Convert current violations to DataFrame if it's a list
-                if isinstance(self.violations["8.5.G"], list):
-                    current_violations = pd.DataFrame(self.violations["8.5.G"])
-                else:
-                    current_violations = self.violations["8.5.G"]
-
-                # Filter out the current date's violations and append new ones
-                if not current_violations.empty:
-                    current_violations = current_violations[
-                        current_violations["date"] != date_str
-                    ]
-
-                # Concatenate with new violations
-                if not new_violations.empty:
-                    self.violations["8.5.G"] = pd.concat(
-                        [current_violations, new_violations], ignore_index=True
-                    )
-                else:
-                    self.violations["8.5.G"] = current_violations
-
-                self.vio_85g_tab.refresh_data(self.violations["8.5.G"])
+                self.violations["8.5.G"] = new_violations
+                self.vio_85g_tab.refresh_data(new_violations)
 
         except Exception as e:
             print(f"Error in handle_maximized_status_change: {str(e)}")
             import traceback
-
             traceback.print_exc()
 
     def init_otdl_maximization_pane(self):

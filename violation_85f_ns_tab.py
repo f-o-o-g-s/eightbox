@@ -36,8 +36,8 @@ class Violation85fNsTab(BaseViolationTab):
         return [
             "carrier_name",
             "list_status",
-            "violation_type",
             "date",
             "remedy_total",
+            "violation_type",
             "total_hours",
         ]

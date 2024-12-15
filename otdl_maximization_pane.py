@@ -248,34 +248,37 @@ class OTDLMaximizationPane(QWidget):
         self.violation_data = violation_data
         print("Violation data set in OTDLMaximizationPane.")
 
-    def apply_changes_for_date(self, date):
-        """Apply maximized status changes for a specific date."""
-        print(f"Applying changes for date: {date}")
+    def apply_all_changes(self):
+        """Apply maximized status changes for all dates at once."""
+        print("Applying changes for all dates")
 
         # Cache the current state
         self.cached_date_maximized = {
             key: value.copy() for key, value in self.date_maximized.items()
         }
 
-        # Apply the changes
-        if isinstance(self.date_maximized.get(date), dict):
-            maximized_status = all(self.date_maximized[date].values())
-            self.date_maximized[date]["is_maximized"] = maximized_status
-        else:
-            default_status = self.get_default_maximized_status(date)
-            self.date_maximized[date] = {"is_maximized": default_status}
+        # First process all changes without emitting signals
+        for date in self.date_maximized.keys():
+            if isinstance(self.date_maximized.get(date), dict):
+                maximized_status = all(self.date_maximized[date].values())
+                self.date_maximized[date]["is_maximized"] = maximized_status
+            else:
+                default_status = self.get_default_maximized_status(date)
+                self.date_maximized[date] = {"is_maximized": default_status}
 
-        # Update the UI
-        self.update_maximized_status_row(date)
+            # Update the UI
+            self.update_maximized_status_row(date)
 
-        # Emit the signal to notify the main app
-        print(
-            f"Emitting signal: date={date}, "
-            f"maximized_status={self.date_maximized[date]['is_maximized']}"
-        )
-        self.date_maximized_updated.emit(
-            date, self.date_maximized[date]["is_maximized"]
-        )
+        # Now emit signals for all dates at once
+        for date in self.date_maximized.keys():
+            print(
+                f"Emitting signal: date={date}, "
+                f"maximized_status={self.date_maximized[date]['is_maximized']}"
+            )
+            self.date_maximized_updated.emit(
+                date, self.date_maximized[date]["is_maximized"]
+            )
+
         # Reload the cached state to keep toggles responsive
         self.reload_cached_state()
 
@@ -641,10 +644,9 @@ class OTDLMaximizationPane(QWidget):
             )  # Replace COLOR_TEXT_LIGHT
             self.table.setItem(row_idx, len(unique_dates) + 2, weekly_hours_item)
 
-            # Add Maximized Status row
-            maximized_row_index = (
-                self.table.rowCount() - 2
-            )  # Index for the Maximized Status row
+            # Add Maximized Status row (this is now the last row)
+            maximized_row_index = len(otdl_names) + 1  # +1 for Day Names row
+            self.table.setRowCount(maximized_row_index + 1)  # +1 for Maximized Status row
 
             # Calculate the row color based on the maximized row index
             maximized_row_color = (
@@ -673,59 +675,65 @@ class OTDLMaximizationPane(QWidget):
 
                 # Set text color based on maximized status
                 if maximized_status:
-                    status_item.setForeground(
-                        QColor("#BB86FC")
-                    )  # Keep Material purple for True
+                    status_item.setForeground(QColor("#BB86FC"))  # Keep Material purple for True
                 else:
                     # Use calculated optimal gray instead of COLOR_TEXT_DIM
-                    status_item.setForeground(
-                        calculate_optimal_gray(maximized_row_color)
-                    )
+                    status_item.setForeground(calculate_optimal_gray(maximized_row_color))
 
                 self.table.setItem(maximized_row_index, col_idx, status_item)
 
-        # Add Apply buttons row
-        apply_row_index = self.table.rowCount() - 1  # Index for the Apply buttons row
-        for col_idx, date in enumerate(unique_dates, start=2):
-            apply_button = QPushButton("Apply")
-            apply_button.setStyleSheet(
-                f"""
-                QPushButton {{
-                    background-color: #2D2D2D;
-                    color: #BB86FC;
-                    border: 1px solid #3D3D3D;
-                    border-bottom: 2px solid #1D1D1D;
-                    padding: 4px 16px;
-                    font-weight: 500;
-                    min-height: 26px;
-                    border-radius: 3px;
-                    font-size: 12px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }}
-                QPushButton:hover {{
-                    background-color: #353535;
-                    border: 1px solid #454545;
-                    border-bottom: 2px solid #252525;
-                    color: #CBB0FF;
-                }}
-                QPushButton:pressed {{
-                    background-color: #252525;
-                    border: 1px solid #353535;
-                    border-top: 2px solid #151515;
-                    border-bottom: 1px solid #353535;
-                    padding-top: 5px;
-                    color: #BB86FC;
-                }}
-                QPushButton:disabled {{
-                    background-color: #252525;
-                    color: {calculate_optimal_gray(QColor('#252525')).name()};
-                    border: 1px solid #2D2D2D;
-                }}
-                """
-            )
-            apply_button.clicked.connect(partial(self.apply_changes_for_date, date))
-            self.table.setCellWidget(apply_row_index, col_idx, apply_button)
+        # Add single Apply button at the bottom
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(10, 10, 10, 10)
+
+        apply_button = QPushButton("Apply All Changes")
+        apply_button.setStyleSheet(
+            f"""
+            QPushButton {{
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                border: 1px solid #3D3D3D;
+                border-bottom: 2px solid #1D1D1D;
+                padding: 8px 24px;
+                font-weight: 500;
+                min-height: 32px;
+                border-radius: 4px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }}
+            QPushButton:hover {{
+                background-color: #353535;
+                border: 1px solid #454545;
+                border-bottom: 2px solid #252525;
+                color: #CBB0FF;
+            }}
+            QPushButton:pressed {{
+                background-color: #252525;
+                border: 1px solid #353535;
+                border-top: 2px solid #151515;
+                border-bottom: 1px solid #353535;
+                padding-top: 9px;
+                color: #BB86FC;
+            }}
+            QPushButton:disabled {{
+                background-color: #252525;
+                color: {calculate_optimal_gray(QColor('#252525')).name()};
+                border: 1px solid #2D2D2D;
+            }}
+            """
+        )
+        apply_button.clicked.connect(self.apply_all_changes)
+        button_layout.addStretch()
+        button_layout.addWidget(apply_button)
+        button_layout.addStretch()
+
+        # Add button container below the table
+        content_layout = self.findChild(QVBoxLayout, "")
+        if content_layout:
+            content_layout.addWidget(button_container)
+
         self.adjust_window_size()
 
     def get_excused_carriers(self, date):

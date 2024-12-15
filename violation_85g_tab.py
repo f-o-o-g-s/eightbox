@@ -44,8 +44,8 @@ class Violation85gTab(BaseViolationTab):
             "date",
             "hour_limit",
             "total_hours",
-            "remedy_total",
             "display_indicators",  # Changed from display_indicator
+            "remedy_total",
             "violation_type",  # Shows "8.5.G OTDL Not Maximized" or "8.5.G Trigger (No Remedy)"
             "trigger_carrier",  # WAL/NL carrier that triggered the violation
             "trigger_hours",  # Hours worked by trigger carrier
