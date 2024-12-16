@@ -49,3 +49,7 @@ black_changes.txt
 /test_db/*.json
 /test_db/name_mapping.txt
 /test_db/*_backup*
+
+# SQLite databases (except the fake test database)
+*.sqlite
+!fake_mandates_db.sqlite
