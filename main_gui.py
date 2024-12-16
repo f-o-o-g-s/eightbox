@@ -750,9 +750,6 @@ class MainApp(QMainWindow):
 
     def init_85d_tab(self):
         """Initialize the Article 8.5.D violation tab."""
-        print("Initializing 8.5.D Violations Tab")  # Debugging statement
-
-        """Initialize and add the 8.5.D Tab."""
         self.vio_85d_tab = Violation85dTab()
         self.central_tab_widget.addTab(self.vio_85d_tab, "8.5.D Violations")
         self.vio_85d_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
@@ -762,27 +759,18 @@ class MainApp(QMainWindow):
 
     def init_85f_tab(self):
         """Initialize the Article 8.5.F violation tab."""
-        print("Initializing 8.5.F Violations Tab")  # Debugging statement
-
-        """Initialize and add the 8.5.F Tab."""
         self.vio_85f_tab = Violation85fTab()
         self.central_tab_widget.addTab(self.vio_85f_tab, "8.5.F Violations")
         self.vio_85f_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_85f_ns_tab(self):
         """Initialize the Article 8.5.F non-scheduled day violation tab."""
-        print("Initializing 8.5.F NS Violations Tab")  # Debugging statement
-
-        """Initialize and add the 8.5.F NS Tab."""
         self.vio_85f_ns_tab = Violation85fNsTab()
         self.central_tab_widget.addTab(self.vio_85f_ns_tab, "8.5.F NS Violations")
         self.vio_85f_ns_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_85f_5th_tab(self):
         """Initialize the Article 8.5.F fifth overtime day violation tab."""
-        print("Initializing 8.5.F 5th Violations Tab")  # Debugging statement
-
-        """Initialize and add the 8.5.F 5th Tab."""
         self.vio_85f_5th_tab = Violation85f5thTab()
         self.central_tab_widget.addTab(self.vio_85f_5th_tab, "8.5.F 5th Violations")
         self.vio_85f_5th_tab.refresh_data(
@@ -791,38 +779,22 @@ class MainApp(QMainWindow):
 
     def init_85g_tab(self):
         """Initialize the Article 8.5.G violation tab."""
-        print("Initializing 8.5.G Violations Tab")  # Debugging statement
-
-        """Initialize and add the 8.5.G Tab."""
         self.vio_85g_tab = Violation85gTab()
         self.central_tab_widget.addTab(self.vio_85g_tab, "8.5.G Violations")
         self.vio_85g_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_MAX12_tab(self):
-        """Initialize the Maximum 12-Hour Rule violation tab.
-
-        Creates and configures the tab for tracking violations of the 12-hour daily
-        work limit. This includes setting up the tab widget, connecting signals,
-        and configuring the display.
-        """
+        """Initialize the Maximum 12-Hour Rule violation tab."""
         self.vio_MAX12_tab = ViolationMax12Tab(self)
         self.central_tab_widget.addTab(self.vio_MAX12_tab, "MAX12")
 
     def init_MAX60_tab(self):
-        """Initialize the Maximum 60-Hour Rule violation tab.
-
-        Creates and configures the tab for tracking violations of the 60-hour weekly
-        work limit. This includes setting up the tab widget, connecting signals,
-        and configuring the display.
-        """
+        """Initialize the Maximum 60-Hour Rule violation tab."""
         self.vio_MAX60_tab = ViolationMax60Tab(self)
         self.central_tab_widget.addTab(self.vio_MAX60_tab, "MAX60")
 
     def init_remedies_tab(self):
         """Initialize the violation remedies summary tab."""
-        print("Initializing Violations Summary Tab")  # Debugging statement
-
-        """Initialize and add the Remedies Tab."""
         self.remedies_tab = ViolationRemediesTab()
         self.central_tab_widget.addTab(self.remedies_tab, "Violations Summary")
         self.remedies_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
@@ -1748,22 +1720,21 @@ class MainApp(QMainWindow):
         """
         if violation_type == "8.5.D":
             return self.vio_85d_tab
-        elif violation_type == "8.5.F":
+        if violation_type == "8.5.F":
             return self.vio_85f_tab
-        elif violation_type == "8.5.F NS":
+        if violation_type == "8.5.F NS":
             return self.vio_85f_ns_tab
-        elif violation_type == "8.5.F 5th":
+        if violation_type == "8.5.F 5th":
             return self.vio_85f_5th_tab
-        elif violation_type == "8.5.G":
+        if violation_type == "8.5.G":
             return self.vio_85g_tab
-        elif violation_type == "MAX12":
+        if violation_type == "MAX12":
             return self.vio_MAX12_tab
-        elif violation_type == "MAX60":
+        if violation_type == "MAX60":
             return self.vio_MAX60_tab
-        elif violation_type == "Summary":
+        if violation_type == "Summary":
             return self.remedies_tab
-        else:
-            return None
+        return None
 
     def apply_global_carrier_filter(self, text):
         """Apply carrier filter text across all violation tabs.
