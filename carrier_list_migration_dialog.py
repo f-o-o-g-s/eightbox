@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QPushButton,
     QScrollArea,
+    QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -27,13 +28,7 @@ from custom_widgets import CustomTitleBarWidget
 
 
 class CarrierListMigrationDialog(QDialog):
-    """Dialog for managing carrier list migration between databases.
-
-    Provides a simple interface to:
-    - View carrier differences
-    - Backup existing carrier list
-    - Start fresh with new database
-    """
+    """Dialog for managing carrier list migration between databases."""
 
     def __init__(self, existing_carriers, new_carriers, parent=None):
         super().__init__(parent)
@@ -43,7 +38,8 @@ class CarrierListMigrationDialog(QDialog):
         self.should_backup = True  # Always backup by default
 
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(800)  # Increased minimum width
+        self.setMinimumHeight(600)  # Added minimum height
         self.setStyleSheet(
             """
             QDialog {
@@ -84,6 +80,10 @@ class CarrierListMigrationDialog(QDialog):
             QPushButton:pressed {
                 background-color: #7E57C2;
             }
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
         """
         )
 
@@ -100,6 +100,7 @@ class CarrierListMigrationDialog(QDialog):
 
         # Create content widget
         content = QWidget()
+        content.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         content_layout = QVBoxLayout(content)
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(15)
@@ -116,12 +117,16 @@ class CarrierListMigrationDialog(QDialog):
         # Add carrier comparison table
         content_layout.addWidget(QLabel("Carrier Differences:"))
         self.comparison_table = self.create_comparison_table()
+        self.comparison_table.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding
+        )
 
         # Create scroll area for table
         scroll = QScrollArea()
         scroll.setWidget(self.comparison_table)
         scroll.setWidgetResizable(True)
-        scroll.setMinimumHeight(200)
+        scroll.setMinimumHeight(400)  # Increased minimum height
+        scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         content_layout.addWidget(scroll)
 
         # Add buttons
@@ -189,6 +194,12 @@ class CarrierListMigrationDialog(QDialog):
 
         # Adjust column widths
         table.resizeColumnsToContents()
+        table.horizontalHeader().setStretchLastSection(True)
+
+        # Set table size
+        table.setMinimumWidth(700)  # Added minimum width
+        table.setMinimumHeight(300)  # Added minimum height
+
         return table
 
     def accept(self):
@@ -205,9 +216,5 @@ class CarrierListMigrationDialog(QDialog):
         super().accept()
 
     def get_result(self):
-        """Get the dialog results.
-
-        Returns:
-            tuple: (selected_option, should_backup)
-        """
+        """Get the dialog results."""
         return self.selected_option, self.should_backup
