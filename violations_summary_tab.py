@@ -3,6 +3,8 @@
 This module provides a summary view of all violations across different types,
 allowing for quick analysis and comparison of violation patterns.
 """
+import traceback
+
 import pandas as pd
 
 from base_violation_tab import BaseViolationTab
@@ -86,14 +88,14 @@ class ViolationRemediesTab(BaseViolationTab):
 
         return formatted_data
 
-    def refresh_data(self, data):
+    def refresh_data(self, violation_data):
         """Refresh the tabs with aggregated violation data.
 
         Args:
-            data (pd.DataFrame): DataFrame containing all violation data with columns like
+            violation_data (pd.DataFrame): DataFrame containing all violation data with columns like
                                'date_violation_type' containing remedy totals
         """
-        if not isinstance(data, pd.DataFrame) or data.empty:
+        if not isinstance(violation_data, pd.DataFrame) or violation_data.empty:
             self.init_no_data_tab()
             return
 
@@ -108,7 +110,7 @@ class ViolationRemediesTab(BaseViolationTab):
             all_dates = sorted(
                 set(
                     col.split("_")[0]
-                    for col in data.columns
+                    for col in violation_data.columns
                     if "_" in col and col not in ["carrier_name", "list_status"]
                 )
             )
@@ -118,8 +120,8 @@ class ViolationRemediesTab(BaseViolationTab):
                 date_data = pd.DataFrame()
 
                 # Start with carrier info
-                date_data["carrier_name"] = data["carrier_name"]
-                date_data["list_status"] = data["list_status"]
+                date_data["carrier_name"] = violation_data["carrier_name"]
+                date_data["list_status"] = violation_data["list_status"]
 
                 # Add each violation type's remedy total for this date
                 for violation_type in self.VIOLATION_ORDER:
@@ -127,14 +129,14 @@ class ViolationRemediesTab(BaseViolationTab):
                     col_name = next(
                         (
                             col
-                            for col in data.columns
+                            for col in violation_data.columns
                             if col.startswith(f"{date}_{violation_type}")
                             and not col.startswith(f"{date}_No Violation")
                         ),
                         None,
                     )
                     if col_name:
-                        date_data[violation_type] = data[col_name]
+                        date_data[violation_type] = violation_data[col_name]
                     else:
                         date_data[violation_type] = 0
 
@@ -152,22 +154,22 @@ class ViolationRemediesTab(BaseViolationTab):
             summary_data = pd.DataFrame()
 
             # Start with carrier info
-            summary_data["carrier_name"] = data["carrier_name"]
-            summary_data["list_status"] = data["list_status"]
+            summary_data["carrier_name"] = violation_data["carrier_name"]
+            summary_data["list_status"] = violation_data["list_status"]
 
             # For each violation type, sum up all dates
             for violation_type in self.VIOLATION_ORDER:
                 # Find all columns for this violation type
                 violation_cols = [
                     col
-                    for col in data.columns
+                    for col in violation_data.columns
                     if "_" in col
                     and col.split("_", 1)[1].startswith(violation_type)
                     and not col.split("_", 1)[1].startswith("No Violation")
                 ]
                 if violation_cols:
                     summary_data[violation_type] = (
-                        data[violation_cols].sum(axis=1).round(2)
+                        violation_data[violation_cols].sum(axis=1).round(2)
                     )
                 else:
                     summary_data[violation_type] = 0
@@ -185,8 +187,6 @@ class ViolationRemediesTab(BaseViolationTab):
             self.date_tabs.setCurrentIndex(0)
 
         except Exception:
-            import traceback
-
             traceback.print_exc()
             self.init_no_data_tab()
             return
@@ -199,7 +199,7 @@ class ViolationRemediesTab(BaseViolationTab):
         """
         try:
             # Create model and view
-            model, view = self.create_summary_model(data)
+            _, view = self.create_summary_model(data)
 
             # Add the tab
             tab_index = self.date_tabs.addTab(view, "Summary")
@@ -249,22 +249,20 @@ class ViolationRemediesTab(BaseViolationTab):
             )
 
         except Exception:
-            import traceback
-
             traceback.print_exc()
 
-    def handle_tab_change(self, index):
+    def handle_tab_change(self, _):
         """Handle tab change events."""
         try:
             self.update_stats()
         except Exception:
             pass
 
-    def handle_global_filter_click(self, status):
+    def handle_global_filter_click(self, status_type):
         """Handle global filter button clicks."""
         try:
-            self.current_filter = status
+            self.current_filter = status_type
             self.current_filter_type = "status"
-            self.filter_carriers(status, "status")
+            self.filter_carriers(status_type, "status")
         except Exception:
             pass
