@@ -41,21 +41,21 @@ def set_display(row):
     # Check for specific leave indicators
     if code == "annual" and leave_type == "none":
         return "(NS protect)"
-    elif code == "annual" and leave_type == "annual":
+    if code == "annual" and leave_type == "annual":
         return "(annual)"
-    elif code == "none" and leave_type == "annual":
+    if code == "none" and leave_type == "annual":
         return "(annual)"
-    elif code == "none" and leave_type == "guaranteed":
+    if code == "none" and leave_type == "guaranteed":
         return "(guaranteed)"
-    elif code == "none" and leave_type == "holiday":
+    if code == "none" and leave_type == "holiday":
         return "(holiday)"
-    elif code == "ns day" and leave_type == "none":
+    if code == "ns day" and leave_type == "none":
         return "(NS day)"
-    elif code == "sick" and leave_type == "sick":
+    if code == "sick" and leave_type == "sick":
         return "(sick)"
-    elif code == "none" and leave_type == "sick":
+    if code == "none" and leave_type == "sick":
         return "(sick)"
-    elif code == "no call" and leave_type == "none":
+    if code == "no call" and leave_type == "none":
         return "(no call)"
 
     # Default to no indicator
