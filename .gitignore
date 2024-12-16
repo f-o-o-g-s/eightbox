@@ -43,3 +43,9 @@ spreadsheets/
 *Copy*.json
 black_changes.txtrename_files.py
 black_changes.txt
+
+# Test database files that may contain unsanitized data
+/test_db/*.sqlite
+/test_db/*.json
+/test_db/name_mapping.txt
+/test_db/*_backup*
