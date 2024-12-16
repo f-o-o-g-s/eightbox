@@ -45,7 +45,7 @@ class DocumentationDialog(QDialog):
 
     Attributes:
         parent: Parent widget (usually main window)
-        dragPos: Position for window dragging
+        drag_pos: Position for window dragging
     """
 
     def __init__(self, parent=None):
@@ -56,10 +56,10 @@ class DocumentationDialog(QDialog):
         """
         super().__init__(parent)
         self.parent = parent
-        self.dragPos = None
-        self.initUI()
+        self.drag_pos = None
+        self.init_ui()
 
-    def initUI(self):
+    def init_ui(self):
         """Initialize and configure the dialog's user interface.
 
         Sets up:
