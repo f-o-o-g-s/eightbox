@@ -307,18 +307,18 @@ class OTDLMaximizationPane(QWidget):
             self.parent_main.otdl_button.setChecked(False)
         self.hide()
 
-    def changeEvent(self, event):
+    def change_event(self, event):
         """Handle window state changes"""
         if event.type() == QEvent.WindowStateChange:
             if self.windowState() & Qt.WindowMinimized:
                 # Prevent actual minimize, use our custom handler instead
                 self.minimize_to_button()
                 event.accept()
-        super().changeEvent(event)
+        super().change_event(event)
 
-    def hideEvent(self, event):
+    def hide_event(self, event):
         """Handle window hide events"""
-        super().hideEvent(event)
+        super().hide_event(event)
         if self.parent_main and hasattr(self.parent_main, "otdl_button"):
             self.parent_main.otdl_button.setChecked(False)
 
