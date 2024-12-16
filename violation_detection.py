@@ -343,7 +343,7 @@ def detect_85d_overtime(data, date_maximized_status=None):
             np.minimum(
                 result_df["off_route_hours"],
                 (result_df["total_hours"] - 8).clip(lower=0),
-            ).round(2),
+            ),
             0.0,
         ),
     )
@@ -409,9 +409,8 @@ def detect_85f_overtime_over_10_hours(data, date_maximized_status=None):
     result_df["remedy_total"] = np.where(
         mask_eligible & (result_df["total_hours"] > 10),
         np.minimum(
-            result_df["off_route_hours"],
-            (result_df["total_hours"] - 10).clip(lower=0),
-        ).round(2),
+            result_df["off_route_hours"], (result_df["total_hours"] - 10).clip(lower=0)
+        ),
         0.0,
     )
 
@@ -1377,7 +1376,7 @@ def detect_85g_violations(data, date_maximized_status=None):
                     if is_auto_excused or is_sunday:
                         violation_type = "No Violation (Auto Excused)"
                     elif is_manually_excused:
-                        violation_type = "No Violation (OTDL Maxed)"
+                        violation_type = "No Violation (Manually Excused)"
                     elif total_hours >= hour_limit:
                         violation_type = "No Violation (Maximized)"
                     else:
@@ -1429,7 +1428,7 @@ def detect_85g_violations(data, date_maximized_status=None):
                     print(f"Error converting hour limit: {e}")
                     hour_limit = 12.00
 
-                # Check for automatic excusal conditions
+                # Check for automatic excusal conditions first
                 display_indicators = str(otdl.get("display_indicators", "")).strip()
                 is_auto_excused = any(
                     indicator in display_indicators
@@ -1444,25 +1443,23 @@ def detect_85g_violations(data, date_maximized_status=None):
                     print(f"Error determining day of week: {e}")
                     is_sunday = False
 
-                # Check if carrier is manually excused
+                # Check if carrier is manually excused (only relevant if not auto-excused)
                 carrier_name_str = str(otdl["carrier_name"])
-
-                # Check both excused_carriers list and carrier_excusals dictionary
                 is_manually_excused = (
                     carrier_name_str in excused_carriers
                     or carrier_excusals.get(carrier_name_str, False)
                 )
 
                 # Determine violation type and remedy
-                # First check auto-excusal, then manual excusal
+                # Auto-excusal takes precedence over manual excusal
                 if is_auto_excused or is_sunday:
                     violation_type = "No Violation (Auto Excused)"
                     remedy_total = 0.0
-                elif is_manually_excused:
-                    violation_type = "No Violation (Manually Excused)"
-                    remedy_total = 0.0
                 elif otdl_hours >= hour_limit:
                     violation_type = "No Violation (Maximized)"
+                    remedy_total = 0.0
+                elif is_manually_excused:
+                    violation_type = "No Violation (Manually Excused)"
                     remedy_total = 0.0
                 else:
                     violation_type = "8.5.G OTDL Not Maximized"
