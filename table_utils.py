@@ -44,7 +44,7 @@ def setup_table_copy_functionality(table_view):
     # Override the keyPressEvent for Ctrl+C support
     original_key_press_event = table_view.keyPressEvent
 
-    def keyPressEvent(event):
+    def key_press_event(event):
         """Handle key press events for table widgets.
 
         Implements custom key handling including:
@@ -67,7 +67,7 @@ def setup_table_copy_functionality(table_view):
         else:
             original_key_press_event(event)
 
-    table_view.keyPressEvent = keyPressEvent
+    table_view.keyPressEvent = key_press_event
 
 
 def show_context_menu(table_view, position):
