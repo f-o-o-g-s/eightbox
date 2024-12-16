@@ -1,0 +1,118 @@
+# Project: Eightbox - Article 8 Violation Detection
+# A PyQt5-based GUI application for detecting and managing Article 8 violations
+
+# Development Environment Rules
+- Use Python 3.11 or higher for development
+- Install all dependencies from requirements.txt
+- Use Git Bash for Windows as the terminal environment:
+  * All commands assume Git Bash shell syntax
+  * Do not use PowerShell or CMD-specific commands
+  * Use forward slashes (/) for paths
+  * Use Unix-style commands (ls, rm, mv, etc.)
+- Use backup.py for code formatting and backup:
+  * Run 'python backup.py' before committing changes
+  * Automatically formats code with black and isort
+  * Runs flake8 checks via pre-commit hooks
+  * Creates both Git commits and ZIP backups
+  * Auto-retries up to 3 times after formatting fixes
+  * Provides interactive menu for backup options
+  * Ensures consistent code style across the project
+- Use release.py for version management:
+  * Follows YYYY.MAJOR.MINOR.PATCH versioning
+  * Run 'python release.py' to create new releases
+  * Automatically updates version in main_gui.py
+  * Creates Git tags and GitHub releases
+  * Requires GITHUB_TOKEN for GitHub releases
+  * Supports patch (bug fixes), minor (features), and major (breaking) releases
+  * Maintains changelog in release notes
+- Suggested workflow improvements for backup.py:
+  * Add --format-only flag to run formatters without backup
+  * Add --check-only flag to verify without making changes
+  * Add VSCode integration for format-on-save using backup.py
+  * Consider adding parallel processing for large codebases
+  * Add option to specify files/directories to format
+- Follow MIT License requirements for code contributions
+- Use virtual environment (.venv) for development
+
+# Code Style Rules
+- Follow PEP 8 style guidelines for Python code
+- Use black formatter with default settings (88 char line length)
+- Sort imports using isort with black compatibility
+- Follow flake8 configuration from .flake8
+- Use Google-style docstrings for all classes and methods
+- Maintain consistent 4-space indentation
+- Use snake_case for functions and variables, PascalCase for classes
+
+# GUI Component Rules
+- All PyQt widgets must use Material Dark theme from theme.py
+- Custom widgets should inherit from appropriate PyQt base classes
+- Widget names should be descriptive and follow camelCase convention
+- Connect signals and slots using explicit method references instead of lambdas
+- Include tooltips for all interactive elements
+- Follow the existing tab-based architecture for new features
+- Use CustomWarningDialog and CustomInfoDialog for user messages
+
+# Error Handling Rules
+- Use try-except blocks for database operations and file handling
+- Display user-friendly error messages using CustomWarningDialog
+- Log detailed error information for debugging
+- Implement graceful fallbacks for failure cases
+- Handle Qt events appropriately in custom widgets
+- Follow the error handling patterns in base_violation_tab.py
+
+# Performance Rules
+- Use pandas operations efficiently for large datasets
+- Implement progress dialogs using CustomProgressDialog for long-running operations
+- Avoid blocking the main GUI thread
+- Cache frequently accessed data when appropriate
+- Use lazy loading for UI components when possible
+- Follow the performance patterns in violation_detection.py
+
+# Documentation Rules
+- Keep class and method documentation up to date
+- Document complex algorithms and business logic
+- Include examples in docstrings where helpful
+- Explain any non-obvious code behavior
+- Document any assumptions or limitations
+- Follow the documentation patterns in documentation_content.py
+- Update README.md when adding new features
+
+# Database Rules
+- Use parameterized queries to prevent SQL injection
+- Handle database connections properly with context managers
+- Include appropriate indexes for frequently queried fields
+- Document database schema changes
+- Validate data before database operations
+- Follow the database patterns in violation_model.py
+
+# Testing Guidelines
+- Write unit tests for business logic
+- Include integration tests for database operations
+- Test edge cases and error conditions
+- Mock external dependencies in tests
+- Maintain test coverage above 80%
+- Follow the testing patterns in existing test files
+
+# Feature Implementation Rules
+- Follow the existing pattern for violation detection modules
+- Implement new features as separate tabs when appropriate
+- Maintain consistency with existing UI patterns
+- Include proper error handling and user feedback
+- Document new features in the help system
+- Follow the module structure in violation_types.py
+
+# Version Control Rules
+- Follow semantic versioning (YYYY.MAJOR.MINOR.PATCH)
+- Update version numbers using release.py
+- Include detailed commit messages
+- Create backup before major changes using backup.py
+- Follow .gitignore patterns for excluded files
+- Use restore.py for reverting changes if needed
+
+# Excel Export Rules
+- Follow the patterns in excel_export.py
+- Use consistent carrier name sorting
+- Include proper headers and formatting
+- Implement progress tracking for large exports
+- Use xlsxwriter for Excel file generation
+- Follow the existing Excel template structure 
