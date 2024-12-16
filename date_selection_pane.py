@@ -196,7 +196,7 @@ class DateSelectionPane(QWidget):
             self.parent_main.date_selection_button.setChecked(False)
         self.hide()
 
-    def changeEvent(self, event):
+    def change_event(self, event):
         """Handle window state changes, particularly minimization.
 
         Args:
@@ -208,7 +208,7 @@ class DateSelectionPane(QWidget):
                 event.accept()
         super().changeEvent(event)
 
-    def hideEvent(self, event):
+    def hide_event(self, event):
         """Handle window hide events.
 
         Updates the parent window's date selection button state when
@@ -230,8 +230,13 @@ class DateSelectionPane(QWidget):
         if self.parent_main and hasattr(self.parent_main, "apply_date_range"):
             self.parent_main.apply_date_range()
 
-    def showEvent(self, event):
+    def show_event(self, event):
         """Override showEvent to set the fixed size after the window is shown"""
         super().showEvent(event)
         # Wait for the window to be shown and all widgets to be properly laid out
         self.setFixedSize(self.sizeHint())
+
+    # Alias Qt method names to maintain compatibility
+    changeEvent = change_event
+    hideEvent = hide_event
+    showEvent = show_event
