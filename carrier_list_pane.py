@@ -71,7 +71,7 @@ class CarrierListProxyModel(QSortFilterProxyModel):
         # Define status order for sorting
         self.status_order = {"nl": 0, "wal": 1, "otdl": 2, "ptf": 3}
 
-    def lessThan(self, left, right):
+    def less_than(self, left, right):
         """Custom sorting implementation"""
         left_data = self.sourceModel().data(left, Qt.DisplayRole)
         right_data = self.sourceModel().data(right, Qt.DisplayRole)
@@ -87,50 +87,29 @@ class CarrierListProxyModel(QSortFilterProxyModel):
             right_order = self.status_order.get(str(right_data).lower(), 999)
             if left_order != right_order:
                 return left_order < right_order
-            else:
-                # If list_status is the same, sort by carrier_name
-                carrier_col = self.sourceModel().df.columns.get_loc("carrier_name")
-                left_carrier = str(
-                    self.sourceModel().data(
-                        self.sourceModel().index(left.row(), carrier_col),
-                        Qt.DisplayRole,
-                    )
-                ).lower()
-                right_carrier = str(
-                    self.sourceModel().data(
-                        self.sourceModel().index(right.row(), carrier_col),
-                        Qt.DisplayRole,
-                    )
-                ).lower()
-                return left_carrier < right_carrier
-        else:
-            # For carrier_name column, ensure ascending order
-            if column_name == "carrier_name":
-                return str(left_data).lower() < str(right_data).lower()
-            # For other columns, use standard comparison
+            # If list_status is the same, sort by carrier_name
+            carrier_col = self.sourceModel().df.columns.get_loc("carrier_name")
+            left_carrier = str(
+                self.sourceModel().data(
+                    self.sourceModel().index(left.row(), carrier_col),
+                    Qt.DisplayRole,
+                )
+            ).lower()
+            right_carrier = str(
+                self.sourceModel().data(
+                    self.sourceModel().index(right.row(), carrier_col),
+                    Qt.DisplayRole,
+                )
+            ).lower()
+            return left_carrier < right_carrier
+
+        # For carrier_name column, ensure ascending order
+        if column_name == "carrier_name":
             return str(left_data).lower() < str(right_data).lower()
+        # For other columns, use standard comparison
+        return str(left_data).lower() < str(right_data).lower()
 
-    def set_status_filter(self, status):
-        """Set the status filter for the proxy model.
-
-        Args:
-            status (str): The list status to filter by ('all', 'otdl', 'wal', 'nl', 'ptf')
-                         Use 'all' to clear the filter.
-        """
-        self.status_filter = status.lower() if status != "all" else ""
-        self.invalidateFilter()
-
-    def set_text_filter(self, text):
-        """Set the text filter for the proxy model.
-
-        Args:
-            text (str): The text to filter carrier names by.
-                       Case-insensitive partial matching is supported.
-        """
-        self.text_filter = text.lower()
-        self.invalidateFilter()
-
-    def filterAcceptsRow(self, source_row, source_parent):
+    def filter_accepts_row(self, source_row, source_parent):
         """Determine if a row should be included in the filtered results.
 
         Implements both status and text filtering logic. A row is accepted if it:
@@ -171,6 +150,10 @@ class CarrierListProxyModel(QSortFilterProxyModel):
 
         return False
 
+    # Alias Qt method names to maintain compatibility
+    lessThan = less_than
+    filterAcceptsRow = filter_accepts_row
+
 
 class PandasTableModel(QAbstractTableModel):
     """Table model for displaying pandas DataFrame in a QTableView.
@@ -198,7 +181,7 @@ class PandasTableModel(QAbstractTableModel):
             self.db_df = new_db_df
         self.endResetModel()
 
-    def rowCount(self, parent=None):
+    def row_count(self, parent=None):
         """Get the number of rows in the model.
 
         Args:
@@ -209,7 +192,7 @@ class PandasTableModel(QAbstractTableModel):
         """
         return len(self.df)
 
-    def columnCount(self, parent=None):
+    def column_count(self, parent=None):
         """Get the number of columns in the model.
 
         Args:
@@ -263,7 +246,7 @@ class PandasTableModel(QAbstractTableModel):
 
         return QVariant()
 
-    def headerData(self, section, orientation, role):
+    def header_data(self, section, orientation, role):
         """Get header data for display.
 
         Provides column and row headers for the carrier list table.
@@ -279,11 +262,11 @@ class PandasTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self.df.columns[section]
-            elif orientation == Qt.Vertical:
+            if orientation == Qt.Vertical:
                 return str(section + 1)
         return None
 
-    def setData(self, index, value, role=Qt.EditRole):
+    def set_data(self, index, value, role=Qt.EditRole):
         """Set data in the model.
 
         Updates the model data and handles any necessary post-update actions.
@@ -326,6 +309,12 @@ class PandasTableModel(QAbstractTableModel):
             Qt.ItemFlags: Flags indicating item capabilities
         """
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
+
+    # Alias Qt method names to maintain compatibility
+    rowCount = row_count
+    columnCount = column_count
+    headerData = header_data
+    setData = set_data
 
 
 class CarrierListPane(QWidget):
@@ -624,7 +613,7 @@ class CarrierListPane(QWidget):
             self.parent_main.carrier_list_button.setChecked(False)
         self.hide()
 
-    def changeEvent(self, event):
+    def change_event(self, event):
         """Handle window state changes, particularly minimization.
 
         Args:
@@ -637,7 +626,7 @@ class CarrierListPane(QWidget):
                 event.accept()
         super().changeEvent(event)
 
-    def hideEvent(self, event):
+    def hide_event(self, event):
         """Handle window hide events.
 
         Updates the parent window's carrier list button state when
@@ -661,11 +650,11 @@ class CarrierListPane(QWidget):
         # Always call the parent class's hideEvent
         super().hideEvent(event)
 
-    def initUI(self, layout):
+    def init_ui(self, layout):
         """Initialize the user interface components.
 
-        Sets up the table view, filter input, and control buttons.
-        Configures the layout and styling of all UI elements.
+        Sets up the table view, filter input, and control buttons
+        for the carrier list tab.
 
         Args:
             layout (QLayout): The layout to populate with UI elements
