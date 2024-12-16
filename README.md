@@ -61,7 +61,7 @@ The repository includes a sanitized test database (`fake_mandates_db.sqlite`) th
 
 To use the test database:
 1. Launch the application
-2. Open Settings (gear icon)
+2. Click Settings in the menu bar
 3. Set the database path to `fake_mandates_db.sqlite` in your project directory
 4. Click Save to apply the changes
 
