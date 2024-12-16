@@ -6,7 +6,6 @@ This module provides a dialog interface for users to:
 - Start fresh with new database carriers
 """
 
-import json
 import os
 import shutil
 from datetime import datetime
@@ -14,14 +13,14 @@ from datetime import datetime
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
-    QLabel,
-    QVBoxLayout,
     QHBoxLayout,
+    QLabel,
     QPushButton,
-    QWidget,
     QScrollArea,
     QTableWidget,
     QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 from custom_widgets import CustomTitleBarWidget
@@ -29,7 +28,7 @@ from custom_widgets import CustomTitleBarWidget
 
 class CarrierListMigrationDialog(QDialog):
     """Dialog for managing carrier list migration between databases.
-    
+
     Provides a simple interface to:
     - View carrier differences
     - Backup existing carrier list
@@ -42,10 +41,11 @@ class CarrierListMigrationDialog(QDialog):
         self.new_carriers = new_carriers
         self.selected_option = "start_fresh"  # Always start fresh
         self.should_backup = True  # Always backup by default
-        
+
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setMinimumWidth(600)
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QDialog {
                 background-color: #1E1E1E;
                 color: #FFFFFF;
@@ -84,7 +84,8 @@ class CarrierListMigrationDialog(QDialog):
             QPushButton:pressed {
                 background-color: #7E57C2;
             }
-        """)
+        """
+        )
 
         # Create main layout
         layout = QVBoxLayout(self)
@@ -92,7 +93,9 @@ class CarrierListMigrationDialog(QDialog):
         layout.setSpacing(0)
 
         # Add custom title bar
-        self.title_bar = CustomTitleBarWidget(title="New Database Detected", parent=self)
+        self.title_bar = CustomTitleBarWidget(
+            title="New Database Detected", parent=self
+        )
         layout.addWidget(self.title_bar)
 
         # Create content widget
@@ -113,7 +116,7 @@ class CarrierListMigrationDialog(QDialog):
         # Add carrier comparison table
         content_layout.addWidget(QLabel("Carrier Differences:"))
         self.comparison_table = self.create_comparison_table()
-        
+
         # Create scroll area for table
         scroll = QScrollArea()
         scroll.setWidget(self.comparison_table)
@@ -125,10 +128,10 @@ class CarrierListMigrationDialog(QDialog):
         button_layout = QHBoxLayout()
         self.ok_button = QPushButton("OK")
         self.cancel_button = QPushButton("Cancel")
-        
+
         self.ok_button.clicked.connect(self.accept)
         self.cancel_button.clicked.connect(self.reject)
-        
+
         button_layout.addStretch()
         button_layout.addWidget(self.ok_button)
         button_layout.addWidget(self.cancel_button)
@@ -141,45 +144,49 @@ class CarrierListMigrationDialog(QDialog):
         """Create a table showing carrier differences between databases."""
         table = QTableWidget()
         table.setColumnCount(3)
-        table.setHorizontalHeaderLabels(["Carrier Name", "Current Status", "New Status"])
-        
+        table.setHorizontalHeaderLabels(
+            ["Carrier Name", "Current Status", "New Status"]
+        )
+
         # Get all unique carrier names
         all_carriers = set()
         for carrier in self.existing_carriers:
             all_carriers.add(carrier["carrier_name"])
         for carrier in self.new_carriers:
             all_carriers.add(carrier["carrier_name"])
-            
+
         # Sort carriers alphabetically
         all_carriers = sorted(all_carriers)
-        
+
         # Create lookup dictionaries
-        existing_dict = {c["carrier_name"]: c["list_status"] for c in self.existing_carriers}
+        existing_dict = {
+            c["carrier_name"]: c["list_status"] for c in self.existing_carriers
+        }
         new_dict = {c["carrier_name"]: c["list_status"] for c in self.new_carriers}
-        
+
         # Populate table
         table.setRowCount(len(all_carriers))
         for i, carrier in enumerate(all_carriers):
             # Carrier name
             name_item = QTableWidgetItem(carrier)
             table.setItem(i, 0, name_item)
-            
+
             # Current status
             current_status = existing_dict.get(carrier, "Not present")
             current_item = QTableWidgetItem(current_status)
             table.setItem(i, 1, current_item)
-            
+
             # New status
             new_status = new_dict.get(carrier, "Not present")
             new_item = QTableWidgetItem(new_status)
             table.setItem(i, 2, new_item)
-            
+
             # Highlight differences
             if current_status != new_status:
                 for col in range(3):
                     item = table.item(i, col)
                     item.setBackground(Qt.darkRed)
-        
+
         # Adjust column widths
         table.resizeColumnsToContents()
         return table
@@ -194,12 +201,12 @@ class CarrierListMigrationDialog(QDialog):
                 shutil.copy2("carrier_list.json", backup_path)
             except Exception as e:
                 print(f"Warning: Failed to create backup: {e}")
-        
+
         super().accept()
 
     def get_result(self):
         """Get the dialog results.
-        
+
         Returns:
             tuple: (selected_option, should_backup)
         """
