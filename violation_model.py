@@ -166,14 +166,13 @@ class ViolationModel(QStandardItemModel):
         """
         row = index.row()
         col = index.column()
-        col_name = self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+        col_name = self.header_data(col, Qt.Horizontal, Qt.DisplayRole)
         value = self.data(index, Qt.DisplayRole)
 
         # Start with row-level highlighting for violations
         background_color = SUMMARY_ROW_COLOR if self.has_violation_in_row(row) else None
 
         # Add ViolationRemedies tab type handling
-        # (Violations Summary BIG PARENT tab)
         if self.tab_type == ViolationType.VIOLATION_REMEDIES:
             if self.is_summary:
                 # Weekly Remedy Total in teal
@@ -185,7 +184,7 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # All other numeric columns in purple when > 0
-                elif col_name not in ["carrier_name", "list_status"]:
+                if col_name not in ["carrier_name", "list_status"]:
                     try:
                         number = float(str(value))
                         if number > 0:
@@ -202,7 +201,7 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # All other numeric columns in purple when > 0
-                elif col_name not in ["carrier_name", "list_status"]:
+                if col_name not in ["carrier_name", "list_status"]:
                     try:
                         number = float(str(value))
                         if number > 0:
@@ -211,7 +210,7 @@ class ViolationModel(QStandardItemModel):
                         pass
 
         # Then apply specific cell colors that should override the row highlight
-        elif self.tab_type == ViolationType.EIGHT_FIVE_D:
+        if self.tab_type == ViolationType.EIGHT_FIVE_D:
             if self.is_summary:
                 # Weekly Remedy Total in teal
                 if col_name == "Weekly Remedy Total":
@@ -222,7 +221,7 @@ class ViolationModel(QStandardItemModel):
                     except (ValueError, TypeError, IndexError):
                         pass
                 # Individual day columns in darker purple when > 0
-                elif col_name not in [
+                if col_name not in [
                     "Carrier Name",
                     "List Status",
                 ]:  # Skip non-numeric columns
@@ -397,7 +396,7 @@ class ViolationModel(QStandardItemModel):
                         # Find list status column by checking headers
                         list_status_col = None
                         for i in range(self.columnCount()):
-                            header = self.headerData(i, Qt.Horizontal, Qt.DisplayRole)
+                            header = self.header_data(i, Qt.Horizontal, Qt.DisplayRole)
                             if header in ["List Status", "list_status"]:
                                 list_status_col = i
                                 break
@@ -464,7 +463,7 @@ class ViolationModel(QStandardItemModel):
     def has_violation_in_row(self, row):
         """Check if the row contains any violations."""
         for col in range(self.columnCount()):
-            header = self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+            header = self.header_data(col, Qt.Horizontal, Qt.DisplayRole)
             if header in ["violation_type", "Violation Type"]:
                 value = self.data(self.index(row, col), Qt.DisplayRole)
                 # Check for both types of non-violation messages
@@ -544,12 +543,12 @@ class ViolationModel(QStandardItemModel):
             # If violation_type column doesn't exist, return carrier_name column (0)
             return 0
 
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        """Override headerData to display the column names from the DataFrame."""
+    def header_data(self, section, orientation, role=Qt.DisplayRole):
+        """Override header_data to display the column names from the DataFrame."""
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             if section < len(self.df.columns):
                 return str(self.df.columns[section])
-        return super().headerData(section, orientation, role)
+        return super().header_data(section, orientation, role)
 
     def get_cell_metadata(self, index):
         """Get metadata for a specific cell including background and text colors."""
@@ -585,7 +584,7 @@ class ViolationModel(QStandardItemModel):
         """
         # Get column headers
         headers = [
-            self.headerData(i, Qt.Horizontal, Qt.DisplayRole)
+            self.header_data(i, Qt.Horizontal, Qt.DisplayRole)
             for i in range(self.columnCount())
         ]
 
@@ -638,7 +637,7 @@ class ViolationModel(QStandardItemModel):
         """Override sort to use numeric sorting for numeric columns."""
         try:
             self.layoutAboutToBeChanged.emit()
-            header = self.headerData(column, Qt.Horizontal, Qt.DisplayRole)
+            header = self.header_data(column, Qt.Horizontal, Qt.DisplayRole)
 
             # Get the actual column name from the DataFrame
             df_column = self.df.columns[column]
@@ -727,37 +726,25 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
         self.hidden_columns = set(columns)
         self.invalidateFilter()
 
-    def filterAcceptsColumn(self, source_column, source_parent):
+    def filter_accepts_column(self, source_column, _):
         """Determine if a column should be shown in the view.
 
         Args:
             source_column (int): Column index in source model
-            source_parent (QModelIndex): Parent index in source model
+            _: Unused parent index parameter
 
         Returns:
             bool: True if column should be shown, False if hidden
         """
         source_model = self.sourceModel()
         if source_model:
-            column_name = source_model.headerData(
+            column_name = source_model.header_data(
                 source_column, Qt.Horizontal, Qt.DisplayRole
             )
             return column_name not in self.hidden_columns
         return True
 
-    def set_filter(self, text, filter_type="name"):
-        """Set the current filter criteria.
-
-        Args:
-            text (str): The filter text to match against
-            filter_type (str): The type of filter to apply
-                (e.g. 'name', 'list_status', 'violations')
-        """
-        self.filter_type = filter_type
-        self.filter_text = text.lower() if text else ""
-        self.invalidateFilter()
-
-    def filterAcceptsRow(self, source_row, source_parent):
+    def filter_accepts_row(self, source_row, source_parent):
         """Determine if a row should be included in the filtered view.
 
         Implements the filtering logic for violations based on:
@@ -781,7 +768,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             # Get carrier name column
             carrier_col = None
             for col in range(source_model.columnCount(source_parent)):
-                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                header = source_model.header_data(col, Qt.Horizontal, Qt.DisplayRole)
                 if header and header.lower() in ["carrier_name", "carrier name"]:
                     carrier_col = col
                     break
@@ -796,7 +783,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             # Get list status column
             status_col = None
             for col in range(source_model.columnCount(source_parent)):
-                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                header = source_model.header_data(col, Qt.Horizontal, Qt.DisplayRole)
                 if header and header.lower() in ["list_status", "list status"]:
                     status_col = col
                     break
@@ -811,7 +798,7 @@ class ViolationFilterProxyModel(QSortFilterProxyModel):
             # Check remedy total column
             remedy_col = None
             for col in range(source_model.columnCount(source_parent)):
-                header = source_model.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+                header = source_model.header_data(col, Qt.Horizontal, Qt.DisplayRole)
                 if header and header.lower() in ["remedy_total", "remedy total"]:
                     remedy_col = col
                     break
