@@ -54,7 +54,7 @@ class CustomTitleBarWidget(QWidget):
         super().__init__(parent)
         self.parent = parent
         self.setFixedHeight(40)
-        self.dragPos = None
+        self.drag_pos = None
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -109,35 +109,40 @@ class CustomTitleBarWidget(QWidget):
         """
         )
 
-    def mousePressEvent(self, event):
+    def mouse_press_event(self, event):
         """Handle mouse press events for window dragging.
 
         Args:
             event (QMouseEvent): The mouse event
         """
         if event.button() == Qt.LeftButton:
-            self.dragPos = event.globalPos() - self.parent.frameGeometry().topLeft()
+            self.drag_pos = event.globalPos() - self.parent.frameGeometry().topLeft()
             event.accept()
 
-    def mouseMoveEvent(self, event):
+    def mouse_move_event(self, event):
         """Handle mouse move events for window dragging.
 
         Args:
             event (QMouseEvent): The mouse event
         """
-        if event.buttons() == Qt.LeftButton and self.dragPos is not None:
-            self.parent.move(event.globalPos() - self.dragPos)
+        if event.buttons() == Qt.LeftButton and self.drag_pos is not None:
+            self.parent.move(event.globalPos() - self.drag_pos)
             event.accept()
 
-    def mouseReleaseEvent(self, event):
+    def mouse_release_event(self, event):
         """Handle mouse release events for window dragging.
 
         Args:
             event (QMouseEvent): The mouse event
         """
         if event.button() == Qt.LeftButton:
-            self.dragPos = None
+            self.drag_pos = None
             event.accept()
+
+    # Alias Qt method names to maintain compatibility
+    mousePressEvent = mouse_press_event
+    mouseMoveEvent = mouse_move_event
+    mouseReleaseEvent = mouse_release_event
 
 
 class CustomProgressDialog(QProgressDialog):
@@ -1062,7 +1067,7 @@ class CustomSizeGrip(QSizeGrip):
         super().__init__(parent)
         self.setFixedSize(20, 20)
 
-    def paintEvent(self, event):
+    def paint_event(self, event):
         """Paint the classic diagonal dot pattern."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -1088,6 +1093,9 @@ class CustomSizeGrip(QSizeGrip):
                 x = self.width() - (4 - i) * spacing + j * spacing
                 y = self.height() - (i + 1) * spacing
                 painter.drawEllipse(x, y, dot_size, dot_size)
+
+    # Alias Qt method name to maintain compatibility
+    paintEvent = paint_event
 
 
 # Make sure these classes are available for import
