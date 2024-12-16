@@ -181,6 +181,23 @@ def apply_material_dark_theme(app: QApplication):
         QScrollBar::add-page, QScrollBar::sub-page {
             background: none;
         }
+        /* Dialog Styling */
+        QDialog {
+            background-color: #121212;
+            border: none;
+            padding: 1px;
+        }
+        QDialog > QWidget {
+            background-color: #121212;
+            border: 2px solid #1A1A1A;
+            border-bottom: 2px solid #252525;
+        }
+        QDialog QLabel {
+            color: #FFFFFF;
+        }
+        QDialog QPushButton {
+            min-width: 250px;
+        }
         /* Top Button Row Styling */
         QWidget#ButtonContainer {
             background-color: #1E1E1E;

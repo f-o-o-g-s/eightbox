@@ -8,8 +8,15 @@ This module provides a dialog interface for users to:
 - Save/load configuration
 """
 
-from PyQt5.QtCore import Qt
+import os
+import sqlite3
+
+from PyQt5.QtCore import (
+    Qt,
+    pyqtSignal,
+)
 from PyQt5.QtWidgets import (
+    QDialog,
     QFileDialog,
     QLabel,
     QPushButton,
@@ -17,15 +24,21 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from custom_widgets import CustomTitleBarWidget
+from custom_widgets import (
+    CustomTitleBarWidget,
+    CustomWarningDialog,
+)
 
 
-class SettingsDialog(QWidget):
+class SettingsDialog(QDialog):
     """Dialog interface for application settings and configuration.
 
     Provides a user interface for viewing and modifying application settings,
     including database connections and user preferences.
     """
+
+    # Signal emitted when database path changes and is validated
+    pathChanged = pyqtSignal(str)
 
     def __init__(self, current_path, parent=None):
         super().__init__(parent)
@@ -45,160 +58,214 @@ class SettingsDialog(QWidget):
         self.title_bar = CustomTitleBarWidget(title="Settings", parent=self)
         layout.addWidget(self.title_bar)
 
-        # Content widget with dark background
+        # Content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            "background-color: #1E1E1E;"
-        )  # Dark background to match theme
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(
-            20, 20, 20, 20
-        )  # Increased margins for better spacing
-        content_layout.setSpacing(15)  # Increased spacing between elements
+        content_layout.setContentsMargins(20, 20, 20, 20)
+        content_layout.setSpacing(15)
 
-        # Labels with better styling
+        # Labels
         path_label = QLabel("Current Database Path")
-        path_label.setStyleSheet("color: #FFFFFF; font-size: 12px; font-weight: bold;")
+        path_label.setStyleSheet("font-size: 12px; font-weight: bold;")
 
         self.path_display = QLabel(self.mandates_db_path)
         self.path_display.setStyleSheet(
             """
-            color: #9575CD;  /* Lighter purple for path */
+            color: #9575CD;
             font-size: 11px;
             padding: 5px;
         """
         )
         self.path_display.setWordWrap(True)
+        self.path_display.setMinimumWidth(360)
 
         status_label = QLabel("Status")
-        status_label.setStyleSheet(
-            "color: #FFFFFF; font-size: 12px; font-weight: bold;"
-        )
+        status_label.setStyleSheet("font-size: 12px; font-weight: bold;")
 
         self.status_display = QLabel("Connected ✓")
         self.status_display.setStyleSheet(
             """
-            color: #81C784;  /* Material green */
+            color: #81C784;
             font-size: 11px;
             padding: 5px;
         """
         )
 
-        # Buttons with material styling
-        button_style = """
-            QPushButton {
-                background-color: #9575CD;  /* Material purple */
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #B39DDB;  /* Lighter purple on hover */
-            }
-            QPushButton:pressed {
-                background-color: #7E57C2;  /* Darker purple when pressed */
-            }
-        """
+        # Button container
+        button_container = QWidget()
+        button_layout = QVBoxLayout(button_container)
+        button_layout.setSpacing(10)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Check for auto-detected path
+        auto_detected_path = None
+        if hasattr(self.parent, "auto_detect_klusterbox_path"):
+            auto_detected_path = self.parent.auto_detect_klusterbox_path()
+
+        # Add auto-detect button if available and not currently using it
+        if auto_detected_path and auto_detected_path != self.mandates_db_path:
+            use_auto_detect_button = QPushButton("Use Auto-detected Klusterbox Path")
+            use_auto_detect_button.clicked.connect(
+                lambda: self.use_auto_detected_path(auto_detected_path)
+            )
+            button_layout.addWidget(use_auto_detect_button)
 
         set_path_button = QPushButton("Set Database Path")
         set_path_button.clicked.connect(self.set_database_path)
-        set_path_button.setFixedWidth(200)
-        set_path_button.setStyleSheet(button_style)
+        button_layout.addWidget(set_path_button)
 
         save_button = QPushButton("Save and Close")
-        save_button.clicked.connect(self.accept)
-        save_button.setFixedWidth(200)
-        save_button.setStyleSheet(button_style)
+        save_button.clicked.connect(self.apply_settings)
+        button_layout.addWidget(save_button)
 
         # Add widgets to content layout
         content_layout.addWidget(path_label)
         content_layout.addWidget(self.path_display)
-        content_layout.addSpacing(10)  # Additional spacing between sections
+        content_layout.addSpacing(10)
         content_layout.addWidget(status_label)
         content_layout.addWidget(self.status_display)
-        content_layout.addSpacing(20)  # More spacing before buttons
-        content_layout.addWidget(set_path_button, alignment=Qt.AlignCenter)
-        content_layout.addWidget(save_button, alignment=Qt.AlignCenter)
-        content_layout.addStretch()  # Push everything up
+        content_layout.addSpacing(20)
+        content_layout.addWidget(button_container, alignment=Qt.AlignCenter)
+        content_layout.addStretch()
 
         # Add content widget to main layout
         layout.addWidget(content_widget)
 
-        # Set a fixed size
-        self.setFixedSize(400, 337)
+        # Set minimum size
+        self.setMinimumSize(450, 400)
+        self.adjustSize()
 
     def mouse_press_event(self, event):
-        """Handle mouse press events for window dragging.
-
-        Captures the initial position when the user clicks on the window,
-        enabling window dragging functionality.
-
-        Args:
-            event (QMouseEvent): The mouse press event containing position data
-        """
+        """Handle mouse press events for window dragging."""
         self.drag_pos = event.globalPos()
 
     def mouse_move_event(self, event):
-        """Handle mouse move events for window dragging.
-
-        Updates the window position as the user drags, creating a smooth
-        window movement effect.
-
-        Args:
-            event (QMouseEvent): The mouse move event containing position data
-        """
+        """Handle mouse move events for window dragging."""
         if event.buttons() == Qt.LeftButton:
             self.move(self.pos() + event.globalPos() - self.drag_pos)
             self.drag_pos = event.globalPos()
 
     def mouse_release_event(self):
-        """Handle mouse release events for window dragging.
-
-        Cleans up after window dragging is complete.
-        """
+        """Handle mouse release events for window dragging."""
         self.drag_pos = None
 
-    def hide_event(self, event):
-        """Handle window hide events.
-
-        Performs cleanup when the settings dialog is hidden.
+    def validate_database(self, path):
+        """Validate that the given path points to a valid SQLite database.
 
         Args:
-            event (QHideEvent): The hide event
-        """
+            path (str): Path to validate
 
-    def accept(self):
-        """Accept the dialog changes and close.
-
-        Hides the dialog without applying settings. Settings are only applied
-        when the Apply button is clicked.
+        Returns:
+            bool: True if valid, False otherwise
         """
-        self.hide()
+        if not os.path.exists(path):
+            self.update_status("Error: Database file not found", error=True)
+            return False
+
+        try:
+            # Attempt to connect to the database
+            conn = sqlite3.connect(path)
+
+            # Check for required tables
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = {row[0] for row in cursor.fetchall()}
+
+            required_tables = {"rings3", "carriers"}
+            if not required_tables.issubset(tables):
+                missing = required_tables - tables
+                self.update_status(
+                    f"Error: Missing tables: {', '.join(missing)}", error=True
+                )
+                conn.close()
+                return False
+
+            conn.close()
+            self.update_status("Connected ✓")
+            return True
+
+        except sqlite3.Error as e:
+            self.update_status(f"Error: Invalid database - {str(e)}", error=True)
+            return False
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}", error=True)
+            return False
+
+    def update_status(self, message, error=False):
+        """Update the status display with a message.
+
+        Args:
+            message (str): Status message to display
+            error (bool): Whether this is an error message
+        """
+        self.status_display.setText(message)
+        if error:
+            self.status_display.setStyleSheet(
+                """
+                color: #EF5350;
+                font-size: 11px;
+                padding: 5px;
+            """
+            )
+        else:
+            self.status_display.setStyleSheet(
+                """
+                color: #81C784;
+                font-size: 11px;
+                padding: 5px;
+            """
+            )
+
+    def use_auto_detected_path(self, path):
+        """Use the auto-detected Klusterbox database path.
+
+        Args:
+            path (str): The auto-detected path to use
+        """
+        if self.validate_database(path):
+            self.mandates_db_path = path
+            self.path_display.setText(self.mandates_db_path)
+            self.update_status("Using auto-detected Klusterbox path")
+        else:
+            CustomWarningDialog.warning(
+                self,
+                "Invalid Database",
+                "The auto-detected database is not valid.\n"
+                "Please select a valid database file manually.",
+            )
 
     def set_database_path(self):
-        """Open file dialog to select and set new database path.
-
-        Opens a file selection dialog filtered for SQLite database files.
-        If a file is selected, updates the database path and display label.
-        """
+        """Open file dialog to select and set new database path."""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select Database File",
             "",
             "SQLite Database (*.sqlite);;All Files (*.*)",
         )
+
         if file_path:
-            self.mandates_db_path = file_path
-            self.path_display.setText(self.mandates_db_path)
+            # Validate the selected database
+            if self.validate_database(file_path):
+                self.mandates_db_path = file_path
+                self.path_display.setText(self.mandates_db_path)
+            else:
+                CustomWarningDialog.warning(
+                    self,
+                    "Invalid Database",
+                    "The selected file is not a valid Klusterbox database.\n"
+                    "Please select a valid database file.",
+                )
 
     def apply_settings(self):
-        """Apply and save the current settings.
-
-        Updates the application configuration with the current dialog values
-        and saves them to the settings file. Handles:
-        - Database path validation
-        - Settings persistence
-        - Configuration updates
-        """
+        """Apply and save the current settings."""
+        if self.validate_database(self.mandates_db_path):
+            # Emit the pathChanged signal with the new path
+            self.pathChanged.emit(self.mandates_db_path)
+            self.hide()
+        else:
+            CustomWarningDialog.warning(
+                self,
+                "Invalid Database",
+                "Cannot save settings with an invalid database path.\n"
+                "Please select a valid database file.",
+            )

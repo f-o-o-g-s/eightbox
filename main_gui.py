@@ -20,6 +20,7 @@ from PyQt5.QtCore import (
 from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QAction,
     QApplication,
+    QDialog,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -37,7 +38,6 @@ from custom_widgets import (
     CustomInfoDialog,
     CustomProgressDialog,
     CustomSizeGrip,
-    CustomWarningDialog,
 )
 
 # Custom modules
@@ -237,6 +237,7 @@ class MainApp(QMainWindow):
 
     VERSION = "2024.0.5.0"  # Updated by release.py
     BUILD_TIME = "2024-12-16 09:45"  # Updated by release.py
+    SETTINGS_FILE = "app_settings.json"  # File to store application settings
 
     def __init__(self):
         super().__init__()
@@ -322,8 +323,8 @@ class MainApp(QMainWindow):
 
         self.setCentralWidget(container)
 
-        # Initialize database path
-        self.mandates_db_path = self.auto_detect_klusterbox_path()
+        # Initialize database path from settings or auto-detect
+        self.mandates_db_path = self.load_database_path()
 
         # Initialize dynamic panes
         self.date_selection_pane = None
@@ -828,26 +829,25 @@ class MainApp(QMainWindow):
 
         # Second check: Carrier List validation
         if not os.path.exists("carrier_list.json"):
-            response = CustomWarningDialog.warning(
+            CustomInfoDialog.information(
                 self,
                 "Carrier List Required",
                 "The carrier list needs to be configured and saved before processing dates.\n\n"
                 "1. Configure your carrier list\n"
-                "2. Click 'Save/Apply' to save your changes\n\n"
-                "Would you like to open the Carrier List setup now?",
+                "2. Click 'Save/Apply' to save your changes",
             )
 
-            if response == QMessageBox.Yes:
-                self.carrier_list_button.setChecked(True)
-                self.toggle_carrier_list_pane()
+            # Automatically open carrier list pane
+            self.carrier_list_button.setChecked(True)
+            self.toggle_carrier_list_pane()
 
-                if (
-                    hasattr(self, "carrier_list_pane")
-                    and self.carrier_list_pane is not None
-                ):
-                    self.carrier_list_pane.data_updated.connect(
-                        lambda: self.retry_apply_date_range()
-                    )
+            if (
+                hasattr(self, "carrier_list_pane")
+                and self.carrier_list_pane is not None
+            ):
+                self.carrier_list_pane.data_updated.connect(
+                    lambda: self.retry_apply_date_range()
+                )
             return
 
         # Third check: Carrier List content validation
@@ -1149,6 +1149,8 @@ class MainApp(QMainWindow):
             from settings_dialog import SettingsDialog
 
             self.settings_dialog = SettingsDialog(self.mandates_db_path, self)
+            # Connect the pathChanged signal
+            self.settings_dialog.pathChanged.connect(self.handle_database_path_change)
             self.settings_dialog.show()
         else:
             self.settings_dialog.activateWindow()  # Bring existing window to front
@@ -1487,10 +1489,29 @@ class MainApp(QMainWindow):
     # This query generates the base dataframe for the entire program.
     # The resulting dataframe will be modified by subsequent methods.
     def fetch_clock_ring_data(self, start_date=None, end_date=None):
-        """Fetch clock ring data for the selected date range from mandates.sqlite.
+        """Fetch clock ring data for the selected date range from mandates.sqlite."""
+        # First validate database path
+        if not self.mandates_db_path or not os.path.exists(self.mandates_db_path):
+            QMessageBox.critical(
+                self,
+                "Database Error",
+                "No valid database path configured.\n"
+                "Please set a valid database path in Settings.",
+            )
+            return pd.DataFrame(
+                columns=[
+                    "carrier_name",
+                    "rings_date",
+                    "list_status",
+                    "total",
+                    "moves",
+                    "code",
+                    "leave_type",
+                    "leave_time",
+                    "display_indicators",
+                ]
+            )
 
-        Retrieves clock ring data and fills missing entries using pandas.
-        """
         query = """
         SELECT
             r.carrier_name,
@@ -1514,6 +1535,7 @@ class MainApp(QMainWindow):
         ) c ON r.carrier_name = c.carrier_name
         WHERE r.rings_date BETWEEN ? AND ?
         """
+
         try:
             # Validate the date_selection_pane and calendar
             if (
@@ -1607,33 +1629,29 @@ class MainApp(QMainWindow):
 
         except (AttributeError, ValueError) as e:
             QMessageBox.critical(self, "Calendar Error", str(e))
-            return pd.DataFrame(
-                columns=[
-                    "carrier_name",
-                    "rings_date",
-                    "list_status",
-                    "total",
-                    "moves",
-                    "code",
-                    "leave_type",
-                    "display_indicators",
-                ]
+        except sqlite3.Error as e:
+            QMessageBox.critical(
+                self, "Database Error", f"Failed to fetch data: {str(e)}"
+            )
+        except Exception as e:
+            QMessageBox.critical(
+                self, "Error", f"An unexpected error occurred: {str(e)}"
             )
 
-        except Exception as e:
-            QMessageBox.critical(self, "Database Error", str(e))
-            return pd.DataFrame(
-                columns=[
-                    "carrier_name",
-                    "rings_date",
-                    "list_status",
-                    "total",
-                    "moves",
-                    "code",
-                    "leave_type",
-                    "display_indicators",
-                ]
-            )
+        # Return empty DataFrame with correct columns on any error
+        return pd.DataFrame(
+            columns=[
+                "carrier_name",
+                "rings_date",
+                "list_status",
+                "total",
+                "moves",
+                "code",
+                "leave_type",
+                "leave_time",
+                "display_indicators",
+            ]
+        )
 
     def show_violation_documentation(self):
         """Show the documentation dialog."""
@@ -1684,9 +1702,11 @@ class MainApp(QMainWindow):
             from settings_dialog import SettingsDialog
 
             self.settings_dialog = SettingsDialog(self.mandates_db_path, self)
+            # Connect the pathChanged signal
+            self.settings_dialog.pathChanged.connect(self.handle_database_path_change)
             self.settings_dialog.show()
         else:
-            self.settings_dialog.activateWindow()
+            self.settings_dialog.activateWindow()  # Bring existing window to front
 
     def show_documentation(self):
         """Show the documentation dialog.
@@ -1898,6 +1918,267 @@ class MainApp(QMainWindow):
         """Initialize signal/slot connections."""
         # Replace lambda with direct method reference
         QTimer.singleShot(100, self.apply_date_range)
+
+    def load_database_path(self):
+        """Load database path from settings file or auto-detect.
+
+        Returns:
+            str: Path to the database file
+        """
+        try:
+            if os.path.exists(self.SETTINGS_FILE):
+                with open(self.SETTINGS_FILE, "r") as f:
+                    settings = json.load(f)
+                    saved_path = settings.get("database_path")
+                    if saved_path and os.path.exists(saved_path):
+                        # Validate the saved path
+                        if self.validate_database_path(saved_path):
+                            return saved_path
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+
+        # Fall back to auto-detection if loading fails
+        return self.auto_detect_klusterbox_path()
+
+    def save_database_path(self, path):
+        """Save database path to settings file.
+
+        Args:
+            path (str): Path to save
+        """
+        try:
+            settings = {}
+            if os.path.exists(self.SETTINGS_FILE):
+                with open(self.SETTINGS_FILE, "r") as f:
+                    settings = json.load(f)
+
+            settings["database_path"] = path
+
+            with open(self.SETTINGS_FILE, "w") as f:
+                json.dump(settings, f, indent=4)
+        except Exception as e:
+            print(f"Error saving settings: {e}")
+            QMessageBox.warning(
+                self, "Settings Error", f"Failed to save settings: {str(e)}"
+            )
+
+    def validate_database_path(self, path):
+        """Validate that the given path points to a valid SQLite database.
+
+        Args:
+            path (str): Path to validate
+
+        Returns:
+            bool: True if valid, False otherwise
+        """
+        if not os.path.exists(path):
+            return False
+
+        try:
+            conn = sqlite3.connect(path)
+            cursor = conn.cursor()
+
+            # Check for required tables
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = {row[0] for row in cursor.fetchall()}
+
+            required_tables = {"rings3", "carriers"}
+            conn.close()
+
+            return required_tables.issubset(tables)
+
+        except Exception:
+            return False
+
+    def handle_database_path_change(self, new_path):
+        """Handle database path changes from settings dialog.
+
+        Args:
+            new_path (str): New database path
+        """
+        if self.validate_database_path(new_path):
+            old_path = self.mandates_db_path
+
+            # If carrier_list.json exists, check for differences
+            if os.path.exists("carrier_list.json"):
+                new_carriers = self.get_carriers_from_database(new_path)
+                existing_carriers = self.load_carrier_list()
+
+                if self.carriers_differ(new_carriers, existing_carriers):
+                    # Import the migration dialog here to avoid circular imports
+                    from carrier_list_migration_dialog import CarrierListMigrationDialog
+
+                    # Show migration dialog
+                    migration_dialog = CarrierListMigrationDialog(
+                        existing_carriers, new_carriers, self
+                    )
+                    if migration_dialog.exec_() == QDialog.Accepted:
+                        # Handle the chosen migration option
+                        option, _ = migration_dialog.get_result()
+                        try:
+                            self.handle_carrier_migration(
+                                option, existing_carriers, new_carriers
+                            )
+                        except Exception as e:
+                            QMessageBox.critical(
+                                self,
+                                "Migration Error",
+                                f"Failed to migrate carrier list: {str(e)}\n"
+                                "Reverting to previous database.",
+                            )
+                            return
+                    else:
+                        return  # User cancelled
+
+            # Continue with database path change
+            self.mandates_db_path = new_path
+            self.save_database_path(new_path)
+
+            # Update carrier list pane with new path
+            if (
+                hasattr(self, "carrier_list_pane")
+                and self.carrier_list_pane is not None
+            ):
+                # First destroy the old carrier list pane
+                self.carrier_list_pane.hide()
+                self.carrier_list_pane.deleteLater()
+
+                # Create a new carrier list pane with the new database path
+                self.carrier_list_pane = CarrierListPane(new_path, parent=self)
+                self.carrier_list_pane.request_apply_date_range.connect(
+                    self.apply_date_range
+                )
+
+                # If the carrier list pane was visible, show the new one
+                if self.carrier_list_button.isChecked():
+                    self.carrier_list_pane.show()
+                    self.carrier_list_pane.resize(650, 400)
+
+            # Show success message
+            CustomInfoDialog.information(
+                self, "Database Updated", "Database path has been updated successfully."
+            )
+
+            # Refresh data if date range is selected
+            if (
+                hasattr(self, "date_selection_pane")
+                and self.date_selection_pane is not None
+            ):
+                QTimer.singleShot(100, self.apply_date_range)
+        else:
+            # Revert to previous path
+            self.mandates_db_path = (
+                old_path if old_path else self.auto_detect_klusterbox_path()
+            )
+            QMessageBox.critical(
+                self,
+                "Database Error",
+                "Failed to connect to the new database.\n"
+                "Reverting to previous database path.",
+            )
+
+    def get_carriers_from_database(self, db_path):
+        """Get carrier list from database.
+
+        Args:
+            db_path (str): Path to the database
+
+        Returns:
+            list: List of carrier dictionaries
+        """
+        try:
+            with sqlite3.connect(db_path) as conn:
+                query = """
+                SELECT carrier_name, list_status
+                FROM carriers
+                WHERE (carrier_name, effective_date) IN (
+                    SELECT carrier_name, MAX(effective_date)
+                    FROM carriers
+                    GROUP BY carrier_name
+                )
+                """
+                cursor = conn.cursor()
+                cursor.execute(query)
+                return [
+                    {"carrier_name": name, "list_status": status}
+                    for name, status in cursor.fetchall()
+                ]
+        except Exception as e:
+            print(f"Error getting carriers from database: {e}")
+            return []
+
+    def load_carrier_list(self):
+        """Load the current carrier list from JSON.
+
+        Returns:
+            list: List of carrier dictionaries
+        """
+        try:
+            if os.path.exists("carrier_list.json"):
+                with open("carrier_list.json", "r") as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"Error loading carrier list: {e}")
+        return []
+
+    def carriers_differ(self, carriers1, carriers2):
+        """Check if two carrier lists are different.
+
+        Args:
+            carriers1 (list): First list of carrier dictionaries
+            carriers2 (list): Second list of carrier dictionaries
+
+        Returns:
+            bool: True if lists differ, False if same
+        """
+        # Create sets of carrier names and statuses
+        set1 = {(c["carrier_name"], c["list_status"]) for c in carriers1}
+        set2 = {(c["carrier_name"], c["list_status"]) for c in carriers2}
+        return set1 != set2
+
+    def handle_carrier_migration(self, option, existing_carriers, new_carriers):
+        """Handle carrier list migration based on selected option.
+
+        Args:
+            option (str): Selected migration option
+            existing_carriers (list): Current carrier list
+            new_carriers (list): Carriers from new database
+        """
+        try:
+            if option == "keep_existing":
+                # Nothing to do, keep existing file
+                return
+
+            elif option == "import_new":
+                # Use carriers from new database
+                with open("carrier_list.json", "w") as f:
+                    json.dump(new_carriers, f, indent=4)
+
+            elif option == "merge":
+                # Create lookup for existing carriers
+                existing_dict = {c["carrier_name"]: c for c in existing_carriers}
+
+                # Start with existing carriers
+                merged = existing_carriers.copy()
+
+                # Add new carriers that don't exist
+                for new_carrier in new_carriers:
+                    name = new_carrier["carrier_name"]
+                    if name not in existing_dict:
+                        merged.append(new_carrier)
+
+                # Save merged list
+                with open("carrier_list.json", "w") as f:
+                    json.dump(merged, f, indent=4)
+
+            elif option == "start_fresh":
+                # Delete carrier_list.json
+                if os.path.exists("carrier_list.json"):
+                    os.remove("carrier_list.json")
+
+        except Exception as e:
+            print(f"Error during carrier migration: {e}")
+            raise
 
 
 if __name__ == "__main__":

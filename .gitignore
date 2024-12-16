@@ -1,5 +1,9 @@
 # Application generated files
 carrier_list.json
+progress.md
+carrier_list_backup*.json
+carrier_list*.bak
+app_settings.json
 
 # Python environment
 __pycache__/
