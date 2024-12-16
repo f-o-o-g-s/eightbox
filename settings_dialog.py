@@ -31,6 +31,7 @@ class SettingsDialog(QWidget):
         super().__init__(parent)
         self.parent = parent
         self.mandates_db_path = current_path
+        self.drag_pos = None
 
         # Set window flags for frameless window
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
