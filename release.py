@@ -133,10 +133,10 @@ def get_new_version(current_version, update_type):
         if year != current_year:
             return f"{current_year}.0.0.0"
         return f"{year}.{major + 1}.0.0"
-    elif update_type == 2:  # Minor
+    if update_type == 2:  # Minor
         return f"{year}.{major}.{minor + 1}.0"
-    else:  # Patch
-        return f"{year}.{major}.{minor}.{patch + 1}"
+    # Patch
+    return f"{year}.{major}.{minor}.{patch + 1}"
 
 
 def get_current_version():
