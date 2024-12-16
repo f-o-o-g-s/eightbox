@@ -4,7 +4,6 @@ Contains specialized widgets and UI components that extend PyQt's base widgets
 with additional functionality specific to the application's needs.
 """
 
-# Create a new file: custom_widgets.py
 from PyQt5.QtCore import (
     QByteArray,
     Qt,
@@ -25,18 +24,19 @@ from PyQt5.QtWidgets import (
     QProgressBar,
     QProgressDialog,
     QPushButton,
+    QScrollArea,
     QSizeGrip,
     QVBoxLayout,
     QWidget,
 )
 
-CHECKMARK_ICON = """
-iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA
-B3RJTUUH4QgPDRknF/OPiQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUH
-AAAAhUlEQVQoz62RMQ7CMAxF30/UhQk2RqZyhB4Bwd5D9Ai9UY/AwFRGJgYWJKeqVFVVBYnYbFmW
-n/5vGzyJme0B4JxbhhCOvfeXlNJt7KwBQkRkZ2ZrEZkD1xjjKed8rLWu+nPe+wUwE5E9cAaOIYTT
-0Gm0OQPvVc65ZQjh2Hu/pJRuY+cbMh1wQZTz4KoAAAAASUVORK5CYII=
-"""
+# Base64 encoded checkmark icon
+CHECKMARK_BASE64 = (
+    "PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Im"
+    "h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTAgM0w0LjUgOC41TDIgNiIgc3Ryb2tlPSJ3aGl0"
+    "ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz"
+    "48L3N2Zz4="
+)
 
 
 class CustomTitleBarWidget(QWidget):
@@ -886,7 +886,7 @@ class NewCarriersDialog(QDialog):
 
         # Create the checkmark icon
         pixmap = QPixmap()
-        pixmap.loadFromData(QByteArray.fromBase64(CHECKMARK_ICON.encode()))
+        pixmap.loadFromData(QByteArray.fromBase64(CHECKMARK_BASE64.encode()))
 
         # Set the icon as a property of the dialog
         self.setProperty("checkmark", pixmap)
@@ -927,10 +927,7 @@ class NewCarriersDialog(QDialog):
             }
             QCheckBox::indicator:checked {
                 background-color: #BB86FC;
-                image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb\
-3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJ\
-NMTAgM0w0LjUgOC41TDIgNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91b\
-mQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
+                image: url("data:image/svg+xml;base64,%s");
             }
             QCheckBox::indicator:hover {
                 border-color: #9965DA;
@@ -950,7 +947,12 @@ mQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
             QPushButton:pressed {
                 background-color: #7B4FAF;
             }
-        """
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            """
+            % CHECKMARK_BASE64
         )
 
         content_layout = QVBoxLayout(content_widget)
@@ -961,13 +963,28 @@ mQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
         label = QLabel("Select the new carriers to add to the carrier list:")
         content_layout.addWidget(label)
 
+        # Create a widget to hold checkboxes
+        checkbox_widget = QWidget()
+        checkbox_layout = QVBoxLayout(checkbox_widget)
+        checkbox_layout.setSpacing(8)
+
         # Add checkboxes for carriers
         self.checkboxes = {}
         for carrier in carriers:
             checkbox = QCheckBox(carrier)
             checkbox.setChecked(False)  # Start unchecked
             self.checkboxes[carrier] = checkbox
-            content_layout.addWidget(checkbox)
+            checkbox_layout.addWidget(checkbox)
+
+        # Add stretch to push checkboxes to the top
+        checkbox_layout.addStretch()
+
+        # Create scroll area for checkboxes
+        scroll = QScrollArea()
+        scroll.setWidget(checkbox_widget)
+        scroll.setWidgetResizable(True)
+        scroll.setMinimumHeight(300)  # Set minimum height
+        content_layout.addWidget(scroll)
 
         # Add buttons
         button_layout = QHBoxLayout()
@@ -988,7 +1005,7 @@ mQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
         self.setLayout(layout)
 
         # Set minimum size and adjust based on content
-        self.setMinimumSize(300, 150)
+        self.setMinimumSize(400, 500)  # Increased minimum size
         self.adjustSize()
 
         # Center on screen if no parent, otherwise center on parent
