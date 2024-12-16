@@ -78,6 +78,20 @@ This project uses:
 
 ## Version History
 
+### 2024.0.6.0
+- Added carrier list migration system for database changes
+- Improved settings dialog with better UI and database path handling
+- Added sanitized test database for development and testing
+- Enhanced project documentation and README
+- Fixed UI styling and dialog sizing issues
+- Improved code formatting and organization
+
+### 2024.0.5.0
+- Added test database sanitization functionality
+- Enhanced project tooling and documentation
+- Improved error handling and user feedback
+- Added comprehensive testing support
+
 ### 2024.0.4.0
 - Added 8.5.G violation detection and OTDL Maximization integration
 - Added comprehensive documentation for all violation types
