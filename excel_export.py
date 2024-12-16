@@ -287,7 +287,7 @@ class ExcelExporter:
                 continue
 
             # Extract table state using the utility function that handles proxy models
-            content_df, metadata_df, row_highlights_df = extract_table_state(table_view)
+            content_df, metadata_df, _ = extract_table_state(table_view)
 
             # Sort by carrier name for Excel export
             if (
@@ -335,7 +335,7 @@ class ExcelExporter:
                 worksheet.write(1, col, header, header_format)
 
             # Write data with formatting - using DataFrame's order
-            for row in range(len(content_df)):
+            for row_idx, row in enumerate(range(len(content_df))):
                 for col in range(len(content_df.columns)):
                     cell_format = workbook.add_format(
                         {
@@ -363,10 +363,10 @@ class ExcelExporter:
                         cell_format.set_font_color("#FFFFFF")
 
                     value = content_df.iloc[row, col]
-                    worksheet.write(row + 2, col, value, cell_format)
+                    worksheet.write(row_idx + 2, col, value, cell_format)
 
             # Auto-fit columns based on content and GUI widths
-            for col in range(len(content_df.columns)):
+            for _, col in enumerate(range(len(content_df.columns))):
                 # Get the column width from the GUI if available
                 gui_width = table_view.columnWidth(col)
                 excel_width = (
