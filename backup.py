@@ -4,8 +4,8 @@ import subprocess
 import zipfile
 from datetime import datetime
 
-project_dir = os.path.dirname(os.path.abspath(__file__))
-backup_dir = os.path.join(project_dir, "backups")
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKUP_DIR = os.path.join(PROJECT_DIR, "backups")
 
 
 def run_pre_commit():
@@ -21,6 +21,7 @@ def run_pre_commit():
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
+                check=False,
             )
 
             # If hooks passed successfully
@@ -62,17 +63,17 @@ def run_pre_commit():
     return False
 
 
-def create_zip_backup(project_dir, backup_dir):
+def create_zip_backup(source_dir, target_dir):
     """Create a ZIP backup of the project."""
     try:
         print("\nCreating ZIP backup...")
 
         # Create backup directory if it doesn't exist
-        os.makedirs(backup_dir, exist_ok=True)
+        os.makedirs(target_dir, exist_ok=True)
 
         # Generate backup filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        zip_path = os.path.join(backup_dir, f"backup_{timestamp}.zip")
+        zip_path = os.path.join(target_dir, f"backup_{timestamp}.zip")
 
         print("Copying files...")
 
@@ -90,21 +91,21 @@ def create_zip_backup(project_dir, backup_dir):
         exclude_extensions = {".pyc", ".pyo", ".pyd", ".zip"}
 
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(project_dir):
+            for root, dirs, files in os.walk(source_dir):
                 # Skip excluded directories
                 dirs[:] = [d for d in dirs if d not in exclude_dirs]
 
                 for file in files:
                     if not any(file.endswith(ext) for ext in exclude_extensions):
                         file_path = os.path.join(root, file)
-                        arcname = os.path.relpath(file_path, project_dir)
+                        arcname = os.path.relpath(file_path, source_dir)
                         print(f"Adding: {arcname}")
                         zipf.write(file_path, arcname)
 
         print(f"\nZIP backup created: {zip_path}")
         return zip_path
 
-    except Exception as e:
+    except (OSError, zipfile.BadZipFile) as e:
         print(f"\nError creating ZIP backup: {str(e)}")
         return None
 
@@ -180,12 +181,10 @@ def create_backup():
 
         success = True
         if backup_type in ["1", "3"]:
-            success &= git_backup(
-                description, target_branch
-            )  # Pass target_branch to git_backup
+            success &= git_backup(description, target_branch)
 
         if backup_type in ["2", "3"]:
-            zip_path = create_zip_backup(project_dir, backup_dir)
+            zip_path = create_zip_backup(PROJECT_DIR, BACKUP_DIR)
             success &= bool(zip_path)
 
         if success:
@@ -195,7 +194,7 @@ def create_backup():
 
     except KeyboardInterrupt:
         print("\nBackup cancelled.")
-    except Exception as e:
+    except (subprocess.CalledProcessError, OSError) as e:
         print(f"\nError: {str(e)}")
 
 
