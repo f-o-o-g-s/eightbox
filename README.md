@@ -52,6 +52,21 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 ## Setup
 [Installation instructions to be added]
 
+## Test Database
+The repository includes a sanitized test database (`fake_mandates_db.sqlite`) that you can use to try out the application without needing real carrier data. This database:
+- Contains anonymized carrier names and employee IDs
+- Includes sample data for all supported violation types
+- Uses generic station names (STATION1, STATION2, etc.)
+- Is safe to use and share as it contains no real carrier information
+
+To use the test database:
+1. Launch the application
+2. Open Settings (gear icon)
+3. Set the database path to `fake_mandates_db.sqlite` in your project directory
+4. Click Save to apply the changes
+
+You can also use the test database as a template to understand the required schema for your own data.
+
 ## Usage
 [Basic usage instructions to be added]
 
