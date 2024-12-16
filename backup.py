@@ -137,8 +137,12 @@ def git_backup(description, target_branch="main"):
         return False
 
 
-def create_backup():
-    """Create a backup of the project using Git version control."""
+def create_backup(cli_description=None):
+    """Create a backup of the project using Git version control.
+
+    Args:
+        cli_description (str, optional): Description provided via command line
+    """
     try:
         # Run pre-commit hooks first
         if not run_pre_commit():
@@ -156,7 +160,7 @@ def create_backup():
 
         # If not on main, ask where to push
         target_branch = "main"
-        if current_branch != "main":
+        if current_branch != "main" and cli_description is None:
             print("\nWhere would you like to push your changes?")
             print(f"1. Current branch ({current_branch})")
             print("2. Main branch")
@@ -166,18 +170,24 @@ def create_backup():
                 target_branch = current_branch
 
         # Get backup description and type
-        print("\nEnter a description of your changes:")
-        description = input().strip()
+        description = cli_description
+        if description is None:
+            print("\nEnter a description of your changes:")
+            description = input().strip()
 
         if not description:
             print("\nError: Description cannot be empty")
             return
 
-        print("\nBackup type:")
-        print("1. Git backup only")
-        print("2. ZIP backup only")
-        print("3. Both Git and ZIP backup")
-        backup_type = input("\nEnter choice (1-3): ").strip()
+        # If using CLI, default to Git backup only
+        # Otherwise show interactive menu
+        backup_type = "1" if cli_description else None
+        if backup_type is None:
+            print("\nBackup type:")
+            print("1. Git backup only")
+            print("2. ZIP backup only")
+            print("3. Both Git and ZIP backup")
+            backup_type = input("\nEnter choice (1-3): ").strip()
 
         success = True
         if backup_type in ["1", "3"]:
@@ -201,17 +211,23 @@ def create_backup():
 if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help", "help"]:
-        print("\nUsage: python backup.py")
-        print("Creates both Git and ZIP backups of the project.")
-        print("\nThe script will:")
-        print("1. Run pre-commit hooks (black, isort, flake8)")
-        print("2. Ask for a description of changes")
-        print("3. Offer backup options:")
-        print("   - Git backup (version control)")
-        print("   - ZIP backup (full directory)")
-        print("   - Both Git and ZIP")
-        print("4. Create selected backups")
-        print("\nZIP backups are stored in ~/eightbox_backups/")
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ["-h", "--help", "help"]:
+            print("\nUsage: python backup.py [description]")
+            print("Creates both Git and ZIP backups of the project.")
+            print("\nArguments:")
+            print("  description    Commit message for the backup")
+            print("                 If provided, will do Git backup only")
+            print("\nInteractive mode (no arguments):")
+            print("1. Run pre-commit hooks (black, isort, flake8)")
+            print("2. Ask for a description of changes")
+            print("3. Offer backup options:")
+            print("   - Git backup (version control)")
+            print("   - ZIP backup (full directory)")
+            print("   - Both Git and ZIP")
+            print("4. Create selected backups")
+            print("\nZIP backups are stored in ~/eightbox_backups/")
+        else:
+            create_backup(sys.argv[1])
     else:
         create_backup()
