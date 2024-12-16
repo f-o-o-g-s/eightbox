@@ -351,6 +351,13 @@ class MainApp(QMainWindow):
         self.size_grip = CustomSizeGrip(self)
         self.size_grip.setStyleSheet("background: transparent;")
 
+    def setup_ui(self):
+        """Set up the user interface."""
+        self.init_window_properties()
+        self.init_layouts()
+        self.init_widgets()
+        self.init_connections()
+
     def _get_resize_edge(self, pos):
         """Determine which edge to resize based on mouse position."""
         margin = self.MARGINS
@@ -1017,7 +1024,9 @@ class MainApp(QMainWindow):
         # Check if carrier_list.json exists and is valid before proceeding
         if os.path.exists("carrier_list.json"):
             try:
-                with open("carrier_list.json", "r") as json_file:
+                with open(
+                    "carrier_list.json", "r", encoding="utf-8"
+                ) as json_file:  # Added encoding
                     carrier_list = pd.DataFrame(json.load(json_file))
                     if not carrier_list.empty:
                         # Small delay to ensure UI updates are complete
@@ -1884,6 +1893,11 @@ class MainApp(QMainWindow):
             self.width() - 20, self.height() - 20
         )  # Adjusted for new size
         self.size_grip.raise_()
+
+    def init_connections(self):
+        """Initialize signal/slot connections."""
+        # Replace lambda with direct method reference
+        QTimer.singleShot(100, self.apply_date_range)
 
 
 if __name__ == "__main__":
