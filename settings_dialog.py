@@ -28,6 +28,7 @@ from PyQt5.QtWidgets import (
 from custom_widgets import (
     CustomTitleBarWidget,
     CustomWarningDialog,
+    CustomInfoDialog,
 )
 
 
@@ -231,11 +232,11 @@ class SettingsDialog(QDialog):
             # Get record counts
             cursor.execute("SELECT COUNT(*) FROM rings3")
             rings_count = cursor.fetchone()[0]
-            cursor.execute("SELECT COUNT(*) FROM carriers")
+            cursor.execute("SELECT COUNT(DISTINCT carrier_name) FROM carriers")
             carriers_count = cursor.fetchone()[0]
             
             conn.close()
-            self.update_eightbox_status(f"Initialized ✓ ({rings_count} rings, {carriers_count} carriers)")
+            self.update_eightbox_status(f"Initialized ✓ ({rings_count} rings, {carriers_count} unique carrier names)")
             return True
 
         except sqlite3.Error as e:
@@ -279,11 +280,11 @@ class SettingsDialog(QDialog):
             # Get record counts
             cursor.execute("SELECT COUNT(*) FROM rings3")
             rings_count = cursor.fetchone()[0]
-            cursor.execute("SELECT COUNT(*) FROM carriers")
+            cursor.execute("SELECT COUNT(DISTINCT carrier_name) FROM carriers")
             carriers_count = cursor.fetchone()[0]
             
             conn.close()
-            self.update_klusterbox_status(f"Connected ✓ ({rings_count} rings, {carriers_count} carriers)")
+            self.update_klusterbox_status(f"Connected ✓ ({rings_count} rings, {carriers_count} unique carrier names)")
             return True
 
         except sqlite3.Error as e:
@@ -577,12 +578,12 @@ class SettingsDialog(QDialog):
                         f"Added {stats['carriers_added']} new carrier records\n"
                         f"Updated {stats['carriers_modified']} carrier records"
                     )
-                    CustomWarningDialog.warning(self, "Sync Complete", message)
+                    CustomInfoDialog.information(self, "Sync Complete", message)
                     return True, message, stats
                 else:
                     target_conn.rollback()
                     print("\nNo new records to add - databases are in sync")
-                    CustomWarningDialog.warning(self, "Sync Complete", "No new records to sync")
+                    CustomInfoDialog.information(self, "Sync Complete", "No new records to sync")
                     return False, "No new records to sync", stats
                     
             except Exception as e:
