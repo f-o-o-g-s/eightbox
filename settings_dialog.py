@@ -408,6 +408,58 @@ class SettingsDialog(QDialog):
             print(f"Source: {source_path}")
             print(f"Target: {target_path}")
             
+            # Check if target database exists and is initialized
+            if not os.path.exists(target_path):
+                print("\nTarget database does not exist. Creating and initializing...")
+                conn = sqlite3.connect(target_path)
+                cursor = conn.cursor()
+                
+                # Create required tables
+                cursor.execute("""
+                    CREATE TABLE carriers (
+                        effective_date date,
+                        carrier_name varchar,
+                        list_status varchar,
+                        ns_day varchar,
+                        route_s varchar,
+                        station varchar
+                    )
+                """)
+                
+                cursor.execute("""
+                    CREATE TABLE rings3 (
+                        rings_date date,
+                        carrier_name varchar,
+                        total varchar,
+                        rs varchar,
+                        code varchar,
+                        moves varchar,
+                        leave_type varchar,
+                        leave_time varchar,
+                        refusals varchar,
+                        bt varchar,
+                        et varchar
+                    )
+                """)
+                
+                cursor.execute("""
+                    CREATE TABLE sync_log (
+                        sync_date TEXT NOT NULL,
+                        rows_added_rings3 INTEGER,
+                        rows_added_carriers INTEGER,
+                        backup_path TEXT
+                    )
+                """)
+                
+                # Create recommended indexes
+                cursor.execute("CREATE INDEX idx_rings3_date ON rings3(rings_date)")
+                cursor.execute("CREATE INDEX idx_carrier_name ON carriers(carrier_name)")
+                cursor.execute("CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)")
+                
+                conn.commit()
+                conn.close()
+                print("Database initialized successfully.")
+            
             # Connect to both databases
             source_conn = sqlite3.connect(source_path)
             target_conn = sqlite3.connect(target_path)
