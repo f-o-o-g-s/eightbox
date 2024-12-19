@@ -631,11 +631,21 @@ class SettingsDialog(QDialog):
                         f"Modified {stats['carriers_modified']} existing carrier records"
                     )
                     CustomInfoDialog.information(self, "Sync Complete", message)
+                    
+                    # Refresh both database status displays after successful sync
+                    self.validate_database(self.mandates_db_path)
+                    self.validate_eightbox_database()
+                    
                     return True, message, stats
                 else:
                     target_conn.rollback()
                     print("\nNo new records to add - databases are in sync")
                     CustomInfoDialog.information(self, "Sync Complete", "No new records to sync")
+                    
+                    # Still refresh status displays even if no changes were made
+                    self.validate_database(self.mandates_db_path)
+                    self.validate_eightbox_database()
+                    
                     return False, "No new records to sync", stats
                     
             except Exception as e:
