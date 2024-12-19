@@ -46,6 +46,7 @@ class SettingsDialog(QDialog):
         self.parent = parent
         self.mandates_db_path = current_path
         self.drag_pos = None
+        self.eightbox_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite")
 
         # Set window flags for frameless window
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -65,32 +66,83 @@ class SettingsDialog(QDialog):
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(15)
 
-        # Labels
-        path_label = QLabel("Current Database Path")
-        path_label.setStyleSheet("font-size: 12px; font-weight: bold;")
+        # Klusterbox Database Section
+        klusterbox_section = QWidget()
+        klusterbox_layout = QVBoxLayout(klusterbox_section)
+        klusterbox_layout.setSpacing(5)
 
-        self.path_display = QLabel(self.mandates_db_path)
-        self.path_display.setStyleSheet(
+        klusterbox_header = QLabel("Klusterbox Database (Source)")
+        klusterbox_header.setStyleSheet("font-size: 14px; font-weight: bold; color: #BB86FC;")
+        
+        klusterbox_desc = QLabel("The source database from Klusterbox containing carrier and clock ring data.")
+        klusterbox_desc.setStyleSheet("font-size: 11px; color: #9E9E9E;")
+        klusterbox_desc.setWordWrap(True)
+
+        self.klusterbox_path_display = QLabel(self.mandates_db_path)
+        self.klusterbox_path_display.setStyleSheet(
             """
             color: #9575CD;
             font-size: 11px;
             padding: 5px;
+            background-color: #1E1E1E;
+            border-radius: 4px;
         """
         )
-        self.path_display.setWordWrap(True)
-        self.path_display.setMinimumWidth(360)
+        self.klusterbox_path_display.setWordWrap(True)
+        self.klusterbox_path_display.setMinimumWidth(360)
 
-        status_label = QLabel("Status")
-        status_label.setStyleSheet("font-size: 12px; font-weight: bold;")
-
-        self.status_display = QLabel("Connected ✓")
-        self.status_display.setStyleSheet(
+        self.klusterbox_status = QLabel("Connected ✓")
+        self.klusterbox_status.setStyleSheet(
             """
             color: #81C784;
             font-size: 11px;
             padding: 5px;
         """
         )
+
+        klusterbox_layout.addWidget(klusterbox_header)
+        klusterbox_layout.addWidget(klusterbox_desc)
+        klusterbox_layout.addWidget(self.klusterbox_path_display)
+        klusterbox_layout.addWidget(self.klusterbox_status)
+
+        # Eightbox Database Section
+        eightbox_section = QWidget()
+        eightbox_layout = QVBoxLayout(eightbox_section)
+        eightbox_layout.setSpacing(5)
+
+        eightbox_header = QLabel("Eightbox Database (Working)")
+        eightbox_header.setStyleSheet("font-size: 14px; font-weight: bold; color: #BB86FC;")
+        
+        eightbox_desc = QLabel("The local working database used by Eightbox to store synchronized data.")
+        eightbox_desc.setStyleSheet("font-size: 11px; color: #9E9E9E;")
+        eightbox_desc.setWordWrap(True)
+
+        self.eightbox_path_display = QLabel(self.eightbox_db_path)
+        self.eightbox_path_display.setStyleSheet(
+            """
+            color: #9575CD;
+            font-size: 11px;
+            padding: 5px;
+            background-color: #1E1E1E;
+            border-radius: 4px;
+        """
+        )
+        self.eightbox_path_display.setWordWrap(True)
+        self.eightbox_path_display.setMinimumWidth(360)
+
+        self.eightbox_status = QLabel("Initialized ✓")
+        self.eightbox_status.setStyleSheet(
+            """
+            color: #81C784;
+            font-size: 11px;
+            padding: 5px;
+        """
+        )
+
+        eightbox_layout.addWidget(eightbox_header)
+        eightbox_layout.addWidget(eightbox_desc)
+        eightbox_layout.addWidget(self.eightbox_path_display)
+        eightbox_layout.addWidget(self.eightbox_status)
 
         # Button container
         button_container = QWidget()
@@ -111,7 +163,7 @@ class SettingsDialog(QDialog):
             )
             button_layout.addWidget(use_auto_detect_button)
 
-        set_path_button = QPushButton("Set Database Path")
+        set_path_button = QPushButton("Set Klusterbox Database Path")
         set_path_button.clicked.connect(self.set_database_path)
         button_layout.addWidget(set_path_button)
 
@@ -124,12 +176,10 @@ class SettingsDialog(QDialog):
         save_button.clicked.connect(self.apply_settings)
         button_layout.addWidget(save_button)
 
-        # Add widgets to content layout
-        content_layout.addWidget(path_label)
-        content_layout.addWidget(self.path_display)
-        content_layout.addSpacing(10)
-        content_layout.addWidget(status_label)
-        content_layout.addWidget(self.status_display)
+        # Add sections to content layout
+        content_layout.addWidget(klusterbox_section)
+        content_layout.addSpacing(20)
+        content_layout.addWidget(eightbox_section)
         content_layout.addSpacing(20)
         content_layout.addWidget(button_container, alignment=Qt.AlignCenter)
         content_layout.addStretch()
@@ -138,8 +188,12 @@ class SettingsDialog(QDialog):
         layout.addWidget(content_widget)
 
         # Set minimum size
-        self.setMinimumSize(450, 400)
+        self.setMinimumSize(500, 600)
         self.adjustSize()
+
+        # Update initial status
+        self.validate_database(self.mandates_db_path)
+        self.validate_eightbox_database()
 
     def mouse_press_event(self, event):
         """Handle mouse press events for window dragging."""
@@ -155,6 +209,42 @@ class SettingsDialog(QDialog):
         """Handle mouse release events for window dragging."""
         self.drag_pos = None
 
+    def validate_eightbox_database(self):
+        """Validate the Eightbox database and update its status."""
+        if not os.path.exists(self.eightbox_db_path):
+            self.update_eightbox_status("Not initialized", error=True)
+            return False
+
+        try:
+            conn = sqlite3.connect(self.eightbox_db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = {row[0] for row in cursor.fetchall()}
+            required_tables = {"rings3", "carriers", "sync_log"}
+            
+            if not required_tables.issubset(tables):
+                missing = required_tables - tables
+                self.update_eightbox_status(f"Missing tables: {', '.join(missing)}", error=True)
+                conn.close()
+                return False
+
+            # Get record counts
+            cursor.execute("SELECT COUNT(*) FROM rings3")
+            rings_count = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM carriers")
+            carriers_count = cursor.fetchone()[0]
+            
+            conn.close()
+            self.update_eightbox_status(f"Initialized ✓ ({rings_count} rings, {carriers_count} carriers)")
+            return True
+
+        except sqlite3.Error as e:
+            self.update_eightbox_status(f"Database error: {str(e)}", error=True)
+            return False
+        except Exception as e:
+            self.update_eightbox_status(f"Error: {str(e)}", error=True)
+            return False
+
     def validate_database(self, path):
         """Validate that the given path points to a valid SQLite database.
 
@@ -165,7 +255,7 @@ class SettingsDialog(QDialog):
             bool: True if valid, False otherwise
         """
         if not os.path.exists(path):
-            self.update_status("Error: Database file not found", error=True)
+            self.update_klusterbox_status("Database file not found", error=True)
             return False
 
         try:
@@ -180,33 +270,39 @@ class SettingsDialog(QDialog):
             required_tables = {"rings3", "carriers"}
             if not required_tables.issubset(tables):
                 missing = required_tables - tables
-                self.update_status(
-                    f"Error: Missing tables: {', '.join(missing)}", error=True
+                self.update_klusterbox_status(
+                    f"Missing tables: {', '.join(missing)}", error=True
                 )
                 conn.close()
                 return False
 
+            # Get record counts
+            cursor.execute("SELECT COUNT(*) FROM rings3")
+            rings_count = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM carriers")
+            carriers_count = cursor.fetchone()[0]
+            
             conn.close()
-            self.update_status("Connected ✓")
+            self.update_klusterbox_status(f"Connected ✓ ({rings_count} rings, {carriers_count} carriers)")
             return True
 
         except sqlite3.Error as e:
-            self.update_status(f"Error: Invalid database - {str(e)}", error=True)
+            self.update_klusterbox_status(f"Invalid database: {str(e)}", error=True)
             return False
         except Exception as e:
-            self.update_status(f"Error: {str(e)}", error=True)
+            self.update_klusterbox_status(f"Error: {str(e)}", error=True)
             return False
 
-    def update_status(self, message, error=False):
-        """Update the status display with a message.
+    def update_klusterbox_status(self, message, error=False):
+        """Update the Klusterbox database status display.
 
         Args:
             message (str): Status message to display
             error (bool): Whether this is an error message
         """
-        self.status_display.setText(message)
+        self.klusterbox_status.setText(message)
         if error:
-            self.status_display.setStyleSheet(
+            self.klusterbox_status.setStyleSheet(
                 """
                 color: #EF5350;
                 font-size: 11px;
@@ -214,7 +310,32 @@ class SettingsDialog(QDialog):
             """
             )
         else:
-            self.status_display.setStyleSheet(
+            self.klusterbox_status.setStyleSheet(
+                """
+                color: #81C784;
+                font-size: 11px;
+                padding: 5px;
+            """
+            )
+
+    def update_eightbox_status(self, message, error=False):
+        """Update the Eightbox database status display.
+
+        Args:
+            message (str): Status message to display
+            error (bool): Whether this is an error message
+        """
+        self.eightbox_status.setText(message)
+        if error:
+            self.eightbox_status.setStyleSheet(
+                """
+                color: #EF5350;
+                font-size: 11px;
+                padding: 5px;
+            """
+            )
+        else:
+            self.eightbox_status.setStyleSheet(
                 """
                 color: #81C784;
                 font-size: 11px;
@@ -230,8 +351,7 @@ class SettingsDialog(QDialog):
         """
         if self.validate_database(path):
             self.mandates_db_path = path
-            self.path_display.setText(self.mandates_db_path)
-            self.update_status("Using auto-detected Klusterbox path")
+            self.klusterbox_path_display.setText(self.mandates_db_path)
         else:
             CustomWarningDialog.warning(
                 self,
@@ -244,7 +364,7 @@ class SettingsDialog(QDialog):
         """Open file dialog to select and set new database path."""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Select Database File",
+            "Select Klusterbox Database File",
             "",
             "SQLite Database (*.sqlite);;All Files (*.*)",
         )
@@ -253,7 +373,7 @@ class SettingsDialog(QDialog):
             # Validate the selected database
             if self.validate_database(file_path):
                 self.mandates_db_path = file_path
-                self.path_display.setText(self.mandates_db_path)
+                self.klusterbox_path_display.setText(self.mandates_db_path)
             else:
                 CustomWarningDialog.warning(
                     self,

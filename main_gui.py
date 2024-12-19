@@ -38,6 +38,7 @@ from custom_widgets import (
     CustomInfoDialog,
     CustomProgressDialog,
     CustomSizeGrip,
+    CustomWarningDialog,
 )
 
 # Custom modules
@@ -325,6 +326,15 @@ class MainApp(QMainWindow):
 
         # Initialize database path from settings or auto-detect
         self.mandates_db_path = self.load_database_path()
+
+        # Initialize eightbox database
+        if not self.initialize_eightbox_database(self.mandates_db_path):
+            CustomWarningDialog.warning(
+                self,
+                "Database Error",
+                "Failed to initialize the working database.\n"
+                "Please check the application logs for details."
+            )
 
         # Initialize dynamic panes
         self.date_selection_pane = None
@@ -1988,6 +1998,114 @@ class MainApp(QMainWindow):
             return required_tables.issubset(tables)
 
         except Exception:
+            return False
+
+    def initialize_eightbox_database(self, source_db_path=None):
+        """Initialize the eightbox.sqlite database.
+        
+        Creates a new eightbox.sqlite database if it doesn't exist,
+        or validates an existing one. Can optionally copy data from
+        a source database during initialization.
+        
+        Args:
+            source_db_path (str, optional): Path to source database to copy data from
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            target_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite")
+            
+            # If database exists and is valid, return True
+            if os.path.exists(target_path):
+                conn = sqlite3.connect(target_path)
+                cursor = conn.cursor()
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                tables = {row[0] for row in cursor.fetchall()}
+                required_tables = {"rings3", "carriers", "sync_log"}
+                if required_tables.issubset(tables):
+                    conn.close()
+                    return True
+                conn.close()
+            
+            # Create new database
+            conn = sqlite3.connect(target_path)
+            cursor = conn.cursor()
+            
+            # Create tables
+            cursor.execute("""
+                CREATE TABLE carriers (
+                    effective_date date,
+                    carrier_name varchar,
+                    list_status varchar,
+                    ns_day varchar,
+                    route_s varchar,
+                    station varchar
+                )
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE rings3 (
+                    rings_date date,
+                    carrier_name varchar,
+                    total varchar,
+                    rs varchar,
+                    code varchar,
+                    moves varchar,
+                    leave_type varchar,
+                    leave_time varchar,
+                    refusals varchar,
+                    bt varchar,
+                    et varchar
+                )
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE sync_log (
+                    sync_date TEXT NOT NULL,
+                    rows_added_rings3 INTEGER,
+                    rows_added_carriers INTEGER,
+                    backup_path TEXT
+                )
+            """)
+            
+            # Create recommended indexes
+            cursor.execute("CREATE INDEX idx_rings3_date ON rings3(rings_date)")
+            cursor.execute("CREATE INDEX idx_carrier_name ON carriers(carrier_name)")
+            cursor.execute("CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)")
+            
+            # If source database provided, copy data
+            if source_db_path and os.path.exists(source_db_path):
+                cursor.execute("ATTACH DATABASE ? AS source", (source_db_path,))
+                
+                # Copy data in a transaction
+                cursor.execute("BEGIN TRANSACTION")
+                try:
+                    cursor.execute("INSERT INTO carriers SELECT * FROM source.carriers")
+                    cursor.execute("INSERT INTO rings3 SELECT * FROM source.rings3")
+                    cursor.execute("COMMIT")
+                except:
+                    cursor.execute("ROLLBACK")
+                    raise
+                finally:
+                    cursor.execute("DETACH DATABASE source")
+
+                # Add initial sync log entry
+                from datetime import datetime
+                now = datetime.now().isoformat()
+                cursor.execute("""
+                    INSERT INTO sync_log (
+                        sync_date, 
+                        rows_added_rings3, 
+                        rows_added_carriers, 
+                        backup_path
+                    ) VALUES (?, 0, 0, NULL)
+                """, (now,))
+                
+                return True
+                
+        except Exception as e:
+            print(f"Error initializing database: {e}")
             return False
 
     def handle_database_path_change(self, new_path):

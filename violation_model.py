@@ -574,63 +574,63 @@ class ViolationModel(QStandardItemModel):
         return metadata
 
     def get_table_state(self):
-        """Extract the complete state of the table.
-
+        """Get the complete state of the table for Excel export.
+        
+        This method is REQUIRED for Excel export functionality.
+        It must return three DataFrames containing:
+        1. The actual cell values
+        2. Cell metadata (colors, formatting)
+        3. Row-level highlight information
+        
         Returns:
             tuple: (content_df, metadata_df, row_highlights_df)
-                - content_df: DataFrame containing cell values
-                - metadata_df: DataFrame containing cell formatting metadata
-                - row_highlights_df: DataFrame containing row highlight information
+                - content_df: DataFrame with actual cell values
+                - metadata_df: DataFrame with cell formatting info
+                - row_highlights_df: DataFrame with row highlight info
         """
-        # Get column headers
+        # Get headers from the model
         headers = [
-            self.header_data(i, Qt.Horizontal, Qt.DisplayRole)
-            for i in range(self.columnCount())
+            self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
+            for col in range(self.columnCount())
         ]
-
-        # Extract content
+        
+        # Build content DataFrame from actual displayed values
         content_data = []
         metadata_data = []
-        row_highlights = []
-
+        
         for row in range(self.rowCount()):
             row_content = []
             row_metadata = []
-            has_highlight = False
-
             for col in range(self.columnCount()):
                 index = self.index(row, col)
-
                 # Get display value
                 value = self.data(index, Qt.DisplayRole)
-                if value is None:
-                    value = ""
                 row_content.append(value)
-
-                # Get formatting metadata
+                
+                # Get cell metadata
                 bg_color = self.get_background_color(index)
                 fg_color = self.get_foreground_color(index)
-
-                # Convert QColor to string or None
-                bg_color_str = bg_color.name() if isinstance(bg_color, QColor) else None
-                fg_color_str = fg_color.name() if isinstance(fg_color, QColor) else None
-
-                metadata = {"background": bg_color_str, "foreground": fg_color_str}
+                
+                metadata = {
+                    "background": bg_color.name() if bg_color else None,
+                    "foreground": fg_color.name() if fg_color else None
+                }
                 row_metadata.append(metadata)
-
-                # Check for highlights - only if we have a valid background color
-                if bg_color_str and bg_color_str.lower() != "#000000":
-                    has_highlight = True
-
+            
             content_data.append(row_content)
             metadata_data.append(row_metadata)
-            row_highlights.append(has_highlight)
 
-        # Create DataFrames with explicit dtypes to avoid ambiguous truth values
+        # Create DataFrames
         content_df = pd.DataFrame(content_data, columns=headers)
         metadata_df = pd.DataFrame(metadata_data, columns=headers)
-        row_highlights_df = pd.DataFrame({"highlighted": row_highlights}, dtype=bool)
-
+        
+        # Create row highlights DataFrame
+        row_highlights = []
+        for row in range(self.rowCount()):
+            has_highlight = self.has_violation_in_row(row)
+            row_highlights.append({"row": row, "highlighted": has_highlight})
+        row_highlights_df = pd.DataFrame(row_highlights)
+        
         return content_df, metadata_df, row_highlights_df
 
     def sort(self, column, order):
