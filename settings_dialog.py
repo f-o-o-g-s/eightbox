@@ -575,8 +575,8 @@ class SettingsDialog(QDialog):
                     message = (
                         f"Sync completed successfully.\n"
                         f"Added {stats['rings3_added']} new clock rings\n"
-                        f"Added {stats['carriers_added']} new carrier records\n"
-                        f"Updated {stats['carriers_modified']} carrier records"
+                        f"Added {stats['carriers_added']} carrier records (new carrier+date combinations)\n"
+                        f"Modified {stats['carriers_modified']} existing carrier records"
                     )
                     CustomInfoDialog.information(self, "Sync Complete", message)
                     return True, message, stats
