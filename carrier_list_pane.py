@@ -71,6 +71,24 @@ class CarrierListProxyModel(QSortFilterProxyModel):
         # Define status order for sorting
         self.status_order = {"nl": 0, "wal": 1, "otdl": 2, "ptf": 3}
 
+    def set_text_filter(self, text):
+        """Set the text filter and invalidate the current filtering.
+        
+        Args:
+            text (str): The text to filter by
+        """
+        self.text_filter = text.lower()
+        self.invalidateFilter()
+
+    def set_status_filter(self, status):
+        """Set the status filter and invalidate the current filtering.
+        
+        Args:
+            status (str): The status to filter by ('all' or specific status)
+        """
+        self.status_filter = status if status != "all" else ""
+        self.invalidateFilter()
+
     def less_than(self, left, right):
         """Custom sorting implementation"""
         left_data = self.sourceModel().data(left, Qt.DisplayRole)
