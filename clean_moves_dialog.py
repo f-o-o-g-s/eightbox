@@ -760,10 +760,6 @@ class CleanMovesDialog(QDialog):
         self.edit_button.clicked.connect(self.edit_moves)
         self.edit_button.setEnabled(False)
 
-        self.merge_button = QPushButton("Merge Moves")
-        self.merge_button.clicked.connect(self.merge_moves)
-        self.merge_button.setEnabled(False)
-
         self.restore_button = QPushButton("Restore Moves")
         self.restore_button.clicked.connect(self.restore_moves)
         self.restore_button.setEnabled(False)
@@ -773,7 +769,6 @@ class CleanMovesDialog(QDialog):
         self.clear_button.setEnabled(False)
 
         button_row.addWidget(self.edit_button)
-        button_row.addWidget(self.merge_button)
         button_row.addWidget(self.restore_button)
         button_row.addWidget(self.clear_button)
 
@@ -1015,16 +1010,12 @@ class CleanMovesDialog(QDialog):
 
             # Parse moves to check if merge/split/edit is possible
             move_list = parse_moves_entry(moves)
-            self.merge_button.setEnabled(
-                len(move_list) > 1
-            )  # Enable merge only if multiple moves
             self.edit_button.setEnabled(
                 bool(move_list)
             )  # Enable edit if there are any moves
 
         else:
             self.current_row = None
-            self.merge_button.setEnabled(False)
             self.edit_button.setEnabled(False)
             self.clear_button.setEnabled(False)
             self.restore_button.setEnabled(False)
@@ -1114,79 +1105,6 @@ class CleanMovesDialog(QDialog):
 
                 # Show the dialog again since we had an error
                 self.show()
-
-    def merge_moves(self):
-        """Merge multiple moves into a single move."""
-        if self.current_row is None:
-            return
-
-        # Get current row data
-        carrier = self.table.item(self.current_row, 0).text()
-        date = self.table.item(self.current_row, 1).text()
-        moves = self.table.item(self.current_row, 2).text()
-
-        # Parse moves
-        move_list = parse_moves_entry(moves)
-        if len(move_list) <= 1:
-            return
-
-        # Show confirmation dialog
-        if (
-            CustomWarningDialog.warning(
-                self,
-                "Confirm Merge",
-                "This will merge all moves into a single move. Continue?",
-                buttons=["Yes", "No"],
-                default_button="No",
-            )
-            == "Yes"
-        ):
-            # Get start time from first move and end time from last move
-            first_start = move_list[0][0]  # Start time of first move
-            last_end = move_list[-1][1]  # End time of last move
-            first_route = move_list[0][2]  # Use route from first move
-
-            # Calculate total hours in centesimal format
-            total_hours = 0.0
-            for start, end, _ in move_list:
-                hours = end - start
-                if hours < 0:  # Handle moves crossing midnight
-                    hours += 24
-                total_hours += hours
-
-            # Create new merged move string
-            new_moves_str = f"{first_start:.2f},{last_end:.2f},{first_route}"
-
-            # Store the cleaned move
-            key = (carrier, date)
-            self.cleaned_moves[key] = new_moves_str
-
-            # Update fixed moves column with breakdown
-            fixed_item = self.table.item(self.current_row, 4)
-            fixed_item.setText(f"rt{first_route} ({total_hours:.2f} hrs)")
-            fixed_item.setData(Qt.UserRole, "true")
-            fixed_item.setBackground(Qt.transparent)
-
-            # Update fixed hours
-            fixed_hours_item = self.table.item(self.current_row, 6)
-            fixed_hours_item.setText(f"{total_hours:.2f}")
-            if total_hours > 4.25:
-                fixed_hours_item.setData(Qt.UserRole, "warning")
-            else:
-                fixed_hours_item.setData(Qt.UserRole, None)
-
-            # Update status
-            status_item = self.table.item(self.current_row, 8)
-            status_item.setText("Fixed")
-            status_item.setData(Qt.UserRole, "true")
-            status_item.setBackground(QColor("#1B5E20"))  # Material Design green 900
-            status_item.setForeground(QColor("#81C784"))  # Material Design green 300
-
-            # Enable save button
-            self.save_button.setEnabled(bool(self.cleaned_moves))
-
-            # Disable merge button since we now have only one move
-            self.merge_button.setEnabled(False)
 
     def restore_moves(self):
         """Restore moves to their original state."""

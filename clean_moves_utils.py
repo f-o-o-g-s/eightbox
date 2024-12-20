@@ -177,7 +177,7 @@ def parse_moves_entry(moves_str: str) -> List[Tuple[float, float, str]]:
     """Parse a moves string into a list of (start, end, route) tuples.
 
     Args:
-        moves_str: Comma-separated moves string
+        moves_str: Comma-separated moves string in format "start1,end1,route1,start2,end2,route2,..."
 
     Returns:
         List of (start_time, end_time, route) tuples
@@ -190,18 +190,39 @@ def parse_moves_entry(moves_str: str) -> List[Tuple[float, float, str]]:
         return []
 
     try:
+        # Clean and validate the moves string
         parts = [x.strip() for x in moves_str.split(",")]
+        
+        # Check if we have complete move entries (multiples of 3)
+        if len(parts) % 3 != 0:
+            print(f"Invalid moves format: {moves_str} - Not a multiple of 3 parts")
+            return []
+            
         moves = []
-
         # Process in groups of 3 (start, end, route)
         for i in range(0, len(parts), 3):
-            start = float(parts[i])
-            end = float(parts[i + 1])
-            route = parts[i + 2]
-            moves.append((start, end, route))
+            try:
+                start = float(parts[i])
+                end = float(parts[i + 1])
+                route = parts[i + 2]
+                
+                # Basic validation
+                if not (0 <= start <= 24 and 0 <= end <= 24):
+                    print(f"Invalid time values: start={start}, end={end}")
+                    continue
+                    
+                if not route.isdigit():
+                    print(f"Invalid route format: {route}")
+                    continue
+                    
+                moves.append((start, end, route))
+            except (ValueError, IndexError) as e:
+                print(f"Error parsing move at index {i}: {e}")
+                continue
 
         return moves
-    except Exception:
+    except Exception as e:
+        print(f"Error parsing moves string: {e}")
         return []
 
 
