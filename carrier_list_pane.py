@@ -73,7 +73,7 @@ class CarrierListProxyModel(QSortFilterProxyModel):
 
     def set_text_filter(self, text):
         """Set the text filter and invalidate the current filtering.
-        
+
         Args:
             text (str): The text to filter by
         """
@@ -82,7 +82,7 @@ class CarrierListProxyModel(QSortFilterProxyModel):
 
     def set_status_filter(self, status):
         """Set the status filter and invalidate the current filtering.
-        
+
         Args:
             status (str): The status to filter by ('all' or specific status)
         """
@@ -915,33 +915,129 @@ class CarrierListPane(QWidget):
         # Fetch existing values for the carrier using the correct index
         carrier_data = self.main_model.df.loc[sorted_df_index].to_dict()
 
-        # Create an edit dialog
+        # Create an edit dialog with frameless window hint
         dialog = QDialog(self)
-        dialog.setWindowTitle("Edit Carrier")
-        layout = QVBoxLayout()
+        dialog.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+
+        # Create main layout with no margins
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        # Add custom title bar
+        title_bar = CustomTitleBarWidget(title="Edit Carrier", parent=dialog)
+        main_layout.addWidget(title_bar)
+
+        # Create content widget with Material Design styling
+        content_widget = QWidget()
+        content_widget.setStyleSheet("""
+            QWidget {
+                background-color: #1E1E1E;
+                color: #E1E1E1;
+            }
+            QLabel {
+                color: #E1E1E1;
+                font-size: 12px;
+                padding: 4px;
+            }
+            QLineEdit {
+                background-color: #2D2D2D;
+                color: #E1E1E1;
+                border: 1px solid #333333;
+                border-radius: 4px;
+                padding: 8px;
+                margin: 4px 0px;
+            }
+            QLineEdit:disabled {
+                background-color: #1A1A1A;
+                color: #666666;
+            }
+            QComboBox {
+                background-color: #2D2D2D;
+                color: #E1E1E1;
+                border: 1px solid #333333;
+                border-radius: 4px;
+                padding: 8px;
+                padding-right: 24px; /* Make room for arrow */
+                margin: 4px 0px;
+                min-width: 200px;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 24px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 5px solid #BB86FC;
+                width: 8px;
+                height: 8px;
+                margin-right: 8px;
+            }
+            QComboBox:hover {
+                border-color: #BB86FC;
+            }
+            QComboBox:hover::down-arrow {
+                border-top-color: #9965DA;
+            }
+            QComboBox:on {
+                border: 2px solid #BB86FC;
+            }
+            QComboBox:on::down-arrow {
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 5px solid #9965DA;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #2D2D2D;
+                color: #E1E1E1;
+                selection-background-color: #BB86FC;
+                selection-color: black;
+                border: 1px solid #333333;
+            }
+            QPushButton {
+                background-color: #BB86FC;
+                color: black;
+                border: none;
+                border-radius: 4px;
+                padding: 8px 16px;
+                margin: 4px;
+                font-weight: bold;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: #9965DA;
+            }
+            QPushButton:pressed {
+                background-color: #7B4FAF;
+            }
+        """)
+
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(20, 20, 20, 20)
+        content_layout.setSpacing(10)
 
         # Carrier name input
         name_label = QLabel("Carrier Name:")
         name_input = QLineEdit(carrier_data["carrier_name"])
-        name_input.setReadOnly(
-            True
-        )  # Ensure the carrier name is not editable to avoid mismatched updates
-        layout.addWidget(name_label)
-        layout.addWidget(name_input)
+        name_input.setReadOnly(True)
+        content_layout.addWidget(name_label)
+        content_layout.addWidget(name_input)
 
         # List status dropdown
         list_status_label = QLabel("List Status:")
         list_status_dropdown = QComboBox()
         list_status_dropdown.addItems(["otdl", "ptf", "wal", "nl"])
         list_status_dropdown.setCurrentText(carrier_data["list_status"])
-        layout.addWidget(list_status_label)
-        layout.addWidget(list_status_dropdown)
+        content_layout.addWidget(list_status_label)
+        content_layout.addWidget(list_status_dropdown)
 
         # Hour limit dropdown
         hour_limit_label = QLabel("Hour Limit:")
         hour_limit_dropdown = QComboBox()
-        layout.addWidget(hour_limit_label)
-        layout.addWidget(hour_limit_dropdown)
+        content_layout.addWidget(hour_limit_label)
+        content_layout.addWidget(hour_limit_dropdown)
 
         # Populate the hour_limit_dropdown based on initial list_status
         def update_hour_limit_options():
@@ -971,11 +1067,30 @@ class CarrierListPane(QWidget):
         else:
             hour_limit_dropdown.setCurrentText("(none)")
 
-        # Buttons
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        layout.addWidget(button_box)
+        # Create button container with horizontal layout
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.addStretch()
 
-        dialog.setLayout(layout)
+        # Create OK and Cancel buttons
+        ok_button = QPushButton("OK")
+        cancel_button = QPushButton("Cancel")
+
+        button_layout.addWidget(ok_button)
+        button_layout.addWidget(cancel_button)
+        content_layout.addWidget(button_container)
+
+        # Add content widget to main layout
+        main_layout.addWidget(content_widget)
+        dialog.setLayout(main_layout)
+
+        # Set minimum size and center on parent
+        dialog.setMinimumSize(400, 300)
+        if self.parent():
+            dialog.move(
+                self.parent().x() + (self.parent().width() - dialog.width()) // 2,
+                self.parent().y() + (self.parent().height() - dialog.height()) // 2
+            )
 
         # Handle dialog actions
         def on_accept():
@@ -992,8 +1107,8 @@ class CarrierListPane(QWidget):
             self.proxy_model.invalidate()  # Ensure the proxy model refreshes
             dialog.accept()
 
-        button_box.accepted.connect(on_accept)
-        button_box.rejected.connect(dialog.reject)
+        ok_button.clicked.connect(on_accept)
+        cancel_button.clicked.connect(dialog.reject)
 
         dialog.exec_()
 

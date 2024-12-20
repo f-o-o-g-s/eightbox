@@ -19,9 +19,10 @@ from PyQt5.QtWidgets import (
     QTextBrowser,
     QVBoxLayout,
     QWidget,
+    QHBoxLayout,
 )
 
-from custom_widgets import CustomTitleBarWidget
+from custom_widgets import CustomTitleBarWidget, CustomSizeGrip
 from documentation_content import (
     DOCUMENTATION_85D,
     DOCUMENTATION_85F,
@@ -30,6 +31,13 @@ from documentation_content import (
     DOCUMENTATION_85G,
     DOCUMENTATION_MAX12,
     DOCUMENTATION_MAX60,
+)
+from theme import (
+    MATERIAL_PRIMARY,
+    MATERIAL_SURFACE,
+    MATERIAL_BACKGROUND,
+    COLOR_TEXT_LIGHT,
+    COLOR_TEXT_DIM,
 )
 
 
@@ -69,7 +77,7 @@ class DocumentationDialog(QDialog):
         - Documentation sections
         """
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
-        self.setSizeGripEnabled(True)
+        self.setSizeGripEnabled(False)
         self.setMinimumSize(600, 400)
         self.resize(950, 800)
 
@@ -86,61 +94,81 @@ class DocumentationDialog(QDialog):
         content_widget = QWidget()
         self._setup_styles(content_widget)
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(15, 15, 15, 15)
+        content_layout.setContentsMargins(15, 15, 15, 35)
 
         # Create and populate tab widget
         tab_widget = QTabWidget()
         self._add_documentation_tabs(tab_widget)
         content_layout.addWidget(tab_widget)
 
+        # Create button container with horizontal layout
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 0, 20, 0)
+        button_layout.addStretch()
+
         # Add close button
         close_button = QPushButton("Close")
         close_button.clicked.connect(self.accept)
-        content_layout.addWidget(close_button, alignment=Qt.AlignRight)
+        button_layout.addWidget(close_button)
+        content_layout.addWidget(button_container)
 
         layout.addWidget(content_widget)
         self.setLayout(layout)
+
+        # Add custom size grip
+        self.size_grip = CustomSizeGrip(self)
 
         # Center on parent
         if self.parent:
             self.move(
                 self.parent.x() + (self.parent.width() - self.width()) // 2,
-                self.parent.y() + (self.parent.height() - self.height()) // 2,
+                self.parent.y() + (self.parent.height() - self.height()) // 2
             )
+
+    def resizeEvent(self, event):
+        """Handle resize events to keep size grip in correct position."""
+        super().resizeEvent(event)
+        # Update size grip position
+        self.size_grip.move(
+            self.width() - self.size_grip.width(),
+            self.height() - self.size_grip.height()
+        )
+        self.size_grip.raise_()
 
     def _setup_styles(self, widget):
         """Set up the stylesheet for the content widget."""
         widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-            }
-            QTabWidget::pane {
-                border: 1px solid #333333;
-                background-color: #1E1E1E;
-            }
-            QTabBar::tab {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
+            f"""
+            QWidget {{
+                background-color: {MATERIAL_BACKGROUND.name()};
+            }}
+            QTabWidget::pane {{
+                border: 1px solid {COLOR_TEXT_DIM.name()};
+                background-color: {MATERIAL_SURFACE.name()};
+            }}
+            QTabBar::tab {{
+                background-color: {MATERIAL_SURFACE.name()};
+                color: {COLOR_TEXT_LIGHT.name()};
                 padding: 8px 20px;
                 margin: 0 2px;
-                border: 1px solid #333333;
+                border: 1px solid {COLOR_TEXT_DIM.name()};
                 font-size: 14px;
                 min-width: 80px;
-            }
-            QTabBar::tab:selected {
-                background-color: #BB86FC;
+            }}
+            QTabBar::tab:selected {{
+                background-color: {MATERIAL_PRIMARY.name()};
                 color: #000000;
-            }
-            QTextBrowser {
-                background-color: #1E1E1E;
-                color: #E1E1E1;
+            }}
+            QTextBrowser {{
+                background-color: {MATERIAL_SURFACE.name()};
+                color: {COLOR_TEXT_LIGHT.name()};
                 border: none;
                 font-size: 14px;
                 line-height: 1.6;
-            }
-            QPushButton {
-                background-color: #BB86FC;
+            }}
+            QPushButton {{
+                background-color: {MATERIAL_PRIMARY.name()};
                 border: none;
                 border-radius: 4px;
                 padding: 8px 16px;
@@ -148,13 +176,13 @@ class DocumentationDialog(QDialog):
                 min-width: 80px;
                 font-weight: bold;
                 font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {MATERIAL_PRIMARY.lighter(110).name()};
+            }}
+            QPushButton:pressed {{
+                background-color: {MATERIAL_PRIMARY.darker(110).name()};
+            }}
             """
         )
 

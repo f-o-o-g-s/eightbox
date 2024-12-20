@@ -10,8 +10,8 @@ This module provides a dialog interface for users to:
 
 import os
 import sqlite3
-import pandas as pd
 
+import pandas as pd
 from PyQt5.QtCore import (
     Qt,
     pyqtSignal,
@@ -26,9 +26,9 @@ from PyQt5.QtWidgets import (
 )
 
 from custom_widgets import (
+    CustomInfoDialog,
     CustomTitleBarWidget,
     CustomWarningDialog,
-    CustomInfoDialog,
 )
 
 
@@ -47,7 +47,9 @@ class SettingsDialog(QDialog):
         self.parent = parent
         self.mandates_db_path = current_path
         self.drag_pos = None
-        self.eightbox_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite")
+        self.eightbox_db_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite"
+        )
 
         # Set window flags for frameless window
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -73,9 +75,13 @@ class SettingsDialog(QDialog):
         klusterbox_layout.setSpacing(5)
 
         klusterbox_header = QLabel("Klusterbox Database (Source)")
-        klusterbox_header.setStyleSheet("font-size: 14px; font-weight: bold; color: #BB86FC;")
-        
-        klusterbox_desc = QLabel("The source database from Klusterbox containing carrier and clock ring data.")
+        klusterbox_header.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: #BB86FC;"
+        )
+
+        klusterbox_desc = QLabel(
+            "The source database from Klusterbox containing carrier and clock ring data."
+        )
         klusterbox_desc.setStyleSheet("font-size: 11px; color: #9E9E9E;")
         klusterbox_desc.setWordWrap(True)
 
@@ -112,9 +118,13 @@ class SettingsDialog(QDialog):
         eightbox_layout.setSpacing(5)
 
         eightbox_header = QLabel("Eightbox Database (Working)")
-        eightbox_header.setStyleSheet("font-size: 14px; font-weight: bold; color: #BB86FC;")
-        
-        eightbox_desc = QLabel("The local working database used by Eightbox to store synchronized data.")
+        eightbox_header.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: #BB86FC;"
+        )
+
+        eightbox_desc = QLabel(
+            "The local working database used by Eightbox to store synchronized data."
+        )
         eightbox_desc.setStyleSheet("font-size: 11px; color: #9E9E9E;")
         eightbox_desc.setWordWrap(True)
 
@@ -222,10 +232,12 @@ class SettingsDialog(QDialog):
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = {row[0] for row in cursor.fetchall()}
             required_tables = {"rings3", "carriers", "sync_log"}
-            
+
             if not required_tables.issubset(tables):
                 missing = required_tables - tables
-                self.update_eightbox_status(f"Missing tables: {', '.join(missing)}", error=True)
+                self.update_eightbox_status(
+                    f"Missing tables: {', '.join(missing)}", error=True
+                )
                 conn.close()
                 return False
 
@@ -234,9 +246,11 @@ class SettingsDialog(QDialog):
             rings_count = cursor.fetchone()[0]
             cursor.execute("SELECT COUNT(DISTINCT carrier_name) FROM carriers")
             carriers_count = cursor.fetchone()[0]
-            
+
             conn.close()
-            self.update_eightbox_status(f"Initialized ✓ ({rings_count} rings, {carriers_count} unique carrier names)")
+            self.update_eightbox_status(
+                f"Initialized ✓ ({rings_count} rings, {carriers_count} unique carrier names)"
+            )
             return True
 
         except sqlite3.Error as e:
@@ -282,9 +296,11 @@ class SettingsDialog(QDialog):
             rings_count = cursor.fetchone()[0]
             cursor.execute("SELECT COUNT(DISTINCT carrier_name) FROM carriers")
             carriers_count = cursor.fetchone()[0]
-            
+
             conn.close()
-            self.update_klusterbox_status(f"Connected ✓ ({rings_count} rings, {carriers_count} unique carrier names)")
+            self.update_klusterbox_status(
+                f"Connected ✓ ({rings_count} rings, {carriers_count} unique carrier names)"
+            )
             return True
 
         except sqlite3.Error as e:
@@ -401,21 +417,24 @@ class SettingsDialog(QDialog):
         """Synchronize the working database with the source database."""
         try:
             # Get target database path
-            target_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite")
+            target_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite"
+            )
             source_path = self.mandates_db_path
-            
-            print(f"\nStarting sync process...")
+
+            print("Starting sync process...")
             print(f"Source: {source_path}")
             print(f"Target: {target_path}")
-            
+
             # Check if target database exists and is initialized
             if not os.path.exists(target_path):
-                print("\nTarget database does not exist. Creating and initializing...")
+                print("Target database does not exist. Creating and initializing...")
                 conn = sqlite3.connect(target_path)
                 cursor = conn.cursor()
-                
+
                 # Create required tables
-                cursor.execute("""
+                cursor.execute(
+                    """
                     CREATE TABLE carriers (
                         effective_date date,
                         carrier_name varchar,
@@ -424,9 +443,11 @@ class SettingsDialog(QDialog):
                         route_s varchar,
                         station varchar
                     )
-                """)
-                
-                cursor.execute("""
+                """
+                )
+
+                cursor.execute(
+                    """
                     CREATE TABLE rings3 (
                         rings_date date,
                         carrier_name varchar,
@@ -440,234 +461,289 @@ class SettingsDialog(QDialog):
                         bt varchar,
                         et varchar
                     )
-                """)
-                
-                cursor.execute("""
+                """
+                )
+
+                cursor.execute(
+                    """
                     CREATE TABLE sync_log (
                         sync_date TEXT NOT NULL,
                         rows_added_rings3 INTEGER,
                         rows_added_carriers INTEGER,
                         backup_path TEXT
                     )
-                """)
-                
+                """
+                )
+
                 # Create recommended indexes
                 cursor.execute("CREATE INDEX idx_rings3_date ON rings3(rings_date)")
-                cursor.execute("CREATE INDEX idx_carrier_name ON carriers(carrier_name)")
-                cursor.execute("CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)")
-                
+                cursor.execute(
+                    "CREATE INDEX idx_carrier_name ON carriers(carrier_name)"
+                )
+                cursor.execute(
+                    "CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)"
+                )
+
                 conn.commit()
                 conn.close()
                 print("Database initialized successfully.")
-            
+
             # Connect to both databases
             source_conn = sqlite3.connect(source_path)
             target_conn = sqlite3.connect(target_path)
-            
+
             try:
                 # Start transaction
                 target_conn.execute("BEGIN TRANSACTION")
-                
+
                 # Add diagnostic queries
                 print("\nDiagnostic Information:")
-                
+
                 # Get total counts from both databases
                 source_cursor = source_conn.cursor()
                 target_cursor = target_conn.cursor()
-                
+
                 source_cursor.execute("SELECT COUNT(*) FROM rings3")
                 target_cursor.execute("SELECT COUNT(*) FROM rings3")
                 source_count = source_cursor.fetchone()[0]
                 target_count = target_cursor.fetchone()[0]
                 print(f"Total records in source rings3: {source_count}")
                 print(f"Total records in target rings3: {target_count}")
-                
+
                 # Get the latest records from both databases
                 print("\nLatest records in source rings3:")
-                source_cursor.execute("""
-                    SELECT rings_date, carrier_name, total 
-                    FROM rings3 
-                    ORDER BY rings_date DESC, carrier_name 
+                source_cursor.execute(
+                    """
+                    SELECT rings_date, carrier_name, total
+                    FROM rings3
+                    ORDER BY rings_date DESC, carrier_name
                     LIMIT 5
-                """)
+                """
+                )
                 for row in source_cursor.fetchall():
                     print(f"Date: {row[0]}, Carrier: {row[1]}, Total: {row[2]}")
-                    
+
                 print("\nLatest records in target rings3:")
-                target_cursor.execute("""
-                    SELECT rings_date, carrier_name, total 
-                    FROM rings3 
-                    ORDER BY rings_date DESC, carrier_name 
+                target_cursor.execute(
+                    """
+                    SELECT rings_date, carrier_name, total
+                    FROM rings3
+                    ORDER BY rings_date DESC, carrier_name
                     LIMIT 5
-                """)
+                """
+                )
                 for row in target_cursor.fetchall():
                     print(f"Date: {row[0]}, Carrier: {row[1]}, Total: {row[2]}")
-                
+
                 stats = {"rings3_added": 0, "carriers_added": 0, "carriers_modified": 0}
-                
+
                 # Get only new records that don't exist in the target
-                print("\nChecking for new records...")
-                
+                print("Checking for new records...")
+
                 # Get all records from source
-                source_cursor.execute("""
-                    SELECT DISTINCT s.* 
-                    FROM rings3 s 
+                source_cursor.execute(
+                    """
+                    SELECT DISTINCT s.*
+                    FROM rings3 s
                     ORDER BY s.rings_date DESC, s.carrier_name
-                """)
+                """
+                )
                 source_records = source_cursor.fetchall()
-                
+
                 # Check each source record against target
                 new_records = []
                 for record in source_records:
                     rings_date, carrier_name = record[0], record[1]
-                    target_cursor.execute("""
-                        SELECT 1 FROM rings3 
-                        WHERE rings_date = ? 
+                    target_cursor.execute(
+                        """
+                        SELECT 1 FROM rings3
+                        WHERE rings_date = ?
                         AND carrier_name = ?
-                    """, (rings_date, carrier_name))
-                    
+                    """,
+                        (rings_date, carrier_name),
+                    )
+
                     if not target_cursor.fetchone():
                         new_records.append(record)
-                        print(f"Found new record: Date: {rings_date}, Carrier: {carrier_name}")
-                
+                        print(
+                            f"Found new record: Date: {rings_date}, "
+                            f"Carrier: {carrier_name}"
+                        )
+
                 if new_records:
-                    print(f"\nPreparing to add {len(new_records)} records:")
+                    print(f"Preparing to add {len(new_records)} records:")
                     for record in new_records[:5]:  # Show first 5 records
                         print(record)
-                    
+
                     # Insert new records directly
-                    target_conn.executemany("""
+                    target_conn.executemany(
+                        """
                         INSERT INTO rings3 (
-                            rings_date, carrier_name, total, rs, code, moves,
-                            leave_type, leave_time, refusals, bt, et
+                            rings_date, carrier_name, total, rs, code,
+                            moves, leave_type, leave_time, refusals, bt, et
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, new_records)
+                    """,
+                        new_records,
+                    )
                     stats["rings3_added"] = len(new_records)
 
                 # Handle carriers table similarly - using direct SQL like rings3
-                print("\nChecking for new carrier records...")
-                source_cursor.execute("""
-                    SELECT DISTINCT s.* 
-                    FROM carriers s 
+                print("Checking for new carrier records...")
+                source_cursor.execute(
+                    """
+                    SELECT DISTINCT s.*
+                    FROM carriers s
                     ORDER BY s.effective_date DESC, s.carrier_name
-                """)
+                """
+                )
                 source_carrier_records = source_cursor.fetchall()
-                
+
                 # Check each source carrier record against target
                 new_carrier_records = []
                 for record in source_carrier_records:
                     effective_date, carrier_name = record[0], record[1]
-                    target_cursor.execute("""
-                        SELECT 1 FROM carriers 
-                        WHERE effective_date = ? 
+                    target_cursor.execute(
+                        """
+                        SELECT 1 FROM carriers
+                        WHERE effective_date = ?
                         AND carrier_name = ?
-                    """, (effective_date, carrier_name))
-                    
+                    """,
+                        (effective_date, carrier_name),
+                    )
+
                     if not target_cursor.fetchone():
                         new_carrier_records.append(record)
-                        print(f"Found new carrier record: Date: {effective_date}, Carrier: {carrier_name}")
-                
+                        print(
+                            f"Found new carrier record: Date: {effective_date}, "
+                            f"Carrier: {carrier_name}"
+                        )
+
                 if new_carrier_records:
-                    print(f"\nPreparing to add {len(new_carrier_records)} carrier records:")
+                    print(
+                        f"Preparing to add {len(new_carrier_records)} carrier records:"
+                    )
                     for record in new_carrier_records[:5]:  # Show first 5 records
                         print(record)
-                    
+
                     # Insert new carrier records directly
-                    target_conn.executemany("""
+                    target_conn.executemany(
+                        """
                         INSERT INTO carriers (
                             effective_date, carrier_name, list_status,
                             ns_day, route_s, station
                         ) VALUES (?, ?, ?, ?, ?, ?)
-                    """, new_carrier_records)
+                    """,
+                        new_carrier_records,
+                    )
                     stats["carriers_added"] = len(new_carrier_records)
 
                 # Check for modified carrier records
-                modified_carriers = pd.read_sql_query("""
-                    SELECT s.* 
+                modified_carriers = pd.read_sql_query(
+                    """
+                    SELECT s.*
                     FROM carriers s
-                    JOIN carriers t ON 
+                    JOIN carriers t ON
                         s.effective_date = t.effective_date AND
                         s.carrier_name = t.carrier_name
                     WHERE COALESCE(s.list_status,'') != COALESCE(t.list_status,'')
                        OR COALESCE(s.ns_day,'') != COALESCE(t.ns_day,'')
                        OR COALESCE(s.route_s,'') != COALESCE(t.route_s,'')
                        OR COALESCE(s.station,'') != COALESCE(t.station,'')
-                """, source_conn)
+                """,
+                    source_conn,
+                )
 
                 if not modified_carriers.empty:
-                    print(f"\nUpdating {len(modified_carriers)} modified carrier records")
-                    
+                    print(f"Updating {len(modified_carriers)} modified carrier records")
+
                     # Update modified records
                     for _, record in modified_carriers.iterrows():
-                        target_conn.execute("""
-                            UPDATE carriers 
-                            SET list_status = ?, ns_day = ?, route_s = ?, station = ?
+                        target_conn.execute(
+                            """
+                            UPDATE carriers
+                            SET list_status = ?, ns_day = ?,
+                                route_s = ?, station = ?
                             WHERE effective_date = ? AND carrier_name = ?
-                        """, (
-                            record['list_status'], record['ns_day'], 
-                            record['route_s'], record['station'],
-                            record['effective_date'], record['carrier_name']
-                        ))
+                        """,
+                            (
+                                record["list_status"],
+                                record["ns_day"],
+                                record["route_s"],
+                                record["station"],
+                                record["effective_date"],
+                                record["carrier_name"],
+                            ),
+                        )
                     stats["carriers_modified"] = len(modified_carriers)
 
                 # If we added any records, update the sync log
-                if stats["rings3_added"] > 0 or stats["carriers_added"] > 0 or stats["carriers_modified"] > 0:
+                if (
+                    stats["rings3_added"] > 0
+                    or stats["carriers_added"] > 0
+                    or stats["carriers_modified"] > 0
+                ):
                     from datetime import datetime
+
                     now = datetime.now().isoformat()
-                    target_conn.execute("""
+                    target_conn.execute(
+                        """
                         INSERT INTO sync_log (
-                            sync_date, 
-                            rows_added_rings3, 
+                            sync_date,
+                            rows_added_rings3,
                             rows_added_carriers
                         ) VALUES (?, ?, ?)
-                    """, (now, stats["rings3_added"], stats["carriers_added"]))
-                    
+                    """,
+                        (now, stats["rings3_added"], stats["carriers_added"]),
+                    )
+
                     target_conn.commit()
-                    print("\nSync completed successfully!")
+                    print("Sync completed successfully!")
                     message = (
                         f"Sync completed successfully.\n"
                         f"Added {stats['rings3_added']} new clock rings\n"
-                        f"Added {stats['carriers_added']} carrier records (new carrier+date combinations)\n"
+                        f"Added {stats['carriers_added']} carrier records\n"
                         f"Modified {stats['carriers_modified']} existing carrier records"
                     )
                     CustomInfoDialog.information(self, "Sync Complete", message)
-                    
+
                     # Refresh both database status displays after successful sync
                     self.validate_database(self.mandates_db_path)
                     self.validate_eightbox_database()
-                    
+
                     return True, message, stats
                 else:
                     target_conn.rollback()
-                    print("\nNo new records to add - databases are in sync")
-                    CustomInfoDialog.information(self, "Sync Complete", "No new records to sync")
-                    
+                    print("No new records to add - databases are in sync")
+                    CustomInfoDialog.information(
+                        self, "Sync Complete", "No new records to sync"
+                    )
+
                     # Still refresh status displays even if no changes were made
                     self.validate_database(self.mandates_db_path)
                     self.validate_eightbox_database()
-                    
+
                     return False, "No new records to sync", stats
-                    
+
             except Exception as e:
                 target_conn.rollback()
                 print(f"\nError during sync operation: {str(e)}")
                 print(f"Error type: {type(e).__name__}")
                 import traceback
+
                 traceback.print_exc()
                 raise e
-                
+
             finally:
                 source_conn.close()
                 target_conn.close()
-                
+
         except Exception as e:
             print(f"\nFatal sync error: {str(e)}")
             print(f"Error type: {type(e).__name__}")
             import traceback
+
             traceback.print_exc()
             CustomWarningDialog.warning(
-                self,
-                "Sync Error",
-                f"An error occurred during sync:\n{str(e)}"
+                self, "Sync Error", f"An error occurred during sync:\n{str(e)}"
             )
             return False, f"Sync failed: {str(e)}", None

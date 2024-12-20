@@ -34,6 +34,11 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
 )
 
 from carrier_list_pane import CarrierListPane
+from clean_moves_dialog import CleanMovesDialog
+from clean_moves_utils import (
+    detect_invalid_moves,
+    get_valid_routes,
+)
 from custom_widgets import (
     CustomInfoDialog,
     CustomProgressDialog,
@@ -45,12 +50,6 @@ from custom_widgets import (
 from date_selection_pane import DateSelectionPane
 from excel_export import ExcelExporter
 from otdl_maximization_pane import OTDLMaximizationPane
-
-from clean_moves_dialog import CleanMovesDialog
-from clean_moves_utils import (
-    detect_invalid_moves,
-    get_valid_routes,
-)
 
 # Theme colors
 from theme import apply_material_dark_theme
@@ -339,7 +338,7 @@ class MainApp(QMainWindow):
                 self,
                 "Database Error",
                 "Failed to initialize the working database.\n"
-                "Please check the application logs for details."
+                "Please check the application logs for details.",
             )
 
         # Initialize dynamic panes
@@ -1144,7 +1143,9 @@ class MainApp(QMainWindow):
         # Exit menu entry
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
-        self.file_menu.addActions([clean_moves_action, exit_action])  # Add both actions to the menu
+        self.file_menu.addActions(
+            [clean_moves_action, exit_action]
+        )  # Add both actions to the menu
 
         # Settings menu
         settings_menu = menu_bar.addMenu("Settings")
@@ -2016,20 +2017,22 @@ class MainApp(QMainWindow):
 
     def initialize_eightbox_database(self, source_db_path=None):
         """Initialize the eightbox.sqlite database.
-        
+
         Creates a new eightbox.sqlite database if it doesn't exist,
         or validates an existing one. Can optionally copy data from
         a source database during initialization.
-        
+
         Args:
             source_db_path (str, optional): Path to source database to copy data from
-            
+
         Returns:
             bool: True if successful, False otherwise
         """
         try:
-            target_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite")
-            
+            target_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite"
+            )
+
             # If database exists and is valid, return True
             if os.path.exists(target_path):
                 conn = sqlite3.connect(target_path)
@@ -2045,115 +2048,158 @@ class MainApp(QMainWindow):
                             # Connect to both databases
                             source_conn = sqlite3.connect(source_db_path)
                             target_conn = sqlite3.connect(target_path)
-                            
+
                             try:
                                 # Start transaction
                                 target_conn.execute("BEGIN TRANSACTION")
-                                stats = {"rings3_added": 0, "carriers_added": 0, "carriers_modified": 0}
-                                
+                                stats = {
+                                    "rings3_added": 0,
+                                    "carriers_added": 0,
+                                    "carriers_modified": 0,
+                                }
+
                                 # Get new rings3 records
                                 source_cursor = source_conn.cursor()
                                 target_cursor = target_conn.cursor()
-                                
-                                source_cursor.execute("""
-                                    SELECT DISTINCT s.* 
-                                    FROM rings3 s 
+
+                                source_cursor.execute(
+                                    """
+                                    SELECT DISTINCT s.*
+                                    FROM rings3 s
                                     ORDER BY s.rings_date DESC, s.carrier_name
-                                """)
+                                """
+                                )
                                 source_records = source_cursor.fetchall()
-                                
+
                                 # Check each source record against target
                                 new_records = []
                                 for record in source_records:
                                     rings_date, carrier_name = record[0], record[1]
-                                    target_cursor.execute("""
-                                        SELECT 1 FROM rings3 
-                                        WHERE rings_date = ? 
+                                    target_cursor.execute(
+                                        """
+                                        SELECT 1 FROM rings3
+                                        WHERE rings_date = ?
                                         AND carrier_name = ?
-                                    """, (rings_date, carrier_name))
-                                    
+                                    """,
+                                        (rings_date, carrier_name),
+                                    )
+
                                     if not target_cursor.fetchone():
                                         new_records.append(record)
-                                
+
                                 if new_records:
-                                    target_conn.executemany("""
+                                    target_conn.executemany(
+                                        """
                                         INSERT INTO rings3 (
-                                            rings_date, carrier_name, total, rs, code, moves,
-                                            leave_type, leave_time, refusals, bt, et
+                                            rings_date, carrier_name, total, rs, code,
+                                            moves, leave_type, leave_time, refusals,
+                                            bt, et
                                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                    """, new_records)
+                                    """,
+                                        new_records,
+                                    )
                                     stats["rings3_added"] = len(new_records)
 
                                 # Handle carriers table
-                                source_cursor.execute("""
-                                    SELECT DISTINCT s.* 
-                                    FROM carriers s 
+                                source_cursor.execute(
+                                    """
+                                    SELECT DISTINCT s.*
+                                    FROM carriers s
                                     ORDER BY s.effective_date DESC, s.carrier_name
-                                """)
+                                """
+                                )
                                 source_carrier_records = source_cursor.fetchall()
-                                
+
                                 # Check each source carrier record against target
                                 new_carrier_records = []
                                 for record in source_carrier_records:
                                     effective_date, carrier_name = record[0], record[1]
-                                    target_cursor.execute("""
-                                        SELECT 1 FROM carriers 
-                                        WHERE effective_date = ? 
+                                    target_cursor.execute(
+                                        """
+                                        SELECT 1 FROM carriers
+                                        WHERE effective_date = ?
                                         AND carrier_name = ?
-                                    """, (effective_date, carrier_name))
-                                    
+                                    """,
+                                        (effective_date, carrier_name),
+                                    )
+
                                     if not target_cursor.fetchone():
                                         new_carrier_records.append(record)
-                                
+
                                 if new_carrier_records:
-                                    target_conn.executemany("""
+                                    target_conn.executemany(
+                                        """
                                         INSERT INTO carriers (
                                             effective_date, carrier_name, list_status,
                                             ns_day, route_s, station
                                         ) VALUES (?, ?, ?, ?, ?, ?)
-                                    """, new_carrier_records)
+                                    """,
+                                        new_carrier_records,
+                                    )
                                     stats["carriers_added"] = len(new_carrier_records)
 
                                 # Check for modified carrier records
-                                modified_carriers = pd.read_sql_query("""
-                                    SELECT s.* 
+                                modified_carriers = pd.read_sql_query(
+                                    """
+                                    SELECT s.*
                                     FROM carriers s
-                                    JOIN carriers t ON 
+                                    JOIN carriers t ON
                                         s.effective_date = t.effective_date AND
                                         s.carrier_name = t.carrier_name
                                     WHERE COALESCE(s.list_status,'') != COALESCE(t.list_status,'')
                                        OR COALESCE(s.ns_day,'') != COALESCE(t.ns_day,'')
                                        OR COALESCE(s.route_s,'') != COALESCE(t.route_s,'')
                                        OR COALESCE(s.station,'') != COALESCE(t.station,'')
-                                """, source_conn)
+                                """,
+                                    source_conn,
+                                )
 
                                 if not modified_carriers.empty:
                                     for _, record in modified_carriers.iterrows():
-                                        target_conn.execute("""
-                                            UPDATE carriers 
-                                            SET list_status = ?, ns_day = ?, route_s = ?, station = ?
+                                        target_conn.execute(
+                                            """
+                                            UPDATE carriers
+                                            SET list_status = ?, ns_day = ?,
+                                                route_s = ?, station = ?
                                             WHERE effective_date = ? AND carrier_name = ?
-                                        """, (
-                                            record['list_status'], record['ns_day'], 
-                                            record['route_s'], record['station'],
-                                            record['effective_date'], record['carrier_name']
-                                        ))
+                                        """,
+                                            (
+                                                record["list_status"],
+                                                record["ns_day"],
+                                                record["route_s"],
+                                                record["station"],
+                                                record["effective_date"],
+                                                record["carrier_name"],
+                                            ),
+                                        )
                                     stats["carriers_modified"] = len(modified_carriers)
 
                                 # If we added any records, update the sync log
-                                if stats["rings3_added"] > 0 or stats["carriers_added"] > 0 or stats["carriers_modified"] > 0:
+                                if (
+                                    stats["rings3_added"] > 0
+                                    or stats["carriers_added"] > 0
+                                    or stats["carriers_modified"] > 0
+                                ):
                                     from datetime import datetime
+
                                     now = datetime.now().isoformat()
-                                    target_conn.execute("""
+                                    target_conn.execute(
+                                        """
                                         INSERT INTO sync_log (
-                                            sync_date, 
-                                            rows_added_rings3, 
+                                            sync_date,
+                                            rows_added_rings3,
                                             rows_added_carriers
                                         ) VALUES (?, ?, ?)
-                                    """, (now, stats["rings3_added"], stats["carriers_added"]))
-                                    
+                                    """,
+                                        (
+                                            now,
+                                            stats["rings3_added"],
+                                            stats["carriers_added"],
+                                        ),
+                                    )
+
                                     target_conn.commit()
-                                    
+
                                     # Just log to console for debugging
                                     print(
                                         f"Initial sync completed successfully.\n"
@@ -2164,26 +2210,27 @@ class MainApp(QMainWindow):
                                 else:
                                     target_conn.rollback()
                                     print("No new records to sync")
-                                    
+
                             finally:
                                 source_conn.close()
                                 target_conn.close()
-                                
+
                         except Exception as e:
                             print(f"Error during initial sync: {str(e)}")
                             CustomWarningDialog.warning(
                                 self,
                                 "Sync Error",
-                                f"An error occurred during initial sync:\n{str(e)}"
+                                f"An error occurred during initial sync:\n{str(e)}",
                             )
                     return True
 
             # Create new database
             conn = sqlite3.connect(target_path)
             cursor = conn.cursor()
-            
+
             # Create tables
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE carriers (
                     effective_date date,
                     carrier_name varchar,
@@ -2192,9 +2239,11 @@ class MainApp(QMainWindow):
                     route_s varchar,
                     station varchar
                 )
-            """)
-            
-            cursor.execute("""
+            """
+            )
+
+            cursor.execute(
+                """
                 CREATE TABLE rings3 (
                     rings_date date,
                     carrier_name varchar,
@@ -2208,33 +2257,38 @@ class MainApp(QMainWindow):
                     bt varchar,
                     et varchar
                 )
-            """)
-            
-            cursor.execute("""
+            """
+            )
+
+            cursor.execute(
+                """
                 CREATE TABLE sync_log (
                     sync_date TEXT NOT NULL,
                     rows_added_rings3 INTEGER,
                     rows_added_carriers INTEGER,
                     backup_path TEXT
                 )
-            """)
-            
+            """
+            )
+
             # Create recommended indexes
             cursor.execute("CREATE INDEX idx_rings3_date ON rings3(rings_date)")
             cursor.execute("CREATE INDEX idx_carrier_name ON carriers(carrier_name)")
-            cursor.execute("CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)")
-            
+            cursor.execute(
+                "CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)"
+            )
+
             # If source database provided, copy data
             if source_db_path and os.path.exists(source_db_path):
                 cursor.execute("ATTACH DATABASE ? AS source", (source_db_path,))
-                
+
                 # Copy data in a transaction
                 cursor.execute("BEGIN TRANSACTION")
                 try:
                     cursor.execute("INSERT INTO carriers SELECT * FROM source.carriers")
                     cursor.execute("INSERT INTO rings3 SELECT * FROM source.rings3")
                     cursor.execute("COMMIT")
-                except:
+                except Exception:
                     cursor.execute("ROLLBACK")
                     raise
                 finally:
@@ -2242,18 +2296,22 @@ class MainApp(QMainWindow):
 
                 # Add initial sync log entry
                 from datetime import datetime
+
                 now = datetime.now().isoformat()
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO sync_log (
-                        sync_date, 
-                        rows_added_rings3, 
-                        rows_added_carriers, 
+                        sync_date,
+                        rows_added_rings3,
+                        rows_added_carriers,
                         backup_path
                     ) VALUES (?, 0, 0, NULL)
-                """, (now,))
-                
+                """,
+                    (now,),
+                )
+
                 return True
-                
+
         except Exception as e:
             print(f"Error initializing database: {e}")
             return False

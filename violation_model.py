@@ -575,13 +575,13 @@ class ViolationModel(QStandardItemModel):
 
     def get_table_state(self):
         """Get the complete state of the table for Excel export.
-        
+
         This method is REQUIRED for Excel export functionality.
         It must return three DataFrames containing:
         1. The actual cell values
         2. Cell metadata (colors, formatting)
         3. Row-level highlight information
-        
+
         Returns:
             tuple: (content_df, metadata_df, row_highlights_df)
                 - content_df: DataFrame with actual cell values
@@ -593,11 +593,11 @@ class ViolationModel(QStandardItemModel):
             self.headerData(col, Qt.Horizontal, Qt.DisplayRole)
             for col in range(self.columnCount())
         ]
-        
+
         # Build content DataFrame from actual displayed values
         content_data = []
         metadata_data = []
-        
+
         for row in range(self.rowCount()):
             row_content = []
             row_metadata = []
@@ -606,31 +606,31 @@ class ViolationModel(QStandardItemModel):
                 # Get display value
                 value = self.data(index, Qt.DisplayRole)
                 row_content.append(value)
-                
+
                 # Get cell metadata
                 bg_color = self.get_background_color(index)
                 fg_color = self.get_foreground_color(index)
-                
+
                 metadata = {
                     "background": bg_color.name() if bg_color else None,
-                    "foreground": fg_color.name() if fg_color else None
+                    "foreground": fg_color.name() if fg_color else None,
                 }
                 row_metadata.append(metadata)
-            
+
             content_data.append(row_content)
             metadata_data.append(row_metadata)
 
         # Create DataFrames
         content_df = pd.DataFrame(content_data, columns=headers)
         metadata_df = pd.DataFrame(metadata_data, columns=headers)
-        
+
         # Create row highlights DataFrame
         row_highlights = []
         for row in range(self.rowCount()):
             has_highlight = self.has_violation_in_row(row)
             row_highlights.append({"row": row, "highlighted": has_highlight})
         row_highlights_df = pd.DataFrame(row_highlights)
-        
+
         return content_df, metadata_df, row_highlights_df
 
     def sort(self, column, order):
