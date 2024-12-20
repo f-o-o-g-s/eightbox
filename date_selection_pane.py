@@ -1,242 +1,323 @@
-"""Manages the date selection interface for the application.
+"""Date selection component for the application.
 
-ProvidesUI components and logic for selecting and managing date ranges,
-allowing users to filter and view data for specific time periods.
+Provides a table interface for selecting date ranges, showing only valid ranges 
+that have data in the database.
 """
 
+from datetime import datetime, timedelta
+import sqlite3
+
 from PyQt5.QtCore import (
-    QDate,
-    QEvent,
     Qt,
+    QModelIndex,
+    pyqtSignal,
+    QAbstractTableModel,
+    QDate,
 )
 from PyQt5.QtGui import (
     QColor,
-    QTextCharFormat,
 )
 from PyQt5.QtWidgets import (
-    QCalendarWidget,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QPushButton,
-    QVBoxLayout,
-    QWidget,
+    QTableView,
+    QHeaderView,
+    QSizePolicy,
 )
 
 from custom_widgets import CustomTitleBarWidget
 
 
-class CustomCalendarWidget(QCalendarWidget):
-    """A customized calendar widget with styled navigation and date display.
+class DateRangeModel(QAbstractTableModel):
+    """Model for storing and managing date range data in a table structure."""
 
-    Provides a calendar interface with:
-    - White text for current month days
-    - Dimmed text for other month days
-    - Custom styled navigation bar with month/year controls
-    - Automatic format updates when month changes
-    """
+    def __init__(self):
+        super().__init__()
+        self.headers = ["Date Range", "Year", "Carriers"]
+        self.date_ranges = []  # Will store tuples of (start_date, end_date, carrier_count)
 
+    def rowCount(self, parent=None):
+        return len(self.date_ranges)
+
+    def columnCount(self, parent=None):
+        return len(self.headers)
+
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return None
+
+        row = index.row()
+        col = index.column()
+
+        if role == Qt.DisplayRole:
+            start_date, end_date, carrier_count = self.date_ranges[row]
+            if col == 0:
+                return f"{start_date.strftime('%b %d')} - {end_date.strftime('%b %d')}"
+            elif col == 1:
+                return start_date.strftime("%Y")
+            elif col == 2:
+                return str(carrier_count)
+
+        elif role == Qt.TextAlignmentRole:
+            if col == 2:  # Carriers column
+                return Qt.AlignCenter
+            elif col == 1:  # Year column
+                return Qt.AlignCenter
+            return Qt.AlignLeft | Qt.AlignVCenter
+
+        elif role == Qt.BackgroundRole:
+            # Alternate row colors for better readability
+            if row % 2:
+                return QColor("#2A2A2A")
+            return QColor("#222222")
+
+        return None
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self.headers[section]
+        return None
+
+    def populate_data(self, date_ranges):
+        """Populate the model with date range data.
+        
+        Args:
+            date_ranges: List of tuples (start_date, end_date, carrier_count)
+                        where dates are datetime objects
+        """
+        self.beginResetModel()
+        self.date_ranges = date_ranges
+        self.endResetModel()
+
+    def get_date_range(self, row):
+        """Get the date range for a specific row.
+        
+        Args:
+            row: The row index
+            
+        Returns:
+            tuple: (start_date, end_date) or None if invalid row
+        """
+        if 0 <= row < len(self.date_ranges):
+            start_date, end_date, _ = self.date_ranges[row]
+            return start_date, end_date
+        return None
+
+
+class DateRangeSelector(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.init_ui()
 
-        # Create white text format for current month days
-        self.white_format = QTextCharFormat()
-        self.white_format.setForeground(Qt.white)
+    def init_ui(self):
+        """Initialize the UI components."""
+        # Main layout with no spacing or margins
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.setLayout(layout)
 
-        # Create dimmed format for other month days
-        self.dimmed_format = QTextCharFormat()
-        self.dimmed_format.setForeground(QColor("#323232"))
+        # Create and set up the table view
+        self.table_view = QTableView()
+        self.model = DateRangeModel()
+        self.table_view.setModel(self.model)
 
-        # Apply the white format to weekday headers and weekend days
-        self.setWeekdayTextFormat(Qt.Saturday, self.white_format)
-        self.setWeekdayTextFormat(Qt.Sunday, self.white_format)
+        # Configure table view properties
+        self.table_view.setSelectionBehavior(QTableView.SelectRows)
+        self.table_view.setSelectionMode(QTableView.SingleSelection)
+        self.table_view.setEditTriggers(QTableView.NoEditTriggers)
+        self.table_view.verticalHeader().setVisible(False)
+        self.table_view.setShowGrid(False)
+        
+        # Set up the header and column sizes
+        header = self.table_view.horizontalHeader()
+        
+        # Make Date Range column stretch to fill available space
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        
+        # Set fixed widths for Year and Carriers columns
+        header.setSectionResizeMode(1, QHeaderView.Fixed)
+        header.setSectionResizeMode(2, QHeaderView.Fixed)
+        self.table_view.setColumnWidth(1, 80)   # Year column
+        self.table_view.setColumnWidth(2, 100)  # Carriers column
 
-        # Set up the calendar's appearance with navigation bar styling
-        self.setStyleSheet(
-            """
-            QCalendarWidget QAbstractItemView:!enabled {
-                color: #323232;
-            }
-            QCalendarWidget QWidget#qt_calendar_navigationbar {
-                background-color: #d8b4fc;  /* Light purple */
-            }
-            QCalendarWidget QToolButton {
-                color: #000000;  /* Black text */
-                background-color: transparent;
-                border: none;
-                border-radius: 0px;
-                qproperty-iconSize: 24px;
-                padding: 4px;
-            }
-            /* Hover state for navigation buttons */
-            QCalendarWidget QToolButton:hover {
-                background-color: rgba(255, 255, 255, 0.1);
-            }
-            /* Previous/Next month buttons */
-            QCalendarWidget QToolButton::menu-indicator,
-            QCalendarWidget QToolButton::menu-arrow {
-                image: none;  /* Remove default arrows */
-            }
-            /* Month/Year text button */
-            QCalendarWidget QToolButton#qt_calendar_monthbutton,
-            QCalendarWidget QToolButton#qt_calendar_yearbutton {
-                color: #000000;
-                background-color: transparent;
-                padding: 2px 8px;
-            }
-            QCalendarWidget QSpinBox {
-                color: #000000;  /* Black text for year spinbox if visible */
-            }
-            /* Navigation Bar */
-            QCalendarWidget QToolButton#qt_calendar_prevmonth,
-            QCalendarWidget QToolButton#qt_calendar_nextmonth {
-                background-color: rgba(0, 0, 0, 0.2);  /* Darker background */
-                border: 1px solid rgba(255, 255, 255, 0.2);  /* More visible border */
-                border-radius: 4px;
-                margin: 3px;
-                padding: 6px 8px;
-                font-weight: bold;
-                font-size: 18px;
-                color: #000000;
-            }
-            QCalendarWidget QToolButton#qt_calendar_prevmonth {
-                qproperty-icon: none;
-                qproperty-text: "◀";
-            }
-            QCalendarWidget QToolButton#qt_calendar_nextmonth {
-                qproperty-icon: none;
-                qproperty-text: "▶";
-            }
-            QCalendarWidget QToolButton#qt_calendar_prevmonth:hover,
-            QCalendarWidget QToolButton#qt_calendar_nextmonth:hover {
-                background-color: rgba(0, 0, 0, 0.3);  /* Darker hover */
-                border: 1px solid rgba(255, 255, 255, 0.3);  /* Hover border */
-            }
-            """
-        )
+        # Make the table view stretch to fill available space
+        self.table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        layout.addWidget(self.table_view)
 
-        # Connect to the currentPageChanged signal
-        self.currentPageChanged.connect(self.update_date_formats)
+        # Connect selection signal
+        self.table_view.selectionModel().selectionChanged.connect(self.on_selection_changed)
 
-        # Initial update
-        self.update_date_formats()
+    def on_selection_changed(self, selected, deselected):
+        """Handle selection changes in the table view."""
+        if selected.indexes():
+            row = selected.indexes()[0].row()
+            start_date, end_date, _ = self.model.date_ranges[row]
+            self.date_range_selected.emit(start_date, end_date)
 
-    def update_date_formats(self):
-        """Update the text formats when the month changes"""
-        # Get the current month's dates
-        current = self.selectedDate()
-        first_day = QDate(current.year(), current.month(), 1)
-        last_day = first_day.addMonths(1).addDays(-1)
-
-        # Reset all dates to dimmed format
-        self.setDateTextFormat(QDate(), self.dimmed_format)
-
-        # Set current month dates to white
-        for d in range(first_day.daysTo(last_day) + 1):
-            current_date = first_day.addDays(d)
-            self.setDateTextFormat(current_date, self.white_format)
+    # Signal emitted when a date range is selected
+    date_range_selected = pyqtSignal(QDate, QDate)
 
 
 class DateSelectionPane(QWidget):
-    """A floating window that allows users to select date ranges.
+    """A widget for selecting date ranges from available data.
 
-    Provides a calendar interface for selecting dates with:
-    - Custom calendar widget
-    - Apply button for confirming selection
-    - Instructions for user guidance
-    - Minimize/restore functionality
+    Provides a table interface showing available date ranges with carrier counts.
     """
+    
+    date_range_selected = pyqtSignal(datetime, datetime)  # Emits (start_date, end_date)
 
-    def __init__(self, parent=None):
+    def __init__(self, db_path, parent=None):
         super().__init__(parent)
+        self.db_path = db_path
         self.parent_widget = parent
-        self.parent_main = parent
-
+        self.selected_range = None
+        
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+        self.setup_ui()
+        self.load_data()
 
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+    def setup_ui(self):
+        """Set up the UI components."""
+        # Main layout
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        self.title_bar = CustomTitleBarWidget(title="Date Selection", parent=self)
-        if hasattr(self.title_bar, "minimize_btn"):
-            self.title_bar.minimize_btn.clicked.disconnect()
-            self.title_bar.minimize_btn.clicked.connect(self.minimize_to_button)
-        main_layout.addWidget(self.title_bar)
+        # Add custom title bar
+        self.title_bar = CustomTitleBarWidget("Date Range Selection", self)
+        layout.addWidget(self.title_bar)
 
+        # Content widget with padding
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(10, 10, 10, 10)
-        content_layout.setSpacing(10)
+        content_layout.setContentsMargins(20, 20, 20, 20)
+        content_layout.setSpacing(15)
 
-        self.calendar = CustomCalendarWidget()
-        self.calendar.setFirstDayOfWeek(Qt.Saturday)
-        self.calendar.setMinimumSize(280, 280)
-        self.calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
+        # Current selection label
+        self.selection_label = QLabel("No Date Range Selected")
+        content_layout.addWidget(self.selection_label)
 
-        content_layout.addWidget(self.calendar)
+        # Table view
+        self.table_view = QTableView()
+        self.table_view.setAlternatingRowColors(True)
+        self.table_view.setSelectionBehavior(QTableView.SelectRows)
+        self.table_view.setSelectionMode(QTableView.SingleSelection)
+        
+        # Set up the model
+        self.model = DateRangeModel()
+        self.table_view.setModel(self.model)
+        
+        # Set up header
+        header = self.table_view.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)  # Date Range
+        header.setSectionResizeMode(1, QHeaderView.Fixed)   # Year
+        header.setSectionResizeMode(2, QHeaderView.Fixed)   # Carriers
+        
+        # Set fixed widths for Year and Carriers columns
+        self.table_view.setColumnWidth(1, 80)   # Year
+        self.table_view.setColumnWidth(2, 100)  # Carriers
+        
+        # Hide vertical header (row numbers)
+        self.table_view.verticalHeader().hide()
+        
+        # Make the table view stretch to fill available space
+        self.table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        content_layout.addWidget(self.table_view)
 
-        apply_button = QPushButton("Apply Date Range")
-        apply_button.setFixedWidth(200)
-        apply_button.clicked.connect(self.apply_date_range_wrapper)
-        content_layout.addWidget(apply_button, alignment=Qt.AlignCenter)
+        # Connect selection signal
+        self.table_view.clicked.connect(self.handle_selection)
 
-        instruction_label = QLabel("Select a Saturday, and press 'Apply Date Range'.")
-        instruction_label.setWordWrap(True)
-        instruction_label.setAlignment(Qt.AlignCenter)
-        content_layout.addWidget(instruction_label)
+        # Buttons
+        button_layout = QHBoxLayout()
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.apply_button = QPushButton("Apply Selection")
+        self.apply_button.setEnabled(False)
+        self.apply_button.clicked.connect(self.apply_selection)
+        
+        self.refresh_button = QPushButton("Refresh")
+        self.refresh_button.clicked.connect(self.load_data)
+        
+        button_layout.addWidget(self.apply_button)
+        button_layout.addWidget(self.refresh_button)
+        
+        content_layout.addLayout(button_layout)
+        
+        # Make content widget stretch
+        content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        layout.addWidget(content_widget)
 
-        main_layout.addWidget(content_widget)
+    def load_data(self):
+        """Load date ranges from the database."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT 
+                        DATE(rings_date) as rings_date,
+                        COUNT(DISTINCT carrier_name) as carrier_count
+                    FROM rings3 
+                    GROUP BY DATE(rings_date)
+                    ORDER BY rings_date DESC
+                """)
+                
+                # Process results into weekly ranges
+                date_ranges = []
+                current_start = None
+                current_carriers = 0
+                
+                for row in cursor.fetchall():
+                    date_str, carrier_count = row
+                    date = datetime.strptime(date_str, "%Y-%m-%d")
+                    
+                    # If it's a Saturday, start a new range
+                    if date.weekday() == 5:  # 5 = Saturday
+                        if current_start:
+                            # Add the previous range
+                            date_ranges.append((
+                                current_start,
+                                current_start + timedelta(days=6),
+                                current_carriers
+                            ))
+                        current_start = date
+                        current_carriers = carrier_count
+                
+                # Add the last range if there is one
+                if current_start:
+                    date_ranges.append((
+                        current_start,
+                        current_start + timedelta(days=6),
+                        current_carriers
+                    ))
+                
+                # Update the model
+                self.model.populate_data(date_ranges)
+                
+        except Exception as e:
+            print(f"Error loading date ranges: {e}")
 
-    def minimize_to_button(self):
-        """Minimize the date selection pane and update parent button state.
+    def handle_selection(self, index):
+        """Handle selection in the table view."""
+        row = index.row()
+        date_range = self.model.get_date_range(row)
+        
+        if date_range:
+            start_date, end_date = date_range
+            self.selected_range = (start_date, end_date)
+            self.selection_label.setText(
+                f"Selected: {start_date.strftime('%b %d')} - {end_date.strftime('%b %d, %Y')}"
+            )
+            self.apply_button.setEnabled(True)
+        else:
+            self.selected_range = None
+            self.apply_button.setEnabled(False)
 
-        Hides the pane and unchecks the associated toggle button in the
-        parent window if it exists.
-        """
-        if self.parent_main and hasattr(self.parent_main, "date_selection_button"):
-            self.parent_main.date_selection_button.setChecked(False)
-        self.hide()
-
-    def change_event(self, event):
-        """Handle window state changes, particularly minimization.
-
-        Args:
-            event (QEvent): The window state change event
-        """
-        if event.type() == QEvent.WindowStateChange:
-            if self.windowState() & Qt.WindowMinimized:
-                self.minimize_to_button()
-                event.accept()
-        super().changeEvent(event)
-
-    def hide_event(self, event):
-        """Handle window hide events.
-
-        Updates the parent window's date selection button state when
-        this pane is hidden.
-
-        Args:
-            event (QEvent): The hide event
-        """
-        super().hideEvent(event)
-        if self.parent_main and hasattr(self.parent_main, "date_selection_button"):
-            self.parent_main.date_selection_button.setChecked(False)
-
-    def apply_date_range_wrapper(self):
-        """Wrapper to call the parent's apply_date_range method.
-
-        Delegates the date range application to the parent window if
-        the method exists.
-        """
-        if self.parent_main and hasattr(self.parent_main, "apply_date_range"):
-            self.parent_main.apply_date_range()
-
-    def show_event(self, event):
-        """Override showEvent to set the fixed size after the window is shown"""
-        super().showEvent(event)
-        # Wait for the window to be shown and all widgets to be properly laid out
-        self.setFixedSize(self.sizeHint())
-
-    # Alias Qt method names to maintain compatibility
-    changeEvent = change_event
-    hideEvent = hide_event
-    showEvent = show_event
+    def apply_selection(self):
+        """Apply the selected date range."""
+        if self.selected_range:
+            start_date, end_date = self.selected_range
+            self.date_range_selected.emit(start_date, end_date) 

@@ -1443,3 +1443,16 @@ class CarrierListPane(QWidget):
         filter_text = self.filter_input.text()
         self.proxy_model.set_text_filter(filter_text)
         self.update_statistics()
+
+    def has_valid_date_range(self):
+        """Check if a valid date range is selected.
+
+        Returns:
+            bool: True if a valid date range is selected, False otherwise
+        """
+        return (
+            hasattr(self.parent_widget, "date_selection_pane")
+            and self.parent_widget.date_selection_pane is not None
+            and hasattr(self.parent_widget.date_selection_pane, "selected_range")
+            and self.parent_widget.date_selection_pane.selected_range is not None
+        )

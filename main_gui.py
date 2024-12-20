@@ -832,10 +832,7 @@ class MainApp(QMainWindow):
                 "Please configure the database path before proceeding.",
             )
             self.open_settings_dialog()
-            if (
-                hasattr(self, "carrier_list_pane")
-                and self.carrier_list_pane is not None
-            ):
+            if hasattr(self, "carrier_list_pane") and self.carrier_list_pane is not None:
                 if hasattr(self.carrier_list_pane, "data_updated"):
                     self.carrier_list_pane.data_updated.connect(
                         lambda: self.retry_apply_date_range()
@@ -856,10 +853,7 @@ class MainApp(QMainWindow):
             self.carrier_list_button.setChecked(True)
             self.toggle_carrier_list_pane()
 
-            if (
-                hasattr(self, "carrier_list_pane")
-                and self.carrier_list_pane is not None
-            ):
+            if hasattr(self, "carrier_list_pane") and self.carrier_list_pane is not None:
                 self.carrier_list_pane.data_updated.connect(
                     lambda: self.retry_apply_date_range()
                 )
@@ -910,29 +904,21 @@ class MainApp(QMainWindow):
             QApplication.processEvents()
 
             # Validate the date selection
-            if (
-                not hasattr(self, "date_selection_pane")
-                or self.date_selection_pane is None
-            ):
+            if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
                 raise AttributeError("Date selection pane is not initialized.")
 
-            if (
-                not hasattr(self.date_selection_pane, "calendar")
-                or self.date_selection_pane.calendar is None
-            ):
-                raise AttributeError("Calendar widget is not initialized.")
+            if not hasattr(self.date_selection_pane, "selected_range") or self.date_selection_pane.selected_range is None:
+                raise ValueError("No date range selected.")
 
-            # Get the selected date from the calendar
-            selected_date = self.date_selection_pane.calendar.selectedDate()
-            if not selected_date.isValid():
-                raise ValueError("No valid date selected in the calendar.")
+            # Get the selected date range
+            start_date, end_date = self.date_selection_pane.selected_range
+            start_date_str = start_date.strftime("%Y-%m-%d")
+            end_date_str = end_date.strftime("%Y-%m-%d")
 
             # Fetch clock ring data (20%)
             update_progress(10, "Fetching clock ring data...")
-            start_date = selected_date.toString("yyyy-MM-dd")
-            end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
-            self.update_date_range_display(start_date, end_date)
-            clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
+            self.update_date_range_display(start_date_str, end_date_str)
+            clock_ring_data = self.fetch_clock_ring_data(start_date_str, end_date_str)
 
             # Process carrier list (30%)
             update_progress(20, "Processing carrier list...")
@@ -1562,26 +1548,19 @@ class MainApp(QMainWindow):
         """
 
         try:
-            # Validate the date_selection_pane and calendar
-            if (
-                not hasattr(self, "date_selection_pane")
-                or self.date_selection_pane is None
-            ):
-                raise AttributeError("Date selection pane is not initialized.")
-
-            if (
-                not hasattr(self.date_selection_pane, "calendar")
-                or self.date_selection_pane.calendar is None
-            ):
-                raise AttributeError("Calendar widget is not initialized.")
-
-            # Get the selected date from the calendar
-            selected_date = self.date_selection_pane.calendar.selectedDate()
-            if not selected_date.isValid():
-                raise ValueError("No valid date selected in the calendar.")
-
-            start_date = selected_date.toString("yyyy-MM-dd")
-            end_date = selected_date.addDays(7).toString("yyyy-MM-dd")
+            # If no dates provided, try to get them from the date selection pane
+            if start_date is None or end_date is None:
+                if (
+                    not hasattr(self, "date_selection_pane")
+                    or self.date_selection_pane is None
+                    or not hasattr(self.date_selection_pane, "selected_range")
+                    or self.date_selection_pane.selected_range is None
+                ):
+                    raise ValueError("No valid date range selected.")
+                
+                start_date, end_date = self.date_selection_pane.selected_range
+                start_date = start_date.strftime("%Y-%m-%d")
+                end_date = end_date.strftime("%Y-%m-%d")
 
             with sqlite3.connect(self.mandates_db_path) as conn:
                 db_data = pd.read_sql_query(query, conn, params=(start_date, end_date))
@@ -1864,14 +1843,35 @@ class MainApp(QMainWindow):
     def toggle_date_selection_pane(self):
         """Toggle the Date Selection Pane and button state."""
         if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
-            self.date_selection_pane = DateSelectionPane(self)
+            # Initialize with the database path
+            self.date_selection_pane = DateSelectionPane(self.mandates_db_path, self)
+            # Connect the date range selected signal
+            self.date_selection_pane.date_range_selected.connect(self.on_date_range_selected)
 
         if self.date_selection_pane.isVisible():
             self.date_selection_pane.hide()
             self.date_selection_button.setChecked(False)
         else:
             self.date_selection_pane.show()
+            # Set a reasonable initial size for the selector
+            self.date_selection_pane.resize(600, 500)
             self.date_selection_button.setChecked(True)
+
+    def on_date_range_selected(self, start_date, end_date):
+        """Handle when a date range is selected.
+        
+        Args:
+            start_date (datetime): Start date of selected range
+            end_date (datetime): End date of selected range
+        """
+        # Update the date range display
+        self.update_date_range_display(
+            start_date.strftime("%Y-%m-%d"),
+            end_date.strftime("%Y-%m-%d")
+        )
+        
+        # Process the selected date range
+        self.apply_date_range()
 
     def toggle_carrier_list_pane(self):
         """Toggle the Carrier List Pane and button state."""

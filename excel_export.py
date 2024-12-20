@@ -174,35 +174,28 @@ class ExcelExporter:
             print(f"Export failed with error: {e}")
             raise
 
-    def _get_date_range(self):
-        """Get the current date range from the main window.
+    def get_date_range(self):
+        """Get the currently selected date range.
 
         Returns:
-            str: Date range in format 'YYYY-MM-DD to YYYY-MM-DD'
-
-        Raises:
-            AttributeError: If date selection pane is not initialized
-            ValueError: If no valid date is selected
+            tuple: (start_date, end_date) as strings in YYYY-MM-DD format,
+                   or (None, None) if no valid range selected
         """
-        if (
-            not hasattr(self.main_window, "date_selection_pane")
-            or self.main_window.date_selection_pane is None
-        ):
-            raise AttributeError("Date selection pane is not initialized")
+        try:
+            if (
+                not hasattr(self.main_window, "date_selection_pane")
+                or self.main_window.date_selection_pane is None
+                or not hasattr(self.main_window.date_selection_pane, "selected_range")
+                or self.main_window.date_selection_pane.selected_range is None
+            ):
+                return None, None
 
-        if (
-            not hasattr(self.main_window.date_selection_pane, "calendar")
-            or self.main_window.date_selection_pane.calendar is None
-        ):
-            raise AttributeError("Calendar widget is not initialized")
+            start_date, end_date = self.main_window.date_selection_pane.selected_range
+            return start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
 
-        selected_date = self.main_window.date_selection_pane.calendar.selectedDate()
-        if not selected_date.isValid():
-            raise ValueError("No valid date selected in the calendar")
-
-        start_date = selected_date.toString("yyyy-MM-dd")
-        end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
-        return f"{start_date} to {end_date}"
+        except Exception as e:
+            print(f"Error getting date range: {e}")
+            return None, None
 
     def _write_excel_file(self, writer, date_range):
         """Write data to Excel with proper formatting."""
@@ -426,5 +419,26 @@ class ExcelExporter:
             return sheet_name[:31]
 
         return sheet_name
+
+    def _get_date_range(self):
+        """Get the current date range from the main window.
+
+        Returns:
+            str: Date range in format 'YYYY-MM-DD to YYYY-MM-DD'
+
+        Raises:
+            AttributeError: If date selection pane is not initialized
+            ValueError: If no valid date is selected
+        """
+        if (
+            not hasattr(self.main_window, "date_selection_pane")
+            or self.main_window.date_selection_pane is None
+            or not hasattr(self.main_window.date_selection_pane, "selected_range")
+            or self.main_window.date_selection_pane.selected_range is None
+        ):
+            raise AttributeError("No valid date range selected")
+
+        start_date, end_date = self.main_window.date_selection_pane.selected_range
+        return f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
 
     # ... (continue with other helper methods like _write_excel_file)
