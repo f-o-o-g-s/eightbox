@@ -28,7 +28,6 @@ from PyQt5.QtGui import (
 from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,
-    QDialogButtonBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -930,7 +929,8 @@ class CarrierListPane(QWidget):
 
         # Create content widget with Material Design styling
         content_widget = QWidget()
-        content_widget.setStyleSheet("""
+        content_widget.setStyleSheet(
+            """
             QWidget {
                 background-color: #1E1E1E;
                 color: #E1E1E1;
@@ -1012,7 +1012,8 @@ class CarrierListPane(QWidget):
             QPushButton:pressed {
                 background-color: #7B4FAF;
             }
-        """)
+        """
+        )
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
@@ -1089,7 +1090,7 @@ class CarrierListPane(QWidget):
         if self.parent():
             dialog.move(
                 self.parent().x() + (self.parent().width() - dialog.width()) // 2,
-                self.parent().y() + (self.parent().height() - dialog.height()) // 2
+                self.parent().y() + (self.parent().height() - dialog.height()) // 2,
             )
 
         # Handle dialog actions

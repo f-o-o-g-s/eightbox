@@ -1,31 +1,31 @@
 """Date selection component for the application.
 
-Provides a table interface for selecting date ranges, showing only valid ranges 
+Provides a table interface for selecting date ranges, showing only valid ranges
 that have data in the database.
 """
 
-from datetime import datetime, timedelta
 import sqlite3
+from datetime import (
+    datetime,
+    timedelta,
+)
 
 from PyQt5.QtCore import (
-    Qt,
-    QModelIndex,
-    pyqtSignal,
     QAbstractTableModel,
     QDate,
+    Qt,
+    pyqtSignal,
 )
-from PyQt5.QtGui import (
-    QColor,
-)
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QPushButton,
-    QTableView,
-    QHeaderView,
     QSizePolicy,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
 )
 
 from custom_widgets import CustomTitleBarWidget
@@ -37,7 +37,9 @@ class DateRangeModel(QAbstractTableModel):
     def __init__(self):
         super().__init__()
         self.headers = ["Date Range", "Year", "Carriers"]
-        self.date_ranges = []  # Will store tuples of (start_date, end_date, carrier_count)
+        self.date_ranges = (
+            []
+        )  # Will store tuples of (start_date, end_date, carrier_count)
 
     def rowCount(self, parent=None):
         return len(self.date_ranges)
@@ -83,7 +85,7 @@ class DateRangeModel(QAbstractTableModel):
 
     def populate_data(self, date_ranges):
         """Populate the model with date range data.
-        
+
         Args:
             date_ranges: List of tuples (start_date, end_date, carrier_count)
                         where dates are datetime objects
@@ -94,10 +96,10 @@ class DateRangeModel(QAbstractTableModel):
 
     def get_date_range(self, row):
         """Get the date range for a specific row.
-        
+
         Args:
             row: The row index
-            
+
         Returns:
             tuple: (start_date, end_date) or None if invalid row
         """
@@ -131,17 +133,17 @@ class DateRangeSelector(QWidget):
         self.table_view.setEditTriggers(QTableView.NoEditTriggers)
         self.table_view.verticalHeader().setVisible(False)
         self.table_view.setShowGrid(False)
-        
+
         # Set up the header and column sizes
         header = self.table_view.horizontalHeader()
-        
+
         # Make Date Range column stretch to fill available space
         header.setSectionResizeMode(0, QHeaderView.Stretch)
-        
+
         # Set fixed widths for Year and Carriers columns
         header.setSectionResizeMode(1, QHeaderView.Fixed)
         header.setSectionResizeMode(2, QHeaderView.Fixed)
-        self.table_view.setColumnWidth(1, 80)   # Year column
+        self.table_view.setColumnWidth(1, 80)  # Year column
         self.table_view.setColumnWidth(2, 100)  # Carriers column
 
         # Make the table view stretch to fill available space
@@ -149,7 +151,9 @@ class DateRangeSelector(QWidget):
         layout.addWidget(self.table_view)
 
         # Connect selection signal
-        self.table_view.selectionModel().selectionChanged.connect(self.on_selection_changed)
+        self.table_view.selectionModel().selectionChanged.connect(
+            self.on_selection_changed
+        )
 
     def on_selection_changed(self, selected, deselected):
         """Handle selection changes in the table view."""
@@ -167,7 +171,7 @@ class DateSelectionPane(QWidget):
 
     Provides a table interface showing available date ranges with carrier counts.
     """
-    
+
     date_range_selected = pyqtSignal(datetime, datetime)  # Emits (start_date, end_date)
 
     def __init__(self, db_path, parent=None):
@@ -175,7 +179,7 @@ class DateSelectionPane(QWidget):
         self.db_path = db_path
         self.parent_widget = parent
         self.selected_range = None
-        
+
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setup_ui()
         self.load_data()
@@ -206,24 +210,24 @@ class DateSelectionPane(QWidget):
         self.table_view.setAlternatingRowColors(True)
         self.table_view.setSelectionBehavior(QTableView.SelectRows)
         self.table_view.setSelectionMode(QTableView.SingleSelection)
-        
+
         # Set up the model
         self.model = DateRangeModel()
         self.table_view.setModel(self.model)
-        
+
         # Set up header
         header = self.table_view.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Stretch)  # Date Range
-        header.setSectionResizeMode(1, QHeaderView.Fixed)   # Year
-        header.setSectionResizeMode(2, QHeaderView.Fixed)   # Carriers
-        
+        header.setSectionResizeMode(1, QHeaderView.Fixed)  # Year
+        header.setSectionResizeMode(2, QHeaderView.Fixed)  # Carriers
+
         # Set fixed widths for Year and Carriers columns
-        self.table_view.setColumnWidth(1, 80)   # Year
+        self.table_view.setColumnWidth(1, 80)  # Year
         self.table_view.setColumnWidth(2, 100)  # Carriers
-        
+
         # Hide vertical header (row numbers)
         self.table_view.verticalHeader().hide()
-        
+
         # Make the table view stretch to fill available space
         self.table_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         content_layout.addWidget(self.table_view)
@@ -234,19 +238,19 @@ class DateSelectionPane(QWidget):
         # Buttons
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         self.apply_button = QPushButton("Apply Selection")
         self.apply_button.setEnabled(False)
         self.apply_button.clicked.connect(self.apply_selection)
-        
+
         self.refresh_button = QPushButton("Refresh")
         self.refresh_button.clicked.connect(self.load_data)
-        
+
         button_layout.addWidget(self.apply_button)
         button_layout.addWidget(self.refresh_button)
-        
+
         content_layout.addLayout(button_layout)
-        
+
         # Make content widget stretch
         content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         layout.addWidget(content_widget)
@@ -256,47 +260,53 @@ class DateSelectionPane(QWidget):
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT 
+                cursor.execute(
+                    """
+                    SELECT
                         DATE(rings_date) as rings_date,
                         COUNT(DISTINCT carrier_name) as carrier_count
-                    FROM rings3 
+                    FROM rings3
                     GROUP BY DATE(rings_date)
                     ORDER BY rings_date DESC
-                """)
-                
+                """
+                )
+
                 # Process results into weekly ranges
                 date_ranges = []
                 current_start = None
                 current_carriers = 0
-                
+
                 for row in cursor.fetchall():
                     date_str, carrier_count = row
                     date = datetime.strptime(date_str, "%Y-%m-%d")
-                    
+
                     # If it's a Saturday, start a new range
                     if date.weekday() == 5:  # 5 = Saturday
                         if current_start:
                             # Add the previous range
-                            date_ranges.append((
-                                current_start,
-                                current_start + timedelta(days=6),
-                                current_carriers
-                            ))
+                            date_ranges.append(
+                                (
+                                    current_start,
+                                    current_start + timedelta(days=6),
+                                    current_carriers,
+                                )
+                            )
                         current_start = date
                         current_carriers = carrier_count
-                
+
                 # Add the last range if there is one
                 if current_start:
-                    date_ranges.append((
-                        current_start,
-                        current_start + timedelta(days=6),
-                        current_carriers
-                    ))
-                
+                    date_ranges.append(
+                        (
+                            current_start,
+                            current_start + timedelta(days=6),
+                            current_carriers,
+                        )
+                    )
+
                 # Update the model
                 self.model.populate_data(date_ranges)
-                
+
         except Exception as e:
             print(f"Error loading date ranges: {e}")
 
@@ -304,7 +314,7 @@ class DateSelectionPane(QWidget):
         """Handle selection in the table view."""
         row = index.row()
         date_range = self.model.get_date_range(row)
-        
+
         if date_range:
             start_date, end_date = date_range
             self.selected_range = (start_date, end_date)
@@ -320,4 +330,4 @@ class DateSelectionPane(QWidget):
         """Apply the selected date range."""
         if self.selected_range:
             start_date, end_date = self.selected_range
-            self.date_range_selected.emit(start_date, end_date) 
+            self.date_range_selected.emit(start_date, end_date)

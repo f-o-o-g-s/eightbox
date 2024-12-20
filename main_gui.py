@@ -832,7 +832,10 @@ class MainApp(QMainWindow):
                 "Please configure the database path before proceeding.",
             )
             self.open_settings_dialog()
-            if hasattr(self, "carrier_list_pane") and self.carrier_list_pane is not None:
+            if (
+                hasattr(self, "carrier_list_pane")
+                and self.carrier_list_pane is not None
+            ):
                 if hasattr(self.carrier_list_pane, "data_updated"):
                     self.carrier_list_pane.data_updated.connect(
                         lambda: self.retry_apply_date_range()
@@ -853,7 +856,10 @@ class MainApp(QMainWindow):
             self.carrier_list_button.setChecked(True)
             self.toggle_carrier_list_pane()
 
-            if hasattr(self, "carrier_list_pane") and self.carrier_list_pane is not None:
+            if (
+                hasattr(self, "carrier_list_pane")
+                and self.carrier_list_pane is not None
+            ):
                 self.carrier_list_pane.data_updated.connect(
                     lambda: self.retry_apply_date_range()
                 )
@@ -904,10 +910,16 @@ class MainApp(QMainWindow):
             QApplication.processEvents()
 
             # Validate the date selection
-            if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
+            if (
+                not hasattr(self, "date_selection_pane")
+                or self.date_selection_pane is None
+            ):
                 raise AttributeError("Date selection pane is not initialized.")
 
-            if not hasattr(self.date_selection_pane, "selected_range") or self.date_selection_pane.selected_range is None:
+            if (
+                not hasattr(self.date_selection_pane, "selected_range")
+                or self.date_selection_pane.selected_range is None
+            ):
                 raise ValueError("No date range selected.")
 
             # Get the selected date range
@@ -1557,7 +1569,7 @@ class MainApp(QMainWindow):
                     or self.date_selection_pane.selected_range is None
                 ):
                     raise ValueError("No valid date range selected.")
-                
+
                 start_date, end_date = self.date_selection_pane.selected_range
                 start_date = start_date.strftime("%Y-%m-%d")
                 end_date = end_date.strftime("%Y-%m-%d")
@@ -1846,7 +1858,9 @@ class MainApp(QMainWindow):
             # Initialize with the database path
             self.date_selection_pane = DateSelectionPane(self.mandates_db_path, self)
             # Connect the date range selected signal
-            self.date_selection_pane.date_range_selected.connect(self.on_date_range_selected)
+            self.date_selection_pane.date_range_selected.connect(
+                self.on_date_range_selected
+            )
 
         if self.date_selection_pane.isVisible():
             self.date_selection_pane.hide()
@@ -1859,17 +1873,16 @@ class MainApp(QMainWindow):
 
     def on_date_range_selected(self, start_date, end_date):
         """Handle when a date range is selected.
-        
+
         Args:
             start_date (datetime): Start date of selected range
             end_date (datetime): End date of selected range
         """
         # Update the date range display
         self.update_date_range_display(
-            start_date.strftime("%Y-%m-%d"),
-            end_date.strftime("%Y-%m-%d")
+            start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
         )
-        
+
         # Process the selected date range
         self.apply_date_range()
 

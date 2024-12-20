@@ -14,15 +14,18 @@ with proper styling and navigation.
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
+    QHBoxLayout,
     QPushButton,
     QTabWidget,
     QTextBrowser,
     QVBoxLayout,
     QWidget,
-    QHBoxLayout,
 )
 
-from custom_widgets import CustomTitleBarWidget, CustomSizeGrip
+from custom_widgets import (
+    CustomSizeGrip,
+    CustomTitleBarWidget,
+)
 from documentation_content import (
     DOCUMENTATION_85D,
     DOCUMENTATION_85F,
@@ -33,11 +36,11 @@ from documentation_content import (
     DOCUMENTATION_MAX60,
 )
 from theme import (
+    COLOR_TEXT_DIM,
+    COLOR_TEXT_LIGHT,
+    MATERIAL_BACKGROUND,
     MATERIAL_PRIMARY,
     MATERIAL_SURFACE,
-    MATERIAL_BACKGROUND,
-    COLOR_TEXT_LIGHT,
-    COLOR_TEXT_DIM,
 )
 
 
@@ -123,7 +126,7 @@ class DocumentationDialog(QDialog):
         if self.parent:
             self.move(
                 self.parent.x() + (self.parent.width() - self.width()) // 2,
-                self.parent.y() + (self.parent.height() - self.height()) // 2
+                self.parent.y() + (self.parent.height() - self.height()) // 2,
             )
 
     def resizeEvent(self, event):
@@ -132,7 +135,7 @@ class DocumentationDialog(QDialog):
         # Update size grip position
         self.size_grip.move(
             self.width() - self.size_grip.width(),
-            self.height() - self.size_grip.height()
+            self.height() - self.size_grip.height(),
         )
         self.size_grip.raise_()
 
