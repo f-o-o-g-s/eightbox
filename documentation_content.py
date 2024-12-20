@@ -1,4 +1,4 @@
-"""Documentation content for Article 8 violations."""
+"""Documentation content for Article 8 violations formulas."""
 
 DOCUMENTATION_85D = """
 <h2 style='color: #BB86FC; font-size: 24px; margin: 20px 0;'>
