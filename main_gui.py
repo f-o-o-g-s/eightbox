@@ -1982,7 +1982,7 @@ class MainApp(QMainWindow):
             self.otdl_maximization_button.setChecked(False)
         else:
             self.otdl_maximization_pane.show()
-            self.otdl_maximization_pane.setMinimumSize(1053, 681)
+            self.otdl_maximization_pane.setMinimumSize(1053, 300)
             self.otdl_maximization_button.setChecked(True)
 
     def create_progress_dialog(self, title="Processing...", initial_text=""):

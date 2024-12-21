@@ -50,6 +50,8 @@ from PyQt5.QtWidgets import (
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
+    QScrollArea,
+    QFrame,
 )
 
 from custom_widgets import CustomTitleBarWidget
@@ -135,32 +137,66 @@ class OTDLMaximizationPane(QWidget):
         self.title_bar = CustomTitleBarWidget(title="OTDL Maximization", parent=self)
         main_layout.addWidget(self.title_bar)
 
-        # Content widget to hold the table
-        content_widget = QWidget()
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(2, 2, 2, 2)
-        content_layout.setSpacing(10)
+        # Create a central widget to hold both the table and footer
+        central_widget = QWidget()
+        central_layout = QVBoxLayout(central_widget)
+        central_layout.setContentsMargins(2, 2, 2, 0)  # Remove bottom margin
+        central_layout.setSpacing(0)
 
-        # Add table to content layout with expanding size policy
+        # Create a scroll area for the table
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.NoFrame)  # Remove frame border
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        # Create table container widget
+        table_container = QWidget()
+        table_layout = QVBoxLayout(table_container)
+        table_layout.setContentsMargins(2, 2, 2, 2)
+        table_layout.setSpacing(0)
+
+        # Add table to table container
         self.table = QTableWidget()
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
-        header.setDefaultSectionSize(
-            100
-        )  # Set a reasonable default width for all columns
-
-        # Connect table changes to window resizing
-        self.table.itemChanged.connect(lambda: self.adjust_window_size())
+        header.setDefaultSectionSize(100)
 
         setup_table_copy_functionality(self.table)
-        content_layout.addWidget(self.table)
+        table_layout.addWidget(self.table)
 
-        # Create Apply button container (store as instance variable)
-        self.button_container = QWidget()
-        button_layout = QHBoxLayout(self.button_container)
-        button_layout.setContentsMargins(0, 0, 0, 0)
+        # Set table container as the scroll area widget
+        scroll_area.setWidget(table_container)
+        
+        # Create a widget to hold the scroll area
+        scroll_container = QWidget()
+        scroll_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        scroll_layout = QVBoxLayout(scroll_container)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(0)
+        scroll_layout.addWidget(scroll_area)
+        
+        central_layout.addWidget(scroll_container, 1)  # Add stretch factor of 1
 
+        # Create sticky footer with separator
+        footer = QWidget()
+        footer.setObjectName("footer")
+        footer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)  # Fixed height
+        footer.setStyleSheet("""
+            QWidget#footer {
+                background-color: #1E1E1E;
+                border-top: 1px solid #333333;
+                min-height: 60px;
+                max-height: 60px;
+                padding-bottom: 8px;  /* Add margin at the bottom */
+            }
+        """)
+        footer_layout = QHBoxLayout(footer)
+        footer_layout.setContentsMargins(10, 10, 10, 10)
+
+        # Create Apply button with existing style
         apply_button = QPushButton("Apply All Changes")
         apply_button.setStyleSheet(
             f"""
@@ -199,16 +235,15 @@ class OTDLMaximizationPane(QWidget):
             """
         )
         apply_button.clicked.connect(self.apply_all_changes)
-        button_layout.addStretch()
-        button_layout.addWidget(apply_button)
-        button_layout.addStretch()
+        footer_layout.addStretch()
+        footer_layout.addWidget(apply_button)
+        footer_layout.addStretch()
 
-        # Add button container below the table
-        content_layout.addWidget(self.button_container)
+        # Add footer to central layout with no stretch
+        central_layout.addWidget(footer, 0)  # No stretch factor
 
-        # Make content widget expand to fill space
-        content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        main_layout.addWidget(content_widget)
+        # Add central widget to main layout
+        main_layout.addWidget(central_widget)
 
         # Initialize tracking dictionaries
         self.violation_data = None
@@ -242,6 +277,9 @@ class OTDLMaximizationPane(QWidget):
 
     def adjust_window_size(self):
         """Adjust the window size based on the table contents."""
+        # Clear any previous size constraints
+        self.setMinimumSize(0, 0)
+        
         # Ensure all columns and rows are sized to their contents
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
@@ -255,18 +293,13 @@ class OTDLMaximizationPane(QWidget):
             + 20  # Minimal padding
         )
 
-        # Calculate total height needed including all rows
-        total_row_height = 0
-        for row in range(self.table.rowCount()):
-            total_row_height += self.table.rowHeight(row)
-
-        # Calculate height including all components with proper spacing
-        height = (
-            self.table.horizontalHeader().height()  # Height of column headers
-            + total_row_height  # Sum of all row heights
-            + self.title_bar.height()  # Title bar height
-            + self.button_container.sizeHint().height()  # Height of button container
-            + 40  # Additional padding (20px above and below the button)
+        # Calculate total height needed
+        total_height = (
+            self.title_bar.height()  # Title bar height
+            + self.table.horizontalHeader().height()  # Header height
+            + sum([self.table.rowHeight(i) for i in range(self.table.rowCount())])  # Content height
+            + 60  # Footer height
+            + 20  # Padding
         )
 
         # Get screen dimensions
@@ -275,31 +308,19 @@ class OTDLMaximizationPane(QWidget):
         # Cap width at 90% of screen width if needed
         if width > screen.width() * 0.9:
             width = int(screen.width() * 0.9)
-            self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        else:
-            self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # Cap height at 90% of screen height if needed
-        if height > screen.height() * 0.9:
-            height = int(screen.height() * 0.9)
-            self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        else:
-            # Always disable vertical scrollbar and show full content
-            self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        if total_height > screen.height() * 0.9:
+            total_height = int(screen.height() * 0.9)
 
         # Set the final window size
-        self.setFixedSize(width, height)
+        self.setFixedSize(width, total_height)
 
-        # Calculate space available for table
-        available_table_height = (
-            height
-            - self.title_bar.height()
-            - self.button_container.sizeHint().height()
-            - 40  # Match the padding we added above
-        )
-
-        # Set table height to fill available space minus button and padding
-        self.table.setFixedHeight(available_table_height)
+        # Update scroll area if content exceeds window size
+        if total_height >= screen.height() * 0.9:
+            self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        else:
+            self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def minimize_to_button(self):
         """Custom minimize handler that properly hides the window"""
@@ -328,6 +349,10 @@ class OTDLMaximizationPane(QWidget):
 
     def apply_all_changes(self):
         """Gather all maximization changes and emit them as a batch."""
+        # Check if there's any data to process
+        if not hasattr(self, "clock_ring_data") or self.clock_ring_data is None or self.clock_ring_data.empty:
+            return
+
         # Cache the current state
         self.cached_date_maximized = {
             key: value.copy() for key, value in self.date_maximized.items()
@@ -341,15 +366,14 @@ class OTDLMaximizationPane(QWidget):
 
             # Get all OTDL carriers for this date
             otdl_carriers = set()
-            if self.clock_ring_data is not None:
-                date_data = self.clock_ring_data[
-                    self.clock_ring_data["rings_date"] == date
-                ]
-                otdl_carriers = set(
-                    date_data[date_data["list_status"] == "otdl"][
-                        "carrier_name"
-                    ].unique()
-                )
+            date_data = self.clock_ring_data[
+                self.clock_ring_data["rings_date"] == date
+            ]
+            otdl_carriers = set(
+                date_data[date_data["list_status"] == "otdl"][
+                    "carrier_name"
+                ].unique()
+            )
 
             # A date is maximized if all OTDL carriers are excused
             maximized_status = len(otdl_carriers) > 0 and all(
@@ -368,11 +392,11 @@ class OTDLMaximizationPane(QWidget):
             else:
                 self.date_maximized[date] = {"is_maximized": maximized_status}
 
-        # Emit a single signal with all changes
-        self.date_maximized_updated.emit("all", changes)
-
-        # Reload the cached state to keep toggles responsive
-        self.reload_cached_state()
+        # Only emit signal if we have changes
+        if changes:
+            self.date_maximized_updated.emit("all", changes)
+            # Reload the cached state to keep toggles responsive
+            self.reload_cached_state()
 
     def reload_cached_state(self):
         """Reload the cached state to allow further updates."""
@@ -459,13 +483,21 @@ class OTDLMaximizationPane(QWidget):
         # Get unique dates and sort them
         unique_dates = sorted(otdl_rings["rings_date"].unique())
 
-        # Set up the table
+        # Clear existing table
         self.table.clear()
+        self.table.setRowCount(0)
+        self.table.setColumnCount(0)
+        
+        # Clear any size constraints
+        self.setMinimumSize(0, 0)
+        self.setMaximumSize(16777215, 16777215)  # QWIDGETSIZE_MAX
+
+        # Set up the table
         self.table.setStyleSheet(
             f"background-color: {COLOR_NO_HIGHLIGHT.name()}; color: {COLOR_TEXT_LIGHT.name()};"
         )
 
-        # Set row count: carriers + day names row (removed maximized status row)
+        # Set row count: carriers + day names row
         self.table.setRowCount(len(otdl_names) + 1)
         self.table.setColumnCount(
             len(unique_dates) + 3
@@ -713,8 +745,12 @@ class OTDLMaximizationPane(QWidget):
             )  # Replace COLOR_TEXT_LIGHT
             self.table.setItem(row_idx, len(unique_dates) + 2, weekly_hours_item)
 
-        # Adjust window size after table update
+        # Adjust window size after populating data
         self.adjust_window_size()
+
+        # If no data, set a reasonable minimum size
+        if len(otdl_names) == 0:
+            self.resize(400, 300)
 
     def get_excused_carriers(self, date):
         """Get list of excused carriers for a given date.
