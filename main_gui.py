@@ -1219,16 +1219,20 @@ class MainApp(QMainWindow):
             progress.setValue(5)
             QApplication.processEvents()
 
-            selected_date = self.date_selection_pane.calendar.selectedDate()
-            start_date = selected_date.toString("yyyy-MM-dd")
-            end_date = selected_date.addDays(6).toString("yyyy-MM-dd")
+            # Get the selected date range from the date selection pane
+            if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None or not hasattr(self.date_selection_pane, "selected_range"):
+                raise ValueError("No date range selected")
+            
+            start_date, end_date = self.date_selection_pane.selected_range
+            start_date_str = start_date.strftime("%Y-%m-%d")
+            end_date_str = end_date.strftime("%Y-%m-%d")
 
             # Phase 2: Loading Data (10-30%)
             progress.setLabelText("Loading clock ring data...")
             progress.setValue(10)
             QApplication.processEvents()
 
-            clock_ring_data = self.fetch_clock_ring_data(start_date, end_date)
+            clock_ring_data = self.fetch_clock_ring_data(start_date_str, end_date_str)
             if clock_ring_data.empty:
                 return
 
@@ -1274,7 +1278,7 @@ class MainApp(QMainWindow):
             QApplication.processEvents()
 
             date_maximized_status = {}
-            for d in pd.date_range(start_date, end_date):
+            for d in pd.date_range(start_date_str, end_date_str):
                 d_str = d.strftime("%Y-%m-%d")
                 if d_str in changes:
                     date_maximized_status[d_str] = changes[d_str]
@@ -1512,7 +1516,32 @@ class MainApp(QMainWindow):
     # This query generates the base dataframe for the entire program.
     # The resulting dataframe will be modified by subsequent methods.
     def fetch_clock_ring_data(self, start_date=None, end_date=None):
-        """Fetch clock ring data for the selected date range from mandates.sqlite."""
+        """Fetch clock ring data for the selected date range from mandates.sqlite.
+        
+        Important note on date handling:
+        The SQL query uses `rings_date >= DATE(?)` for the start date and
+        `rings_date < DATE(?, '+1 day')` for the end date to ensure we get
+        all records for the entire end date. This is because SQLite's DATE()
+        function truncates times to midnight, so using <= would miss records
+        later in the day. By using < next_day, we include all records up to
+        but not including midnight of the next day.
+
+        Args:
+            start_date (str, optional): Start date in YYYY-MM-DD format
+            end_date (str, optional): End date in YYYY-MM-DD format
+            
+        Returns:
+            pd.DataFrame: DataFrame containing clock ring data with columns:
+                - carrier_name
+                - rings_date
+                - list_status
+                - total
+                - moves
+                - code
+                - leave_type
+                - leave_time
+                - display_indicators
+        """
         # First validate database path
         if not self.mandates_db_path or not os.path.exists(self.mandates_db_path):
             QMessageBox.critical(
@@ -1556,8 +1585,16 @@ class MainApp(QMainWindow):
                 GROUP BY carrier_name
             )
         ) c ON r.carrier_name = c.carrier_name
-        WHERE r.rings_date BETWEEN ? AND ?
+        WHERE r.rings_date >= DATE(?) 
+        AND r.rings_date < DATE(?, '+1 day')
         """
+        # Note on date handling:
+        # We use `r.rings_date >= DATE(?)` for the start date and
+        # `r.rings_date < DATE(?, '+1 day')` for the end date to ensure we get
+        # all records for the entire end date. This is because SQLite's DATE()
+        # function truncates times to midnight, so using <= would miss records
+        # later in the day. By using < next_day, we include all records up to
+        # but not including midnight of the next day.
 
         try:
             # If no dates provided, try to get them from the date selection pane
@@ -1575,7 +1612,11 @@ class MainApp(QMainWindow):
                 end_date = end_date.strftime("%Y-%m-%d")
 
             with sqlite3.connect(self.mandates_db_path) as conn:
+                print(f"\nQuerying database with dates: {start_date} to {end_date}")
                 db_data = pd.read_sql_query(query, conn, params=(start_date, end_date))
+                print(f"\nInitial data from database:")
+                print(f"Shape: {db_data.shape}")
+                print(f"Unique dates: {sorted(db_data['rings_date'].unique())}")
 
                 # Filter out carriers with "out of station"
                 db_data = db_data[
@@ -1619,21 +1660,49 @@ class MainApp(QMainWindow):
                         "Warning: Could not load carrier_list.json, using database carriers only"
                     )
 
-                # Create all date combinations
-                all_dates = pd.date_range(
-                    start=start_date, end=end_date, inclusive="left"
-                )
-                all_combinations = pd.MultiIndex.from_product(
-                    [carrier_names, all_dates], names=["carrier_name", "rings_date"]
-                )
+                try:
+                    # Create all date combinations
+                    all_dates = pd.date_range(
+                        start=start_date, end=end_date, inclusive='both'
+                    )
+                    print(f"\nCreated date range:")
+                    print(f"Start: {all_dates[0].strftime('%Y-%m-%d')}")
+                    print(f"End: {all_dates[-1].strftime('%Y-%m-%d')}")
+                    print(f"Total days: {len(all_dates)}")
+                    
+                    all_combinations = pd.MultiIndex.from_product(
+                        [carrier_names, all_dates], names=["carrier_name", "rings_date"]
+                    )
 
-                # Reindex to include all carrier-date combinations
-                db_data["rings_date"] = pd.to_datetime(db_data["rings_date"])
-                db_data = db_data.set_index(["carrier_name", "rings_date"])
-                db_data = db_data.reindex(all_combinations, fill_value=0).reset_index()
-
-                # Convert reindexed rings_date back to string
-                db_data["rings_date"] = db_data["rings_date"].dt.strftime("%Y-%m-%d")
+                    # Convert rings_date to datetime for proper comparison
+                    db_data["rings_date"] = pd.to_datetime(db_data["rings_date"])
+                    
+                    # Set index for reindexing
+                    db_data = db_data.set_index(["carrier_name", "rings_date"])
+                    
+                    # Reindex with all combinations
+                    db_data = db_data.reindex(all_combinations)
+                    
+                    # Fill missing values appropriately
+                    db_data = db_data.fillna({
+                        'total': 0,
+                        'moves': '',
+                        'code': '',
+                        'leave_type': '',
+                        'leave_time': '',
+                        'list_status': db_data['list_status'].iloc[0] if not db_data.empty else ''
+                    })
+                    
+                    # Reset index and convert dates back to string format
+                    db_data = db_data.reset_index()
+                    db_data["rings_date"] = db_data["rings_date"].dt.strftime("%Y-%m-%d")
+                    
+                    print(f"\nFinal data after reindexing:")
+                    print(f"Shape: {db_data.shape}")
+                    print(f"Unique dates: {sorted(db_data['rings_date'].unique())}")
+                except Exception as e:
+                    print(f"Error creating date combinations: {e}")
+                    raise
 
                 # Add the display_indicators column
                 db_data["display_indicators"] = db_data.apply(set_display, axis=1)
