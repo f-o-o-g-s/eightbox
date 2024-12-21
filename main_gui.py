@@ -1220,9 +1220,13 @@ class MainApp(QMainWindow):
             QApplication.processEvents()
 
             # Get the selected date range from the date selection pane
-            if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None or not hasattr(self.date_selection_pane, "selected_range"):
+            if (
+                not hasattr(self, "date_selection_pane")
+                or self.date_selection_pane is None
+                or not hasattr(self.date_selection_pane, "selected_range")
+            ):
                 raise ValueError("No date range selected")
-            
+
             start_date, end_date = self.date_selection_pane.selected_range
             start_date_str = start_date.strftime("%Y-%m-%d")
             end_date_str = end_date.strftime("%Y-%m-%d")
@@ -1517,7 +1521,7 @@ class MainApp(QMainWindow):
     # The resulting dataframe will be modified by subsequent methods.
     def fetch_clock_ring_data(self, start_date=None, end_date=None):
         """Fetch clock ring data for the selected date range from mandates.sqlite.
-        
+
         Important note on date handling:
         The SQL query uses `rings_date >= DATE(?)` for the start date and
         `rings_date < DATE(?, '+1 day')` for the end date to ensure we get
@@ -1529,7 +1533,7 @@ class MainApp(QMainWindow):
         Args:
             start_date (str, optional): Start date in YYYY-MM-DD format
             end_date (str, optional): End date in YYYY-MM-DD format
-            
+
         Returns:
             pd.DataFrame: DataFrame containing clock ring data with columns:
                 - carrier_name
@@ -1585,7 +1589,7 @@ class MainApp(QMainWindow):
                 GROUP BY carrier_name
             )
         ) c ON r.carrier_name = c.carrier_name
-        WHERE r.rings_date >= DATE(?) 
+        WHERE r.rings_date >= DATE(?)
         AND r.rings_date < DATE(?, '+1 day')
         """
         # Note on date handling:
@@ -1612,11 +1616,7 @@ class MainApp(QMainWindow):
                 end_date = end_date.strftime("%Y-%m-%d")
 
             with sqlite3.connect(self.mandates_db_path) as conn:
-                print(f"\nQuerying database with dates: {start_date} to {end_date}")
                 db_data = pd.read_sql_query(query, conn, params=(start_date, end_date))
-                print(f"\nInitial data from database:")
-                print(f"Shape: {db_data.shape}")
-                print(f"Unique dates: {sorted(db_data['rings_date'].unique())}")
 
                 # Filter out carriers with "out of station"
                 db_data = db_data[
@@ -1663,43 +1663,42 @@ class MainApp(QMainWindow):
                 try:
                     # Create all date combinations
                     all_dates = pd.date_range(
-                        start=start_date, end=end_date, inclusive='both'
+                        start=start_date, end=end_date, inclusive="both"
                     )
-                    print(f"\nCreated date range:")
-                    print(f"Start: {all_dates[0].strftime('%Y-%m-%d')}")
-                    print(f"End: {all_dates[-1].strftime('%Y-%m-%d')}")
-                    print(f"Total days: {len(all_dates)}")
-                    
+
                     all_combinations = pd.MultiIndex.from_product(
                         [carrier_names, all_dates], names=["carrier_name", "rings_date"]
                     )
 
                     # Convert rings_date to datetime for proper comparison
                     db_data["rings_date"] = pd.to_datetime(db_data["rings_date"])
-                    
+
                     # Set index for reindexing
                     db_data = db_data.set_index(["carrier_name", "rings_date"])
-                    
+
                     # Reindex with all combinations
                     db_data = db_data.reindex(all_combinations)
-                    
+
                     # Fill missing values appropriately
-                    db_data = db_data.fillna({
-                        'total': 0,
-                        'moves': '',
-                        'code': '',
-                        'leave_type': '',
-                        'leave_time': '',
-                        'list_status': db_data['list_status'].iloc[0] if not db_data.empty else ''
-                    })
-                    
+                    db_data = db_data.fillna(
+                        {
+                            "total": 0,
+                            "moves": "",
+                            "code": "",
+                            "leave_type": "",
+                            "leave_time": "",
+                            "list_status": db_data["list_status"].iloc[0]
+                            if not db_data.empty
+                            else "",
+                        }
+                    )
+
                     # Reset index and convert dates back to string format
                     db_data = db_data.reset_index()
-                    db_data["rings_date"] = db_data["rings_date"].dt.strftime("%Y-%m-%d")
-                    
-                    print(f"\nFinal data after reindexing:")
-                    print(f"Shape: {db_data.shape}")
-                    print(f"Unique dates: {sorted(db_data['rings_date'].unique())}")
+                    db_data["rings_date"] = db_data["rings_date"].dt.strftime(
+                        "%Y-%m-%d"
+                    )
+
                 except Exception as e:
                     print(f"Error creating date combinations: {e}")
                     raise
