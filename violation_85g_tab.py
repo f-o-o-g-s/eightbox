@@ -47,9 +47,6 @@ class Violation85gTab(BaseViolationTab):
             "display_indicators",  # Changed from display_indicator
             "remedy_total",
             "violation_type",  # Shows "8.5.G OTDL Not Maximized" or "8.5.G Trigger (No Remedy)"
-            "trigger_carrier",  # WAL/NL carrier that triggered the violation
-            "trigger_hours",  # Hours worked by trigger carrier
-            "off_route_hours",  # Off-route hours that triggered violation
         ]
 
     def format_data(self, data):
@@ -71,8 +68,6 @@ class Violation85gTab(BaseViolationTab):
             "hour_limit",
             "total_hours",
             "remedy_total",
-            "trigger_hours",
-            "off_route_hours",
         ]
         for col in numeric_columns:
             if col in formatted.columns:
