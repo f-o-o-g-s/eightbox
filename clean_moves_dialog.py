@@ -1027,11 +1027,14 @@ class CleanMovesDialog(QDialog):
             return
 
         # Show confirmation dialog using CustomWarningDialog
-        if CustomWarningDialog.warning(
-            self,
-            "Confirm Clear",
-            "This will remove all moves for this entry. Continue?"
-        ) == QMessageBox.Yes:
+        if (
+            CustomWarningDialog.warning(
+                self,
+                "Confirm Clear",
+                "This will remove all moves for this entry. Continue?",
+            )
+            == QMessageBox.Yes
+        ):
             # Get current row data
             carrier = self.table.item(self.current_row, 0).text()
             date = self.table.item(self.current_row, 1).text()
@@ -1070,11 +1073,14 @@ class CleanMovesDialog(QDialog):
             return
 
         # Show confirmation dialog
-        if CustomWarningDialog.warning(
-            self,
-            "Confirm Save",
-            "This will update the moves data in the database. Continue?"
-        ) == QMessageBox.Yes:
+        if (
+            CustomWarningDialog.warning(
+                self,
+                "Confirm Save",
+                "This will update the moves data in the database. Continue?",
+            )
+            == QMessageBox.Yes
+        ):
             try:
                 # Hide this dialog while processing
                 self.hide()
