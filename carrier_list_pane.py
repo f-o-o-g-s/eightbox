@@ -48,22 +48,13 @@ from custom_widgets import (
 )
 from table_utils import setup_table_copy_functionality
 
-# Local imports
-from theme import (
-    COLOR_CELL_HIGHLIGHT,
-    COLOR_NO_HIGHLIGHT,
-    COLOR_ROW_HIGHLIGHT,
-    COLOR_TEXT_LIGHT,
-    COLOR_WEEKLY_REMEDY,
-)
-
 
 class RightAlignDelegate(QStyledItemDelegate):
     """Custom delegate for right-aligned text in table cells."""
-    
+
     def initStyleOption(self, option, index):
         """Initialize style options for the delegate.
-        
+
         Args:
             option (QStyleOptionViewItem): The style options to initialize
             index (QModelIndex): The index being styled
@@ -182,19 +173,19 @@ class PandasTableModel(QAbstractTableModel):
         # Define text colors for different list statuses
         self.status_text_colors = {
             "otdl": QColor("#BB86FC"),  # Purple
-            "wal": QColor("#03DAC6"),   # Teal
-            "nl": QColor("#64DD17"),    # Light Green
-            "ptf": QColor("#FF7597"),   # Pink
+            "wal": QColor("#03DAC6"),  # Teal
+            "nl": QColor("#64DD17"),  # Light Green
+            "ptf": QColor("#FF7597"),  # Pink
         }
 
     def calculate_text_color(self, bg_color):
         """Calculate optimal text color (black or white) based on background color.
-        
+
         Uses relative luminance formula to determine best contrast.
-        
+
         Args:
             bg_color (QColor): Background color to calculate against
-            
+
         Returns:
             QColor: Either black or white depending on background
         """
@@ -202,14 +193,14 @@ class PandasTableModel(QAbstractTableModel):
         r = bg_color.red() / 255.0
         g = bg_color.green() / 255.0
         b = bg_color.blue() / 255.0
-        
+
         # Calculate relative luminance using sRGB formula
         r = r / 12.92 if r <= 0.03928 else ((r + 0.055) / 1.055) ** 2.4
         g = g / 12.92 if g <= 0.03928 else ((g + 0.055) / 1.055) ** 2.4
         b = b / 12.92 if b <= 0.03928 else ((b + 0.055) / 1.055) ** 2.4
-        
+
         luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        
+
         # Return white for dark backgrounds, black for light backgrounds
         return QColor("#FFFFFF") if luminance < 0.5 else QColor("#000000")
 
@@ -493,12 +484,16 @@ class CarrierListPane(QWidget):
             stat_layout.setSpacing(4)  # Tighter spacing
 
             label = QLabel(label_text)
-            value_widget.setProperty("status", status)  # Set the status property for color
+            value_widget.setProperty(
+                "status", status
+            )  # Set the status property for color
             stat_layout.addWidget(label)
             stat_layout.addWidget(value_widget)
 
             stat_container.status = status
-            stat_container.mousePressEvent = lambda e, s=status: self.filter_by_status(s)
+            stat_container.mousePressEvent = lambda e, s=status: self.filter_by_status(
+                s
+            )
             stats_layout.addWidget(stat_container)
             setattr(self, f"{status}_container", stat_container)
 
@@ -548,52 +543,66 @@ class CarrierListPane(QWidget):
             }
             """
         )
-        
+
         # Add widgets to layout
         search_layout.addWidget(self.filter_input)
-        
+
         # Set the icon's position absolutely within the search container
         search_icon.setParent(self.filter_input)
         search_icon.move(12, 8)  # Position the icon inside the input field
-        
+
         content_layout.addWidget(search_container)
 
         # Add table view with Material Design styling
         self.table_view = QTableView()
-        self.table_view.setEditTriggers(QTableView.NoEditTriggers)  # Disable all editing
+        self.table_view.setEditTriggers(
+            QTableView.NoEditTriggers
+        )  # Disable all editing
         self.table_view.setSelectionBehavior(QTableView.SelectRows)
         self.table_view.setSelectionMode(QTableView.SingleSelection)
         self.table_view.setShowGrid(False)
         self.table_view.setAlternatingRowColors(False)  # Disable alternating row colors
         self.table_view.verticalHeader().setVisible(False)  # Hide row numbers
-        
+
         # Set the table to stretch to fill the window
         self.table_view.horizontalHeader().setStretchLastSection(True)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        
+
         # Set specific column widths and alignment
         def setup_table_columns():
             # Set column widths proportionally
             total_width = self.table_view.width()
-            self.table_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.Interactive)  # carrier_name
-            self.table_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.Interactive)  # effective_date
-            self.table_view.horizontalHeader().setSectionResizeMode(2, QHeaderView.Interactive)  # list_status
-            self.table_view.horizontalHeader().setSectionResizeMode(3, QHeaderView.Interactive)  # route_s
-            self.table_view.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)     # hour_limit
-            
+            self.table_view.horizontalHeader().setSectionResizeMode(
+                0, QHeaderView.Interactive
+            )  # carrier_name
+            self.table_view.horizontalHeader().setSectionResizeMode(
+                1, QHeaderView.Interactive
+            )  # effective_date
+            self.table_view.horizontalHeader().setSectionResizeMode(
+                2, QHeaderView.Interactive
+            )  # list_status
+            self.table_view.horizontalHeader().setSectionResizeMode(
+                3, QHeaderView.Interactive
+            )  # route_s
+            self.table_view.horizontalHeader().setSectionResizeMode(
+                4, QHeaderView.Stretch
+            )  # hour_limit
+
             # Set initial column widths
             self.table_view.setColumnWidth(0, int(total_width * 0.25))  # carrier_name
             self.table_view.setColumnWidth(1, int(total_width * 0.20))  # effective_date
             self.table_view.setColumnWidth(2, int(total_width * 0.15))  # list_status
             self.table_view.setColumnWidth(3, int(total_width * 0.20))  # route_s
             # hour_limit will stretch to fill remaining space
-            
+
             # Right-align the hour_limit column using our custom delegate
-            self.table_view.setItemDelegateForColumn(4, RightAlignDelegate(self.table_view))
-        
+            self.table_view.setItemDelegateForColumn(
+                4, RightAlignDelegate(self.table_view)
+            )
+
         # Call setup_table_columns after the model is set
         QTimer.singleShot(0, setup_table_columns)
-        
+
         self.table_view.setStyleSheet(
             """
             QTableView {
@@ -616,7 +625,8 @@ class CarrierListPane(QWidget):
                 border-bottom: 1px solid rgba(51, 51, 51, 0.5);
             }
             QTableView::item:selected {
-                background: rgba(103, 80, 164, 0.15);  /* Material Design primary container color with lower opacity */
+                background: rgba(103, 80, 164, 0.15);
+                /* Material Design primary container color with lower opacity */
                 color: inherit;  /* Keep the text color unchanged when selected */
             }
             QTableView::item:focus {
@@ -1001,7 +1011,8 @@ class CarrierListPane(QWidget):
                 if (
                     hasattr(self.parent_widget, "date_selection_pane")
                     and self.parent_widget.date_selection_pane is not None
-                    and self.parent_widget.date_selection_pane.selected_range is not None
+                    and self.parent_widget.date_selection_pane.selected_range
+                    is not None
                 ):
                     self.request_apply_date_range.emit()
 
@@ -1590,7 +1601,7 @@ class CarrierListPane(QWidget):
 
     def reset_carrier_list(self):
         """Reset the carrier list to its initial state.
-        
+
         Deletes the carrier list JSON file and reloads carrier data from the database.
         Shows confirmation dialog before proceeding and notification after completion.
         """
@@ -1598,44 +1609,41 @@ class CarrierListPane(QWidget):
         confirm_dialog = ConfirmDialog(
             "Are you sure you want to reset the carrier list?\n\n"
             "This will remove all customizations and reload carriers from the database.",
-            self
+            self,
         )
         if confirm_dialog.exec_() == QDialog.Accepted:
             try:
                 # Delete the JSON file if it exists
                 if os.path.exists(self.json_path):
                     os.remove(self.json_path)
-                
+
                 # Reload carrier data from database
                 df = self.fetch_carrier_data()
-                
+
                 # Update the model with the new data
                 self.main_model.update_data(df)
-                
+
                 # Emit signals to update the main application
                 self.carrier_list_updated.emit(df)
                 self.data_updated.emit(df)
-                
+
                 # If we have a valid date selected, trigger a refresh
                 if (
                     hasattr(self.parent_widget, "date_selection_pane")
                     and self.parent_widget.date_selection_pane is not None
-                    and self.parent_widget.date_selection_pane.selected_range is not None
+                    and self.parent_widget.date_selection_pane.selected_range
+                    is not None
                 ):
                     self.request_apply_date_range.emit()
-                
+
                 CustomNotificationDialog.show_notification(
-                    self,
-                    "Success",
-                    "Carrier list has been reset to its initial state."
+                    self, "Success", "Carrier list has been reset to its initial state."
                 )
-                
+
                 # Update statistics
                 self.update_statistics()
-                
+
             except Exception as e:
                 CustomErrorDialog.error(
-                    self,
-                    "Error",
-                    f"Failed to reset carrier list: {e}"
+                    self, "Error", f"Failed to reset carrier list: {e}"
                 )

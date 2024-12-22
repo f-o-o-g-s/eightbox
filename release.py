@@ -8,10 +8,10 @@ This module provides functionality for:
 - Build time tracking
 """
 
+import argparse
 import os
 import re
 import subprocess
-import argparse
 from datetime import datetime
 
 from github import Github
@@ -27,7 +27,8 @@ def show_help():
 
     Usage:
         python release.py [options]
-        python release.py --non-interactive --type {patch|minor|major} --message "commit message" --notes "note1" "note2" ...
+        python release.py --non-interactive --type {patch|minor|major}
+        --message "commit message" --notes "note1" "note2" ...
 
     Version Format: YYYY.MAJOR.MINOR.PATCH
         - YYYY:  Current year
@@ -339,8 +340,12 @@ def create_release_non_interactive(release_type, commit_msg, notes):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Eightbox Release Script")
-    parser.add_argument("--non-interactive", action="store_true", help="Run in non-interactive mode")
-    parser.add_argument("--type", choices=["patch", "minor", "major"], help="Release type")
+    parser.add_argument(
+        "--non-interactive", action="store_true", help="Run in non-interactive mode"
+    )
+    parser.add_argument(
+        "--type", choices=["patch", "minor", "major"], help="Release type"
+    )
     parser.add_argument("--message", "-m", help="Commit message")
     parser.add_argument("--notes", nargs="+", help="Release notes (multiple arguments)")
 
@@ -348,7 +353,10 @@ if __name__ == "__main__":
 
     if args.non_interactive:
         if not all([args.type, args.message, args.notes]):
-            print("Error: When using --non-interactive, you must provide --type, --message, and --notes")
+            print(
+                "Error: When using --non-interactive, "
+                "you must provide --type, --message, and --notes"
+            )
             parser.print_help()
             exit(1)
         create_release_non_interactive(args.type, args.message, args.notes)
