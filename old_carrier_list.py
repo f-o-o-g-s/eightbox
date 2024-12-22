@@ -29,11 +29,9 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,
     QHBoxLayout,
-    QHeaderView,
     QLabel,
     QLineEdit,
     QPushButton,
-    QStyledItemDelegate,
     QTableView,
     QVBoxLayout,
     QWidget,
@@ -58,20 +56,6 @@ from theme import (
 )
 
 
-class RightAlignDelegate(QStyledItemDelegate):
-    """Custom delegate for right-aligned text in table cells."""
-    
-    def initStyleOption(self, option, index):
-        """Initialize style options for the delegate.
-        
-        Args:
-            option (QStyleOptionViewItem): The style options to initialize
-            index (QModelIndex): The index being styled
-        """
-        super().initStyleOption(option, index)
-        option.displayAlignment = Qt.AlignRight | Qt.AlignVCenter
-
-
 class CarrierListProxyModel(QSortFilterProxyModel):
     """Custom proxy model for filtering and sorting carrier list data.
 
@@ -87,12 +71,20 @@ class CarrierListProxyModel(QSortFilterProxyModel):
         self.status_order = {"nl": 0, "wal": 1, "otdl": 2, "ptf": 3}
 
     def set_text_filter(self, text):
-        """Set the text filter and invalidate the current filtering."""
+        """Set the text filter and invalidate the current filtering.
+
+        Args:
+            text (str): The text to filter by
+        """
         self.text_filter = text.lower()
         self.invalidateFilter()
 
     def set_status_filter(self, status):
-        """Set the status filter and invalidate the current filtering."""
+        """Set the status filter and invalidate the current filtering.
+
+        Args:
+            status (str): The status to filter by ('all' or specific status)
+        """
         self.status_filter = status if status != "all" else ""
         self.invalidateFilter()
 
@@ -135,7 +127,19 @@ class CarrierListProxyModel(QSortFilterProxyModel):
         return str(left_data).lower() < str(right_data).lower()
 
     def filter_accepts_row(self, source_row, source_parent):
-        """Determine if a row should be included in the filtered results."""
+        """Determine if a row should be included in the filtered results.
+
+        Implements both status and text filtering logic. A row is accepted if it:
+        1. Matches the current status filter (if any)
+        2. Contains the filter text in any column (if text filter is active)
+
+        Args:
+            source_row (int): Row index in the source model
+            source_parent (QModelIndex): Parent index in source model
+
+        Returns:
+            bool: True if row should be shown, False if it should be filtered out
+        """
         source_model = self.sourceModel()
 
         # Get the list status for this row
@@ -177,41 +181,9 @@ class PandasTableModel(QAbstractTableModel):
 
     def __init__(self, df, db_df=None, parent=None):
         super().__init__(parent)
+        self.status_order = {"nl": 0, "wal": 1, "otdl": 2, "ptf": 3}
         self.df = df
         self.db_df = db_df if db_df is not None else pd.DataFrame()
-        # Define text colors for different list statuses
-        self.status_text_colors = {
-            "otdl": QColor("#BB86FC"),  # Purple
-            "wal": QColor("#03DAC6"),   # Teal
-            "nl": QColor("#64DD17"),    # Light Green
-            "ptf": QColor("#FF7597"),   # Pink
-        }
-
-    def calculate_text_color(self, bg_color):
-        """Calculate optimal text color (black or white) based on background color.
-        
-        Uses relative luminance formula to determine best contrast.
-        
-        Args:
-            bg_color (QColor): Background color to calculate against
-            
-        Returns:
-            QColor: Either black or white depending on background
-        """
-        # Convert RGB values to relative luminance
-        r = bg_color.red() / 255.0
-        g = bg_color.green() / 255.0
-        b = bg_color.blue() / 255.0
-        
-        # Calculate relative luminance using sRGB formula
-        r = r / 12.92 if r <= 0.03928 else ((r + 0.055) / 1.055) ** 2.4
-        g = g / 12.92 if g <= 0.03928 else ((g + 0.055) / 1.055) ** 2.4
-        b = b / 12.92 if b <= 0.03928 else ((b + 0.055) / 1.055) ** 2.4
-        
-        luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        
-        # Return white for dark backgrounds, black for light backgrounds
-        return QColor("#FFFFFF") if luminance < 0.5 else QColor("#000000")
 
     def update_data(self, new_df, new_db_df=None):
         """Update the model's data with new DataFrame(s).
@@ -249,7 +221,15 @@ class PandasTableModel(QAbstractTableModel):
         return len(self.df.columns)
 
     def data(self, index, role=Qt.DisplayRole):
-        """Get data for the specified model index and role."""
+        """Get data for the specified model index and role.
+
+        Args:
+            index (QModelIndex): The index to get data for
+            role (Qt.ItemDataRole): The role to get data for (default: DisplayRole)
+
+        Returns:
+            The data for the given index and role
+        """
         if not index.isValid():
             return QVariant()
 
@@ -260,17 +240,26 @@ class PandasTableModel(QAbstractTableModel):
                 return f"{float(value):.2f}" if pd.notna(value) else ""
             return str(value) if pd.notna(value) else ""
 
-        elif role == Qt.ForegroundRole:
-            # Get list_status for this row
-            list_status = str(self.df.iloc[index.row()]["list_status"]).lower().strip()
-            # Return the text color for this status
-            return QBrush(self.status_text_colors.get(list_status, QColor("#FFFFFF")))
+        if role == Qt.ForegroundRole:
+            list_status = self.df.iloc[
+                index.row(), self.df.columns.get_loc("list_status")
+            ]
+            if list_status == "nl":  # Assuming "nl" is the bright green
+                return QBrush(QColor("#000000"))  # Black text for better contrast
+            return QBrush(COLOR_TEXT_LIGHT)
 
-        elif role == Qt.TextAlignmentRole:
-            # Right-align the hour_limit column
-            if self.df.columns[index.column()] == "hour_limit":
-                return Qt.AlignRight | Qt.AlignVCenter
-            return Qt.AlignLeft | Qt.AlignVCenter
+        if role == Qt.BackgroundRole:
+            # Apply background color based on `list_status`
+            list_status = self.df.iloc[
+                index.row(), self.df.columns.get_loc("list_status")
+            ]
+            status_color_mapping = {
+                "otdl": COLOR_ROW_HIGHLIGHT,
+                "wal": COLOR_CELL_HIGHLIGHT,
+                "nl": COLOR_WEEKLY_REMEDY,
+                "ptf": COLOR_NO_HIGHLIGHT,
+            }
+            return QBrush(status_color_mapping.get(list_status, QColor(Qt.white)))
 
         return QVariant()
 
@@ -326,9 +315,17 @@ class PandasTableModel(QAbstractTableModel):
         return False
 
     def flags(self, index):
-        """Return item flags for the given index."""
-        # Remove ItemIsEditable flag to prevent direct editing
-        return Qt.ItemIsSelectable | Qt.ItemIsEnabled
+        """Return item flags for the given index.
+
+        Enables selection and editing for all cells in the table.
+
+        Args:
+            index (QModelIndex): Index to get flags for
+
+        Returns:
+            Qt.ItemFlags: Flags indicating item capabilities
+        """
+        return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
     # Alias Qt method names to maintain compatibility
     rowCount = row_count
@@ -401,7 +398,173 @@ class CarrierListPane(QWidget):
         content_layout.setContentsMargins(10, 10, 10, 10)  # Add padding around content
         content_layout.setSpacing(10)  # Add spacing between elements
 
-        # Initialize statistics labels and values
+        # Add filter input with material styling
+        self.filter_input = QLineEdit()
+        self.filter_input.setPlaceholderText("Filter by carrier name...")
+        self.filter_input.setStyleSheet(
+            """
+            QLineEdit {
+                background-color: #2D2D2D;
+                color: #E1E1E1;
+                border: 1px solid #333333;
+                padding: 8px;
+                border-radius: 4px;
+                margin-bottom: 5px;
+            }
+            QLineEdit:focus {
+                border: 2px solid #BB86FC;
+            }
+        """
+        )
+        content_layout.addWidget(self.filter_input)
+
+        # Add table view with material styling
+        self.table_view = QTableView()
+        self.table_view.setSelectionBehavior(
+            QTableView.SelectRows
+        )  # Select entire rows
+        self.table_view.setSelectionMode(
+            QTableView.SingleSelection
+        )  # Optional: limit to one row at a time
+        self.table_view.setStyleSheet(
+            """
+            QTableView {
+                background-color: #1E1E1E;
+                alternate-background-color: #262626;
+                gridline-color: #333333;
+                border: 1px solid #333333;
+                border-radius: 4px;
+                selection-background-color: #3700B3;
+                selection-color: #FFFFFF;
+            }
+            QHeaderView::section {
+                background-color: #2D2D2D;
+                color: #E1E1E1;
+                padding: 8px;
+                border: none;
+                border-right: 1px solid #333333;
+                border-bottom: 1px solid #333333;
+            }
+            QTableView::item {
+                padding: 4px;
+            }
+        """
+        )
+
+        # Add table view with proper model setup
+        self.main_model = PandasTableModel(self.carrier_df)
+        self.proxy_model = CarrierListProxyModel(self)
+        self.proxy_model.setSourceModel(self.main_model)
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.table_view.setModel(self.proxy_model)
+        self.table_view.setSortingEnabled(True)
+
+        # Force initial sort by list_status
+        list_status_col = self.carrier_df.columns.get_loc("list_status")
+        self.proxy_model.sort(list_status_col, Qt.AscendingOrder)
+
+        content_layout.addWidget(self.table_view)
+
+        # Style for all buttons using material design
+        button_style = """
+            QPushButton {
+                background-color: #BB86FC;
+                color: #000000;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+                margin: 2px;
+            }
+            QPushButton:hover {
+                background-color: #9965DA;
+            }
+            QPushButton:pressed {
+                background-color: #7B4FAF;
+            }
+            QPushButton:disabled {
+                background-color: #666666;
+                color: #999999;
+            }
+        """
+
+        # Create button container with spacing
+        button_container = QWidget()
+        button_layout = QVBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 10, 0, 0)  # Add top margin
+        button_layout.setSpacing(8)  # Space between buttons
+
+        # Add buttons with material styling
+        edit_button = QPushButton("Edit Carrier")
+        edit_button.setStyleSheet(button_style)
+        edit_button.clicked.connect(self.edit_carrier)
+        button_layout.addWidget(edit_button)
+
+        remove_button = QPushButton("Remove Carrier")
+        remove_button.setStyleSheet(button_style)
+        remove_button.clicked.connect(self.remove_carrier)
+        button_layout.addWidget(remove_button)
+
+        save_button = QPushButton("Save/Apply")
+        save_button.setStyleSheet(button_style)
+        save_button.clicked.connect(self.save_to_json)
+        button_layout.addWidget(save_button)
+
+        reset_button = QPushButton("Reset Carrier List")
+        reset_button.setStyleSheet(button_style)
+        reset_button.clicked.connect(self.reset_carrier_list)
+        button_layout.addWidget(reset_button)
+
+        # Add button container to content layout
+        content_layout.addWidget(button_container)
+
+        # Add content widget to main layout
+        main_layout.addWidget(content_widget)
+
+        # Set the layout
+        self.setLayout(main_layout)
+
+        # Connect filter input
+        self.filter_input.textChanged.connect(self.apply_filter)
+
+        # Set minimum size
+        self.setMinimumSize(300, 700)
+
+        # Create statistics panel with Material Design styling and hover effects
+        stats_panel = QWidget()
+        stats_panel.setStyleSheet(
+            """
+            QWidget {
+                background-color: #1E1E1E;
+                border-top: 1px solid #333333;
+                padding: 8px;
+            }
+            QLabel {
+                color: #E1E1E1;
+                font-size: 13px;
+                padding: 4px;
+            }
+            QLabel[class="stat-value"] {
+                color: #BB86FC;
+                font-weight: bold;
+            }
+            QWidget[class="stat-container"] {
+                border-radius: 4px;
+                padding: 4px 8px;
+            }
+            QWidget[class="stat-container"]:hover {
+                background-color: #333333;
+                cursor: pointer;
+            }
+            QWidget[class="stat-container"][selected="true"] {
+                background-color: #3700B3;
+            }
+        """
+        )
+        stats_layout = QHBoxLayout(stats_panel)
+        stats_layout.setSpacing(20)  # Space between stat items
+
+        # Create labels for statistics
         self.total_label = QLabel("Total Carriers: ")
         self.total_value = QLabel("0")
         self.total_value.setProperty("class", "stat-value")
@@ -422,310 +585,42 @@ class CarrierListPane(QWidget):
         self.ptf_value = QLabel("0")
         self.ptf_value.setProperty("class", "stat-value")
 
-        # Create statistics panel with Material Design styling and hover effects
-        stats_panel = QWidget()
-        stats_panel.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                padding: 8px;
-                margin-bottom: 10px;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 13px;
-                padding: 4px;
-            }
-            QLabel[class="stat-value"][status="all"] {
-                color: #E1E1E1;
-                font-weight: 500;
-            }
-            QLabel[class="stat-value"][status="otdl"] {
-                color: #BB86FC;  /* Purple */
-                font-weight: 500;
-            }
-            QLabel[class="stat-value"][status="wal"] {
-                color: #03DAC6;  /* Teal */
-                font-weight: 500;
-            }
-            QLabel[class="stat-value"][status="nl"] {
-                color: #64DD17;  /* Light Green */
-                font-weight: 500;
-            }
-            QLabel[class="stat-value"][status="ptf"] {
-                color: #FF7597;  /* Pink */
-                font-weight: 500;
-            }
-            QWidget[class="stat-container"] {
-                border-radius: 4px;
-                padding: 4px 12px;
-            }
-            QWidget[class="stat-container"]:hover {
-                background-color: rgba(103, 80, 164, 0.08);
-            }
-            QWidget[class="stat-container"][selected="true"] {
-                background-color: rgba(103, 80, 164, 0.15);
-            }
-        """
-        )
-        stats_layout = QHBoxLayout(stats_panel)
-        stats_layout.setSpacing(20)  # Space between stat items
-        stats_layout.setContentsMargins(8, 4, 8, 4)  # Tighter margins
-
-        # Add stretch before the stats to push them to center
-        stats_layout.addStretch()
-
-        # Create labels for statistics in a more compact layout
+        # Create clickable stat containers with visual feedback
         for label_text, value_widget, status in [
-            ("ALL", self.total_value, "all"),
-            ("OTDL", self.otdl_value, "otdl"),
-            ("WAL", self.wal_value, "wal"),
-            ("NL", self.nl_value, "nl"),
-            ("PTF", self.ptf_value, "ptf"),
+            ("ALL Carriers: ", self.total_value, "all"),
+            ("OTDL: ", self.otdl_value, "otdl"),
+            ("WAL: ", self.wal_value, "wal"),
+            ("NL: ", self.nl_value, "nl"),
+            ("PTF: ", self.ptf_value, "ptf"),
         ]:
             stat_container = QWidget()
             stat_container.setProperty("class", "stat-container")
             stat_container.setProperty("selected", False)
             stat_layout = QHBoxLayout(stat_container)
             stat_layout.setContentsMargins(4, 4, 4, 4)
-            stat_layout.setSpacing(4)  # Tighter spacing
 
             label = QLabel(label_text)
-            value_widget.setProperty("status", status)  # Set the status property for color
             stat_layout.addWidget(label)
             stat_layout.addWidget(value_widget)
 
+            # Store the filter status with the widget
             stat_container.status = status
-            stat_container.mousePressEvent = lambda e, s=status: self.filter_by_status(s)
+
+            # Make the container clickable
+            stat_container.mousePressEvent = lambda e, s=status: self.filter_by_status(
+                s
+            )
+
             stats_layout.addWidget(stat_container)
+
+            # Store reference to container for updating selection state
             setattr(self, f"{status}_container", stat_container)
 
-        # Add stretch after the stats to push them to center
+        # Add stretch to push stats to the left
         stats_layout.addStretch()
+
+        # Add stats panel to the main layout before the button container
         content_layout.addWidget(stats_panel)
-
-        # Create search bar with Material Design styling
-        search_container = QWidget()
-        search_layout = QHBoxLayout(search_container)
-        search_layout.setContentsMargins(0, 0, 0, 0)
-        search_layout.setSpacing(0)
-
-        self.filter_input = QLineEdit()
-        self.filter_input.setPlaceholderText("Search carriers...")
-        self.filter_input.setStyleSheet(
-            """
-            QLineEdit {
-                background-color: #262626;
-                color: #E1E1E1;
-                border: 1px solid #333333;
-                padding: 8px 12px;
-                border-radius: 4px;
-                font-size: 13px;
-                selection-background-color: #BB86FC;
-                selection-color: #000000;
-            }
-            QLineEdit:focus {
-                border: 2px solid #BB86FC;
-                background-color: #2D2D2D;
-            }
-            QLineEdit:hover {
-                background-color: #2A2A2A;
-            }
-        """
-        )
-        search_layout.addWidget(self.filter_input)
-        content_layout.addWidget(search_container)
-
-        # Add table view with Material Design styling
-        self.table_view = QTableView()
-        self.table_view.setEditTriggers(QTableView.NoEditTriggers)  # Disable all editing
-        self.table_view.setSelectionBehavior(QTableView.SelectRows)
-        self.table_view.setSelectionMode(QTableView.SingleSelection)
-        self.table_view.setShowGrid(False)
-        self.table_view.setAlternatingRowColors(False)  # Disable alternating row colors
-        self.table_view.verticalHeader().setVisible(False)  # Hide row numbers
-        
-        # Set the table to stretch to fill the window
-        self.table_view.horizontalHeader().setStretchLastSection(True)
-        self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        
-        # Set specific column widths and alignment
-        def setup_table_columns():
-            # Set column widths proportionally
-            total_width = self.table_view.width()
-            self.table_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.Interactive)  # carrier_name
-            self.table_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.Interactive)  # effective_date
-            self.table_view.horizontalHeader().setSectionResizeMode(2, QHeaderView.Interactive)  # list_status
-            self.table_view.horizontalHeader().setSectionResizeMode(3, QHeaderView.Interactive)  # route_s
-            self.table_view.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)     # hour_limit
-            
-            # Set initial column widths
-            self.table_view.setColumnWidth(0, int(total_width * 0.25))  # carrier_name
-            self.table_view.setColumnWidth(1, int(total_width * 0.20))  # effective_date
-            self.table_view.setColumnWidth(2, int(total_width * 0.15))  # list_status
-            self.table_view.setColumnWidth(3, int(total_width * 0.20))  # route_s
-            # hour_limit will stretch to fill remaining space
-            
-            # Right-align the hour_limit column using our custom delegate
-            self.table_view.setItemDelegateForColumn(4, RightAlignDelegate(self.table_view))
-        
-        # Call setup_table_columns after the model is set
-        QTimer.singleShot(0, setup_table_columns)
-        
-        self.table_view.setStyleSheet(
-            """
-            QTableView {
-                background-color: #1E1E1E;
-                alternate-background-color: transparent;
-                gridline-color: transparent;
-                border: 1px solid #333333;
-                border-radius: 4px;
-            }
-            QHeaderView::section {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                padding: 8px;
-                border: none;
-                border-right: 1px solid #333333;
-                border-bottom: 1px solid #333333;
-            }
-            QTableView::item {
-                padding: 8px 4px;
-                border-bottom: 1px solid rgba(51, 51, 51, 0.5);
-            }
-            QTableView::item:selected {
-                background: rgba(103, 80, 164, 0.15);  /* Material Design primary container color with lower opacity */
-                color: inherit;  /* Keep the text color unchanged when selected */
-            }
-            QTableView::item:focus {
-                background: transparent;
-                outline: none;  /* Remove the focus outline */
-            }
-            QTableView::item:selected:focus {
-                background: rgba(103, 80, 164, 0.15);  /* Keep the same as normal selection */
-                outline: none;
-            }
-        """
-        )
-
-        # Add table view with proper model setup
-        self.main_model = PandasTableModel(self.carrier_df)
-        self.proxy_model = CarrierListProxyModel(self)
-        self.proxy_model.setSourceModel(self.main_model)
-        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
-        self.table_view.setModel(self.proxy_model)
-        self.table_view.setSortingEnabled(True)
-
-        # Force initial sort by list_status
-        list_status_col = self.carrier_df.columns.get_loc("list_status")
-        self.proxy_model.sort(list_status_col, Qt.AscendingOrder)
-
-        content_layout.addWidget(self.table_view)
-
-        # Create toolbar-style button row
-        button_container = QWidget()
-        button_container.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1A1A1A;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                margin-top: 8px;
-            }
-            QPushButton {
-                background-color: #262626;
-                color: #E1E1E1;
-                border: none;
-                padding: 6px 16px;
-                font-weight: 500;
-                font-size: 13px;
-                border-radius: 4px;
-                min-width: 90px;
-            }
-            QPushButton:hover {
-                background-color: #333333;
-            }
-            QPushButton:pressed {
-                background-color: #404040;
-            }
-            QPushButton#primary {
-                background-color: #BB86FC;
-                color: #000000;
-                font-weight: 500;
-            }
-            QPushButton#primary:hover {
-                background-color: #A875E8;
-            }
-            QPushButton#primary:pressed {
-                background-color: #9965DA;
-            }
-            QPushButton#destructive {
-                background-color: rgba(207, 102, 121, 0.8);
-                color: #000000;
-                font-weight: 500;
-            }
-            QPushButton#destructive:hover {
-                background-color: rgba(207, 102, 121, 0.9);
-            }
-            QPushButton#destructive:pressed {
-                background-color: #CF6679;
-            }
-        """
-        )
-        button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(8, 6, 8, 6)
-        button_layout.setSpacing(8)
-
-        # Left-aligned buttons
-        left_button_container = QWidget()
-        left_button_layout = QHBoxLayout(left_button_container)
-        left_button_layout.setContentsMargins(0, 0, 0, 0)
-        left_button_layout.setSpacing(8)
-
-        edit_button = QPushButton("Edit")
-        edit_button.clicked.connect(self.edit_carrier)
-        left_button_layout.addWidget(edit_button)
-
-        remove_button = QPushButton("Remove")
-        remove_button.setObjectName("destructive")
-        remove_button.clicked.connect(self.remove_carrier)
-        left_button_layout.addWidget(remove_button)
-
-        button_layout.addWidget(left_button_container)
-        button_layout.addStretch()
-
-        # Right-aligned buttons
-        right_button_container = QWidget()
-        right_button_layout = QHBoxLayout(right_button_container)
-        right_button_layout.setContentsMargins(0, 0, 0, 0)
-        right_button_layout.setSpacing(8)
-
-        reset_button = QPushButton("Reset List")
-        reset_button.clicked.connect(self.reset_carrier_list)
-        right_button_layout.addWidget(reset_button)
-
-        save_button = QPushButton("Save/Apply")
-        save_button.setObjectName("primary")
-        save_button.clicked.connect(self.save_to_json)
-        right_button_layout.addWidget(save_button)
-
-        button_layout.addWidget(right_button_container)
-
-        content_layout.addWidget(button_container)
-
-        # Add content widget to main layout
-        main_layout.addWidget(content_widget)
-
-        # Set the layout
-        self.setLayout(main_layout)
-
-        # Connect filter input
-        self.filter_input.textChanged.connect(self.apply_filter)
-
-        # Set minimum size
-        self.setMinimumSize(300, 700)
 
         # Add method to update statistics
         self.update_statistics()
