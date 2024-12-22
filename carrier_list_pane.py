@@ -510,6 +510,11 @@ class CarrierListPane(QWidget):
         save_button.clicked.connect(self.save_to_json)
         button_layout.addWidget(save_button)
 
+        reset_button = QPushButton("Reset Carrier List")
+        reset_button.setStyleSheet(button_style)
+        reset_button.clicked.connect(self.reset_carrier_list)
+        button_layout.addWidget(reset_button)
+
         # Add button container to content layout
         content_layout.addWidget(button_container)
 
@@ -738,9 +743,9 @@ class CarrierListPane(QWidget):
             if (
                 hasattr(parent, "date_selection_pane")
                 and parent.date_selection_pane is not None
-                and parent.date_selection_pane.calendar.selectedDate().isValid()
+                and parent.date_selection_pane.selected_range is not None
             ):
-                # Only emit signals if we have a valid date
+                # Only emit signals if we have a valid date range
                 self.carrier_list_updated.emit(self.main_model.df)
                 self.request_apply_date_range.emit()
             else:
@@ -871,7 +876,7 @@ class CarrierListPane(QWidget):
                 if (
                     hasattr(self.parent_widget, "date_selection_pane")
                     and self.parent_widget.date_selection_pane is not None
-                    and self.parent_widget.date_selection_pane.calendar.selectedDate().isValid()
+                    and self.parent_widget.date_selection_pane.selected_range is not None
                 ):
                     self.request_apply_date_range.emit()
 
@@ -1457,3 +1462,55 @@ class CarrierListPane(QWidget):
             and hasattr(self.parent_widget.date_selection_pane, "selected_range")
             and self.parent_widget.date_selection_pane.selected_range is not None
         )
+
+    def reset_carrier_list(self):
+        """Reset the carrier list to its initial state.
+        
+        Deletes the carrier list JSON file and reloads carrier data from the database.
+        Shows confirmation dialog before proceeding and notification after completion.
+        """
+        # Show confirmation dialog
+        confirm_dialog = ConfirmDialog(
+            "Are you sure you want to reset the carrier list?\n\n"
+            "This will remove all customizations and reload carriers from the database.",
+            self
+        )
+        if confirm_dialog.exec_() == QDialog.Accepted:
+            try:
+                # Delete the JSON file if it exists
+                if os.path.exists(self.json_path):
+                    os.remove(self.json_path)
+                
+                # Reload carrier data from database
+                df = self.fetch_carrier_data()
+                
+                # Update the model with the new data
+                self.main_model.update_data(df)
+                
+                # Emit signals to update the main application
+                self.carrier_list_updated.emit(df)
+                self.data_updated.emit(df)
+                
+                # If we have a valid date selected, trigger a refresh
+                if (
+                    hasattr(self.parent_widget, "date_selection_pane")
+                    and self.parent_widget.date_selection_pane is not None
+                    and self.parent_widget.date_selection_pane.selected_range is not None
+                ):
+                    self.request_apply_date_range.emit()
+                
+                CustomNotificationDialog.show_notification(
+                    self,
+                    "Success",
+                    "Carrier list has been reset to its initial state."
+                )
+                
+                # Update statistics
+                self.update_statistics()
+                
+            except Exception as e:
+                CustomErrorDialog.error(
+                    self,
+                    "Error",
+                    f"Failed to reset carrier list: {e}"
+                )
