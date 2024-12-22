@@ -503,7 +503,7 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
         - Already worked overtime on 4 other days this service week
         - Required to work overtime on a 5th day
         - No days with 0.01-8.00 hours worked (excluding Sundays)
-        - Not during December
+        - Not during December exclusion period (varies by year, defined in exclusion_periods.json)
 
         Remedy:
         - All overtime hours worked on the 5th day (hours beyond 8)
@@ -513,6 +513,7 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
         - Tracks cumulative overtime days per service week
         - Considers paid leave in daily hour calculations
         - Maintains complete carrier roster for reporting consistency
+        - December exclusion period is configurable per year
     """
     # Keep all carriers but only process violations for WAL/NL
     result_df = data.copy()
@@ -539,6 +540,22 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
     # Add display indicators
     result_df["display_indicator"] = result_df.apply(set_display, axis=1)
 
+    # Convert dates to datetime for comparison
+    result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
+    
+    # Load exclusion periods
+    exclusion_periods = load_exclusion_periods()
+    
+    # Check for exclusion period
+    def is_in_exclusion_period(date):
+        year = str(date.year)
+        if year in exclusion_periods:
+            period = exclusion_periods[year].get("december_exclusion", {})
+            start = pd.to_datetime(period.get("start"))
+            end = pd.to_datetime(period.get("end"))
+            return start <= date <= end
+        return False
+
     # Process all carriers but only calculate violations for WAL/NL
     base_result = []
     for carrier in result_df["carrier_name"].unique():
@@ -550,44 +567,58 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
 
         violation_date = None
         if is_eligible:
-            # Only check for violations if carrier is WAL/NL
-            non_sunday_mask = (
-                pd.to_datetime(carrier_data["rings_date"]).dt.dayofweek != 6
-            )
-            worked_day_mask = carrier_data["daily_hours"] > 0
-            had_eight_hour_day = (
-                carrier_data[non_sunday_mask & worked_day_mask]["daily_hours"]
-                .between(0.01, 8.00, inclusive="both")
-                .any()
-            )
+            # Check if any dates are in exclusion period
+            carrier_data["is_excluded"] = carrier_data["date_dt"].apply(is_in_exclusion_period)
+            
+            # Only check for violations if carrier is WAL/NL and not in exclusion period
+            if not carrier_data["is_excluded"].any():
+                non_sunday_mask = (
+                    pd.to_datetime(carrier_data["rings_date"]).dt.dayofweek != 6
+                )
+                worked_day_mask = carrier_data["daily_hours"] > 0
+                had_eight_hour_day = (
+                    carrier_data[non_sunday_mask & worked_day_mask]["daily_hours"]
+                    .between(0.01, 8.00, inclusive="both")
+                    .any()
+                )
 
-            days_worked = (carrier_data["daily_hours"] > 0).cumsum()
-            days_over_8 = (carrier_data["daily_hours"] > 8).cumsum()
+                days_worked = (carrier_data["daily_hours"] > 0).cumsum()
+                days_over_8 = (carrier_data["daily_hours"] > 8).cumsum()
 
-            if not had_eight_hour_day:
-                violation_mask = (days_worked > 4) & (days_over_8 > 4)
-                if violation_mask.any():
-                    violation_day = carrier_data[violation_mask].iloc[0]
-                    violation_date = violation_day["rings_date"]
+                if not had_eight_hour_day:
+                    violation_mask = (days_worked > 4) & (days_over_8 > 4)
+                    if violation_mask.any():
+                        violation_day = carrier_data[violation_mask].iloc[0]
+                        violation_date = violation_day["rings_date"]
 
         # Add all days for this carrier
         for _, day in carrier_data.iterrows():
-            is_violation = is_eligible and day["rings_date"] == violation_date
+            is_excluded = is_in_exclusion_period(day["date_dt"])
+            is_violation = is_eligible and day["rings_date"] == violation_date and not is_excluded
+            
+            violation_type = (
+                "No Violation (December Exclusion)"
+                if is_excluded
+                else "8.5.F 5th More Than 4 Days of Overtime in a Week"
+                if is_violation
+                else "No Violation"
+            )
+            
+            remedy_total = (
+                0.0
+                if is_excluded
+                else round(max(0, day["daily_hours"] - 8), 2)
+                if is_violation
+                else 0.0
+            )
+
             base_result.append(
                 {
                     "carrier_name": carrier,
                     "date": day["rings_date"],
                     "list_status": day["list_status"],
-                    "violation_type": (
-                        "8.5.F 5th More Than 4 Days of Overtime in a Week"
-                        if is_violation
-                        else "No Violation"
-                    ),
-                    "remedy_total": (
-                        round(max(0, day["daily_hours"] - 8), 2)
-                        if is_violation
-                        else 0.0
-                    ),
+                    "violation_type": violation_type,
+                    "remedy_total": remedy_total,
                     "total_hours": day["daily_hours"],
                     "display_indicator": day["display_indicator"],
                     "85F_5th_date": violation_date if is_violation else "",
@@ -1255,7 +1286,7 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
         - Carrier is WAL or NL
         - Working on their non-scheduled day
         - Worked more than 8 hours that day
-        - Not during December
+        - Not during December exclusion period (varies by year, defined in exclusion_periods.json)
 
         Remedy:
         - All hours worked beyond 8 on the NS day
@@ -1266,7 +1297,7 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
         - Analyzes all carriers but only applies violation logic to WAL/NL
         - Identifies NS days through route code analysis
         - Maintains complete carrier roster for reporting consistency
-        - Rounds remedy hours to 2 decimal places
+        - December exclusion period is configurable per year
     """
     # Set the pandas option to opt-in to the future behavior
     pd.set_option("future.no_silent_downcasting", True)
@@ -1287,9 +1318,7 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
         )
 
     # Prepare data
-    result_df["total_hours"] = pd.to_numeric(
-        result_df["total"], errors="coerce"
-    ).fillna(0)
+    result_df["total_hours"] = pd.to_numeric(result_df["total"], errors="coerce").fillna(0)
     result_df["list_status"] = result_df["list_status"].str.strip().str.lower()
 
     # Update code column handling with the new pandas behavior
@@ -1300,18 +1329,43 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
         result_df["code"].str.strip().str.lower().str.contains("ns day", na=False)
     )
 
+    # Convert dates to datetime for comparison
+    result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
+    
+    # Load exclusion periods
+    exclusion_periods = load_exclusion_periods()
+    
+    # Check for exclusion period
+    def is_in_exclusion_period(date):
+        year = str(date.year)
+        if year in exclusion_periods:
+            period = exclusion_periods[year].get("december_exclusion", {})
+            start = pd.to_datetime(period.get("start"))
+            end = pd.to_datetime(period.get("end"))
+            return start <= date <= end
+        return False
+
+    # Mark exclusion periods
+    result_df["is_excluded"] = result_df["date_dt"].apply(is_in_exclusion_period)
+
+    # Set exclusion period entries first
+    result_df.loc[result_df["is_excluded"], "violation_type"] = "No Violation (December Exclusion)"
+    result_df.loc[result_df["is_excluded"], "remedy_total"] = 0.0
+
     # Calculate violations vectorized using conditions directly
     result_df["remedy_total"] = np.where(
-        (result_df["list_status"].isin(["wal", "nl"])) & (result_df["is_ns_day"]),
+        (result_df["list_status"].isin(["wal", "nl"])) & 
+        (result_df["is_ns_day"]) & 
+        ~result_df["is_excluded"],
         (result_df["total_hours"] - 8).clip(lower=0).round(2),
-        0.0,
+        result_df["remedy_total"] if "remedy_total" in result_df.columns else 0.0,
     )
 
     # Set violation types
     result_df["violation_type"] = np.where(
-        result_df["remedy_total"] > 0,
-        "8.5.F NS Overtime On a Non-Scheduled Day",  # Match the exact string
-        "No Violation",
+        ~result_df["is_excluded"] & (result_df["remedy_total"] > 0),
+        "8.5.F NS Overtime On a Non-Scheduled Day",
+        result_df["violation_type"] if "violation_type" in result_df.columns else "No Violation",
     )
 
     return result_df[
