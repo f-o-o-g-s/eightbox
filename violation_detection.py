@@ -666,6 +666,12 @@ def detect_MAX_12(data, date_maximized_status=None):
         - NL/PTF carriers: 11.50 hours
         - OTDL carriers: 12.00 hours
 
+        December Exclusions:
+        - OTDL carriers cannot trigger MAX12 violations in December
+        - WAL carriers working only their assignment cannot trigger MAX12 violations in December
+        - WAL carriers working off assignment CAN trigger MAX12 violations in December (treated as NL)
+        - NL/PTF carriers can still trigger MAX12 violations in December
+
         Remedy:
         - Hours worked beyond the applicable limit (11.50/12.00)
 
@@ -674,6 +680,7 @@ def detect_MAX_12(data, date_maximized_status=None):
         - Considers route moves when determining WAL carrier limits
         - Maintains complete carrier roster for reporting consistency
         - Rounds remedy hours to 2 decimal places
+        - Handles complex December exclusion rules by carrier type and assignment
     """
     if "list_status" not in data.columns:
         raise ValueError("The 'list_status' column is missing from the data")
@@ -681,9 +688,7 @@ def detect_MAX_12(data, date_maximized_status=None):
     # Prepare data
     result_df = data.copy()
     result_df["list_status"] = result_df["list_status"].str.strip().str.lower()
-    result_df["total_hours"] = pd.to_numeric(
-        result_df["total"], errors="coerce"
-    ).fillna(0)
+    result_df["total_hours"] = pd.to_numeric(result_df["total"], errors="coerce").fillna(0)
 
     # Process moves vectorized
     moves_result = result_df.apply(
@@ -691,25 +696,86 @@ def detect_MAX_12(data, date_maximized_status=None):
     )
     result_df = pd.concat([result_df, moves_result], axis=1)
 
-    # Calculate max hours based on carrier type and moves
+    # Convert dates to datetime for comparison
+    result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
+    
+    # Load exclusion periods
+    exclusion_periods = load_exclusion_periods()
+    
+    # Check for exclusion period
+    def is_in_exclusion_period(date):
+        year = str(date.year)
+        if year in exclusion_periods:
+            period = exclusion_periods[year].get("december_exclusion", {})
+            start = pd.to_datetime(period.get("start"))
+            end = pd.to_datetime(period.get("end"))
+            return start <= date <= end
+        return False
+
+    # Mark exclusion periods
+    result_df["is_excluded"] = result_df["date_dt"].apply(is_in_exclusion_period)
+
+    # Determine if WAL carriers are working off assignment
+    result_df["is_working_off_assignment"] = (
+        (result_df["list_status"] == "wal") & 
+        (result_df["moves"].notna()) & 
+        (result_df["moves"] != "none") & 
+        (result_df["off_route_hours"] > 0)
+    )
+
+    # Calculate max hours based on carrier type, moves, and December exclusions
     result_df["max_hours"] = np.where(
-        result_df["list_status"] == "wal",
+        result_df["is_excluded"],
+        # December rules
         np.where(
-            result_df["moves"].notna() & (result_df["moves"] != "none"), 11.5, 12.0
+            result_df["list_status"] == "otdl",
+            float("inf"),  # OTDL exempt in December
+            np.where(
+                (result_df["list_status"] == "wal") & ~result_df["is_working_off_assignment"],
+                float("inf"),  # WAL on assignment exempt in December
+                11.5  # All others (NL, PTF, WAL off assignment) limited to 11.5
+            )
         ),
-        np.where(result_df["list_status"].isin(["nl", "ptf"]), 11.5, 12.0),
+        # Non-December rules
+        np.where(
+            result_df["list_status"] == "wal",
+            np.where(
+                result_df["moves"].notna() & (result_df["moves"] != "none"),
+                11.5,
+                12.0
+            ),
+            np.where(
+                result_df["list_status"].isin(["nl", "ptf"]),
+                11.5,
+                12.0  # OTDL
+            )
+        )
     )
 
     # Calculate remedies vectorized
     result_df["remedy_total"] = (
-        (result_df["total_hours"] - result_df["max_hours"]).clip(lower=0).round(2)
+        (result_df["total_hours"] - result_df["max_hours"])
+        .clip(lower=0)
+        .round(2)
     )
 
-    # Set violation types
+    # Set violation types with appropriate messages
     result_df["violation_type"] = np.where(
         result_df["remedy_total"] > 0,
         "MAX12 More Than 12 Hours Worked in a Day",
-        "No Violation",
+        np.where(
+            result_df["is_excluded"],
+            np.where(
+                result_df["list_status"] == "otdl",
+                "No Violation (December Exclusion - OTDL)",
+                np.where(
+                    (result_df["list_status"] == "wal") & ~result_df["is_working_off_assignment"],
+                    "No Violation (December Exclusion - WAL On Assignment)",
+                    "No Violation"
+                )
+            ),
+            "No Violation"
+        )
     )
 
     # Select and rename columns
