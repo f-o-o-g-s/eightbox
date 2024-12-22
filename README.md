@@ -78,6 +78,15 @@ This project uses:
 
 ## Version History
 
+### 2024.0.11.0
+- Updated all violation type documentation to reflect current implementation
+- Enhanced documentation with highlighted key contract language sections
+- Added detailed explanations for vectorized violation detection
+- Improved documentation formatting and styling consistency
+- Added clarification about exact excusal indicator matching
+- Enhanced examples with consistent decimal formatting
+- Added missing violation types and clarified hour limit defaults
+
 ### 2024.0.10.0
 - Vectorized violation detection for significant performance improvements
 - Fixed 85G violation detection to match original behavior
