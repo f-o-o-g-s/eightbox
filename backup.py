@@ -1,4 +1,5 @@
 """Handles both Git version control and full project directory backups."""
+import argparse
 import os
 import subprocess
 import zipfile
@@ -137,11 +138,13 @@ def git_backup(description, target_branch="main"):
         return False
 
 
-def create_backup(cli_description=None):
+def create_backup(cli_description=None, cli_backup_type=None):
     """Create a backup of the project using Git version control.
 
     Args:
         cli_description (str, optional): Description provided via command line
+        cli_backup_type (str, optional): Backup type provided via command line
+            (1=Git, 2=ZIP, 3=Both)
     """
     try:
         # Run pre-commit hooks first
@@ -179,9 +182,8 @@ def create_backup(cli_description=None):
             print("\nError: Description cannot be empty")
             return
 
-        # If using CLI, default to Git backup only
-        # Otherwise show interactive menu
-        backup_type = "1" if cli_description else None
+        # Use provided backup type or show interactive menu
+        backup_type = cli_backup_type
         if backup_type is None:
             print("\nBackup type:")
             print("1. Git backup only")
@@ -209,25 +211,19 @@ def create_backup(cli_description=None):
 
 
 if __name__ == "__main__":
-    import sys
+    parser = argparse.ArgumentParser(description="Create project backups")
+    parser.add_argument("description", nargs="?", help="Commit message for the backup")
+    parser.add_argument(
+        "--zip", action="store_true", help="Create ZIP backup in addition to Git backup"
+    )
+    args = parser.parse_args()
 
-    if len(sys.argv) > 1:
-        if sys.argv[1] in ["-h", "--help", "help"]:
-            print("\nUsage: python backup.py [description]")
-            print("Creates both Git and ZIP backups of the project.")
-            print("\nArguments:")
-            print("  description    Commit message for the backup")
-            print("                 If provided, will do Git backup only")
-            print("\nInteractive mode (no arguments):")
-            print("1. Run pre-commit hooks (black, isort, flake8)")
-            print("2. Ask for a description of changes")
-            print("3. Offer backup options:")
-            print("   - Git backup (version control)")
-            print("   - ZIP backup (full directory)")
-            print("   - Both Git and ZIP")
-            print("4. Create selected backups")
-            print("\nZIP backups are stored in ~/eightbox_backups/")
+    if args.description:
+        if args.description in ["-h", "--help", "help"]:
+            parser.print_help()
         else:
-            create_backup(sys.argv[1])
+            # Set backup_type based on --zip flag
+            backup_type = "3" if args.zip else "1"
+            create_backup(args.description, backup_type)
     else:
         create_backup()
