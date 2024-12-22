@@ -1712,7 +1712,7 @@ class MainApp(QMainWindow):
                 return db_data
 
         except (AttributeError, ValueError) as e:
-            QMessageBox.critical(self, "Calendar Error", str(e))
+            QMessageBox.critical(self, "Date Selection Error", str(e))
         except sqlite3.Error as e:
             QMessageBox.critical(
                 self, "Database Error", f"Failed to fetch data: {str(e)}"
