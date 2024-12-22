@@ -797,9 +797,7 @@ class OTDLMaximizationPane(QWidget):
                 carrier_name = str(row["carrier_name"])
 
                 # Get indicator and hours
-                indicator = row.get(
-                    "display_indicator", ""
-                )  # Use singular form
+                indicator = row.get("display_indicator", "")  # Use singular form
                 total_hours = pd.to_numeric(row.get("total", 0), errors="coerce")
                 hour_limit = pd.to_numeric(
                     row.get("hour_limit", 12.00), errors="coerce"
