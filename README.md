@@ -78,6 +78,12 @@ This project uses:
 
 ## Version History
 
+### 2024.0.10.0
+- Vectorized violation detection for significant performance improvements
+- Fixed 85G violation detection to match original behavior
+- Standardized display_indicator naming across codebase
+- Updated OTDL maximization pane for consistency
+
 ### 2024.0.9.0
 - Enhanced carrier list UI with Material Design improvements
 - Added Material Design styling to carrier list interface
