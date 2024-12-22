@@ -41,17 +41,17 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QApplication,
     QCheckBox,
+    QFrame,
     QHBoxLayout,
     QHeaderView,
     QLabel,
     QPushButton,
+    QScrollArea,
     QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
-    QScrollArea,
-    QFrame,
 )
 
 from custom_widgets import CustomTitleBarWidget
@@ -169,7 +169,7 @@ class OTDLMaximizationPane(QWidget):
 
         # Set table container as the scroll area widget
         scroll_area.setWidget(table_container)
-        
+
         # Create a widget to hold the scroll area
         scroll_container = QWidget()
         scroll_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -177,14 +177,15 @@ class OTDLMaximizationPane(QWidget):
         scroll_layout.setContentsMargins(0, 0, 0, 0)
         scroll_layout.setSpacing(0)
         scroll_layout.addWidget(scroll_area)
-        
+
         central_layout.addWidget(scroll_container, 1)  # Add stretch factor of 1
 
         # Create sticky footer with separator
         footer = QWidget()
         footer.setObjectName("footer")
         footer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)  # Fixed height
-        footer.setStyleSheet("""
+        footer.setStyleSheet(
+            """
             QWidget#footer {
                 background-color: #1E1E1E;
                 border-top: 1px solid #333333;
@@ -192,7 +193,8 @@ class OTDLMaximizationPane(QWidget):
                 max-height: 60px;
                 padding-bottom: 8px;  /* Add margin at the bottom */
             }
-        """)
+        """
+        )
         footer_layout = QHBoxLayout(footer)
         footer_layout.setContentsMargins(10, 10, 10, 10)
 
@@ -279,7 +281,7 @@ class OTDLMaximizationPane(QWidget):
         """Adjust the window size based on the table contents."""
         # Clear any previous size constraints
         self.setMinimumSize(0, 0)
-        
+
         # Ensure all columns and rows are sized to their contents
         self.table.resizeColumnsToContents()
         self.table.resizeRowsToContents()
@@ -297,7 +299,9 @@ class OTDLMaximizationPane(QWidget):
         total_height = (
             self.title_bar.height()  # Title bar height
             + self.table.horizontalHeader().height()  # Header height
-            + sum([self.table.rowHeight(i) for i in range(self.table.rowCount())])  # Content height
+            + sum(
+                [self.table.rowHeight(i) for i in range(self.table.rowCount())]
+            )  # Content height
             + 60  # Footer height
             + 20  # Padding
         )
@@ -350,7 +354,11 @@ class OTDLMaximizationPane(QWidget):
     def apply_all_changes(self):
         """Gather all maximization changes and emit them as a batch."""
         # Check if there's any data to process
-        if not hasattr(self, "clock_ring_data") or self.clock_ring_data is None or self.clock_ring_data.empty:
+        if (
+            not hasattr(self, "clock_ring_data")
+            or self.clock_ring_data is None
+            or self.clock_ring_data.empty
+        ):
             return
 
         # Cache the current state
@@ -366,13 +374,9 @@ class OTDLMaximizationPane(QWidget):
 
             # Get all OTDL carriers for this date
             otdl_carriers = set()
-            date_data = self.clock_ring_data[
-                self.clock_ring_data["rings_date"] == date
-            ]
+            date_data = self.clock_ring_data[self.clock_ring_data["rings_date"] == date]
             otdl_carriers = set(
-                date_data[date_data["list_status"] == "otdl"][
-                    "carrier_name"
-                ].unique()
+                date_data[date_data["list_status"] == "otdl"]["carrier_name"].unique()
             )
 
             # A date is maximized if all OTDL carriers are excused
@@ -487,7 +491,7 @@ class OTDLMaximizationPane(QWidget):
         self.table.clear()
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
-        
+
         # Clear any size constraints
         self.setMinimumSize(0, 0)
         self.setMaximumSize(16777215, 16777215)  # QWIDGETSIZE_MAX

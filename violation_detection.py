@@ -24,6 +24,9 @@ Features:
 - Exception handling for special cases
 """
 
+import json
+import os
+
 # violation_detection.py
 from typing import (
     Callable,
@@ -33,9 +36,6 @@ from typing import (
 
 import numpy as np
 import pandas as pd
-import json
-import os
-from datetime import datetime
 
 from utils import set_display
 
@@ -373,7 +373,7 @@ def detect_85d_overtime(data, date_maximized_status=None):
 
 def load_exclusion_periods():
     """Load exclusion periods from configuration file.
-    
+
     Returns:
         dict: Mapping of years to their exclusion periods
     """
@@ -426,10 +426,10 @@ def detect_85f_overtime_over_10_hours(data, date_maximized_status=None):
 
     # Convert dates to datetime for comparison
     result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
-    
+
     # Load exclusion periods
     exclusion_periods = load_exclusion_periods()
-    
+
     # Check for exclusion period
     def is_in_exclusion_period(date):
         year = str(date.year)
@@ -444,7 +444,9 @@ def detect_85f_overtime_over_10_hours(data, date_maximized_status=None):
     result_df["is_excluded"] = result_df["date_dt"].apply(is_in_exclusion_period)
 
     # Set exclusion period entries
-    result_df.loc[result_df["is_excluded"], "violation_type"] = "No Violation (December Exclusion)"
+    result_df.loc[
+        result_df["is_excluded"], "violation_type"
+    ] = "No Violation (December Exclusion)"
     result_df.loc[result_df["is_excluded"], "remedy_total"] = 0.0
 
     # Calculate remedies vectorized for all non-excluded carriers
@@ -461,7 +463,9 @@ def detect_85f_overtime_over_10_hours(data, date_maximized_status=None):
     result_df["violation_type"] = np.where(
         ~result_df["is_excluded"] & (result_df["remedy_total"] > 0),
         "8.5.F Overtime Over 10 Hours Off Route",
-        result_df["violation_type"] if "violation_type" in result_df.columns else "No Violation",
+        result_df["violation_type"]
+        if "violation_type" in result_df.columns
+        else "No Violation",
     )
 
     return result_df[
@@ -542,10 +546,10 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
 
     # Convert dates to datetime for comparison
     result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
-    
+
     # Load exclusion periods
     exclusion_periods = load_exclusion_periods()
-    
+
     # Check for exclusion period
     def is_in_exclusion_period(date):
         year = str(date.year)
@@ -568,8 +572,10 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
         violation_date = None
         if is_eligible:
             # Check if any dates are in exclusion period
-            carrier_data["is_excluded"] = carrier_data["date_dt"].apply(is_in_exclusion_period)
-            
+            carrier_data["is_excluded"] = carrier_data["date_dt"].apply(
+                is_in_exclusion_period
+            )
+
             # Only check for violations if carrier is WAL/NL and not in exclusion period
             if not carrier_data["is_excluded"].any():
                 non_sunday_mask = (
@@ -594,8 +600,10 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
         # Add all days for this carrier
         for _, day in carrier_data.iterrows():
             is_excluded = is_in_exclusion_period(day["date_dt"])
-            is_violation = is_eligible and day["rings_date"] == violation_date and not is_excluded
-            
+            is_violation = (
+                is_eligible and day["rings_date"] == violation_date and not is_excluded
+            )
+
             violation_type = (
                 "No Violation (December Exclusion)"
                 if is_excluded
@@ -603,7 +611,7 @@ def detect_85f_5th_overtime_over_more_than_4(data, date_maximized_status=None):
                 if is_violation
                 else "No Violation"
             )
-            
+
             remedy_total = (
                 0.0
                 if is_excluded
@@ -668,8 +676,10 @@ def detect_MAX_12(data, date_maximized_status=None):
 
         December Exclusions:
         - OTDL carriers cannot trigger MAX12 violations in December
-        - WAL carriers working only their assignment cannot trigger MAX12 violations in December
-        - WAL carriers working off assignment CAN trigger MAX12 violations in December (treated as NL)
+        - WAL carriers working only their assignment--
+        - cannot trigger MAX12 violations in December
+        - WAL carriers working off assignment--
+        - CAN trigger MAX12 violations in December (treated as NL)
         - NL/PTF carriers can still trigger MAX12 violations in December
 
         Remedy:
@@ -680,7 +690,8 @@ def detect_MAX_12(data, date_maximized_status=None):
         - Considers route moves when determining WAL carrier limits
         - Maintains complete carrier roster for reporting consistency
         - Rounds remedy hours to 2 decimal places
-        - Handles complex December exclusion rules by carrier type and assignment
+        - Handles complex December exclusion rules by
+        - carrier type and assignment
     """
     if "list_status" not in data.columns:
         raise ValueError("The 'list_status' column is missing from the data")
@@ -688,7 +699,9 @@ def detect_MAX_12(data, date_maximized_status=None):
     # Prepare data
     result_df = data.copy()
     result_df["list_status"] = result_df["list_status"].str.strip().str.lower()
-    result_df["total_hours"] = pd.to_numeric(result_df["total"], errors="coerce").fillna(0)
+    result_df["total_hours"] = pd.to_numeric(
+        result_df["total"], errors="coerce"
+    ).fillna(0)
 
     # Process moves vectorized
     moves_result = result_df.apply(
@@ -698,10 +711,10 @@ def detect_MAX_12(data, date_maximized_status=None):
 
     # Convert dates to datetime for comparison
     result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
-    
+
     # Load exclusion periods
     exclusion_periods = load_exclusion_periods()
-    
+
     # Check for exclusion period
     def is_in_exclusion_period(date):
         year = str(date.year)
@@ -717,10 +730,10 @@ def detect_MAX_12(data, date_maximized_status=None):
 
     # Determine if WAL carriers are working off assignment
     result_df["is_working_off_assignment"] = (
-        (result_df["list_status"] == "wal") & 
-        (result_df["moves"].notna()) & 
-        (result_df["moves"] != "none") & 
-        (result_df["off_route_hours"] > 0)
+        (result_df["list_status"] == "wal")
+        & (result_df["moves"].notna())
+        & (result_df["moves"] != "none")
+        & (result_df["off_route_hours"] > 0)
     )
 
     # Calculate max hours based on carrier type, moves, and December exclusions
@@ -731,32 +744,25 @@ def detect_MAX_12(data, date_maximized_status=None):
             result_df["list_status"] == "otdl",
             float("inf"),  # OTDL exempt in December
             np.where(
-                (result_df["list_status"] == "wal") & ~result_df["is_working_off_assignment"],
+                (result_df["list_status"] == "wal")
+                & ~result_df["is_working_off_assignment"],
                 float("inf"),  # WAL on assignment exempt in December
-                11.5  # All others (NL, PTF, WAL off assignment) limited to 11.5
-            )
+                11.5,  # All others (NL, PTF, WAL off assignment) limited to 11.5
+            ),
         ),
         # Non-December rules
         np.where(
             result_df["list_status"] == "wal",
             np.where(
-                result_df["moves"].notna() & (result_df["moves"] != "none"),
-                11.5,
-                12.0
+                result_df["moves"].notna() & (result_df["moves"] != "none"), 11.5, 12.0
             ),
-            np.where(
-                result_df["list_status"].isin(["nl", "ptf"]),
-                11.5,
-                12.0  # OTDL
-            )
-        )
+            np.where(result_df["list_status"].isin(["nl", "ptf"]), 11.5, 12.0),  # OTDL
+        ),
     )
 
     # Calculate remedies vectorized
     result_df["remedy_total"] = (
-        (result_df["total_hours"] - result_df["max_hours"])
-        .clip(lower=0)
-        .round(2)
+        (result_df["total_hours"] - result_df["max_hours"]).clip(lower=0).round(2)
     )
 
     # Set violation types with appropriate messages
@@ -769,13 +775,14 @@ def detect_MAX_12(data, date_maximized_status=None):
                 result_df["list_status"] == "otdl",
                 "No Violation (December Exclusion - OTDL)",
                 np.where(
-                    (result_df["list_status"] == "wal") & ~result_df["is_working_off_assignment"],
+                    (result_df["list_status"] == "wal")
+                    & ~result_df["is_working_off_assignment"],
                     "No Violation (December Exclusion - WAL On Assignment)",
-                    "No Violation"
-                )
+                    "No Violation",
+                ),
             ),
-            "No Violation"
-        )
+            "No Violation",
+        ),
     )
 
     # Select and rename columns
@@ -853,10 +860,10 @@ def detect_MAX_60(data, date_maximized_status=None):
 
     # Convert dates to datetime for comparison
     result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
-    
+
     # Load exclusion periods
     exclusion_periods = load_exclusion_periods()
-    
+
     # Check for exclusion period
     def is_in_exclusion_period(date):
         year = str(date.year)
@@ -902,30 +909,33 @@ def detect_MAX_60(data, date_maximized_status=None):
     grouped = daily_totals.groupby("carrier_name")
     last_day_mask = grouped["rings_date"].transform("max") == daily_totals["rings_date"]
     over_60_mask = daily_totals["cumulative_hours"] > 60.0
-    
+
     # All carriers are exempt from 60-hour limit during December
     # Only check for violations outside the exclusion period
     eligible_mask = (
-        daily_totals["list_status"].isin(["wal", "nl", "otdl"]) &  # All regular carriers
-        ~daily_totals["is_excluded"]  # Not in December exclusion period
+        daily_totals["list_status"].isin(["wal", "nl", "otdl"])
+        & ~daily_totals[  # All regular carriers
+            "is_excluded"
+        ]  # Not in December exclusion period
     )
 
     # Set violation types and remedies
     daily_totals.loc[last_day_mask & over_60_mask & eligible_mask, "remedy_total"] = (
-        daily_totals.loc[last_day_mask & over_60_mask & eligible_mask, "cumulative_hours"]
+        daily_totals.loc[
+            last_day_mask & over_60_mask & eligible_mask, "cumulative_hours"
+        ]
         - 60.0
     ).round(2)
 
     # Set violation types with December exclusion note
     daily_totals["violation_type"] = "No Violation"
     daily_totals.loc[
-        last_day_mask & over_60_mask & eligible_mask,
-        "violation_type"
+        last_day_mask & over_60_mask & eligible_mask, "violation_type"
     ] = "MAX60 More Than 60 Hours Worked in a Week"
     daily_totals.loc[
-        daily_totals["is_excluded"] &
-        daily_totals["list_status"].isin(["wal", "nl", "otdl"]),
-        "violation_type"
+        daily_totals["is_excluded"]
+        & daily_totals["list_status"].isin(["wal", "nl", "otdl"]),
+        "violation_type",
     ] = "No Violation (December Exclusion)"
 
     # Rename date column for consistency
@@ -1134,234 +1144,6 @@ def process_moves_row(row):
         )
 
 
-def detect_violations_optimized(clock_ring_data, date_maximized_status=None):
-    """Process all violation types in a single optimized pass.
-
-    Args:
-        clock_ring_data (pd.DataFrame): Raw carrier clock ring data
-        date_maximized_status (dict, optional): Date-keyed dict indicating if OTDL was maximized
-
-    Returns:
-        dict: Violation type to DataFrame mapping containing:
-            - 8.5.D violations
-            - 8.5.F violations
-            - 8.5.F NS violations
-            - 8.5.F 5th day violations
-            - MAX12 violations
-            - MAX60 violations
-            - 8.5.G violations
-
-    Note:
-        - Optimizes processing by preparing data once for all violation types
-        - Processes moves and groups data efficiently
-        - Maintains consistent carrier roster across all violation types
-        - Used as a faster alternative to individual violation detection
-    """
-    violations = {
-        "8.5.D": [],
-        "8.5.F": [],
-        "8.5.F NS": [],
-        "8.5.F 5th": [],
-        "MAX12": [],
-        "MAX60": [],
-        "8.5.G": [],
-    }
-
-    # Pre-process data once
-    data = clock_ring_data.copy()
-    data["total_hours"] = pd.to_numeric(data["total"], errors="coerce").fillna(0)
-    data["list_status"] = data["list_status"].str.strip().str.lower()
-    data["hour_limit"] = pd.to_numeric(
-        data.get("hour_limit", 12.00), errors="coerce"
-    ).fillna(12.00)
-
-    # Process moves once for all carriers
-    moves_result = data.apply(
-        lambda x: process_moves_vectorized(x.get("moves", "none"), x["code"]), axis=1
-    )
-    data = pd.concat([data, moves_result], axis=1)
-
-    # Group data once
-    carrier_date_groups = data.groupby(["carrier_name", "rings_date"])
-
-    # Process daily violations
-    for (carrier, date), group in carrier_date_groups:
-        list_status = group["list_status"].iloc[0]
-        total_hours = group["total_hours"].sum()
-        off_route_hours = group["off_route_hours"].sum()
-
-        # Only process WAL/NL violations for eligible carriers
-        if list_status in ["wal", "nl"]:
-            # 8.5.D
-            if off_route_hours > 0:
-                violations["8.5.D"].append(
-                    {
-                        "carrier_name": carrier,
-                        "date": date,
-                        "violation_type": "8.5.D Overtime Off Route",
-                        "remedy_total": off_route_hours,
-                        "total_hours": total_hours,
-                        "own_route_hours": group["own_route_hours"].sum(),
-                        "off_route_hours": off_route_hours,
-                        "list_status": list_status,
-                    }
-                )
-
-            # 8.5.F
-            if total_hours > 8:
-                violations["8.5.F"].append(
-                    {
-                        "carrier_name": carrier,
-                        "date": date,
-                        "violation_type": "8.5.F Overtime Over 10 Hours Off Route",
-                        "remedy_total": total_hours - 8,
-                        "total_hours": total_hours,
-                        "list_status": list_status,
-                    }
-                )
-
-                # Check for 8.5.G violations when WAL/NL works overtime off route
-                if off_route_hours > 0:
-                    # Check if OTDL was maximized for this date
-                    is_maximized = False
-                    if date_maximized_status and date in date_maximized_status:
-                        date_status = date_maximized_status[date]
-                        if isinstance(date_status, dict):
-                            is_maximized = date_status.get("is_maximized", False)
-                        else:
-                            is_maximized = date_status.get(date, False)
-
-                    # Only process if OTDL was not maximized
-                    if not is_maximized:
-                        # Get all OTDL carriers for this date
-                        otdl_carriers = data[
-                            (data["rings_date"] == date)
-                            & (data["list_status"] == "otdl")
-                        ].groupby("carrier_name")
-
-                        overtime_worked = total_hours - 8  # Calculate WAL/NL overtime
-
-                        # Check each OTDL carrier
-                        for otdl_carrier, otdl_group in otdl_carriers:
-                            otdl_hours = otdl_group["total_hours"].sum()
-                            hour_limit = pd.to_numeric(
-                                otdl_group["hour_limit"].iloc[0]
-                                if "hour_limit" in otdl_group.columns
-                                else 12.00,
-                                errors="coerce",
-                            ).fillna(12.00)
-
-                            # If OTDL carrier could have worked more hours
-                            if otdl_hours < hour_limit:
-                                potential_remedy = min(
-                                    hour_limit
-                                    - otdl_hours,  # Hours OTDL could have worked
-                                    overtime_worked,  # Hours WAL/NL worked overtime
-                                )
-                                if potential_remedy > 0:
-                                    violations["8.5.G"].append(
-                                        {
-                                            "carrier_name": otdl_carrier,
-                                            "date": date,
-                                            "violation_type": "8.5.G",
-                                            "remedy_total": round(potential_remedy, 2),
-                                            "total_hours": otdl_hours,
-                                            "hour_limit": hour_limit,
-                                            "list_status": "otdl",
-                                            "trigger_carrier": carrier,
-                                            "trigger_hours": total_hours,
-                                            "off_route_hours": off_route_hours,
-                                        }
-                                    )
-                    else:
-                        # Add entries for OTDL carriers on maximized dates
-                        otdl_carriers = data[
-                            (data["rings_date"] == date)
-                            & (data["list_status"] == "otdl")
-                        ]
-                        for _, otdl_row in otdl_carriers.iterrows():
-                            violations["8.5.G"].append(
-                                {
-                                    "carrier_name": otdl_row["carrier_name"],
-                                    "date": date,
-                                    "violation_type": "8.5.G",
-                                    "remedy_total": 0.0,
-                                    "total_hours": pd.to_numeric(
-                                        otdl_row["total"], errors="coerce"
-                                    ).fillna(0),
-                                    "hour_limit": pd.to_numeric(
-                                        otdl_row.get("hour_limit", 12.00),
-                                        errors="coerce",
-                                    ).fillna(12.00),
-                                    "list_status": "otdl",
-                                    "trigger_carrier": carrier,
-                                    "trigger_hours": total_hours,
-                                    "off_route_hours": off_route_hours,
-                                }
-                            )
-
-        # Process MAX12 for all carriers
-        if total_hours > 12:
-            violations["MAX12"].append(
-                {
-                    "carrier_name": carrier,
-                    "date": date,
-                    "violation_type": "MAX12 More Than 12 Hours Worked in a Day",
-                    "remedy_total": total_hours - 12,
-                    "total_hours": total_hours,
-                    "list_status": list_status,
-                }
-            )
-
-    # Process weekly violations
-    weekly_groups = data.groupby("carrier_name")
-    for carrier, week_data in weekly_groups:
-        list_status = week_data["list_status"].iloc[0]
-
-        # MAX60
-        cumulative_hours = week_data.groupby("rings_date")["total_hours"].sum().cumsum()
-        if cumulative_hours.max() > 60:
-            for date, cum_hours in cumulative_hours[cumulative_hours > 60].items():
-                daily_hours = week_data[week_data["rings_date"] == date][
-                    "total_hours"
-                ].sum()
-                violations["MAX60"].append(
-                    {
-                        "carrier_name": carrier,
-                        "date": date,
-                        "violation_type": "MAX60 More Than 60 Hours Worked in a Week",
-                        "remedy_total": daily_hours,
-                        "total_hours": daily_hours,
-                        "cumulative_hours": cum_hours,
-                        "list_status": list_status,
-                    }
-                )
-
-        # 8.5.F 5th day (for WAL/NL only)
-        if list_status in ["wal", "nl"]:
-            working_days = week_data[week_data["total_hours"] > 0][
-                "rings_date"
-            ].unique()
-            if len(working_days) >= 5:
-                fifth_day = sorted(working_days)[4]
-                fifth_day_hours = week_data[week_data["rings_date"] == fifth_day][
-                    "total_hours"
-                ].sum()
-                violations["8.5.F 5th"].append(
-                    {
-                        "carrier_name": carrier,
-                        "date": fifth_day,
-                        "violation_type": "8.5.F 5th More Than 4 Days of Overtime in a Week",
-                        "remedy_total": fifth_day_hours,
-                        "total_hours": fifth_day_hours,
-                        "list_status": list_status,
-                    }
-                )
-
-    # Convert all violations to DataFrames
-    return {k: pd.DataFrame(v) if v else pd.DataFrame() for k, v in violations.items()}
-
-
 @register_violation("8.5.F NS Overtime On a Non-Scheduled Day")
 def detect_85f_ns_overtime(data, date_maximized_status=None):
     """Detect Article 8.5.F violations for overtime on non-scheduled days.
@@ -1416,7 +1198,9 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
         )
 
     # Prepare data
-    result_df["total_hours"] = pd.to_numeric(result_df["total"], errors="coerce").fillna(0)
+    result_df["total_hours"] = pd.to_numeric(
+        result_df["total"], errors="coerce"
+    ).fillna(0)
     result_df["list_status"] = result_df["list_status"].str.strip().str.lower()
 
     # Update code column handling with the new pandas behavior
@@ -1429,10 +1213,10 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
 
     # Convert dates to datetime for comparison
     result_df["date_dt"] = pd.to_datetime(result_df["rings_date"])
-    
+
     # Load exclusion periods
     exclusion_periods = load_exclusion_periods()
-    
+
     # Check for exclusion period
     def is_in_exclusion_period(date):
         year = str(date.year)
@@ -1447,14 +1231,16 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
     result_df["is_excluded"] = result_df["date_dt"].apply(is_in_exclusion_period)
 
     # Set exclusion period entries first
-    result_df.loc[result_df["is_excluded"], "violation_type"] = "No Violation (December Exclusion)"
+    result_df.loc[
+        result_df["is_excluded"], "violation_type"
+    ] = "No Violation (December Exclusion)"
     result_df.loc[result_df["is_excluded"], "remedy_total"] = 0.0
 
     # Calculate violations vectorized using conditions directly
     result_df["remedy_total"] = np.where(
-        (result_df["list_status"].isin(["wal", "nl"])) & 
-        (result_df["is_ns_day"]) & 
-        ~result_df["is_excluded"],
+        (result_df["list_status"].isin(["wal", "nl"]))
+        & (result_df["is_ns_day"])
+        & ~result_df["is_excluded"],
         (result_df["total_hours"] - 8).clip(lower=0).round(2),
         result_df["remedy_total"] if "remedy_total" in result_df.columns else 0.0,
     )
@@ -1463,7 +1249,9 @@ def detect_85f_ns_overtime(data, date_maximized_status=None):
     result_df["violation_type"] = np.where(
         ~result_df["is_excluded"] & (result_df["remedy_total"] > 0),
         "8.5.F NS Overtime On a Non-Scheduled Day",
-        result_df["violation_type"] if "violation_type" in result_df.columns else "No Violation",
+        result_df["violation_type"]
+        if "violation_type" in result_df.columns
+        else "No Violation",
     )
 
     return result_df[
