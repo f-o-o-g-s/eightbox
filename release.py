@@ -11,6 +11,7 @@ This module provides functionality for:
 import os
 import re
 import subprocess
+import argparse
 from datetime import datetime
 
 from github import Github
@@ -25,7 +26,8 @@ def show_help():
     This script handles version updates and releases for Eightbox.
 
     Usage:
-        python release.py [--help]
+        python release.py [options]
+        python release.py --non-interactive --type {patch|minor|major} --message "commit message" --notes "note1" "note2" ...
 
     Version Format: YYYY.MAJOR.MINOR.PATCH
         - YYYY:  Current year
@@ -34,7 +36,7 @@ def show_help():
         - PATCH: Bug fixes
 
     Examples:
-        Bug fix release:
+        Interactive mode:
             > python release.py
             > Choose: 1 (Patch)
             > Message: "Fix carrier list display bug"
@@ -42,13 +44,11 @@ def show_help():
             - Fixed sorting in carrier list
             - Updated error messages
 
-        New feature release:
-            > python release.py
-            > Choose: 2 (Minor)
-            > Message: "Add new violation detection"
-            > Notes:
-            - Added automatic violation detection
-            - Improved user interface
+        Non-interactive mode:
+            > python release.py --non-interactive --type minor \\
+                --message "Add new violation detection" \\
+                --notes "Added automatic violation detection" \\
+                       "Improved user interface"
 
     Environment:
         GITHUB_TOKEN - GitHub personal access token for releases
@@ -208,8 +208,8 @@ def create_release():
         new_version = get_new_version(old_version, choice)
         update_version_and_time(old_version, new_version)
 
-        # 5. Git commands
-        subprocess.run(["git", "add", "main_gui.py"], check=True)
+        # 5. Git commands - now adding all changes
+        subprocess.run(["git", "add", "."], check=True)
         subprocess.run(
             ["git", "commit", "-m", f"{commit_msg} (v{new_version})"], check=True
         )
@@ -262,10 +262,95 @@ def create_release():
         return False
 
 
-if __name__ == "__main__":
-    import sys
+def create_release_non_interactive(release_type, commit_msg, notes):
+    """Create a new release with provided parameters without user interaction."""
+    try:
+        # 1. Get current version
+        old_version = get_current_version()
 
-    if len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help", "help"]:
-        show_help()
+        # Convert release type to choice number
+        type_map = {"patch": 1, "minor": 2, "major": 3}
+        choice = type_map[release_type.lower()]
+
+        # Format notes if they're not already formatted
+        formatted_notes = []
+        for note in notes:
+            if not note.startswith("- "):
+                note = f"- {note}"
+            formatted_notes.append(note)
+
+        # 4. Update version and build time
+        new_version = get_new_version(old_version, choice)
+        update_version_and_time(old_version, new_version)
+
+        # 5. Git commands - now adding all changes
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(
+            ["git", "commit", "-m", f"{commit_msg} (v{new_version})"], check=True
+        )
+        subprocess.run(["git", "push", "origin", "main"], check=True)
+
+        # Get the current commit SHA
+        commit_sha = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+        )
+
+        # Format release notes with commit SHA
+        formatted_notes = format_release_notes(new_version, formatted_notes, commit_msg)
+
+        # Create tag with formatted notes
+        subprocess.run(
+            ["git", "tag", "-a", f"v{new_version}", "-m", formatted_notes], check=True
+        )
+        subprocess.run(["git", "push", "origin", "--tags"], check=True)
+
+        # 6. Create GitHub Release
+        token = get_github_token()
+        g = Github(token)
+        repo = g.get_user().get_repo("eightbox")
+
+        # Create release with specific commit
+        release = repo.create_git_release(
+            tag=f"v{new_version}",
+            name=f"Version {new_version}",
+            message=formatted_notes,
+            draft=False,
+            prerelease=False,
+            target_commitish=commit_sha,
+        )
+
+        print(f"\nSuccessfully released version {new_version}!")
+        print(f"Release URL: {release.html_url}")
+        print(f"Commit SHA: {commit_sha}")
+
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print(f"\nGit command failed: {e.cmd}")
+        print(
+            f"Error output: {e.stderr if hasattr(e, 'stderr') else 'No error output'}"
+        )
+        return False
+
+    except Exception as e:
+        print(f"\nError: {str(e)}")
+        return False
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Eightbox Release Script")
+    parser.add_argument("--non-interactive", action="store_true", help="Run in non-interactive mode")
+    parser.add_argument("--type", choices=["patch", "minor", "major"], help="Release type")
+    parser.add_argument("--message", "-m", help="Commit message")
+    parser.add_argument("--notes", nargs="+", help="Release notes (multiple arguments)")
+
+    args = parser.parse_args()
+
+    if args.non_interactive:
+        if not all([args.type, args.message, args.notes]):
+            print("Error: When using --non-interactive, you must provide --type, --message, and --notes")
+            parser.print_help()
+            exit(1)
+        create_release_non_interactive(args.type, args.message, args.notes)
     else:
         create_release()

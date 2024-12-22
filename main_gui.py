@@ -242,7 +242,7 @@ class MainApp(QMainWindow):
     """
 
     VERSION = "2024.0.8.1"  # Updated by release.py
-    BUILD_TIME = "2024-12-21 18:31"  # Updated by release.py
+    BUILD_TIME = "2024-12-21 18:34"  # Updated by release.py
     SETTINGS_FILE = "app_settings.json"  # File to store application settings
 
     def __init__(self):
