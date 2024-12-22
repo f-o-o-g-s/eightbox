@@ -1222,12 +1222,9 @@ def detect_85g_violations(data, date_maximized_status=None):
     result_df["day_of_week"] = result_df["date_dt"].dt.strftime("%A")
     
     # Vectorized checks for auto-excusal indicators
-    auto_excusal_indicators = [r"\(sick\)", r"\(NS protect\)", r"\(holiday\)", r"\(guaranteed\)", r"\(annual\)"]
-    result_df["is_auto_excused"] = result_df["display_indicator"].str.contains(
-        "|".join(auto_excusal_indicators), 
-        case=False, 
-        na=False,
-        regex=True
+    auto_excusal_indicators = ["(sick)", "(NS protect)", "(holiday)", "(guaranteed)", "(annual)"]
+    result_df["is_auto_excused"] = result_df["display_indicator"].apply(
+        lambda x: any(indicator in str(x) for indicator in auto_excusal_indicators)
     )
     result_df["is_sunday"] = result_df["day_of_week"].astype(str) == "Sunday"
     
@@ -1407,4 +1404,4 @@ def detect_85g_violations(data, date_maximized_status=None):
                 "display_indicator": carrier_data["display_indicator"]
             })
     
-    return pd.DataFrame(final_results)
+    return pd.DataFrame(final_results).sort_values("carrier_name", ascending=True).reset_index(drop=True)
