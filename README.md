@@ -78,19 +78,62 @@ This project uses:
 
 ## Version History
 
+### 2024.0.9.0
+- Enhanced carrier list UI with Material Design improvements
+- Added Material Design styling to carrier list interface
+- Improved visual feedback and status indicators
+- Added Unicode search icon to carrier filter
+- Enhanced table styling with better spacing and borders
+- Removed old carrier list implementation
+
+### 2024.0.8.1
+- Enhanced release.py with non-interactive mode
+- Added support for automated releases
+
+### 2024.0.8.0
+- Implemented December exclusion period for violation detection
+- Updated violation detection logic for December exclusionary period
+- Added configurable JSON file for pay period dates
+- Updated 8.5.F, 8.5.G, MAX12, and MAX60 violation detection
+- Improved trigger carrier display in 8.5.G daily tabs
+
+### 2024.0.7.0
+- Improved database sync functionality with better error handling
+- Changed calendar date range selection to table view
+- Enhanced settings dialog with improved sync completion messages
+- Updated UI styling for OTDL maximization and Edit Carrier dialogs
+- Fixed date range selection bugs
+- Removed merge moves functionality in favor of Edit Moves
+- Added automatic status display refresh after sync operations
+
 ### 2024.0.6.0
-- Added carrier list migration system for database changes
-- Improved settings dialog with better UI and database path handling
+- Added carrier list migration dialog for database changes
+- Improved settings dialog with database path handling
 - Added sanitized test database for development and testing
 - Enhanced project documentation and README
 - Fixed UI styling and dialog sizing issues
 - Improved code formatting and organization
 
 ### 2024.0.5.0
-- Added test database sanitization functionality
-- Enhanced project tooling and documentation
-- Improved error handling and user feedback
-- Added comprehensive testing support
+- Fixed OTDL excusal order precedence
+- Improved code quality with extensive pylint fixes
+- Enhanced method naming conventions across codebase
+- Fixed code style issues in multiple modules
+- Improved error handling and parameter validation
+
+### 2024.0.4.4, 2024.0.4.3
+- Fixed OTDL excusal order precedence in violation detection
+- Improved auto-excusal status handling
+
+### 2024.0.4.2
+- Modified 8.5.D violation detection to handle NS days
+- Updated move requirements for regular vs NS days
+
+### 2024.0.4.1
+- Improved hour display in violation tabs
+- Fixed highlighting logic in MAX60 tab
+- Updated MAX12 Summary tab to show total hours
+- Enhanced violation table sorting
 
 ### 2024.0.4.0
 - Added 8.5.G violation detection and OTDL Maximization integration
