@@ -1,29 +1,27 @@
 """Documentation content for Article 8 violations formulas."""
 
 DOCUMENTATION_85D = """
-<h2 style='color: #BB86FC; font-size: 24px; margin: 20px 0;'>
-    Article 8.5.D - Overtime Off Assignment
-</h2>
+<h2 style='color: #BB86FC;'>Article 8.5.D - Overtime Off Assignment</h2>
 
-<h3 style='color: #03DAC6; font-size: 20px; margin: 16px 0;'>Contract Language:</h3>
-<p style='background-color: #2D2D2D; padding: 15px; border-radius: 4px; font-size: 16px; line-height: 1.6;'>
+<h3 style='color: #03DAC6;'>Contract Language:</h3>
+<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
     "<strong style='color: #BB86FC;'>If the voluntary 'Overtime Desired' list does not provide sufficient qualified people</strong>, "
     "qualified full-time regular employees not on the list may be required to work overtime "
     "on a rotating basis with the first opportunity assigned to the junior employee."
 </p>
-<p style='font-style: italic; color: #03DAC6; margin-top: 10px; font-size: 14px;'>
+<p style='font-style: italic; color: #03DAC6; margin-top: 10px;'>
     Note: This language establishes a crucial requirement - management must first attempt to use all available OTDL carriers 
     to their maximum daily (12 hours) and weekly (60 hours) limits before requiring WAL or NL carriers to work overtime off 
     their assignment. This is why checking if the OTDL was maximized is a key condition for violations.
 </p>
-<p style='font-style: italic; color: #03DAC6; margin-top: 10px; font-size: 14px;'>
+<p style='font-style: italic; color: #03DAC6; margin-top: 10px;'>
     Display Indicator: When a violation occurs on a carrier's non-scheduled day, you will see "(NS day)" next to the remedy amount. 
     This indicates that the carrier is entitled to the full day's hours as remedy, rather than just the overtime portion.
 </p>
 
-<h3 style='color: #03DAC6; font-size: 20px; margin: 16px 0;'>When Does a Violation Occur?</h3>
-<p style='font-size: 16px; line-height: 1.6;'>A violation occurs when ALL of these conditions are met:</p>
-<ul style='font-size: 16px; line-height: 1.8; margin-left: 20px;'>
+<h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
+<p>A violation occurs when ALL of these conditions are met:</p>
+<ul>
     <li>The carrier is Work Assignment List (WAL) or No List</li>
     <li>The carrier worked overtime off their assignment (either their regular route or T6 string)</li>
     <li>The Overtime Desired List (OTDL) was not maximized that day</li>
@@ -109,8 +107,7 @@ DOCUMENTATION_85F = """
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-"Excluding December, no full-time regular employee will be required to work... over ten (10) hours on a regularly 
-scheduled day..."
+"<strong style='color: #BB86FC;'>Excluding December</strong>, no full-time regular employee will be required to work... <strong style='color: #BB86FC;'>over ten (10) hours on a regularly scheduled day</strong>..."
 </p>
 
 <h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
@@ -171,47 +168,73 @@ DOCUMENTATION_85F_NS = """
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-"Excluding December, no full-time regular employee will be required to work... "
-"over eight (8) hours on a non-scheduled day..."
+"<strong style='color: #BB86FC;'>Excluding December</strong>, no full-time regular employee will be required to work... <strong style='color: #BB86FC;'>over eight (8) hours on a non-scheduled day</strong>..."
 </p>
 
 <h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
 <p>A violation occurs when ALL of these conditions are met:</p>
 <ul>
     <li>The carrier is Work Assignment List (WAL) or No List</li>
-    <li>The carrier worked more than 8 hours on their non-scheduled day</li>
+    <li>The day is coded as "NS Day" in the carrier's schedule</li>
+    <li>The carrier worked more than 8 hours on this non-scheduled day</li>
     <li>It is not during the month of December</li>
 </ul>
 
 <h3 style='color: #03DAC6;'>How is the Remedy Calculated?</h3>
-<p>To calculate the remedy amount:</p>
 <ol>
-    <li>First, identify if it's a non-scheduled day:
-        <br>• Check if the day is coded as "NS Day"
-    </li>
-    <li>Then, calculate hours worked beyond 8:
+    <li>First, verify the day is coded as "NS Day"</li>
+    <li>Calculate hours worked beyond 8:
         <br>• Take the total hours worked that day
         <br>• Subtract 8 hours
+        <br>• Round to 2 decimal places
         <br>• This gives you the remedy hours
     </li>
 </ol>
 
-<p><strong>Note:</strong> Unlike regular overtime violations, ALL hours worked beyond 8 on a \
-non-scheduled day count toward the remedy, regardless of whether they were worked on or \
-off assignment.</p>
+<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+<strong>Important:</strong> Unlike regular overtime violations, ALL hours worked beyond 8 on a non-scheduled day count toward the remedy, regardless of whether they were worked on or off assignment.
+</p>
 
 <h3 style='color: #03DAC6;'>Example:</h3>
-<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-    A WAL carrier on their non-scheduled day:
-    <br><br>
-    • Total hours worked: 10 hours
-    <br><br>
-    Remedy Calculation:
-    <br>
-    • Hours over 8 = 10 - 8 = 2 hours
-    <br>
-    • Remedy = 2 hours
-</p>
+<table style='width: 100%; border: none; border-collapse: separate; border-spacing: 20px 0;'>
+    <tr>
+        <td style='width: 50%; vertical-align: top;'>
+            <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+                Example 1 - Violation:
+                <br><br>
+                • WAL carrier on NS day
+                <br>
+                • Total hours worked: 10.00
+                <br><br>
+                Remedy Calculation:
+                <br>
+                • Hours over 8 = 10.00 - 8.00
+                <br>
+                • Remedy = 2.00 hours
+            </p>
+        </td>
+        <td style='width: 50%; vertical-align: top;'>
+            <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+                Example 2 - No Violation:
+                <br><br>
+                • WAL carrier on NS day
+                <br>
+                • Total hours worked: 8.00
+                <br><br>
+                Result:
+                <br>
+                • No violation - At or under 8 hours
+            </p>
+        </td>
+    </tr>
+</table>
+
+<h3 style='color: #03DAC6;'>Violation Types:</h3>
+<ul>
+    <li><strong>8.5.F NS Overtime On a Non-Scheduled Day</strong> - More than 8 hours worked on NS day</li>
+    <li><strong>No Violation (December Exclusion)</strong> - During December exclusion period</li>
+    <li><strong>No Violation</strong> - All other cases</li>
+</ul>
 
 <h3 style='color: #03DAC6;'>No Violation Cases:</h3>
 <ul>
@@ -220,6 +243,14 @@ off assignment.</p>
     <li>When it's a regularly scheduled day</li>
     <li>During the month of December (penalty overtime exclusion period)</li>
 </ul>
+
+<h3 style='color: #03DAC6;'>Special Notes:</h3>
+<ul>
+    <li>The day must be explicitly coded as "NS Day" to trigger violation checks</li>
+    <li>All hours beyond 8 count toward the remedy, regardless of assignment</li>
+    <li>Remedies are always rounded to 2 decimal places</li>
+    <li>December exclusion applies to all carriers</li>
+</ul>
 """
 
 DOCUMENTATION_85F_5TH = """
@@ -227,8 +258,7 @@ DOCUMENTATION_85F_5TH = """
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-    "Excluding December, no full-time regular employee will be required to work overtime "
-    "on more than four (4) of the employee's five (5) scheduled days in a service week..."
+"<strong style='color: #BB86FC;'>Excluding December</strong>, no full-time regular employee will be required to work overtime on <strong style='color: #BB86FC;'>more than four (4) of the employee's five (5) scheduled days in a service week</strong>..."
 </p>
 
 <h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
@@ -237,17 +267,37 @@ DOCUMENTATION_85F_5TH = """
     <li>The carrier is Work Assignment List (WAL) or No List</li>
     <li>The carrier has already worked overtime on 4 days this service week</li>
     <li>The carrier is required to work overtime on a 5th day</li>
-    <li>The carrier did not have any days where they worked between 0.01 and 8.00 hours \
-(excluding Sundays)</li>
+    <li>The carrier did not have any days where they worked between 0.01 and 8.00 hours (excluding Sundays)</li>
     <li>It is not during the month of December</li>
 </ul>
 
+<h3 style='color: #03DAC6;'>How Daily Hours Are Calculated:</h3>
+<p>The system calculates daily hours as follows:</p>
+<ul>
+    <li>For regular work days:
+        <br>• If leave hours ≤ work hours: Use the larger of the two
+        <br>• If leave hours > work hours: Add them together
+    </li>
+    <li>For holidays:
+        <br>• If holiday leave is exactly 8.00 hours: Use only work hours
+        <br>• Otherwise, follow regular work day rules
+    </li>
+</ul>
+
+<h3 style='color: #03DAC6;'>Service Week Rules:</h3>
+<ul>
+    <li>Service week runs from Saturday to Friday</li>
+    <li>Sundays are excluded from overtime day counts</li>
+    <li>Days not worked (0.00 hours) do not count as 8-hour days</li>
+    <li>Only days with more than 8 hours count as overtime days</li>
+</ul>
+
 <h3 style='color: #03DAC6;'>How is the Remedy Calculated?</h3>
-<p>To calculate the remedy amount:</p>
 <ol>
     <li>Track overtime days in the service week:
         <br>• Count each day where total hours exceed 8
         <br>• Include both work hours and paid leave hours
+        <br>• Exclude Sundays
     </li>
     <li>Check for 8-hour days:
         <br>• Look for any day (except Sunday) where hours worked are between 0.01 and 8.00
@@ -257,268 +307,250 @@ DOCUMENTATION_85F_5TH = """
     <li>On the 5th overtime day (if no 8-hour days found):
         <br>• Take the total hours worked that day
         <br>• Subtract 8 hours
+        <br>• Round to 2 decimal places
         <br>• This amount becomes the remedy
     </li>
 </ol>
 
-<p><strong>Note:</strong> All overtime hours worked on the 5th day count toward the remedy, \
-regardless of whether they were worked on or off assignment.</p>
-
 <h3 style='color: #03DAC6;'>Example:</h3>
-<table style='width: 100%; border: none; margin-bottom: 20px;'><tr>
-    <td style='width: 60%; vertical-align: top; padding-right: 20px;'>
-        <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-            Example 1 - Violation:
-            <br>
-            A WAL carrier's service week with no 8-hour days:
-            <br>
-            • Saturday: 0.00 (not worked - does not prevent violation)
-            <br>
-            • Monday: 9.5 hours (1st overtime day)
-            <br>
-            • Tuesday: 10.5 hours (2nd overtime day)
-            <br>
-            • Wednesday: 10 hours (3rd overtime day)
-            <br>
-            • Thursday: 9.25 hours (4th overtime day)
-            <br>
-            • Friday: 9.75 hours (5th overtime day - VIOLATION)
-            <br><br>
-            Remedy Calculation:
-            <br>
-            • Hours over 8 on Friday = 9.75 - 8 = 1.75 hours
-            <br>
-            • Remedy = 1.75 hours
-        </p>
-    </td>
-    
-    <td style='width: 40%; vertical-align: top;'>
-        <table style='width: 100%; border-collapse: collapse; \
-background-color: #2D2D2D;'>
-            <tr style='background-color: #1E1E1E;'>
-                <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Date</th>
-                <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Hours</th>
-            </tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Sat</td>
-                <td style='padding: 8px; border: 1px solid #444;'>0.00</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Mon</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.50</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Tue</td>
-                <td style='padding: 8px; border: 1px solid #444;'>10.50</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Wed</td>
-                <td style='padding: 8px; border: 1px solid #444;'>10.00</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Thu</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.25</td></tr>
-            <tr style='background-color: #BB86FC; color: #000000;'>
-                <td style='padding: 8px; border: 1px solid #444;'>Fri</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.75</td></tr>
-        </table>
-    </td>
-</tr></table>
+<table style='width: 100%; border: none; border-collapse: separate; border-spacing: 20px 0;'>
+    <tr>
+        <td style='width: 60%; vertical-align: top;'>
+            <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+                Example 1 - Violation:
+                <br>
+                A WAL carrier's service week with no 8-hour days:
+                <br>
+                • Saturday: 0.00 (not worked - does not prevent violation)
+                <br>
+                • Monday: 9.50 hours (1st overtime day)
+                <br>
+                • Tuesday: 10.50 hours (2nd overtime day)
+                <br>
+                • Wednesday: 10.00 hours (3rd overtime day)
+                <br>
+                • Thursday: 9.25 hours (4th overtime day)
+                <br>
+                • Friday: 9.75 hours (5th overtime day - VIOLATION)
+                <br><br>
+                Remedy Calculation:
+                <br>
+                • Hours over 8 on Friday = 9.75 - 8 = 1.75 hours
+                <br>
+                • Remedy = 1.75 hours
+            </p>
+        </td>
+        <td style='width: 40%; vertical-align: top;'>
+            <table style='width: 100%; border-collapse: collapse; background-color: #2D2D2D;'>
+                <tr style='background-color: #1E1E1E;'>
+                    <th style='padding: 8px; border: 1px solid #444; color: #BB86FC;'>Date</th>
+                    <th style='padding: 8px; border: 1px solid #444; color: #BB86FC;'>Hours</th>
+                </tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Sat</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>0.00</td></tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Mon</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>9.50</td></tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Tue</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>10.50</td></tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Wed</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>10.00</td></tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Thu</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>9.25</td></tr>
+                <tr style='background-color: #BB86FC; color: #000000;'>
+                    <td style='padding: 8px; border: 1px solid #444;'>Fri</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>9.75</td></tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
-<table style='width: 100%; border: none;'><tr>
-    <td style='width: 60%; vertical-align: top; padding-right: 20px;'>
-        <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-            Example 2 - No Violation:
-            <br>
-            A WAL carrier's service week with an 8-hour day:
-            <br>
-            • Saturday: 9 hours (1st overtime day)
-            <br>
-            • Monday: 9.5 hours (2nd overtime day)
-            <br>
-            • Tuesday: 7.5 hours (prevents violation)
-            <br>
-            • Wednesday: 10 hours (3rd overtime day)
-            <br>
-            • Thursday: 9.25 hours (4th overtime day)
-            <br>
-            • Friday: 9 hours (5th overtime day - NO VIOLATION)
-        </p>
-    </td>
-    
-    <td style='width: 40%; vertical-align: top;'>
-        <table style='width: 100%; border-collapse: collapse; \
-background-color: #2D2D2D;'>
-            <tr style='background-color: #1E1E1E;'>
-                <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Date</th>
-                <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Hours</th>
-            </tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Sat</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.00</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Mon</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.50</td></tr>
-            <tr style='background-color: #03DAC622;'>
-                <td style='padding: 8px; border: 1px solid #444;'>Tue</td>
-                <td style='padding: 8px; border: 1px solid #444;'>7.50</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Wed</td>
-                <td style='padding: 8px; border: 1px solid #444;'>10.00</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Thu</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.25</td></tr>
-            <tr style='background-color: #383838;'>
-                <td style='padding: 8px; border: 1px solid #444;'>Fri</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.00</td></tr>
-        </table>
-    </td>
-</tr></table>
+<table style='width: 100%; border: none; border-collapse: separate; border-spacing: 20px 0;'>
+    <tr>
+        <td style='width: 60%; vertical-align: top;'>
+            <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+                Example 2 - No Violation:
+                <br>
+                A WAL carrier's service week with an 8-hour day:
+                <br>
+                • Saturday: 9.00 hours (1st overtime day)
+                <br>
+                • Monday: 9.50 hours (2nd overtime day)
+                <br>
+                • Tuesday: 7.50 hours (prevents violation)
+                <br>
+                • Wednesday: 10.00 hours (3rd overtime day)
+                <br>
+                • Thursday: 9.25 hours (4th overtime day)
+                <br>
+                • Friday: 9.00 hours (5th overtime day - NO VIOLATION)
+            </p>
+        </td>
+        <td style='width: 40%; vertical-align: top;'>
+            <table style='width: 100%; border-collapse: collapse; background-color: #2D2D2D;'>
+                <tr style='background-color: #1E1E1E;'>
+                    <th style='padding: 8px; border: 1px solid #444; color: #BB86FC;'>Date</th>
+                    <th style='padding: 8px; border: 1px solid #444; color: #BB86FC;'>Hours</th>
+                </tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Sat</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>9.00</td></tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Mon</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>9.50</td></tr>
+                <tr style='background-color: #03DAC622;'>
+                    <td style='padding: 8px; border: 1px solid #444;'>Tue</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>7.50</td></tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Wed</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>10.00</td></tr>
+                <tr><td style='padding: 8px; border: 1px solid #444;'>Thu</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>9.25</td></tr>
+                <tr style='background-color: #383838;'>
+                    <td style='padding: 8px; border: 1px solid #444;'>Fri</td>
+                    <td style='padding: 8px; border: 1px solid #444;'>9.00</td></tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
-<table style='width: 100%; border: none;'><tr>
-    <td style='width: 60%; vertical-align: top; padding-right: 20px;'>
-        <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-            Example 3 - Small Remedy:
-            <br><br>
-            • WAL carrier works 10 hours (2 hours overtime)
-            <br>
-            • OTDL carrier worked 11.50 hours
-            <br>
-            • OTDL carrier's limit is 12 hours
-            <br>
-            • OTDL carrier was not excused
-            <br><br>
-            Remedy Calculation:
-            <br>
-            • Available hours = 12 - 11.50 = 0.50 hours
-            <br>
-            • Remedy = 0.50 hours (Any available time generates a remedy)
-        </p>
-    </td>
-    
-    <td style='width: 40%; vertical-align: top;'>
-        <table style='width: 100%; border-collapse: collapse; \
-background-color: #2D2D2D;'>
-            <tr style='background-color: #1E1E1E;'>
-                <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Date</th>
-                <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Hours</th>
-            </tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Sat</td>
-                <td style='padding: 8px; border: 1px solid #444;'>0.00</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Mon</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.50</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Tue</td>
-                <td style='padding: 8px; border: 1px solid #444;'>10.50</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Wed</td>
-                <td style='padding: 8px; border: 1px solid #444;'>10.00</td></tr>
-            <tr><td style='padding: 8px; border: 1px solid #444;'>Thu</td>
-                <td style='padding: 8px; border: 1px solid #444;'>9.25</td></tr>
-            <tr style='background-color: #BB86FC; color: #000000;'>
-                <td style='padding: 8px; border: 1px solid #444;'>Fri</td>
-                <td style='padding: 8px; border: 1px solid #444;'>11.50</td></tr>
-        </table>
-    </td>
-</tr></table>
+<h3 style='color: #03DAC6;'>Violation Types:</h3>
+<ul>
+    <li><strong>8.5.F 5th More Than 4 Days of Overtime in a Week</strong> - Fifth overtime day with no 8-hour days</li>
+    <li><strong>No Violation (December Exclusion)</strong> - During December exclusion period</li>
+    <li><strong>No Violation</strong> - All other cases</li>
+</ul>
 
 <h3 style='color: #03DAC6;'>No Violation Cases:</h3>
 <ul>
     <li>When the carrier is on the OTDL</li>
     <li>When overtime is worked on 4 or fewer days in the service week</li>
-    <li>When the carrier has worked between 0.01 and 8.00 hours on any day \
-(excluding Sundays)</li>
+    <li>When the carrier has worked between 0.01 and 8.00 hours on any day (excluding Sundays)</li>
     <li>During the month of December (penalty overtime exclusion period)</li>
     <li>When the 5th day's total hours are 8 or less</li>
 </ul>
 
-<p><strong>Note:</strong> Days not worked (0.00 hours) do not count as 8-hour days and \
-will not prevent a violation.</p>
+<h3 style='color: #03DAC6;'>Special Notes:</h3>
+<ul>
+    <li>Service weeks are always Saturday to Friday</li>
+    <li>Days not worked (0.00 hours) do not count as 8-hour days</li>
+    <li>Sundays are excluded from all calculations</li>
+    <li>Holiday hours are handled specially (see Daily Hours section)</li>
+    <li>All remedies are rounded to 2 decimal places</li>
+</ul>
 """
 
 DOCUMENTATION_MAX12 = """
-<h2 style='color: #BB86FC;'>Maximum Daily Work Hour Limitations - 12 Hours</h2>
+<h2 style='color: #BB86FC;'>Maximum 12 Hours in a Day</h2>
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-    "Full-time employees are prohibited from working more than 12 hours in a single \
-work day..."
+"Employees shall <strong style='color: #BB86FC;'>not be required to work more than 12 hours in one service day</strong>..."
 </p>
 
 <h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
-<p>A violation occurs when:</p>
+<p>A violation occurs when a carrier exceeds their maximum daily limit:</p>
 <ul>
-    <li>A full-time carrier works more than 12 hours in a day</li>
-    <li>For WAL carriers, the limit is 11.50 hours</li>
+    <li>WAL carriers:
+        <br>• 11.50 hours if moved between routes
+        <br>• 12.00 hours if working only their assignment
+    </li>
+    <li>NL/PTF carriers: 11.50 hours maximum</li>
+    <li>OTDL carriers: 12.00 hours maximum</li>
+</ul>
+
+<h3 style='color: #03DAC6;'>December Rules:</h3>
+<ul>
+    <li>OTDL carriers are exempt from MAX12 violations</li>
+    <li>WAL carriers working only their assignment are exempt</li>
+    <li>WAL carriers working off assignment CAN trigger MAX12 (treated as NL)</li>
+    <li>NL/PTF carriers can still trigger MAX12 violations</li>
 </ul>
 
 <h3 style='color: #03DAC6;'>How is the Remedy Calculated?</h3>
-<p>To calculate the remedy amount:</p>
-<ol>
-    <li>Take the total hours worked that day</li>
-    <li>Subtract the applicable limit (12.00 or 11.50)</li>
-    <li>This amount becomes the remedy</li>
-</ol>
+<p>The remedy is all hours worked beyond the applicable limit:</p>
+<ul>
+    <li>Hours beyond 11.50 for NL, PTF, and WAL carriers working multiple routes</li>
+    <li>Hours beyond 12.00 for OTDL and WAL carriers on their assignment only</li>
+</ul>
+
+<h3 style='color: #03DAC6;'>Example:</h3>
+<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+    A WAL carrier working multiple routes:
+    <br>• Total hours worked: 12.00 hours
+    <br>• Maximum allowed: 11.50 hours
+    <br>• Remedy = 0.50 hours
+</p>
+
+<h3 style='color: #03DAC6;'>No Violation Cases:</h3>
+<ul>
+    <li>OTDL carriers in December</li>
+    <li>WAL carriers working only their assignment in December</li>
+    <li>When total hours are under the applicable limit</li>
+</ul>
 """
 
 DOCUMENTATION_MAX60 = """
-<h2 style='color: #BB86FC;'>Maximum Weekly Work Hour Limit - 60 Hours</h2>
+<h2 style='color: #BB86FC;'>Maximum 60 Hours in a Service Week</h2>
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-    "Full-time employees are prohibited from working more than... 60 hours within a \
-service week."
+"<strong style='color: #BB86FC;'>Full-time employees shall not be permitted to work more than 60 hours within a service week</strong>."
 </p>
 
 <h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
-<p>A violation occurs when:</p>
+<p>A violation occurs when ALL of these conditions are met:</p>
 <ul>
-    <li>A carrier's total work hours in a service week exceed 60 hours</li>
+    <li>A carrier's total weekly hours exceed 60 hours</li>
     <li>The carrier is WAL, NL, or OTDL (PTFs are exempt)</li>
-    <li>It is not during December</li>
+    <li>It is not during December (in Billings, MT)</li>
 </ul>
+
+<h3 style='color: #03DAC6;'>How Weekly Hours Are Calculated:</h3>
+<p>The following are included in the 60-hour total:</p>
+<ul>
+    <li>Regular work hours</li>
+    <li>Paid leave hours (sick leave, annual leave, etc.)</li>
+    <li>Holiday pay hours</li>
+</ul>
+
+<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
+    <strong>Important:</strong> When a carrier has both work hours and leave hours on the same day:
+    <br>• If leave hours ≤ work hours: The larger of the two is used
+    <br>• If leave hours > work hours: Both are added together
+</p>
 
 <h3 style='color: #03DAC6;'>How is the Remedy Calculated?</h3>
 <p>To calculate the remedy amount:</p>
 <ol>
-    <li>Calculate total weekly hours:
-        <br>• Add all work hours for the service week
-        <br>• Include paid leave hours
-        <br>• Include holiday pay hours
-    </li>
+    <li>Add up all hours for the service week (work + leave)</li>
     <li>If total exceeds 60 hours:
         <br>• Subtract 60 from the total weekly hours
+        <br>• Round to 2 decimal places
         <br>• This amount becomes the remedy
     </li>
 </ol>
 
 <h3 style='color: #03DAC6;'>Example:</h3>
-<table style='width: 100%; border: none; border-collapse: separate; \
-border-spacing: 20px 0;'>
+<table style='width: 100%; border: none; border-collapse: separate; border-spacing: 20px 0;'>
     <tr>
         <td style='width: 60%; vertical-align: top;'>
             <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
                 A WAL carrier's service week:
-                <br>
-                • Saturday: 10 hours
-                <br>
-                • Monday: 12 hours
-                <br>
-                • Tuesday: 11 hours
-                <br>
-                • Wednesday: 11 hours
-                <br>
-                • Thursday: 10 hours
-                <br>
-                • Friday: 8 hours
+                <br>• Saturday: 10 hours
+                <br>• Monday: 12 hours
+                <br>• Tuesday: 11 hours
+                <br>• Wednesday: 11 hours
+                <br>• Thursday: 10 hours
+                <br>• Friday: 8 hours
                 <br><br>
                 Weekly Total: 62 hours
                 <br>
-                Remedy = 62 - 60 = 2 hours
+                Remedy = 62 - 60 = 2.00 hours
             </p>
         </td>
-        
         <td style='width: 40%; vertical-align: top;'>
-            <table style='width: 100%; border-collapse: collapse; \
-background-color: #2D2D2D;'>
+            <table style='width: 100%; border-collapse: collapse; background-color: #2D2D2D;'>
                 <tr style='background-color: #1E1E1E;'>
-                    <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Date</th>
-                    <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Hours</th>
-                    <th style='padding: 8px; border: 1px solid #444; \
-color: #BB86FC;'>Total</th>
+                    <th style='padding: 8px; border: 1px solid #444; color: #BB86FC;'>Date</th>
+                    <th style='padding: 8px; border: 1px solid #444; color: #BB86FC;'>Hours</th>
+                    <th style='padding: 8px; border: 1px solid #444; color: #BB86FC;'>Total</th>
                 </tr>
                 <tr><td style='padding: 8px; border: 1px solid #444;'>Sat</td>
                     <td style='padding: 8px; border: 1px solid #444;'>10.00</td>
@@ -540,7 +572,6 @@ color: #BB86FC;'>Total</th>
                     <td style='padding: 8px; border: 1px solid #444;'>8.00</td>
                     <td style='padding: 8px; border: 1px solid #444;'>62.00</td></tr>
             </table>
-            <p style='color: #BB86FC; margin-top: 10px;'>Remedy = 2.00 hours</p>
         </td>
     </tr>
 </table>
@@ -552,12 +583,12 @@ color: #BB86FC;'>Total</th>
     <li>During the month of December (in Billings)</li>
 </ul>
 
-<p><strong>Important Notes:</strong></p>
+<h3 style='color: #03DAC6;'>Important Notes:</h3>
 <ul>
-    <li>Once a carrier reaches 20 hours of overtime in a week, they are no longer \
-available for additional overtime (except in December)</li>
+    <li>Once a carrier reaches 20 hours of overtime in a week, they should not be assigned additional overtime</li>
     <li>A carrier's tour of duty should be terminated when they reach 60 hours</li>
-    <li>All types of paid leave count toward the 60-hour limit</li>
+    <li>The violation is only reported on the last day of the service week when the total exceeds 60 hours</li>
+    <li>All carriers are exempt from the 60-hour limit during December in Billings, MT</li>
 </ul>
 """
 
@@ -566,41 +597,43 @@ DOCUMENTATION_85G = """
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-    "Full-time employees not on the 'Overtime Desired' list may be required to work overtime only if all available employees on the 
-    'Overtime Desired' list have worked up to twelve (12) hours in a day or sixty (60) hours in a service week."
+"<strong style='color: #BB86FC;'>Full-time employees not on the 'Overtime Desired' list may be required to work overtime only if all available employees on the 'Overtime Desired' list have worked up to twelve (12) hours in a day or sixty (60) hours in a service week</strong>."
 </p>
 
 <h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
 <p>A violation occurs when ALL of these conditions are met:</p>
 <ul>
-    <li>A WAL or NL carrier works overtime off their assignment</li>
+    <li>A WAL or NL carrier works overtime (more than 8 hours)</li>
     <li>An OTDL carrier was available to work (not excused)</li>
-    <li>The available OTDL carrier had not reached their daily limit (12 hours, or more in December)</li>
-    <li>The available OTDL carrier had not reached their weekly limit (60 hours, or more in December)</li>
+    <li>The available OTDL carrier had not reached their daily limit (usually 12 hours)</li>
+    <li>The day was not marked as "OTDL Maximized" in the OTDL Maximization pane</li>
 </ul>
 
-<h3 style='color: #03DAC6;'>Special Notes About December:</h3>
-<p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-    During December (penalty overtime exclusion period):
-    <br>• OTDL carriers may work beyond 12 hours per day and 60 hours per week
-    <br>• Management may, but is not required to, assign OTDL carriers beyond these limits
-    <br>• The requirement to maximize OTDL carriers before using WAL/NL carriers still applies
-    <br>• Violations still occur if WAL/NL carriers work overtime when OTDL carriers are available
-</p>
+<h3 style='color: #03DAC6;'>Automatic Excusal Conditions:</h3>
+<p>OTDL carriers are automatically excused when any of these exact indicators appear:</p>
+<ul>
+    <li>(sick) - On sick leave</li>
+    <li>(NS protect) - Non-scheduled day protection</li>
+    <li>(holiday) - Holiday leave</li>
+    <li>(guaranteed) - Guaranteed time</li>
+    <li>(annual) - Annual leave</li>
+    <li>Sundays - All carriers are excused on Sundays</li>
+</ul>
+
+<h3 style='color: #03DAC6;'>Manual Excusal Options:</h3>
+<ul>
+    <li>Mark entire days as "OTDL Maximized" in the OTDL Maximization pane</li>
+    <li>Excuse individual carriers for specific dates</li>
+    <li>Set custom hour limits for individual carriers in The Carrier List</li>
+</ul>
 
 <h3 style='color: #03DAC6;'>How is the Remedy Calculated?</h3>
-<p>To calculate the remedy amount:</p>
+<p>For each OTDL carrier that was not maximized or excused:</p>
 <ol>
-    <li>For each OTDL carrier:
-        <br>• Determine their hour limit (usually 12.00)
-        <br>• Calculate how many more hours they could have worked
-        <br>• Remedy = hour_limit - total_hours
-    </li>
-    <li>Special Cases:
-        <br>• If carrier is excused (sick, annual, holiday, etc.), no violation occurs
-        <br>• If carrier has reached their hour limit, no violation occurs
-        <br>• If OTDL is marked as maximized for the day, no violation occurs
-    </li>
+    <li>Take their hour limit (usually 12.00 hours)</li>
+    <li>Subtract their total hours worked that day</li>
+    <li>Round to 2 decimal places</li>
+    <li>This amount becomes their remedy</li>
 </ol>
 
 <h3 style='color: #03DAC6;'>Example:</h3>
@@ -610,17 +643,17 @@ DOCUMENTATION_85G = """
             <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
                 Example 1 - Violation:
                 <br><br>
-                • WAL carrier works 10 hours (2 hours overtime)
+                • WAL carrier works 10.00 hours (2 hours overtime)
                 <br>
-                • OTDL carrier only worked 8 hours
+                • OTDL carrier only worked 8.00 hours
                 <br>
-                • OTDL carrier's limit is 12 hours
+                • OTDL carrier's limit is 12.00 hours
                 <br>
                 • OTDL carrier was not excused
                 <br><br>
                 Remedy Calculation:
                 <br>
-                • Available hours = 12 - 8 = 4 hours
+                • Available hours = 12.00 - 8.00 = 4.00 hours
                 <br>
                 • Remedy = 4.00 hours
             </p>
@@ -629,11 +662,11 @@ DOCUMENTATION_85G = """
             <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
                 Example 2 - No Violation:
                 <br><br>
-                • WAL carrier works 10 hours (2 hours overtime)
+                • WAL carrier works 10.00 hours (2 hours overtime)
                 <br>
                 • OTDL carrier worked 12.00 hours
                 <br>
-                • OTDL carrier's limit is 12 hours
+                • OTDL carrier's limit is 12.00 hours
                 <br>
                 • OTDL carrier is maximized
                 <br><br>
@@ -648,17 +681,17 @@ DOCUMENTATION_85G = """
             <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
                 Example 3 - Small Remedy:
                 <br><br>
-                • WAL carrier works 10 hours (2 hours overtime)
+                • WAL carrier works 10.00 hours (2 hours overtime)
                 <br>
                 • OTDL carrier worked 11.50 hours
                 <br>
-                • OTDL carrier's limit is 12 hours
+                • OTDL carrier's limit is 12.00 hours
                 <br>
                 • OTDL carrier was not excused
                 <br><br>
                 Remedy Calculation:
                 <br>
-                • Available hours = 12 - 11.50 = 0.50 hours
+                • Available hours = 12.00 - 11.50 = 0.50 hours
                 <br>
                 • Remedy = 0.50 hours (Any available time generates a remedy)
             </p>
@@ -666,21 +699,34 @@ DOCUMENTATION_85G = """
     </tr>
 </table>
 
+<h3 style='color: #03DAC6;'>Violation Types:</h3>
+<ul>
+    <li><strong>8.5.G OTDL Not Maximized</strong> - OTDL carrier had available hours</li>
+    <li><strong>8.5.G Trigger (No Remedy)</strong> - WAL/NL carrier that triggered the violation</li>
+    <li><strong>No Violation (Auto Excused)</strong> - Carrier has an auto-excusal indicator</li>
+    <li><strong>No Violation (Manually Excused)</strong> - Carrier was manually excused</li>
+    <li><strong>No Violation (Maximized)</strong> - Carrier reached their hour limit</li>
+    <li><strong>No Violation (Non OTDL)</strong> - Not an OTDL carrier</li>
+</ul>
+
 <h3 style='color: #03DAC6;'>No Violation Cases:</h3>
 <ul>
     <li>When OTDL carriers are marked as maximized for the day</li>
     <li>When OTDL carriers are excused (sick, annual, holiday, etc.)</li>
-    <li>When OTDL carriers have reached their hour limits (12/60, or higher in December)</li>
-    <li>When no WAL/NL carriers work overtime off assignment</li>
+    <li>When OTDL carriers have reached their hour limits</li>
+    <li>When no WAL/NL carriers work overtime</li>
     <li>On Sundays</li>
 </ul>
 
 <h3 style='color: #03DAC6;'>Special Notes:</h3>
 <ul>
-    <li>Excusal reasons are tracked in the OTDL Maximization pane</li>
+    <li>The trigger carrier (WAL/NL working overtime) with the most hours is recorded</li>
     <li>Each OTDL carrier's hour limit can be customized in The Carrier List</li>
     <li>The OTDL Maximization pane allows marking entire days as maximized</li>
     <li>Individual carriers can be excused for specific dates</li>
+    <li>All remedies are rounded to 2 decimal places</li>
+    <li>Excusal indicators must match exactly (e.g., "(sick)" not "sick")</li>
+    <li>Hour limits default to 12.00 if not specified</li>
 </ul>
 """
 
