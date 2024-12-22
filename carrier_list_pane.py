@@ -520,14 +520,14 @@ class CarrierListPane(QWidget):
                 background-color: #262626;
                 color: #E1E1E1;
                 border: 1px solid #333333;
-                padding: 8px 12px;
                 border-radius: 4px;
+                padding: 8px 12px 8px 36px;  /* Added left padding for icon */
                 font-size: 13px;
                 selection-background-color: #BB86FC;
                 selection-color: #000000;
             }
             QLineEdit:focus {
-                border: 2px solid #BB86FC;
+                border: 1px solid #BB86FC;
                 background-color: #2D2D2D;
             }
             QLineEdit:hover {
@@ -535,7 +535,27 @@ class CarrierListPane(QWidget):
             }
         """
         )
+
+        # Create search icon label using Unicode character
+        search_icon = QLabel("⚲")  # Unicode search symbol
+        search_icon.setStyleSheet(
+            """
+            QLabel {
+                color: #666666;
+                font-size: 16px;
+                padding: 0px;
+                margin: 0px;
+            }
+            """
+        )
+        
+        # Add widgets to layout
         search_layout.addWidget(self.filter_input)
+        
+        # Set the icon's position absolutely within the search container
+        search_icon.setParent(self.filter_input)
+        search_icon.move(12, 8)  # Position the icon inside the input field
+        
         content_layout.addWidget(search_container)
 
         # Add table view with Material Design styling
