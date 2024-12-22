@@ -241,8 +241,8 @@ class MainApp(QMainWindow):
         otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
     """
 
-    VERSION = "2024.0.8.1"  # Updated by release.py
-    BUILD_TIME = "2024-12-21 18:34"  # Updated by release.py
+    VERSION = "2024.0.9.0"  # Updated by release.py
+    BUILD_TIME = "2024-12-21 22:56"  # Updated by release.py
     SETTINGS_FILE = "app_settings.json"  # File to store application settings
 
     def __init__(self):
@@ -1544,7 +1544,7 @@ class MainApp(QMainWindow):
                 - code
                 - leave_type
                 - leave_time
-                - display_indicators
+                - display_indicator
         """
         # First validate database path
         if not self.mandates_db_path or not os.path.exists(self.mandates_db_path):
@@ -1564,7 +1564,7 @@ class MainApp(QMainWindow):
                     "code",
                     "leave_type",
                     "leave_time",
-                    "display_indicators",
+                    "display_indicator",
                 ]
             )
 
@@ -1703,8 +1703,8 @@ class MainApp(QMainWindow):
                     print(f"Error creating date combinations: {e}")
                     raise
 
-                # Add the display_indicators column
-                db_data["display_indicators"] = db_data.apply(set_display, axis=1)
+                # Add the display_indicator column
+                db_data["display_indicator"] = db_data.apply(set_display, axis=1)
 
                 # Drop the station column to maintain the original structure
                 db_data.drop(columns=["station"], inplace=True)
@@ -1733,7 +1733,7 @@ class MainApp(QMainWindow):
                 "code",
                 "leave_type",
                 "leave_time",
-                "display_indicators",
+                "display_indicator",
             ]
         )
 

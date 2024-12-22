@@ -624,7 +624,7 @@ class OTDLMaximizationPane(QWidget):
                         "daily_hours"
                     ].sum()  # Use daily_hours for calculations
                     weekly_hours += daily_hours  # Add to weekly total
-                    indicator = day_data["display_indicators"].iloc[
+                    indicator = day_data["display_indicator"].iloc[
                         0
                     ]  # Assign from data if available
                 else:
@@ -798,8 +798,8 @@ class OTDLMaximizationPane(QWidget):
 
                 # Get indicator and hours
                 indicator = row.get(
-                    "display_indicators", ""
-                )  # Changed from display_indicator
+                    "display_indicator", ""
+                )  # Use singular form
                 total_hours = pd.to_numeric(row.get("total", 0), errors="coerce")
                 hour_limit = pd.to_numeric(
                     row.get("hour_limit", 12.00), errors="coerce"

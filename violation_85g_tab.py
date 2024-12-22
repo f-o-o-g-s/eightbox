@@ -44,7 +44,7 @@ class Violation85gTab(BaseViolationTab):
             "date",
             "hour_limit",
             "total_hours",
-            "display_indicators",  # Changed from display_indicator
+            "display_indicator",
             "remedy_total",
             "violation_type",  # Shows "8.5.G OTDL Not Maximized" or "8.5.G Trigger (No Remedy)"
         ]

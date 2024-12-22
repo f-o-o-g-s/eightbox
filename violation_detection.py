@@ -1289,81 +1289,122 @@ def detect_85g_violations(data, date_maximized_status=None):
     
     result_df["is_manually_excused"] = result_df.apply(check_manual_excusal, axis=1)
     
-    # Identify WAL/NL carriers working overtime
-    overtime_mask = (
-        result_df["list_status"].isin(["wal", "nl"]) & 
-        (result_df["total_hours"] > 8)
-    )
+    # Process each date group separately to match original implementation
+    final_results = []
+    for date, day_data in result_df.groupby("date_dt"):
+        date_str = date.strftime("%Y-%m-%d")
+        is_maximized = day_data["is_maximized"].iloc[0]
+        
+        if is_maximized:
+            # Handle maximized case
+            for _, carrier_data in day_data.iterrows():
+                violation_type = (
+                    "No Violation (Auto Excused)"
+                    if carrier_data["is_auto_excused"] or carrier_data["is_sunday"]
+                    else "No Violation (Manually Excused)"
+                    if carrier_data["is_manually_excused"]
+                    else "No Violation (Maximized)"
+                    if carrier_data["total_hours"] >= carrier_data["hour_limit"]
+                    else "No Violation"
+                )
+                
+                final_results.append({
+                    "carrier_name": carrier_data["carrier_name"],
+                    "date": date_str,
+                    "violation_type": violation_type,
+                    "remedy_total": 0.0,
+                    "total_hours": carrier_data["total_hours"],
+                    "hour_limit": carrier_data["hour_limit"],
+                    "list_status": carrier_data["list_status"],
+                    "trigger_carrier": "",
+                    "trigger_hours": 0,
+                    "off_route_hours": 0,
+                    "display_indicator": carrier_data["display_indicator"]
+                })
+            continue
+        
+        # Find WAL/NL carriers working overtime
+        wal_nl_overtime = day_data[
+            (day_data["list_status"].isin(["wal", "nl"])) & 
+            (day_data["total_hours"] > 8)
+        ]
+        
+        if not wal_nl_overtime.empty:
+            # Get trigger carrier info
+            trigger_carrier = wal_nl_overtime.loc[wal_nl_overtime["total_hours"].idxmax()]
+            
+            # Process OTDL carriers
+            otdl_carriers = day_data[day_data["list_status"] == "otdl"]
+            for _, otdl in otdl_carriers.iterrows():
+                # Get display indicator
+                display_indicators = str(otdl["display_indicator"]).strip()
+                
+                # Check for automatic excusal conditions
+                is_auto_excused = any(
+                    indicator in display_indicators
+                    for indicator in auto_excusal_indicators
+                )
+                
+                violation_type = (
+                    "No Violation (Auto Excused)"
+                    if is_auto_excused or otdl["is_sunday"]
+                    else "No Violation (Maximized)"
+                    if otdl["total_hours"] >= otdl["hour_limit"]
+                    else "No Violation (Manually Excused)"
+                    if otdl["is_manually_excused"]
+                    else "8.5.G OTDL Not Maximized"
+                )
+                
+                remedy_total = (
+                    max(0, round(otdl["hour_limit"] - otdl["total_hours"], 2))
+                    if violation_type == "8.5.G OTDL Not Maximized"
+                    else 0.0
+                )
+                
+                final_results.append({
+                    "carrier_name": otdl["carrier_name"],
+                    "date": date_str,
+                    "violation_type": violation_type,
+                    "remedy_total": remedy_total,
+                    "total_hours": otdl["total_hours"],
+                    "hour_limit": otdl["hour_limit"],
+                    "list_status": "otdl",
+                    "trigger_carrier": str(trigger_carrier["carrier_name"]),
+                    "trigger_hours": float(trigger_carrier["total_hours"]),
+                    "off_route_hours": float(trigger_carrier.get("off_route_hours", 0)),
+                    "display_indicator": otdl["display_indicator"]
+                })
+        
+        # Add remaining carriers
+        processed_carriers = {r["carrier_name"] for r in final_results if r["date"] == date_str}
+        remaining_carriers = day_data[~day_data["carrier_name"].isin(processed_carriers)]
+        
+        for _, carrier_data in remaining_carriers.iterrows():
+            # For non-OTDL carriers, always use "No Violation (Non OTDL)"
+            violation_type = (
+                "No Violation (Non OTDL)"
+                if carrier_data["list_status"] != "otdl"
+                else "No Violation (Auto Excused)"
+                if carrier_data["is_auto_excused"] or carrier_data["is_sunday"]
+                else "No Violation (Manually Excused)"
+                if carrier_data["is_manually_excused"]
+                else "No Violation (Maximized)"
+                if carrier_data["total_hours"] >= carrier_data["hour_limit"]
+                else "No Violation"
+            )
+            
+            final_results.append({
+                "carrier_name": carrier_data["carrier_name"],
+                "date": date_str,
+                "violation_type": violation_type,
+                "remedy_total": 0.0,
+                "total_hours": carrier_data["total_hours"],
+                "hour_limit": carrier_data["hour_limit"],
+                "list_status": carrier_data["list_status"],
+                "trigger_carrier": "",
+                "trigger_hours": 0,
+                "off_route_hours": 0,
+                "display_indicator": carrier_data["display_indicator"]
+            })
     
-    # Group by date to find trigger carriers
-    trigger_info = (
-        result_df[overtime_mask]
-        .groupby("date_dt")
-        .agg({
-            "carrier_name": "first",
-            "total_hours": "max",
-            "off_route_hours": "first"
-        })
-        .rename(columns={
-            "carrier_name": "trigger_carrier",
-            "total_hours": "trigger_hours",
-            "off_route_hours": "trigger_off_route_hours"
-        })
-    )
-    
-    # Merge trigger information back
-    result_df = pd.merge(
-        result_df,
-        trigger_info,
-        left_on="date_dt",
-        right_index=True,
-        how="left"
-    )
-    
-    # Vectorized violation type determination
-    conditions = [
-        result_df["is_auto_excused"] | result_df["is_sunday"],
-        result_df["total_hours"] >= result_df["hour_limit"],
-        result_df["is_manually_excused"],
-        result_df["is_maximized"],
-        result_df["list_status"] != "otdl",
-        ~pd.isna(result_df["trigger_carrier"]) & (result_df["list_status"] == "otdl")
-    ]
-    
-    choices = [
-        "No Violation (Auto Excused)",
-        "No Violation (Maximized)",
-        "No Violation (Manually Excused)",
-        "No Violation (OTDL Maximized)",
-        "No Violation (Non OTDL)",
-        "8.5.G OTDL Not Maximized"
-    ]
-    
-    result_df["violation_type"] = np.select(conditions, choices, default="No Violation")
-    
-    # Vectorized remedy calculation
-    result_df["remedy_total"] = np.where(
-        result_df["violation_type"] == "8.5.G OTDL Not Maximized",
-        (result_df["hour_limit"] - result_df["total_hours"]).clip(lower=0).round(2),
-        0.0
-    )
-    
-    # Convert date to string before selecting columns
-    result_df["date"] = result_df["rings_date"].astype(str)
-    
-    # Select and rename final columns
-    return result_df[[
-        "carrier_name",
-        "date",
-        "violation_type",
-        "remedy_total",
-        "total_hours",
-        "hour_limit",
-        "list_status",
-        "trigger_carrier",
-        "trigger_hours",
-        "off_route_hours",
-        "display_indicator"
-    ]].rename(columns={
-        "display_indicator": "display_indicators"
-    })
+    return pd.DataFrame(final_results)
