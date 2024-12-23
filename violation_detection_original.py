@@ -26,6 +26,8 @@ Features:
 
 import json
 import os
+
+# violation_detection.py
 from typing import (
     Callable,
     Dict,
@@ -36,7 +38,6 @@ import numpy as np
 import pandas as pd
 
 from utils import set_display
-from violation_formulas.article_85d import detect_85d_violations
 
 # Type alias for violation detection function
 ViolationFunc = Callable[[pd.DataFrame, Optional[dict]], pd.DataFrame]
@@ -47,15 +48,30 @@ violation_registry: Dict[str, ViolationFunc] = {}
 
 
 def register_violation(violation_type: str) -> Callable[[ViolationFunc], ViolationFunc]:
-    """Register a violation detection function for a specific violation type."""
+    """Register a violation detection function for a specific violation type.
+
+    Decorator that adds the decorated function to the violation registry,
+    allowing it to be called through the detect_violations dispatcher.
+
+    Args:
+        violation_type (str): Unique identifier for the violation type
+            (e.g., "8.5.F NS", "MAX60", "MAX12")
+
+    Returns:
+        Callable: Decorator function that registers the violation detection function
+
+    Example:
+        @register_violation("8.5.F NS")
+        def detect_85f_ns_overtime(data, date_maximized_status=None):
+            # Violation detection logic
+            return violation_data
+    """
+
     def decorator(func: ViolationFunc) -> ViolationFunc:
         violation_registry[violation_type] = func
         return func
+
     return decorator
-
-
-# Register the 8.5.D violation detection function
-register_violation("8.5.D Overtime Off Route")(detect_85d_violations)
 
 
 def detect_violations(data, violation_type, date_maximized_status=None):
@@ -278,6 +294,81 @@ def get_violation_remedies(data, violations):
     pivot_remedy_data = pivot_remedy_data.reset_index()
 
     return pivot_remedy_data
+
+
+@register_violation("8.5.D Overtime Off Route")
+def detect_85d_overtime(data, date_maximized_status=None):
+    """Detect Article 8.5.D violations for overtime worked off assignment."""
+    result_df = prepare_data_for_violations(data)
+
+    # Check for NS day in code
+    result_df["is_ns_day"] = (
+        result_df["code"].str.strip().str.lower().str.contains("ns day", na=False)
+    )
+
+    # Initialize violation_type column with "No Violation"
+    result_df["violation_type"] = "No Violation"
+
+    # Handle maximized dates
+    maximized_dates = result_df["rings_date"].map(
+        lambda x: date_maximized_status.get(x, False)
+        if date_maximized_status
+        else False
+    )
+
+    # Set "No Violation (OTDL Maxed)" for maximized dates
+    result_df.loc[maximized_dates, "violation_type"] = "No Violation (OTDL Maxed)"
+
+    # Add display indicator
+    result_df["display_indicator"] = result_df.apply(set_display, axis=1)
+
+    # Check for valid moves (not empty, none, or no moves)
+    has_valid_moves = (
+        result_df["moves"].notna()
+        & (result_df["moves"].str.strip().str.lower() != "none")
+        & (result_df["moves"].str.strip() != "")
+        & (result_df["moves"].str.strip().str.lower() != "no moves")
+    )
+
+    # Calculate eligible carriers - require moves only for non-NS days
+    mask_eligible = (
+        (result_df["is_wal_nl"])
+        & (~maximized_dates)
+        & (result_df["is_ns_day"] | has_valid_moves)
+    )
+
+    # Vectorized remedy calculation - different for NS days
+    result_df["remedy_total"] = np.where(
+        mask_eligible & result_df["is_ns_day"],
+        result_df["total_hours"].round(2),  # Full hours for NS days
+        np.where(
+            mask_eligible,
+            np.minimum(
+                result_df["off_route_hours"],
+                (result_df["total_hours"] - 8).clip(lower=0),
+            ),
+            0.0,
+        ),
+    )
+
+    # Set violation types for non-maximized dates with violations
+    mask_has_violation = (result_df["remedy_total"] > 0) & (~maximized_dates)
+    result_df.loc[mask_has_violation, "violation_type"] = "8.5.D Overtime Off Route"
+
+    return result_df[
+        [
+            "carrier_name",
+            "list_status",
+            "violation_type",
+            "rings_date",
+            "remedy_total",
+            "own_route_hours",
+            "formatted_moves",
+            "total_hours",
+            "moves",
+            "display_indicator",
+        ]
+    ].rename(columns={"rings_date": "date", "formatted_moves": "off_route_hours"})
 
 
 def load_exclusion_periods():
