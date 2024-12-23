@@ -5,7 +5,7 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 ## Features
 
 ### Violation Tracking
-- 8.5.D Violations (Overtime Off Route)
+- 8.5.D Violations (Overtime Off Route when OTDL wasn't maximized)
 - 8.5.F Violations (Regular, Non-Scheduled, 5th Day)
 - 8.5.G Violations (OTDL Maximization)
 - MAX12 Violations (12-Hour Daily Limit)
