@@ -18,6 +18,7 @@ venv/
 output/
 build/
 dist/
+site/
 *.spec
 
 # Poetry
