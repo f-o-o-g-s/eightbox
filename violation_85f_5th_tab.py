@@ -130,14 +130,22 @@ class Violation85f5thTab(BaseViolationTab):
         carrier_status = data.groupby("carrier_name")["list_status"].first()
         date_column = "rings_date" if "rings_date" in data.columns else "date"
 
-        # Get daily totals using total_hours for the date columns
-        daily_totals = data.pivot_table(
-            index="carrier_name",
-            columns=date_column,
-            values="total_hours",
-            aggfunc="sum",
-            fill_value=0,
-        )
+        # Get daily totals and indicators
+        daily_totals = pd.DataFrame()
+        for date in data[date_column].unique():
+            date_data = data[data[date_column] == date]
+            daily_values = date_data.groupby("carrier_name").agg({
+                "total_hours": "first",
+                "display_indicator": "first"
+            })
+            # Combine hours and indicator
+            daily_values[date] = daily_values.apply(
+                lambda row: f"{row['total_hours']:.2f} {row['display_indicator']}"
+                if pd.notna(row['total_hours'])
+                else row['display_indicator'],
+                axis=1
+            )
+            daily_totals[date] = daily_values[date]
 
         # Calculate weekly remedy total
         weekly_totals = data.groupby("carrier_name")["remedy_total"].sum()
@@ -162,10 +170,9 @@ class Violation85f5thTab(BaseViolationTab):
             axis=1,
         ).reset_index()
 
-        # Round numerical columns
-        for col in summary_data.columns:
-            if col not in ["carrier_name", "list_status", "85F_5th_date"]:
-                summary_data.loc[:, col] = summary_data[col].round(2)
+        # Round Weekly Remedy Total
+        if "Weekly Remedy Total" in summary_data.columns:
+            summary_data["Weekly Remedy Total"] = summary_data["Weekly Remedy Total"].round(2)
 
         # Create display data without 85F_5th_date column
         display_columns = [col for col in summary_data.columns if col != "85F_5th_date"]
