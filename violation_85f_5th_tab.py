@@ -134,16 +134,15 @@ class Violation85f5thTab(BaseViolationTab):
         daily_totals = pd.DataFrame()
         for date in data[date_column].unique():
             date_data = data[data[date_column] == date]
-            daily_values = date_data.groupby("carrier_name").agg({
-                "total_hours": "first",
-                "display_indicator": "first"
-            })
+            daily_values = date_data.groupby("carrier_name").agg(
+                {"total_hours": "first", "display_indicator": "first"}
+            )
             # Combine hours and indicator
             daily_values[date] = daily_values.apply(
                 lambda row: f"{row['total_hours']:.2f} {row['display_indicator']}"
-                if pd.notna(row['total_hours'])
-                else row['display_indicator'],
-                axis=1
+                if pd.notna(row["total_hours"])
+                else row["display_indicator"],
+                axis=1,
             )
             daily_totals[date] = daily_values[date]
 
@@ -172,7 +171,9 @@ class Violation85f5thTab(BaseViolationTab):
 
         # Round Weekly Remedy Total
         if "Weekly Remedy Total" in summary_data.columns:
-            summary_data["Weekly Remedy Total"] = summary_data["Weekly Remedy Total"].round(2)
+            summary_data["Weekly Remedy Total"] = summary_data[
+                "Weekly Remedy Total"
+            ].round(2)
 
         # Create display data without 85F_5th_date column
         display_columns = [col for col in summary_data.columns if col != "85F_5th_date"]
