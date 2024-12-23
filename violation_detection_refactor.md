@@ -1,4 +1,4 @@
-# Violation Detection Refactoring Plan
+# Violation Detection Refactoring Progress
 
 ## Goal
 Split violation formulas from violation_detection.py into separate files for better maintainability and testing.
@@ -7,58 +7,56 @@ Split violation formulas from violation_detection.py into separate files for bet
 - violation_detection.py (main logic)
 - violation_detection_original.py (backup reference)
 
-## Formula Files to Create
-1. violation_formulas/
-   - ✓ article_85d.py (Off-assignment violations)
-   - article_85f.py (Regular overtime violations)
-   - article_85f_ns.py (Non-scheduled day violations)
-   - article_85f_5th.py (5th day overtime violations)
-   - article_85g.py (OTDL maximization violations)
-   - max_violations.py (12/60 hour violations)
-   - ✓ __init__.py (for package imports)
+## Formula Files Created ✅
+- [x] violation_formulas/article_85d.py
+- [x] violation_formulas/article_85f.py
+- [x] violation_formulas/article_85f_ns.py
+- [x] violation_formulas/article_85f_5th.py
+- [x] violation_formulas/article_85g.py
+- [x] violation_formulas/max12.py
+- [x] violation_formulas/max60.py
+- [x] violation_formulas/formula_utils.py
 
-## Progress Tracking
-
-### Moved Functions
+## Functions Moved ✅
 - [x] detect_85d_violations -> article_85d.py
-- [x] calculate_85d_remedies -> article_85d.py
+- [x] detect_85f_violations -> article_85f.py
+- [x] detect_85f_ns_violations -> article_85f_ns.py
+- [x] detect_85f_5th_violations -> article_85f_5th.py
+- [x] detect_85g_violations -> article_85g.py
+- [x] detect_MAX_12 -> max12.py
+- [x] detect_MAX_60 -> max60.py
+- [x] process_moves_vectorized -> formula_utils.py
+- [x] prepare_data_for_violations -> formula_utils.py
 
-### To Move
-1. Article 8.5.D Functions:
-   - [x] detect_85d_violations
-   - [x] calculate_85d_remedies
+## Core Functions Maintained in violation_detection.py ✅
+- [x] detect_violations (dispatcher)
+- [x] get_violation_remedies (aggregator)
+- [x] register_violation (decorator)
 
-2. Article 8.5.F Functions:
-   - [ ] detect_85f_violations
-   - [ ] calculate_85f_remedies
-   - [ ] detect_85f_ns_violations
-   - [ ] calculate_85f_ns_remedies
-   - [ ] detect_85f_5th_violations
-   - [ ] calculate_85f_5th_remedies
+## Testing Steps Completed ✅
+- [x] Verified each violation type works independently
+- [x] Tested display indicators
+- [x] Confirmed remedy calculations
+- [x] Validated move processing
+- [x] Checked list status handling
+- [x] Fixed own_route_hours calculation for WAL/NL carriers
 
-3. Article 8.5.G Functions:
-   - [ ] detect_85g_violations
-   - [ ] calculate_85g_remedies
+## Improvements Made
+1. Created formula_utils.py for shared utility functions
+2. Fixed own_route_hours calculation to use total_hours - off_route_hours
+3. Maintained consistent handling of OTDL/PTF carriers
+4. Improved code organization with clear module responsibilities
 
-4. MAX Violation Functions:
-   - [ ] detect_max12_violations
-   - [ ] detect_max60_violations
-   - [ ] calculate_max_remedies
-
-## Testing Steps
-1. Move one formula file at a time
-2. Update imports in violation_detection.py
-3. Test each violation type after moving
-4. Verify results match original implementation
-
-## Manual Testing Plan for 8.5.D
-1. Run main_gui.py
-2. Load some test data
-3. Check if 8.5.D violations are still detected correctly
-4. Verify remedy calculations match original implementation
-5. Check if the violations display properly in the UI
+## Next Steps
+1. Commit all changes to feature/split-violation-formulas branch
+2. Run final tests to verify all functionality
+3. Consider creating unit tests for formula_utils.py
+4. Update documentation to reflect new structure
+5. Create PR for review
 
 ## Notes
-- Keep shared utility functions in violation_detection.py
-- Maintain backwards compatibility with existing tab implementations
-- Document any improvements or bug fixes found during refactoring
+- Successfully reduced file size and improved organization
+- Each violation type now has its own dedicated module
+- Utility functions moved to formula_utils.py
+- All tests passing and functionality preserved
+- No changes needed to database or UI layers
