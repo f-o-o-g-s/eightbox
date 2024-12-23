@@ -40,4 +40,5 @@ class Violation85fNsTab(BaseViolationTab):
             "remedy_total",
             "violation_type",
             "total_hours",
+            "display_indicator",
         ]

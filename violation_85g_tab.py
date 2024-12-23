@@ -46,7 +46,7 @@ class Violation85gTab(BaseViolationTab):
             "total_hours",
             "display_indicator",
             "remedy_total",
-            "violation_type",  # Shows "8.5.G OTDL Not Maximized" or "8.5.G Trigger (No Remedy)"
+            "violation_type",  # Shows "8.5.G OTDL Not Maximized" or "No Violation"
         ]
 
     def format_data(self, data):
@@ -77,7 +77,7 @@ class Violation85gTab(BaseViolationTab):
         if "violation_type" in formatted.columns:
             # Convert simple "8.5.G" to display version
             formatted.loc[
-                formatted["violation_type"] == "8.5.G", "violation_type"
+                formatted["violation_type"].str.startswith("8.5.G"), "violation_type"
             ] = "8.5.G OTDL Not Maximized"
 
             # Hide trigger info and display indicator for non-violations

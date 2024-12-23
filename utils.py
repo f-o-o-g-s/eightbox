@@ -5,6 +5,13 @@ Functions here are designed to be reusable across different parts of the applica
 and handle common tasks like formatting display indicators for various carrier statuses.
 """
 
+import json
+import os
+from typing import Dict, List, Optional, Tuple, Union
+
+import numpy as np
+import pandas as pd
+
 
 def set_display(row):
     """Format display indicators for carrier status and leave types.
@@ -60,3 +67,32 @@ def set_display(row):
 
     # Default to no indicator
     return ""
+
+
+def load_exclusion_periods():
+    """Load exclusion periods from configuration file.
+
+    Returns:
+        tuple: (dict, pd.DatetimeIndex) containing:
+            - dict: Raw exclusion periods from config
+            - pd.DatetimeIndex: Pre-calculated date range for vectorized comparison
+    """
+    try:
+        config_path = os.path.join(os.path.dirname(__file__), "exclusion_periods.json")
+        if os.path.exists(config_path):
+            with open(config_path, "r") as f:
+                periods = json.load(f)
+
+            # Create a list of all exclusion dates for vectorized comparison
+            all_dates = []
+            for year, year_data in periods.items():
+                if "december_exclusion" in year_data:
+                    period = year_data["december_exclusion"]
+                    start = pd.to_datetime(period["start"])
+                    end = pd.to_datetime(period["end"])
+                    all_dates.extend(pd.date_range(start, end))
+
+            return periods, pd.DatetimeIndex(all_dates)
+    except Exception as e:
+        print(f"Error loading exclusion periods: {e}")
+    return {}, pd.DatetimeIndex([])

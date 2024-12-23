@@ -462,18 +462,27 @@ class ViolationModel(QStandardItemModel):
 
     def has_violation_in_row(self, row):
         """Check if the row contains any violations."""
+        # First check violation_type column if it exists
         for col in range(self.columnCount()):
             header = self.header_data(col, Qt.Horizontal, Qt.DisplayRole)
             if header in ["violation_type", "Violation Type"]:
                 value = self.data(self.index(row, col), Qt.DisplayRole)
-                # Check for both types of non-violation messages
-                return not (value.startswith("No Violation"))
-            elif header in ["Weekly Remedy Total", "Remedy Total"]:
+                if value and not value.startswith("No Violation"):
+                    return True
+                break  # Exit after checking violation_type
+
+        # Then check remedy total columns
+        for col in range(self.columnCount()):
+            header = self.header_data(col, Qt.Horizontal, Qt.DisplayRole)
+            if header in ["Weekly Remedy Total", "Remedy Total"]:
                 value = self.data(self.index(row, col), Qt.DisplayRole)
-                try:
-                    return float(str(value).replace(",", "")) > 0.00
-                except (ValueError, TypeError):
-                    continue
+                if value:  # Only check if value is not empty
+                    try:
+                        if float(str(value).replace(",", "")) > 0.00:
+                            return True
+                    except (ValueError, TypeError):
+                        continue
+
         return False
 
     def get_foreground_color(self, index):
