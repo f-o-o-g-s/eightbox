@@ -4,16 +4,19 @@ This module handles violations that occur when non-OTDL carriers work
 more than 10 hours on a regularly scheduled day.
 """
 
+import json
+import os
+
 import numpy as np
 import pandas as pd
-import os
-import json
 
 from utils import set_display
 from violation_formulas.formula_utils import prepare_data_for_violations
 
 
-def detect_85f_violations(data: pd.DataFrame, date_maximized_status: dict) -> pd.DataFrame:
+def detect_85f_violations(
+    data: pd.DataFrame, date_maximized_status: dict
+) -> pd.DataFrame:
     """Detect Article 8.5.F violations for work over 10 hours off assignment.
 
     Args:
@@ -101,7 +104,9 @@ def load_exclusion_periods():
             - pd.DatetimeIndex: Pre-calculated date range for vectorized comparison
     """
     try:
-        config_path = os.path.join(os.path.dirname(__file__), "..", "exclusion_periods.json")
+        config_path = os.path.join(
+            os.path.dirname(__file__), "..", "exclusion_periods.json"
+        )
         if os.path.exists(config_path):
             with open(config_path, "r") as f:
                 periods = json.load(f)
@@ -118,4 +123,4 @@ def load_exclusion_periods():
             return periods, pd.DatetimeIndex(all_dates)
     except Exception as e:
         print(f"Error loading exclusion periods: {e}")
-    return {}, pd.DatetimeIndex([]) 
+    return {}, pd.DatetimeIndex([])

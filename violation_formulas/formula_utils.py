@@ -4,7 +4,6 @@ This module contains shared utility functions used by multiple violation
 formula modules for data preparation, move processing, and calculations.
 """
 
-import numpy as np
 import pandas as pd
 
 
@@ -106,7 +105,9 @@ def prepare_data_for_violations(data):
     result_df[["own_route_hours", "off_route_hours", "formatted_moves"]] = moves_data
 
     # Calculate own_route_hours as total_hours - off_route_hours
-    result_df["own_route_hours"] = (result_df["total_hours"] - result_df["off_route_hours"]).round(2)
+    result_df["own_route_hours"] = (
+        result_df["total_hours"] - result_df["off_route_hours"]
+    ).round(2)
 
     # Handle OTDL/PTF carriers - all their hours count as own route
     otdl_ptf_mask = result_df["list_status"].isin(["otdl", "ptf"])

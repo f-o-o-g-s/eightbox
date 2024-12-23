@@ -11,7 +11,9 @@ from utils import set_display
 from violation_formulas.article_85f import load_exclusion_periods
 
 
-def detect_85f_ns_violations(data: pd.DataFrame, date_maximized_status: dict) -> pd.DataFrame:
+def detect_85f_ns_violations(
+    data: pd.DataFrame, date_maximized_status: dict
+) -> pd.DataFrame:
     """Detect Article 8.5.F violations for overtime on non-scheduled days.
 
     Args:
@@ -113,4 +115,4 @@ def detect_85f_ns_violations(data: pd.DataFrame, date_maximized_status: dict) ->
             "total_hours",
             "display_indicator",
         ]
-    ].rename(columns={"rings_date": "date"}) 
+    ].rename(columns={"rings_date": "date"})

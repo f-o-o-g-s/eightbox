@@ -4,7 +4,6 @@ This module handles violations that occur when OTDL carriers are not maximized
 while non-OTDL carriers are working overtime.
 """
 
-import numpy as np
 import pandas as pd
 
 from utils import set_display
@@ -39,8 +38,12 @@ def detect_85g_violations(data, date_maximized_status=None):
     result_df["list_status"] = result_df["list_status"].str.strip().str.lower()
 
     # Convert numeric columns for all carriers
-    result_df["total_hours"] = pd.to_numeric(result_df["total"], errors="coerce").fillna(0)
-    result_df["hour_limit"] = pd.to_numeric(result_df["hour_limit"], errors="coerce").fillna(12.00)
+    result_df["total_hours"] = pd.to_numeric(
+        result_df["total"], errors="coerce"
+    ).fillna(0)
+    result_df["hour_limit"] = pd.to_numeric(
+        result_df["hour_limit"], errors="coerce"
+    ).fillna(12.00)
 
     # Add display indicators for excusal checking
     result_df["display_indicator"] = result_df.apply(set_display, axis=1)
@@ -69,35 +72,37 @@ def detect_85g_violations(data, date_maximized_status=None):
         for date_str, status in date_maximized_status.items():
             if isinstance(status, dict):
                 is_maximized = status.get("is_maximized", False)
-                excused_carriers = set(str(c) for c in status.get("excused_carriers", []))
+                excused_carriers = set(
+                    str(c) for c in status.get("excused_carriers", [])
+                )
                 carrier_excusals = {
                     str(k): v
                     for k, v in status.items()
                     if k not in ["is_maximized", "excused_carriers"]
                 }
-                max_status_records.append({
-                    "date": pd.to_datetime(date_str),
-                    "is_maximized": is_maximized,
-                    "excused_carriers": excused_carriers,
-                    "carrier_excusals": carrier_excusals,
-                })
+                max_status_records.append(
+                    {
+                        "date": pd.to_datetime(date_str),
+                        "is_maximized": is_maximized,
+                        "excused_carriers": excused_carriers,
+                        "carrier_excusals": carrier_excusals,
+                    }
+                )
             else:
-                max_status_records.append({
-                    "date": pd.to_datetime(date_str),
-                    "is_maximized": bool(status),
-                    "excused_carriers": set(),
-                    "carrier_excusals": {},
-                })
+                max_status_records.append(
+                    {
+                        "date": pd.to_datetime(date_str),
+                        "is_maximized": bool(status),
+                        "excused_carriers": set(),
+                        "carrier_excusals": {},
+                    }
+                )
         max_status_df = pd.DataFrame(max_status_records)
 
     # Merge maximized status with result_df
     if not max_status_df.empty:
         result_df = pd.merge(
-            result_df,
-            max_status_df,
-            left_on="date_dt",
-            right_on="date",
-            how="left"
+            result_df, max_status_df, left_on="date_dt", right_on="date", how="left"
         )
     else:
         result_df["is_maximized"] = False
@@ -134,19 +139,21 @@ def detect_85g_violations(data, date_maximized_status=None):
                     else "No Violation"
                 )
 
-                final_results.append({
-                    "carrier_name": carrier_data["carrier_name"],
-                    "date": date_str,
-                    "violation_type": violation_type,
-                    "remedy_total": 0.0,
-                    "total_hours": carrier_data["total_hours"],
-                    "hour_limit": carrier_data["hour_limit"],
-                    "list_status": carrier_data["list_status"],
-                    "trigger_carrier": "",
-                    "trigger_hours": 0,
-                    "off_route_hours": 0,
-                    "display_indicator": carrier_data["display_indicator"],
-                })
+                final_results.append(
+                    {
+                        "carrier_name": carrier_data["carrier_name"],
+                        "date": date_str,
+                        "violation_type": violation_type,
+                        "remedy_total": 0.0,
+                        "total_hours": carrier_data["total_hours"],
+                        "hour_limit": carrier_data["hour_limit"],
+                        "list_status": carrier_data["list_status"],
+                        "trigger_carrier": "",
+                        "trigger_hours": 0,
+                        "off_route_hours": 0,
+                        "display_indicator": carrier_data["display_indicator"],
+                    }
+                )
             continue
 
         # Find WAL/NL carriers working overtime
@@ -189,19 +196,23 @@ def detect_85g_violations(data, date_maximized_status=None):
                     else 0.0
                 )
 
-                final_results.append({
-                    "carrier_name": otdl["carrier_name"],
-                    "date": date_str,
-                    "violation_type": violation_type,
-                    "remedy_total": remedy_total,
-                    "total_hours": otdl["total_hours"],
-                    "hour_limit": otdl["hour_limit"],
-                    "list_status": "otdl",
-                    "trigger_carrier": str(trigger_carrier["carrier_name"]),
-                    "trigger_hours": float(trigger_carrier["total_hours"]),
-                    "off_route_hours": float(trigger_carrier.get("off_route_hours", 0)),
-                    "display_indicator": otdl["display_indicator"],
-                })
+                final_results.append(
+                    {
+                        "carrier_name": otdl["carrier_name"],
+                        "date": date_str,
+                        "violation_type": violation_type,
+                        "remedy_total": remedy_total,
+                        "total_hours": otdl["total_hours"],
+                        "hour_limit": otdl["hour_limit"],
+                        "list_status": "otdl",
+                        "trigger_carrier": str(trigger_carrier["carrier_name"]),
+                        "trigger_hours": float(trigger_carrier["total_hours"]),
+                        "off_route_hours": float(
+                            trigger_carrier.get("off_route_hours", 0)
+                        ),
+                        "display_indicator": otdl["display_indicator"],
+                    }
+                )
 
         # Add remaining carriers
         processed_carriers = {
@@ -225,22 +236,24 @@ def detect_85g_violations(data, date_maximized_status=None):
                 else "No Violation"
             )
 
-            final_results.append({
-                "carrier_name": carrier_data["carrier_name"],
-                "date": date_str,
-                "violation_type": violation_type,
-                "remedy_total": 0.0,
-                "total_hours": carrier_data["total_hours"],
-                "hour_limit": carrier_data["hour_limit"],
-                "list_status": carrier_data["list_status"],
-                "trigger_carrier": "",
-                "trigger_hours": 0,
-                "off_route_hours": 0,
-                "display_indicator": carrier_data["display_indicator"],
-            })
+            final_results.append(
+                {
+                    "carrier_name": carrier_data["carrier_name"],
+                    "date": date_str,
+                    "violation_type": violation_type,
+                    "remedy_total": 0.0,
+                    "total_hours": carrier_data["total_hours"],
+                    "hour_limit": carrier_data["hour_limit"],
+                    "list_status": carrier_data["list_status"],
+                    "trigger_carrier": "",
+                    "trigger_hours": 0,
+                    "off_route_hours": 0,
+                    "display_indicator": carrier_data["display_indicator"],
+                }
+            )
 
     return (
         pd.DataFrame(final_results)
         .sort_values("carrier_name", ascending=True)
         .reset_index(drop=True)
-    ) 
+    )

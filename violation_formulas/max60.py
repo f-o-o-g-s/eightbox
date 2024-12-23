@@ -7,7 +7,10 @@ weekly work hour limit of 60 hours.
 import numpy as np
 import pandas as pd
 
-from utils import load_exclusion_periods, set_display
+from utils import (
+    load_exclusion_periods,
+    set_display,
+)
 
 
 def detect_MAX_60(data, date_maximized_status=None):
@@ -166,4 +169,4 @@ def detect_MAX_60(data, date_maximized_status=None):
             "cumulative_hours",
             "display_indicator",
         ]
-    ] 
+    ]

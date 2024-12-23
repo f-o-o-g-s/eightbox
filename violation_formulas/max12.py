@@ -152,4 +152,4 @@ def detect_MAX_12(data, date_maximized_status=None):
             "formatted_moves",
             "moves",
         ]
-    ].rename(columns={"rings_date": "date", "formatted_moves": "off_route_hours"}) 
+    ].rename(columns={"rings_date": "date", "formatted_moves": "off_route_hours"})

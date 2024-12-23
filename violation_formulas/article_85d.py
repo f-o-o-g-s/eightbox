@@ -11,7 +11,9 @@ from utils import set_display
 from violation_formulas.formula_utils import prepare_data_for_violations
 
 
-def detect_85d_violations(data: pd.DataFrame, date_maximized_status: dict) -> pd.DataFrame:
+def detect_85d_violations(
+    data: pd.DataFrame, date_maximized_status: dict
+) -> pd.DataFrame:
     """Detect Article 8.5.D violations for working off bid assignment.
 
     Args:
@@ -90,4 +92,4 @@ def detect_85d_violations(data: pd.DataFrame, date_maximized_status: dict) -> pd
             "moves",
             "display_indicator",
         ]
-    ].rename(columns={"rings_date": "date", "formatted_moves": "off_route_hours"}) 
+    ].rename(columns={"rings_date": "date", "formatted_moves": "off_route_hours"})

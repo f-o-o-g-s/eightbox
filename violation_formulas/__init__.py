@@ -14,8 +14,8 @@ various contract violations:
 
 from .article_85d import detect_85d_violations
 from .article_85f import detect_85f_violations
-from .article_85f_ns import detect_85f_ns_violations
 from .article_85f_5th import detect_85f_5th_violations
+from .article_85f_ns import detect_85f_ns_violations
 from .article_85g import detect_85g_violations
 from .max12 import detect_MAX_12
 from .max60 import detect_MAX_60

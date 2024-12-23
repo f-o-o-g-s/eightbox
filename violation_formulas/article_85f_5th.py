@@ -11,7 +11,9 @@ from utils import set_display
 from violation_formulas.article_85f import load_exclusion_periods
 
 
-def detect_85f_5th_violations(data: pd.DataFrame, date_maximized_status: dict) -> pd.DataFrame:
+def detect_85f_5th_violations(
+    data: pd.DataFrame, date_maximized_status: dict
+) -> pd.DataFrame:
     """Detect Article 8.5.F violations for fifth overtime day in a week.
 
     Args:
@@ -176,4 +178,4 @@ def detect_85f_5th_violations(data: pd.DataFrame, date_maximized_status: dict) -
     ]
 
     # Return DataFrame with columns in the expected order
-    return result_df[required_columns] 
+    return result_df[required_columns]

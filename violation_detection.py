@@ -44,22 +44,18 @@ separate modules in the violation_formulas/ directory for better
 maintainability and testing. This module now focuses on coordination
 and shared utilities."""
 
-import json
-import os
 from typing import (
     Callable,
     Dict,
     Optional,
 )
 
-import numpy as np
 import pandas as pd
 
-from utils import set_display
 from violation_formulas.article_85d import detect_85d_violations
 from violation_formulas.article_85f import detect_85f_violations
-from violation_formulas.article_85f_ns import detect_85f_ns_violations
 from violation_formulas.article_85f_5th import detect_85f_5th_violations
+from violation_formulas.article_85f_ns import detect_85f_ns_violations
 from violation_formulas.article_85g import detect_85g_violations
 from violation_formulas.max12 import detect_MAX_12
 from violation_formulas.max60 import detect_MAX_60
@@ -74,9 +70,11 @@ violation_registry: Dict[str, ViolationFunc] = {}
 
 def register_violation(violation_type: str) -> Callable[[ViolationFunc], ViolationFunc]:
     """Register a violation detection function for a specific violation type."""
+
     def decorator(func: ViolationFunc) -> ViolationFunc:
         violation_registry[violation_type] = func
         return func
+
     return decorator
 
 
@@ -84,7 +82,9 @@ def register_violation(violation_type: str) -> Callable[[ViolationFunc], Violati
 register_violation("8.5.D Overtime Off Route")(detect_85d_violations)
 register_violation("8.5.F Overtime Over 10 Hours Off Route")(detect_85f_violations)
 register_violation("8.5.F NS Overtime On a Non-Scheduled Day")(detect_85f_ns_violations)
-register_violation("8.5.F 5th More Than 4 Days of Overtime in a Week")(detect_85f_5th_violations)
+register_violation("8.5.F 5th More Than 4 Days of Overtime in a Week")(
+    detect_85f_5th_violations
+)
 register_violation("8.5.G")(detect_85g_violations)
 register_violation("MAX12 More Than 12 Hours Worked in a Day")(detect_MAX_12)
 register_violation("MAX60 More Than 60 Hours Worked in a Week")(detect_MAX_60)
