@@ -241,8 +241,8 @@ class MainApp(QMainWindow):
         otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
     """
 
-    VERSION = "2024.1.0.1"  # Updated by release.py
-    BUILD_TIME = "2024-12-22 21:16"  # Updated by release.py
+    VERSION = "2024.1.0.2"  # Updated by release.py
+    BUILD_TIME = "2024-12-22 21:35"  # Updated by release.py
     SETTINGS_FILE = "app_settings.json"  # File to store application settings
 
     def __init__(self):
