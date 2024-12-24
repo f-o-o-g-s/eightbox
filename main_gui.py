@@ -6,7 +6,6 @@ different panes and managing the overall application state and user interactions
 
 import json
 import os
-import sqlite3
 import sys
 
 import pandas as pd  # Data manipulation
@@ -19,7 +18,6 @@ from PyQt5.QtCore import (
 from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QAction,
     QApplication,
-    QDialog,
     QHBoxLayout,
     QLabel,
     QLineEdit,
