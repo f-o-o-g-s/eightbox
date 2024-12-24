@@ -48,9 +48,12 @@ from custom_widgets import (
 
 # Custom modules
 from database.initializer import DatabaseInitializer
+from database.models import ClockRingQueryParams, DatabaseError
+from database.service import DatabaseService
 from date_selection_pane import DateSelectionPane
 from excel_export import ExcelExporter
 from otdl_maximization_pane import OTDLMaximizationPane
+from database.path_manager import DatabasePathManager
 
 # Theme colors
 from theme import apply_material_dark_theme
@@ -248,9 +251,33 @@ class MainApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        
+        # Initialize window properties
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setMinimumSize(800, 600)
+        
+        # Initialize database path manager first
+        self.path_manager = DatabasePathManager(self.SETTINGS_FILE)
+        
+        # Load database path with fallback behavior
+        self.mandates_db_path = self.path_manager.load_database_path()
+        
+        # Initialize database service
+        self.db_service = DatabaseService()
+        
+        # Initialize window attributes and UI components
+        self._init_window_attributes()
+        self._init_ui_components()
+        
+        # Initialize database
+        self._init_database()
+        
+        # Show database configuration dialog only if path is not found
+        if not self.mandates_db_path:
+            self.open_settings_dialog()
 
+    def _init_window_attributes(self):
+        """Initialize window-specific attributes."""
         # Add resize attributes
         self._resizing = False
         self._resize_edge = None
@@ -269,7 +296,9 @@ class MainApp(QMainWindow):
 
         # Install event filter on the main window
         self.installEventFilter(self)
-
+        
+    def _init_ui_components(self):
+        """Initialize all UI components."""
         # Apply material dark theme
         apply_material_dark_theme(QApplication.instance())
 
@@ -289,84 +318,22 @@ class MainApp(QMainWindow):
         # Track current filter state
         self.current_status_filter = "all"
 
-        # Create main container
-        container = QWidget()
-        container_layout = QVBoxLayout()
-        container_layout.setContentsMargins(0, 0, 0, 0)
-        container_layout.setSpacing(0)
-        container.setLayout(container_layout)
-
-        # Add custom title bar FIRST
-        self.title_bar = CustomTitleBar(self)
-        container_layout.addWidget(self.title_bar)
-
-        # Create menu content widget
-        menu_content_widget = QWidget()
-        menu_content_layout = QVBoxLayout()
-        menu_content_layout.setContentsMargins(0, 0, 0, 0)
-        menu_content_layout.setSpacing(0)
-        menu_content_widget.setLayout(menu_content_layout)
-
-        # Setup main menu and toolbar
-        self.init_menu_toolbar()
-        menu_content_layout.addWidget(self.menuBar())
-
-        # Main layout with buttons and central tab widget
-        self.main_layout = QVBoxLayout()
-        self.init_top_button_row()
-
-        # Central tab widget for reports
-        self.central_tab_widget = QTabWidget()
-        self.main_layout.addWidget(self.central_tab_widget)
-
-        # Initialize bottom filter row
-        self.init_filter_button_row()
-
-        # Add main layout to menu content layout
-        menu_content_layout.addLayout(self.main_layout)
-
-        # Add menu content widget to container layout
-        container_layout.addWidget(menu_content_widget)
-
-        self.setCentralWidget(container)
-
-        # Initialize database path from settings or auto-detect
-        self.mandates_db_path = self.load_database_path()
-
-        # Initialize eightbox database
+        # Initialize UI components in correct order
+        self._init_title_bar()  # Initialize title bar first
+        self._init_container()  # Then container which uses title bar
+        self._init_menu_content()
+        self._init_tabs()
+        self._init_size_grip()
+        
+    def _init_database(self):
+        """Initialize the database with proper error handling."""
         if not self.initialize_eightbox_database(self.mandates_db_path):
             CustomWarningDialog.warning(
                 self,
                 "Database Error",
                 "Failed to initialize the working database.\n"
-                "Please check the application logs for details.",
+                "Please check the application logs for details."
             )
-
-        # Initialize dynamic panes
-        self.date_selection_pane = None
-        self.init_carrier_list_pane()
-        self.init_otdl_maximization_pane()
-
-        # Initialize Violation Tabs
-        self.init_85d_tab()
-        self.init_85f_tab()
-        self.init_85f_ns_tab()
-        self.init_85f_5th_tab()
-        self.init_85g_tab()
-        self.init_MAX12_tab()
-        self.init_MAX60_tab()
-        self.init_remedies_tab()
-
-        self.settings_dialog = None  # Initialize as None
-
-        # Update the menu action to use the new exporter
-        export_all_action = QAction("Generate All Excel Spreadsheets", self)
-        export_all_action.triggered.connect(self.excel_exporter.export_all_violations)
-        self.file_menu.addAction(export_all_action)
-
-        # Create custom size grip
-        self.size_grip = CustomSizeGrip(self)
-        self.size_grip.setStyleSheet("background: transparent;")
 
     def setup_ui(self):
         """Set up the user interface."""
@@ -1070,30 +1037,6 @@ class MainApp(QMainWindow):
         self.current_data = pd.DataFrame()
         self.violations = None
 
-    def auto_detect_klusterbox_path(self):
-        """Auto-detect the Klusterbox database path.
-
-        Searches for mandates.sqlite in:
-        - Current directory
-        - Common installation locations
-        - User data directories
-
-        Returns:
-            str: Path to mandates.sqlite if found, None otherwise
-
-        Note:
-            - Handles both Windows and Unix-like systems
-            - Validates database file existence
-            - Returns None if database not found
-        """
-        if os.name == "nt":
-            default_path = (
-                os.path.expanduser("~") + "\\Documents\\.klusterbox\\mandates.sqlite"
-            )
-            if os.path.exists(default_path):
-                return default_path
-        return None
-
     def init_menu_toolbar(self):
         """Initialize the menu bar and toolbar."""
         menu_bar = QMenuBar()
@@ -1569,38 +1512,6 @@ class MainApp(QMainWindow):
                 ]
             )
 
-        query = """
-        SELECT
-            r.carrier_name,
-            DATE(r.rings_date) AS rings_date,
-            c.list_status,
-            c.station,
-            r.total,
-            r.moves,
-            r.code,
-            r.leave_type,
-            r.leave_time
-        FROM rings3 r
-        JOIN (
-            SELECT carrier_name, list_status, station
-            FROM carriers
-            WHERE (carrier_name, effective_date) IN (
-                SELECT carrier_name, MAX(effective_date)
-                FROM carriers
-                GROUP BY carrier_name
-            )
-        ) c ON r.carrier_name = c.carrier_name
-        WHERE r.rings_date >= DATE(?)
-        AND r.rings_date < DATE(?, '+1 day')
-        """
-        # Note on date handling:
-        # We use `r.rings_date >= DATE(?)` for the start date and
-        # `r.rings_date < DATE(?, '+1 day')` for the end date to ensure we get
-        # all records for the entire end date. This is because SQLite's DATE()
-        # function truncates times to midnight, so using <= would miss records
-        # later in the day. By using < next_day, we include all records up to
-        # but not including midnight of the next day.
-
         try:
             # If no dates provided, try to get them from the date selection pane
             if start_date is None or end_date is None:
@@ -1616,127 +1527,54 @@ class MainApp(QMainWindow):
                 start_date = start_date.strftime("%Y-%m-%d")
                 end_date = end_date.strftime("%Y-%m-%d")
 
-            with sqlite3.connect(self.mandates_db_path) as conn:
-                db_data = pd.read_sql_query(query, conn, params=(start_date, end_date))
+            # Convert string dates to datetime.date objects
+            if isinstance(start_date, str):
+                start_date = pd.to_datetime(start_date).date()
+            if isinstance(end_date, str):
+                end_date = pd.to_datetime(end_date).date()
 
-                # Filter out carriers with "out of station"
-                db_data = db_data[
-                    ~db_data["station"].str.contains(
-                        "out of station", case=False, na=False
-                    )
-                ]
-
-                # Convert rings_date to string format (YYYY-MM-DD)
-                db_data["rings_date"] = pd.to_datetime(
-                    db_data["rings_date"]
-                ).dt.strftime("%Y-%m-%d")
-
-                # Convert 'total' to numeric explicitly
-                db_data["total"] = pd.to_numeric(
-                    db_data["total"], errors="coerce"
-                ).fillna(0)
-
-                # Load the current carrier list from JSON
-                try:
-                    with open("carrier_list.json", "r") as json_file:
-                        carrier_list_df = pd.DataFrame(json.load(json_file))
-
-                    # Create a mapping of carrier names to their current list status
-                    carrier_status_map = carrier_list_df.set_index("carrier_name")[
-                        "list_status"
-                    ].to_dict()
-
-                    # Update list_status in db_data based on the JSON file
-                    db_data["list_status"] = (
-                        db_data["carrier_name"]
-                        .map(carrier_status_map)
-                        .fillna(db_data["list_status"])
-                    )
-
-                    # Get the full list of carriers from the JSON file
-                    carrier_names = carrier_list_df["carrier_name"].unique()
-                except (FileNotFoundError, json.JSONDecodeError):
-                    carrier_names = db_data["carrier_name"].unique()
-                    print(
-                        "Warning: Could not load carrier_list.json, using database carriers only"
-                    )
-
-                try:
-                    # Create all date combinations
-                    all_dates = pd.date_range(
-                        start=start_date, end=end_date, inclusive="both"
-                    )
-
-                    all_combinations = pd.MultiIndex.from_product(
-                        [carrier_names, all_dates], names=["carrier_name", "rings_date"]
-                    )
-
-                    # Convert rings_date to datetime for proper comparison
-                    db_data["rings_date"] = pd.to_datetime(db_data["rings_date"])
-
-                    # Set index for reindexing
-                    db_data = db_data.set_index(["carrier_name", "rings_date"])
-
-                    # Reindex with all combinations
-                    db_data = db_data.reindex(all_combinations)
-
-                    # Fill missing values appropriately
-                    db_data = db_data.fillna(
-                        {
-                            "total": 0,
-                            "moves": "",
-                            "code": "",
-                            "leave_type": "",
-                            "leave_time": "",
-                            "list_status": db_data["list_status"].iloc[0]
-                            if not db_data.empty
-                            else "",
-                        }
-                    )
-
-                    # Reset index and convert dates back to string format
-                    db_data = db_data.reset_index()
-                    db_data["rings_date"] = db_data["rings_date"].dt.strftime(
-                        "%Y-%m-%d"
-                    )
-
-                except Exception as e:
-                    print(f"Error creating date combinations: {e}")
-                    raise
-
-                # Add the display_indicator column
-                db_data["display_indicator"] = db_data.apply(set_display, axis=1)
-
-                # Drop the station column to maintain the original structure
-                db_data.drop(columns=["station"], inplace=True)
-
-                return db_data
-
-        except (AttributeError, ValueError) as e:
-            QMessageBox.critical(self, "Date Selection Error", str(e))
-        except sqlite3.Error as e:
-            QMessageBox.critical(
-                self, "Database Error", f"Failed to fetch data: {str(e)}"
+            params = ClockRingQueryParams(
+                start_date=start_date,
+                end_date=end_date,
+                mandates_db_path=self.mandates_db_path
             )
+            
+            data, error = self.db_service.fetch_clock_ring_data(params)
+            if error:
+                # Error handler already called by service
+                return pd.DataFrame(
+                    columns=[
+                        "carrier_name",
+                        "rings_date",
+                        "list_status",
+                        "total",
+                        "moves",
+                        "code",
+                        "leave_type",
+                        "leave_time",
+                        "display_indicator",
+                    ]
+                )
+            
+            return data
+
         except Exception as e:
             QMessageBox.critical(
                 self, "Error", f"An unexpected error occurred: {str(e)}"
             )
-
-        # Return empty DataFrame with correct columns on any error
-        return pd.DataFrame(
-            columns=[
-                "carrier_name",
-                "rings_date",
-                "list_status",
-                "total",
-                "moves",
-                "code",
-                "leave_type",
-                "leave_time",
-                "display_indicator",
-            ]
-        )
+            return pd.DataFrame(
+                columns=[
+                    "carrier_name",
+                    "rings_date",
+                    "list_status",
+                    "total",
+                    "moves",
+                    "code",
+                    "leave_type",
+                    "leave_time",
+                    "display_indicator",
+                ]
+            )
 
     def show_violation_documentation(self):
         """Show the documentation dialog."""
@@ -2026,114 +1864,40 @@ class MainApp(QMainWindow):
         # Replace lambda with direct method reference
         QTimer.singleShot(100, self.apply_date_range)
 
-    def load_database_path(self):
-        """Load database path from settings file or auto-detect.
-
-        Returns:
-            str: Path to the database file
-        """
-        try:
-            if os.path.exists(self.SETTINGS_FILE):
-                with open(self.SETTINGS_FILE, "r") as f:
-                    settings = json.load(f)
-                    saved_path = settings.get("database_path")
-                    if saved_path and os.path.exists(saved_path):
-                        # Validate the saved path
-                        if self.validate_database_path(saved_path):
-                            return saved_path
-        except Exception as e:
-            print(f"Error loading settings: {e}")
-
-        # Fall back to auto-detection if loading fails
-        return self.auto_detect_klusterbox_path()
-
-    def save_database_path(self, path):
-        """Save database path to settings file.
-
-        Args:
-            path (str): Path to save
-        """
-        try:
-            settings = {}
-            if os.path.exists(self.SETTINGS_FILE):
-                with open(self.SETTINGS_FILE, "r") as f:
-                    settings = json.load(f)
-
-            settings["database_path"] = path
-
-            with open(self.SETTINGS_FILE, "w") as f:
-                json.dump(settings, f, indent=4)
-        except Exception as e:
-            print(f"Error saving settings: {e}")
-            QMessageBox.warning(
-                self, "Settings Error", f"Failed to save settings: {str(e)}"
-            )
-
-    def validate_database_path(self, path):
-        """Validate that the given path points to a valid SQLite database.
-
-        Args:
-            path (str): Path to validate
-
-        Returns:
-            bool: True if valid, False otherwise
-        """
-        if not os.path.exists(path):
-            return False
-
-        try:
-            conn = sqlite3.connect(path)
-            cursor = conn.cursor()
-
-            # Check for required tables
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-            tables = {row[0] for row in cursor.fetchall()}
-
-            required_tables = {"rings3", "carriers"}
-            conn.close()
-
-            return required_tables.issubset(tables)
-
-        except Exception:
-            return False
-
     def initialize_eightbox_database(self, source_db_path=None):
         """Initialize the eightbox.sqlite database.
 
-        Creates a new eightbox.sqlite database if it doesn't exist,
-        or validates an existing one. Can optionally copy data from
-        a source database during initialization.
-
         Args:
-            source_db_path (str, optional): Path to source database to copy data from
+            source_db_path (str, optional): Path to source database. Defaults to None.
 
         Returns:
-            bool: True if successful, False otherwise
+            bool: True if initialization successful, False otherwise
         """
         target_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite"
+            os.path.dirname(os.path.abspath(__file__)), 
+            "eightbox.sqlite"
         )
         initializer = DatabaseInitializer(target_path, source_db_path, self)
         return initializer.initialize()
 
     def handle_database_path_change(self, new_path):
         """Handle database path changes from settings dialog.
-
+        
         Args:
             new_path (str): New database path
         """
-        if self.validate_database_path(new_path):
+        if self.path_manager.validate_database_path(new_path):
             old_path = self.mandates_db_path
-
+            
             # If carrier_list.json exists, check for differences
             if os.path.exists("carrier_list.json"):
                 new_carriers = self.get_carriers_from_database(new_path)
                 existing_carriers = self.load_carrier_list()
-
+                
                 if self.carriers_differ(new_carriers, existing_carriers):
                     # Import the migration dialog here to avoid circular imports
                     from carrier_list_migration_dialog import CarrierListMigrationDialog
-
+                    
                     # Show migration dialog
                     migration_dialog = CarrierListMigrationDialog(
                         existing_carriers, new_carriers, self
@@ -2155,53 +1919,23 @@ class MainApp(QMainWindow):
                             return
                     else:
                         return  # User cancelled
-
+            
             # Continue with database path change
             self.mandates_db_path = new_path
-            self.save_database_path(new_path)
-
+            self.path_manager.save_database_path(new_path)
+            
             # Update carrier list pane with new path
-            if (
-                hasattr(self, "carrier_list_pane")
-                and self.carrier_list_pane is not None
-            ):
-                # First destroy the old carrier list pane
-                self.carrier_list_pane.hide()
-                self.carrier_list_pane.deleteLater()
-
-                # Create a new carrier list pane with the new database path
-                self.carrier_list_pane = CarrierListPane(new_path, parent=self)
-                self.carrier_list_pane.request_apply_date_range.connect(
-                    self.apply_date_range
-                )
-
-                # If the carrier list pane was visible, show the new one
-                if self.carrier_list_button.isChecked():
-                    self.carrier_list_pane.show()
-                    self.carrier_list_pane.resize(650, 400)
-
+            if hasattr(self, "carrier_list_pane") and self.carrier_list_pane is not None:
+                self.carrier_list_pane.update_database_path(new_path)
+                
             # Show success message
             CustomInfoDialog.information(
                 self, "Database Updated", "Database path has been updated successfully."
             )
-
+            
             # Refresh data if date range is selected
-            if (
-                hasattr(self, "date_selection_pane")
-                and self.date_selection_pane is not None
-            ):
+            if hasattr(self, "date_selection_pane") and self.date_selection_pane is not None:
                 QTimer.singleShot(100, self.apply_date_range)
-        else:
-            # Revert to previous path
-            self.mandates_db_path = (
-                old_path if old_path else self.auto_detect_klusterbox_path()
-            )
-            QMessageBox.critical(
-                self,
-                "Database Error",
-                "Failed to connect to the new database.\n"
-                "Reverting to previous database path.",
-            )
 
     def get_carriers_from_database(self, db_path):
         """Get carrier list from database.
@@ -2436,6 +2170,108 @@ class MainApp(QMainWindow):
         CustomInfoDialog.information(
             self, "Success", "Moves data has been cleaned and violations reprocessed."
         )
+
+    def _handle_database_error(self, error):
+        """Handle database errors with appropriate GUI feedback."""
+        QMessageBox.critical(
+            self,
+            "Database Error",
+            error.message
+        )
+
+    def _init_container(self):
+        """Initialize the main container and layout."""
+        # Create main container widget
+        self.container = QWidget()
+        self.container.setObjectName("mainContainer")
+        
+        # Create main container layout
+        container_layout = QVBoxLayout()
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+        self.container.setLayout(container_layout)
+        
+        # Create menu content widget
+        self.menu_content_widget = QWidget()
+        self.menu_content_widget.setObjectName("menuContent")
+        self.menu_content_layout = QVBoxLayout()
+        self.menu_content_layout.setContentsMargins(0, 0, 0, 0)
+        self.menu_content_layout.setSpacing(0)
+        self.menu_content_widget.setLayout(self.menu_content_layout)
+        
+        # Add title bar and menu content to container
+        container_layout.addWidget(self.title_bar)
+        container_layout.addWidget(self.menu_content_widget)
+        
+        # Set as central widget
+        self.setCentralWidget(self.container)
+
+    def _init_title_bar(self):
+        """Initialize the custom title bar."""
+        self.title_bar = CustomTitleBar(self)
+        self.title_bar.setObjectName("titleBar")
+
+    def _init_menu_content(self):
+        """Initialize the menu content area."""
+        # Setup main menu and toolbar
+        self.init_menu_toolbar()
+        self.menu_content_layout.addWidget(self.menuBar())
+        
+        # Create main layout for buttons and central tab widget
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+        
+        # Initialize button row and add to layout
+        self.init_top_button_row()
+        
+        # Create and add central tab widget
+        self.central_tab_widget = QTabWidget()
+        self.central_tab_widget.setObjectName("centralTabs")
+        self.main_layout.addWidget(self.central_tab_widget)
+        
+        # Initialize and add bottom filter row
+        self.init_filter_button_row()
+        
+        # Add main layout to menu content
+        self.menu_content_layout.addLayout(self.main_layout)
+
+    def _init_tabs(self):
+        """Initialize all tabs and panes."""
+        # Initialize dynamic panes
+        self.date_selection_pane = None
+        self.carrier_list_pane = None
+        self.otdl_maximization_pane = None
+        
+        # Initialize carrier list and OTDL panes
+        self.init_carrier_list_pane()
+        self.init_otdl_maximization_pane()
+        
+        # Initialize violation tabs
+        self.init_85d_tab()
+        self.init_85f_tab()
+        self.init_85f_ns_tab()
+        self.init_85f_5th_tab()
+        self.init_85g_tab()
+        self.init_MAX12_tab()
+        self.init_MAX60_tab()
+        self.init_remedies_tab()
+        
+        # Initialize settings dialog reference
+        self.settings_dialog = None
+        
+        # Add export action to file menu
+        export_all_action = QAction("Generate All Excel Spreadsheets", self)
+        export_all_action.triggered.connect(self.excel_exporter.export_all_violations)
+        self.file_menu.addAction(export_all_action)
+
+    def _init_size_grip(self):
+        """Initialize the custom size grip."""
+        self.size_grip = CustomSizeGrip(self)
+        self.size_grip.setObjectName("sizeGrip")
+        self.size_grip.setStyleSheet("background: transparent;")
+        self.size_grip.move(self.width() - 20, self.height() - 20)
+        self.size_grip.raise_()
 
 
 if __name__ == "__main__":
