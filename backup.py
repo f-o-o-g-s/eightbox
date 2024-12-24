@@ -1,10 +1,26 @@
-"""Backup script for creating Git and ZIP backups.
+"""Backup utility for the Eightbox project.
 
-This script handles:
-1. Running pre-commit hooks
-2. Creating Git commits
-3. Creating ZIP backups
-4. Handling errors and retries
+This module provides functionality for both ZIP and Git backups of the project.
+It includes pre-commit hook integration for code quality checks before commits.
+
+Commit Message Format:
+    All commit messages must start with one of these prefixes:
+    - Fix: for bug fixes and minor changes
+    - Feature: for new features and enhancements
+    - Breaking: for breaking changes
+    If no prefix is provided, 'Fix:' will be used as default.
+
+Pre-commit Hooks:
+    The following checks are run before each commit:
+    - isort: sorts Python imports
+    - black: formats Python code
+    - flake8: checks code style and quality
+
+Usage:
+    python backup.py "description"  # Will add "Fix:" prefix by default
+    python backup.py "Fix: description"
+    python backup.py "Feature: new functionality"
+    python backup.py "Breaking: major change"
 """
 
 import argparse
