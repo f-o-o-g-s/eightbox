@@ -1,20 +1,16 @@
-"""Module for managing database paths and validation."""
+"""Manages database path configuration and validation."""
 
-import os
 import json
-from pathlib import Path
-from typing import Optional, Tuple
+import os
 import sqlite3
-
-from .models import DatabaseError
 
 
 class DatabasePathManager:
     """Manages database path operations and validation."""
-    
+
     def __init__(self, config_path="settings.json"):
         """Initialize the DatabasePathManager.
-        
+
         Args:
             config_path (str): Path to the settings file
         """
@@ -22,7 +18,7 @@ class DatabasePathManager:
 
     def load_database_path(self):
         """Load database path from settings file or auto-detect.
-        
+
         Returns:
             str: Path to the database file, or None if not found
         """
@@ -42,7 +38,7 @@ class DatabasePathManager:
 
     def save_database_path(self, path):
         """Save database path to settings file.
-        
+
         Args:
             path (str): Path to save
         """
@@ -63,10 +59,10 @@ class DatabasePathManager:
 
     def validate_database_path(self, path):
         """Validate that the given path points to a valid SQLite database.
-        
+
         Args:
             path (str): Path to validate
-            
+
         Returns:
             bool: True if valid, False otherwise
         """
@@ -90,12 +86,14 @@ class DatabasePathManager:
 
     def auto_detect_klusterbox_path(self):
         """Auto-detect the Klusterbox database path.
-        
+
         Returns:
             str: Path to mandates.sqlite if found, None otherwise
         """
         if os.name == "nt":  # Windows
-            default_path = os.path.expanduser("~") + "\\Documents\\.klusterbox\\mandates.sqlite"
+            default_path = (
+                os.path.expanduser("~") + "\\Documents\\.klusterbox\\mandates.sqlite"
+            )
             if os.path.exists(default_path):
                 return default_path
-        return None 
+        return None

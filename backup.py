@@ -65,7 +65,22 @@ def run_pre_commit():
 
 
 def create_zip_backup(source_dir, target_dir):
-    """Create a ZIP backup of the project."""
+    """Create a ZIP backup of the project.
+
+    Includes all project files and directories except for:
+    - Version control files (.git)
+    - Previous backups (backups/)
+    - Cache files (__pycache__, .pytest_cache)
+    - Output directories (output/, spreadsheets/)
+    - Virtual environment (.venv)
+    - Binary and compiled files (.pyc, .pyo, .pyd, .zip)
+
+    Special handling for:
+    - /database directory (included)
+    - /tabs directory (included)
+    - All Python source files
+    - Configuration files
+    """
     try:
         print("\nCreating ZIP backup...")
 
@@ -87,16 +102,42 @@ def create_zip_backup(source_dir, target_dir):
             "output",
             ".venv",
             "spreadsheets",
+            "node_modules",  # Added common exclusion
+            ".idea",  # Added common exclusion
+            ".vscode",  # Added common exclusion
         }
+
         # File extensions to exclude
-        exclude_extensions = {".pyc", ".pyo", ".pyd", ".zip"}
+        exclude_extensions = {
+            ".pyc",
+            ".pyo",
+            ".pyd",
+            ".zip",
+            ".log",
+            ".tmp",
+            ".temp",  # Added common exclusions
+            ".bak",
+            ".swp",
+            ".swo",  # Added common exclusions
+        }
+
+        # Important directories to ensure are included
+        important_dirs = {"database", "tabs"}
 
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
             for root, dirs, files in os.walk(source_dir):
-                # Skip excluded directories
+                # Skip excluded directories but ensure important dirs are kept
+                rel_path = os.path.relpath(root, source_dir)
+                if any(excl in rel_path.split(os.sep) for excl in exclude_dirs):
+                    # Check if this is a subdirectory of an important directory
+                    if not any(imp in rel_path.split(os.sep) for imp in important_dirs):
+                        continue
+
+                # Filter out excluded directories for next iteration
                 dirs[:] = [d for d in dirs if d not in exclude_dirs]
 
                 for file in files:
+                    # Skip excluded file extensions
                     if not any(file.endswith(ext) for ext in exclude_extensions):
                         file_path = os.path.join(root, file)
                         arcname = os.path.relpath(file_path, source_dir)

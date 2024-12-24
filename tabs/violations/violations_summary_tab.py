@@ -6,8 +6,8 @@ allowing for quick analysis and comparison of violation patterns.
 import traceback
 
 import pandas as pd
-
 from base_violation_tab import BaseViolationTab
+
 from violation_types import ViolationType
 
 
