@@ -263,6 +263,11 @@ class MainApp(QMainWindow):
         # Load database path with fallback behavior
         self.mandates_db_path = self.path_manager.load_database_path()
 
+        # Set eightbox database path
+        self.eightbox_db_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite"
+        )
+
         # Initialize database service
         self.db_service = DatabaseService()
 
@@ -1465,7 +1470,7 @@ class MainApp(QMainWindow):
     # This query generates the base dataframe for the entire program.
     # The resulting dataframe will be modified by subsequent methods.
     def fetch_clock_ring_data(self, start_date=None, end_date=None):
-        """Fetch clock ring data for the selected date range from mandates.sqlite.
+        """Fetch clock ring data for the selected date range from the working database.
 
         Important note on date handling:
         The SQL query uses `rings_date >= DATE(?)` for the start date and
@@ -1492,7 +1497,7 @@ class MainApp(QMainWindow):
                 - display_indicator
         """
         # First validate database path
-        if not self.mandates_db_path or not os.path.exists(self.mandates_db_path):
+        if not self.eightbox_db_path or not os.path.exists(self.eightbox_db_path):
             QMessageBox.critical(
                 self,
                 "Database Error",
@@ -1537,7 +1542,7 @@ class MainApp(QMainWindow):
             params = ClockRingQueryParams(
                 start_date=start_date,
                 end_date=end_date,
-                mandates_db_path=self.mandates_db_path,
+                db_path=self.eightbox_db_path,  # Use eightbox_db_path here
             )
 
             data, error = self.db_service.fetch_clock_ring_data(params)
@@ -1763,8 +1768,8 @@ class MainApp(QMainWindow):
     def toggle_date_selection_pane(self):
         """Toggle the Date Selection Pane and button state."""
         if not hasattr(self, "date_selection_pane") or self.date_selection_pane is None:
-            # Initialize with the database path
-            self.date_selection_pane = DateSelectionPane(self.mandates_db_path, self)
+            # Initialize with the eightbox database path
+            self.date_selection_pane = DateSelectionPane(self.eightbox_db_path, self)
             # Connect the date range selected signal
             self.date_selection_pane.date_range_selected.connect(
                 self.on_date_range_selected
@@ -2061,7 +2066,7 @@ class MainApp(QMainWindow):
             return
 
         # Get valid routes
-        valid_routes = get_valid_routes(self.mandates_db_path)
+        valid_routes = get_valid_routes(self.eightbox_db_path)
         if not valid_routes:
             CustomWarningDialog.warning(
                 self, "Error", "Failed to get valid route numbers from database."
@@ -2085,7 +2090,7 @@ class MainApp(QMainWindow):
             return
 
         # Detect invalid moves
-        invalid_moves = detect_invalid_moves(current_data, self.mandates_db_path)
+        invalid_moves = detect_invalid_moves(current_data, self.eightbox_db_path)
         if invalid_moves.empty:
             CustomInfoDialog.information(
                 self,

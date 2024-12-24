@@ -681,7 +681,7 @@ class CleanMovesDialog(QDialog):
         self.current_row = None  # Currently selected row
 
         # Get database path from parent (MainApp)
-        self.db_path = parent.mandates_db_path if parent else None
+        self.db_path = parent.eightbox_db_path if parent else None
         if not self.db_path:
             raise ValueError("Database path not available")
 

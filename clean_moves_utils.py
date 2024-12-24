@@ -22,7 +22,7 @@ def get_valid_routes(db_path: str) -> Set[str]:
     """Get set of valid route numbers from carriers table.
 
     Args:
-        db_path: Path to the mandates.sqlite database
+        db_path: Path to the database
 
     Returns:
         Set of valid route numbers from route_s column
@@ -84,7 +84,7 @@ def detect_invalid_moves(moves_data: pd.DataFrame, db_path: str) -> pd.DataFrame
 
     Args:
         moves_data: DataFrame containing moves data
-        db_path: Path to the mandates.sqlite database
+        db_path: Path to the database
 
     Returns:
         DataFrame containing entries with:
@@ -304,7 +304,7 @@ def update_moves_in_database(
     """Update moves in the database with cleaned values.
 
     Args:
-        db_path: Path to the mandates.sqlite database
+        db_path: Path to the database
         cleaned_moves: Dictionary mapping (carrier_name, date) to cleaned moves string
 
     Returns:

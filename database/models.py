@@ -19,13 +19,13 @@ class ClockRingQueryParams:
     Attributes:
         start_date: Start date for the query
         end_date: End date for the query
-        mandates_db_path: Path to the mandates database
+        db_path: Path to the database
         carrier_list_path: Optional path to carrier list JSON file
     """
 
     start_date: date
     end_date: date
-    mandates_db_path: str
+    db_path: str
     carrier_list_path: Optional[str] = "carrier_list.json"
 
 

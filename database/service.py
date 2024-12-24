@@ -55,7 +55,7 @@ class DatabaseService:
         """
         try:
             # Validate database path
-            if not self._validate_database_path(params.mandates_db_path):
+            if not self._validate_database_path(params.db_path):
                 return None, DatabaseError(
                     message=(
                         "No valid database path configured.\n"
@@ -124,7 +124,7 @@ class DatabaseService:
         """
 
         # Connect to database
-        conn = sqlite3.connect(params.mandates_db_path)
+        conn = sqlite3.connect(params.db_path)
 
         # Execute query and load into DataFrame
         db_data = pd.read_sql_query(
