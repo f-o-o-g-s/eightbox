@@ -5,7 +5,7 @@ Article 8.5.G violations, which occur when OTDL carriers are not maximized
 while WAL/NL carriers work overtime off assignment.
 """
 
-from base_violation_tab import BaseViolationTab
+from tabs.base import BaseViolationTab
 from violation_types import ViolationType
 
 

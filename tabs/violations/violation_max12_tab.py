@@ -7,7 +7,7 @@ more than 12 hours in a single day (11.50 hours for WAL carriers).
 
 import pandas as pd
 
-from base_violation_tab import BaseViolationTab
+from tabs.base import BaseViolationTab
 from violation_model import ViolationModel
 from violation_types import ViolationType
 

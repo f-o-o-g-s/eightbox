@@ -5,7 +5,7 @@ Article 8.5.F violations that occur when non-OTDL carriers work more than
 8 hours on their non-scheduled days.
 """
 
-from base_violation_tab import BaseViolationTab
+from tabs.base import BaseViolationTab
 from violation_types import ViolationType
 
 

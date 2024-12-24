@@ -56,19 +56,21 @@ from excel_export import ExcelExporter
 from otdl_maximization_pane import OTDLMaximizationPane
 
 # Theme colors
+from tabs.violations import (
+    Violation85dTab,
+    Violation85fTab,
+    Violation85f5thTab,
+    Violation85fNsTab,
+    Violation85gTab,
+    ViolationMax12Tab,
+    ViolationMax60Tab,
+    ViolationRemediesTab,
+)
 from theme import apply_material_dark_theme
-from violation_85d_tab import Violation85dTab
-from violation_85f_5th_tab import Violation85f5thTab
-from violation_85f_ns_tab import Violation85fNsTab
-from violation_85f_tab import Violation85fTab
-from violation_85g_tab import Violation85gTab
 from violation_detection import (
     detect_violations,
     get_violation_remedies,
 )
-from violation_max12_tab import ViolationMax12Tab
-from violation_max60_tab import ViolationMax60Tab
-from violations_summary_tab import ViolationRemediesTab
 
 
 def qt_message_handler(mode, context, message):

@@ -10,7 +10,7 @@ Article 8.5.F violations, which occur when:
 These rules do not apply during December (penalty overtime exclusion period).
 """
 
-from base_violation_tab import BaseViolationTab
+from tabs.base import BaseViolationTab
 from violation_types import ViolationType
 
 

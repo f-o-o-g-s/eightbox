@@ -8,7 +8,7 @@ on more than 4 of their 5 scheduled days in a service week.
 import pandas as pd
 from PyQt5.QtWidgets import QTableView
 
-from base_violation_tab import BaseViolationTab
+from tabs.base import BaseViolationTab
 from utils import set_display
 from violation_model import ViolationModel
 from violation_types import ViolationType
