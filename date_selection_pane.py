@@ -197,8 +197,110 @@ class DateSelectionPane(QWidget):
 
         # Content widget with padding
         content_widget = QWidget()
+        content_widget.setStyleSheet(
+            """
+            QWidget {
+                background-color: #121212;
+            }
+            QLabel {
+                color: #E1E1E1;
+                font-size: 13px;
+                padding: 8px;
+                background-color: #1E1E1E;
+                border-radius: 4px;
+            }
+            QTableView {
+                background-color: #121212;
+                border: none;
+                border-radius: 4px;
+                selection-background-color: #BB86FC;
+                selection-color: #000000;
+                gridline-color: transparent;
+            }
+            QTableView::item {
+                padding: 8px;
+                border-radius: 2px;
+            }
+            QTableView::item:hover {
+                background-color: rgba(187, 134, 252, 0.1);
+            }
+            QTableView::item:selected {
+                background-color: #BB86FC;
+                color: #000000;
+            }
+            QHeaderView::section {
+                background-color: #1E1E1E;
+                color: #BB86FC;
+                font-weight: bold;
+                padding: 8px;
+                border: none;
+                border-radius: 0px;
+            }
+            QHeaderView::section:first {
+                border-top-left-radius: 4px;
+                border-bottom-left-radius: 4px;
+            }
+            QHeaderView::section:last {
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
+            QPushButton {
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                border: 1px solid #3D3D3D;
+                border-bottom: 2px solid #1D1D1D;
+                padding: 8px 24px;
+                font-weight: 500;
+                min-height: 32px;
+                border-radius: 4px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            QPushButton:hover {
+                background-color: #353535;
+                border: 1px solid #454545;
+                border-bottom: 2px solid #252525;
+                color: #CBB0FF;
+            }
+            QPushButton:pressed {
+                background-color: #252525;
+                border: 1px solid #353535;
+                border-top: 2px solid #151515;
+                border-bottom: 1px solid #353535;
+                padding-top: 9px;
+                color: #BB86FC;
+            }
+            QPushButton:disabled {
+                background-color: #252525;
+                color: rgba(225, 225, 225, 0.3);
+                border: 1px solid #2D2D2D;
+            }
+            QScrollBar:vertical {
+                background-color: #121212;
+                width: 12px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #424242;
+                border-radius: 6px;
+                min-height: 20px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #616161;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+        """
+        )
+
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(20, 20, 20, 20)
+        content_layout.setContentsMargins(10, 10, 10, 10)
         content_layout.setSpacing(15)
 
         # Current selection label
@@ -210,6 +312,8 @@ class DateSelectionPane(QWidget):
         self.table_view.setAlternatingRowColors(True)
         self.table_view.setSelectionBehavior(QTableView.SelectRows)
         self.table_view.setSelectionMode(QTableView.SingleSelection)
+        self.table_view.setShowGrid(False)
+        self.table_view.setFrameShape(QTableView.NoFrame)
 
         # Set up the model
         self.model = DateRangeModel()
@@ -220,6 +324,7 @@ class DateSelectionPane(QWidget):
         header.setSectionResizeMode(0, QHeaderView.Stretch)  # Date Range
         header.setSectionResizeMode(1, QHeaderView.Fixed)  # Year
         header.setSectionResizeMode(2, QHeaderView.Fixed)  # Carriers
+        header.setHighlightSections(False)  # Disable header highlight on click
 
         # Set fixed widths for Year and Carriers columns
         self.table_view.setColumnWidth(1, 80)  # Year
@@ -238,16 +343,19 @@ class DateSelectionPane(QWidget):
         # Buttons
         button_layout = QHBoxLayout()
         button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.setSpacing(10)  # Add spacing between buttons
 
         self.apply_button = QPushButton("Apply Selection")
         self.apply_button.setEnabled(False)
+        self.apply_button.setObjectName("primary")  # Set primary style
         self.apply_button.clicked.connect(self.apply_selection)
 
         self.refresh_button = QPushButton("Refresh")
         self.refresh_button.clicked.connect(self.load_data)
 
-        button_layout.addWidget(self.apply_button)
+        button_layout.addStretch()  # Push buttons to the right
         button_layout.addWidget(self.refresh_button)
+        button_layout.addWidget(self.apply_button)
 
         content_layout.addLayout(button_layout)
 

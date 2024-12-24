@@ -665,42 +665,72 @@ class CarrierListPane(QWidget):
                 margin-top: 8px;
             }
             QPushButton {
-                background-color: #262626;
-                color: #E1E1E1;
-                border: none;
-                padding: 6px 16px;
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                border: 1px solid #3D3D3D;
+                border-bottom: 2px solid #1D1D1D;
+                padding: 8px 24px;
                 font-weight: 500;
-                font-size: 13px;
+                min-height: 32px;
                 border-radius: 4px;
-                min-width: 90px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
             QPushButton:hover {
-                background-color: #333333;
+                background-color: #353535;
+                border: 1px solid #454545;
+                border-bottom: 2px solid #252525;
+                color: #CBB0FF;
             }
             QPushButton:pressed {
-                background-color: #404040;
+                background-color: #252525;
+                border: 1px solid #353535;
+                border-top: 2px solid #151515;
+                border-bottom: 1px solid #353535;
+                padding-top: 9px;
+                color: #BB86FC;
+            }
+            QPushButton:disabled {
+                background-color: #252525;
+                color: rgba(225, 225, 225, 0.3);
+                border: 1px solid #2D2D2D;
             }
             QPushButton#primary {
                 background-color: #BB86FC;
                 color: #000000;
-                font-weight: 500;
+                border: 1px solid #9965DA;
+                border-bottom: 2px solid #7B4FAF;
             }
             QPushButton#primary:hover {
-                background-color: #A875E8;
+                background-color: #CBB0FF;
+                border: 1px solid #BB86FC;
+                border-bottom: 2px solid #9965DA;
             }
             QPushButton#primary:pressed {
-                background-color: #9965DA;
+                background-color: #BB86FC;
+                border: 1px solid #9965DA;
+                border-top: 2px solid #7B4FAF;
+                border-bottom: 1px solid #9965DA;
+                padding-top: 9px;
             }
             QPushButton#destructive {
-                background-color: rgba(207, 102, 121, 0.8);
+                background-color: #CF6679;
                 color: #000000;
-                font-weight: 500;
+                border: 1px solid #B4424F;
+                border-bottom: 2px solid #8F2A35;
             }
             QPushButton#destructive:hover {
-                background-color: rgba(207, 102, 121, 0.9);
+                background-color: #FF8296;
+                border: 1px solid #CF6679;
+                border-bottom: 2px solid #B4424F;
             }
             QPushButton#destructive:pressed {
                 background-color: #CF6679;
+                border: 1px solid #B4424F;
+                border-top: 2px solid #8F2A35;
+                border-bottom: 1px solid #B4424F;
+                padding-top: 9px;
             }
         """
         )
@@ -1099,7 +1129,7 @@ class CarrierListPane(QWidget):
                 border: 1px solid #333333;
                 border-radius: 4px;
                 padding: 8px;
-                padding-right: 24px; /* Make room for arrow */
+                padding-right: 24px;
                 margin: 4px 0px;
                 min-width: 200px;
             }
@@ -1138,22 +1168,38 @@ class CarrierListPane(QWidget):
                 border: 1px solid #333333;
             }
             QPushButton {
-                background-color: #BB86FC;
-                color: black;
-                border: none;
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                border: 1px solid #3D3D3D;
+                border-bottom: 2px solid #1D1D1D;
+                padding: 8px 24px;
+                font-weight: 500;
+                min-height: 32px;
                 border-radius: 4px;
-                padding: 8px 16px;
-                margin: 4px;
-                font-weight: bold;
-                min-width: 80px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
             QPushButton:hover {
-                background-color: #9965DA;
+                background-color: #353535;
+                border: 1px solid #454545;
+                border-bottom: 2px solid #252525;
+                color: #CBB0FF;
             }
             QPushButton:pressed {
-                background-color: #7B4FAF;
+                background-color: #252525;
+                border: 1px solid #353535;
+                border-top: 2px solid #151515;
+                border-bottom: 1px solid #353535;
+                padding-top: 9px;
+                color: #BB86FC;
             }
-        """
+            QPushButton:disabled {
+                background-color: #252525;
+                color: rgba(225, 225, 225, 0.3);
+                border: 1px solid #2D2D2D;
+            }
+            """
         )
 
         content_layout = QVBoxLayout(content_widget)
