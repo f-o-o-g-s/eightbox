@@ -7,20 +7,29 @@ database operations and data fetching.
 import json
 import os
 import sqlite3
-from typing import Union, Tuple, Callable, Optional
+from typing import (
+    Callable,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import pandas as pd
 
-from .models import ClockRingQueryParams, DatabaseError
 from utils import set_display
+
+from .models import (
+    ClockRingQueryParams,
+    DatabaseError,
+)
 
 
 class DatabaseService:
     """Handles all database operations and data fetching."""
-    
+
     def __init__(self, error_handler: Optional[Callable] = None):
         """Initialize the database service.
-        
+
         Args:
             error_handler: Optional callback for handling errors
                          (allows GUI-specific error handling)
@@ -28,20 +37,19 @@ class DatabaseService:
         self.error_handler = error_handler
 
     def fetch_clock_ring_data(
-        self,
-        params: ClockRingQueryParams
+        self, params: ClockRingQueryParams
     ) -> Union[Tuple[pd.DataFrame, None], Tuple[None, DatabaseError]]:
         """Fetch clock ring data for the given parameters.
-        
+
         This is a more functional approach that:
         1. Takes explicit parameters instead of using instance state
         2. Returns either (data, None) or (None, error)
         3. Separates data fetching from error display
         4. Makes testing easier
-        
+
         Args:
             params: ClockRingQueryParams containing query parameters
-            
+
         Returns:
             Tuple of (DataFrame, None) on success or (None, DatabaseError) on failure
         """
@@ -49,45 +57,44 @@ class DatabaseService:
             # Validate database path
             if not self._validate_database_path(params.mandates_db_path):
                 return None, DatabaseError(
-                    message="No valid database path configured.\nPlease set a valid database path in Settings.",
-                    error_type="PATH_ERROR"
+                    message=(
+                        "No valid database path configured.\n"
+                        "Please set a valid database path in Settings."
+                    ),
+                    error_type="PATH_ERROR",
                 )
 
             # Execute the query
             data = self._execute_clock_ring_query(params)
-            
+
             # Process carrier list
             data = self._process_carrier_list(data, params.carrier_list_path)
-            
+
             # Add display indicators
             data = self._add_display_indicators(data)
-            
+
             return data, None
-            
+
         except Exception as e:
             error = DatabaseError(
-                message=str(e),
-                error_type="QUERY_ERROR",
-                details={"exception": str(e)}
+                message=str(e), error_type="QUERY_ERROR", details={"exception": str(e)}
             )
-            
+
             # Call error handler if provided
             if self.error_handler:
                 self.error_handler(error)
-                
+
             return None, error
 
-    def _execute_clock_ring_query(
-        self, params: ClockRingQueryParams
-    ) -> pd.DataFrame:
+    def _execute_clock_ring_query(self, params: ClockRingQueryParams) -> pd.DataFrame:
         """Execute the main clock ring query.
-        
+
         Args:
             params: Query parameters
-            
+
         Returns:
             DataFrame containing the query results
-            
+
         Raises:
             sqlite3.Error: If there's a database error
         """
@@ -122,26 +129,24 @@ class DatabaseService:
                 conn,
                 params=(
                     params.start_date.strftime("%Y-%m-%d"),
-                    params.end_date.strftime("%Y-%m-%d")
-                )
+                    params.end_date.strftime("%Y-%m-%d"),
+                ),
             )
 
             # Filter out carriers with "out of station"
             db_data = db_data[
-                ~db_data["station"].str.contains(
-                    "out of station", case=False, na=False
-                )
+                ~db_data["station"].str.contains("out of station", case=False, na=False)
             ]
 
             # Convert rings_date to string format (YYYY-MM-DD)
-            db_data["rings_date"] = pd.to_datetime(
-                db_data["rings_date"]
-            ).dt.strftime("%Y-%m-%d")
+            db_data["rings_date"] = pd.to_datetime(db_data["rings_date"]).dt.strftime(
+                "%Y-%m-%d"
+            )
 
             # Convert 'total' to numeric explicitly
-            db_data["total"] = pd.to_numeric(
-                db_data["total"], errors="coerce"
-            ).fillna(0)
+            db_data["total"] = pd.to_numeric(db_data["total"], errors="coerce").fillna(
+                0
+            )
 
             return db_data
 
@@ -149,11 +154,11 @@ class DatabaseService:
         self, data: pd.DataFrame, carrier_list_path: str
     ) -> pd.DataFrame:
         """Process and merge carrier list data.
-        
+
         Args:
             data: DataFrame with clock ring data
             carrier_list_path: Path to carrier list JSON
-            
+
         Returns:
             DataFrame with carrier list data merged in
         """
@@ -168,9 +173,7 @@ class DatabaseService:
 
             # Update list_status in data based on the JSON file
             data["list_status"] = (
-                data["carrier_name"]
-                .map(carrier_status_map)
-                .fillna(data["list_status"])
+                data["carrier_name"].map(carrier_status_map).fillna(data["list_status"])
             )
 
             # Get the full list of carriers from the JSON file
@@ -180,12 +183,11 @@ class DatabaseService:
             all_dates = pd.date_range(
                 start=data["rings_date"].min(),
                 end=data["rings_date"].max(),
-                inclusive="both"
+                inclusive="both",
             )
 
             all_combinations = pd.MultiIndex.from_product(
-                [carrier_names, all_dates],
-                names=["carrier_name", "rings_date"]
+                [carrier_names, all_dates], names=["carrier_name", "rings_date"]
             )
 
             # Convert rings_date to datetime for proper comparison
@@ -223,10 +225,10 @@ class DatabaseService:
 
     def _add_display_indicators(self, data: pd.DataFrame) -> pd.DataFrame:
         """Add display indicators to the data.
-        
+
         Args:
             data: DataFrame to add indicators to
-            
+
         Returns:
             DataFrame with display_indicator column added
         """
@@ -235,10 +237,10 @@ class DatabaseService:
 
     def _validate_database_path(self, path: str) -> bool:
         """Validate the database path and required tables.
-        
+
         Args:
             path: Path to validate
-            
+
         Returns:
             bool: True if valid, False otherwise
         """
@@ -259,4 +261,4 @@ class DatabaseService:
             return required_tables.issubset(tables)
 
         except Exception:
-            return False 
+            return False

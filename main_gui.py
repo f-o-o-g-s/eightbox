@@ -58,9 +58,9 @@ from otdl_maximization_pane import OTDLMaximizationPane
 # Theme colors
 from tabs.violations import (
     Violation85dTab,
-    Violation85fTab,
     Violation85f5thTab,
     Violation85fNsTab,
+    Violation85fTab,
     Violation85gTab,
     ViolationMax12Tab,
     ViolationMax60Tab,

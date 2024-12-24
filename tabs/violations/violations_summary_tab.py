@@ -7,7 +7,7 @@ import traceback
 
 import pandas as pd
 
-from base_violation_tab import BaseViolationTab
+from tabs.base import BaseViolationTab
 from violation_types import ViolationType
 
 
