@@ -37,7 +37,8 @@ class DatabaseService:
         self.error_handler = error_handler
 
     def fetch_clock_ring_data(
-        self, params: ClockRingQueryParams
+        self,
+        params: ClockRingQueryParams
     ) -> Union[Tuple[pd.DataFrame, None], Tuple[None, DatabaseError]]:
         """Fetch clock ring data for the given parameters.
 
@@ -61,7 +62,7 @@ class DatabaseService:
                         "No valid database path configured.\n"
                         "Please set a valid database path in Settings."
                     ),
-                    error_type="PATH_ERROR",
+                    error_type="PATH_ERROR"
                 )
 
             # Execute the query
@@ -77,7 +78,9 @@ class DatabaseService:
 
         except Exception as e:
             error = DatabaseError(
-                message=str(e), error_type="QUERY_ERROR", details={"exception": str(e)}
+                message=str(e),
+                error_type="QUERY_ERROR",
+                details={"exception": str(e)}
             )
 
             # Call error handler if provided
@@ -123,32 +126,33 @@ class DatabaseService:
         AND r.rings_date < DATE(?, '+1 day')
         """
 
-        with sqlite3.connect(params.mandates_db_path) as conn:
-            db_data = pd.read_sql_query(
-                query,
-                conn,
-                params=(
-                    params.start_date.strftime("%Y-%m-%d"),
-                    params.end_date.strftime("%Y-%m-%d"),
-                ),
-            )
+        # Execute query and load into DataFrame
+        df = pd.read_sql_query(
+            query,
+            conn,
+            params=(
+                params.start_date.strftime("%Y-%m-%d"),
+                params.end_date.strftime("%Y-%m-%d"),
+            ),
+            parse_dates=["rings_date"],
+        )
 
-            # Filter out carriers with "out of station"
-            db_data = db_data[
-                ~db_data["station"].str.contains("out of station", case=False, na=False)
-            ]
+        # Filter out carriers with "out of station"
+        db_data = db_data[
+            ~db_data["station"].str.contains("out of station", case=False, na=False)
+        ]
 
-            # Convert rings_date to string format (YYYY-MM-DD)
-            db_data["rings_date"] = pd.to_datetime(db_data["rings_date"]).dt.strftime(
-                "%Y-%m-%d"
-            )
+        # Convert rings_date to string format (YYYY-MM-DD)
+        db_data["rings_date"] = pd.to_datetime(db_data["rings_date"]).dt.strftime(
+            "%Y-%m-%d"
+        )
 
-            # Convert 'total' to numeric explicitly
-            db_data["total"] = pd.to_numeric(db_data["total"], errors="coerce").fillna(
-                0
-            )
+        # Convert 'total' to numeric explicitly
+        db_data["total"] = pd.to_numeric(db_data["total"], errors="coerce").fillna(
+            0
+        )
 
-            return db_data
+        return db_data
 
     def _process_carrier_list(
         self, data: pd.DataFrame, carrier_list_path: str
@@ -256,9 +260,13 @@ class DatabaseService:
             tables = {row[0] for row in cursor.fetchall()}
 
             required_tables = {"rings3", "carriers"}
+
             conn.close()
+            return True
 
-            return required_tables.issubset(tables)
-
-        except Exception:
+        except sqlite3.Error as e:
+            error_msg = (
+                "Failed to fetch data from database. "
+                "Please check your database configuration."
+            )
             return False

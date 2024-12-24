@@ -1,4 +1,4 @@
-"""Module for managing database paths and validation."""
+"""Manages database path configuration and validation."""
 
 import json
 import os
