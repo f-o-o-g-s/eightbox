@@ -1,24 +1,18 @@
 """Dialog for configuring application settings.
 
 This module provides a dialog interface for users to:
+- View database status
+- Sync databases
 - Configure application preferences
-- Set default values and behaviors
-- Customize UI settings
-- Manage data paths and locations
-- Save/load configuration
 """
 
 import os
 import sqlite3
 
 import pandas as pd
-from PyQt5.QtCore import (
-    Qt,
-    pyqtSignal,
-)
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
-    QFileDialog,
     QLabel,
     QPushButton,
     QVBoxLayout,
@@ -35,12 +29,8 @@ from custom_widgets import (
 class SettingsDialog(QDialog):
     """Dialog interface for application settings and configuration.
 
-    Provides a user interface for viewing and modifying application settings,
-    including database connections and user preferences.
+    Provides a user interface for viewing database status and syncing data.
     """
-
-    # Signal emitted when database path changes and is validated
-    pathChanged = pyqtSignal(str)
 
     def __init__(self, current_path, parent=None):
         super().__init__(parent)
@@ -161,31 +151,14 @@ class SettingsDialog(QDialog):
         button_layout.setSpacing(10)
         button_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Check for auto-detected path
-        auto_detected_path = None
-        if hasattr(self.parent, "auto_detect_klusterbox_path"):
-            auto_detected_path = self.parent.auto_detect_klusterbox_path()
-
-        # Add auto-detect button if available and not currently using it
-        if auto_detected_path and auto_detected_path != self.mandates_db_path:
-            use_auto_detect_button = QPushButton("Use Auto-detected Klusterbox Path")
-            use_auto_detect_button.clicked.connect(
-                lambda: self.use_auto_detected_path(auto_detected_path)
-            )
-            button_layout.addWidget(use_auto_detect_button)
-
-        set_path_button = QPushButton("Set Klusterbox Database Path")
-        set_path_button.clicked.connect(self.set_database_path)
-        button_layout.addWidget(set_path_button)
-
         # Add sync button
         sync_button = QPushButton("Sync Database")
         sync_button.clicked.connect(self.sync_database)
         button_layout.addWidget(sync_button)
 
-        save_button = QPushButton("Save and Close")
-        save_button.clicked.connect(self.apply_settings)
-        button_layout.addWidget(save_button)
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(self.hide)
+        button_layout.addWidget(close_button)
 
         # Add sections to content layout
         content_layout.addWidget(klusterbox_section)
@@ -358,59 +331,6 @@ class SettingsDialog(QDialog):
                 font-size: 11px;
                 padding: 5px;
             """
-            )
-
-    def use_auto_detected_path(self, path):
-        """Use the auto-detected Klusterbox database path.
-
-        Args:
-            path (str): The auto-detected path to use
-        """
-        if self.validate_database(path):
-            self.mandates_db_path = path
-            self.klusterbox_path_display.setText(self.mandates_db_path)
-        else:
-            CustomWarningDialog.warning(
-                self,
-                "Invalid Database",
-                "The auto-detected database is not valid.\n"
-                "Please select a valid database file manually.",
-            )
-
-    def set_database_path(self):
-        """Open file dialog to select and set new database path."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select Klusterbox Database File",
-            "",
-            "SQLite Database (*.sqlite);;All Files (*.*)",
-        )
-
-        if file_path:
-            # Validate the selected database
-            if self.validate_database(file_path):
-                self.mandates_db_path = file_path
-                self.klusterbox_path_display.setText(self.mandates_db_path)
-            else:
-                CustomWarningDialog.warning(
-                    self,
-                    "Invalid Database",
-                    "The selected file is not a valid Klusterbox database.\n"
-                    "Please select a valid database file.",
-                )
-
-    def apply_settings(self):
-        """Apply and save the current settings."""
-        if self.validate_database(self.mandates_db_path):
-            # Emit the pathChanged signal with the new path
-            self.pathChanged.emit(self.mandates_db_path)
-            self.hide()
-        else:
-            CustomWarningDialog.warning(
-                self,
-                "Invalid Database",
-                "Cannot save settings with an invalid database path.\n"
-                "Please select a valid database file.",
             )
 
     def sync_database(self):
