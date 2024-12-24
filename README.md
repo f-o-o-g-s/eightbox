@@ -115,6 +115,12 @@ This project uses:
 
 ## Version History
 
+### 2024.1.0.6
+- Fixed linting issues and line length problems
+- Removed redundant code and comments
+- Updated clean moves functionality to use eightbox.sqlite
+- Improved code organization
+
 ### 2024.1.0.5
 - Updated clean moves functionality to use eightbox.sqlite
 - Fixed database synchronization issues in clean moves dialog
