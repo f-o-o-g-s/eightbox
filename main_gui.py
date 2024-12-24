@@ -2155,11 +2155,20 @@ class MainApp(QMainWindow):
                     carrier_list = pd.DataFrame(json.load(json_file))
 
                 # Normalize carrier names
-                carrier_list["carrier_name"] = carrier_list["carrier_name"].str.strip().str.lower()
-                current_data["carrier_name"] = current_data["carrier_name"].str.strip().str.lower()
+                carrier_list["carrier_name"] = (
+                    carrier_list["carrier_name"].str.strip().str.lower()
+                )
+                current_data["carrier_name"] = (
+                    current_data["carrier_name"].str.strip().str.lower()
+                )
 
                 # Drop existing list_status and hour_limit columns if they exist
-                columns_to_drop = ["list_status", "list_status_x", "list_status_y", "hour_limit"]
+                columns_to_drop = [
+                    "list_status",
+                    "list_status_x",
+                    "list_status_y",
+                    "hour_limit",
+                ]
                 for col in columns_to_drop:
                     if col in current_data.columns:
                         current_data = current_data.drop(columns=[col])
@@ -2168,7 +2177,7 @@ class MainApp(QMainWindow):
                 current_data = current_data.merge(
                     carrier_list[["carrier_name", "list_status", "hour_limit"]],
                     on="carrier_name",
-                    how="left"
+                    how="left",
                 )
 
             except Exception as e:
