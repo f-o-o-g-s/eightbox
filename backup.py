@@ -115,21 +115,10 @@ def run_pre_commit():
 
 
 def create_zip_backup(source_dir, target_dir):
-    """Create a ZIP backup of the project.
+    """Create a ZIP backup of the source directory.
 
-    Includes all project files and directories except for:
-    - Version control files (.git)
-    - Previous backups (backups/)
-    - Cache files (__pycache__, .pytest_cache)
-    - Output directories (output/, spreadsheets/)
-    - Virtual environment (.venv)
-    - Binary and compiled files (.pyc, .pyo, .pyd, .zip)
-
-    Special handling for:
-    - /database directory (always included)
-    - /tabs directory (always included)
-    - Important configuration files (exclusion_periods.json, carrier_list.json, etc.)
-    - All Python source files
+    Handles file filtering and exclusions based on predefined rules.
+    Maintains directory structure in the ZIP file.
     """
     try:
         print("\nCreating ZIP backup...")
@@ -187,8 +176,22 @@ def git_backup(description, target_branch="main"):
 
     This function handles Git operations including staging changes,
     committing with a timestamped message, and pushing to the target branch.
+    The commit message will be prefixed with one of: Fix:, Feature:, or Breaking:
+    If no prefix is provided, 'Fix:' will be used as default.
     """
     try:
+        # Define valid prefixes
+        valid_prefixes = ["Fix:", "Feature:", "Breaking:"]
+
+        # Check if description starts with a valid prefix
+        has_valid_prefix = any(
+            description.startswith(prefix) for prefix in valid_prefixes
+        )
+
+        # If no valid prefix, add 'Fix:' as default
+        if not has_valid_prefix:
+            description = f"Fix: {description}"
+
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         message = f"BACKUP ({timestamp}): {description}"
 
