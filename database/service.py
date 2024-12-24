@@ -37,8 +37,7 @@ class DatabaseService:
         self.error_handler = error_handler
 
     def fetch_clock_ring_data(
-        self,
-        params: ClockRingQueryParams
+        self, params: ClockRingQueryParams
     ) -> Union[Tuple[pd.DataFrame, None], Tuple[None, DatabaseError]]:
         """Fetch clock ring data for the given parameters.
 
@@ -62,7 +61,7 @@ class DatabaseService:
                         "No valid database path configured.\n"
                         "Please set a valid database path in Settings."
                     ),
-                    error_type="PATH_ERROR"
+                    error_type="PATH_ERROR",
                 )
 
             # Execute the query
@@ -78,9 +77,7 @@ class DatabaseService:
 
         except Exception as e:
             error = DatabaseError(
-                message=str(e),
-                error_type="QUERY_ERROR",
-                details={"exception": str(e)}
+                message=str(e), error_type="QUERY_ERROR", details={"exception": str(e)}
             )
 
             # Call error handler if provided
@@ -126,8 +123,11 @@ class DatabaseService:
         AND r.rings_date < DATE(?, '+1 day')
         """
 
+        # Connect to database
+        conn = sqlite3.connect(params.mandates_db_path)
+
         # Execute query and load into DataFrame
-        df = pd.read_sql_query(
+        db_data = pd.read_sql_query(
             query,
             conn,
             params=(
@@ -136,6 +136,9 @@ class DatabaseService:
             ),
             parse_dates=["rings_date"],
         )
+
+        # Close connection
+        conn.close()
 
         # Filter out carriers with "out of station"
         db_data = db_data[
@@ -148,9 +151,7 @@ class DatabaseService:
         )
 
         # Convert 'total' to numeric explicitly
-        db_data["total"] = pd.to_numeric(db_data["total"], errors="coerce").fillna(
-            0
-        )
+        db_data["total"] = pd.to_numeric(db_data["total"], errors="coerce").fillna(0)
 
         return db_data
 
@@ -258,15 +259,10 @@ class DatabaseService:
             # Check for required tables
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = {row[0] for row in cursor.fetchall()}
-
             required_tables = {"rings3", "carriers"}
 
             conn.close()
-            return True
+            return required_tables.issubset(tables)
 
-        except sqlite3.Error as e:
-            error_msg = (
-                "Failed to fetch data from database. "
-                "Please check your database configuration."
-            )
+        except sqlite3.Error:
             return False

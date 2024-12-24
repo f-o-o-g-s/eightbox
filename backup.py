@@ -1,12 +1,62 @@
-"""Handles both Git version control and full project directory backups."""
+"""Backup script for creating Git and ZIP backups.
+
+This script handles:
+1. Running pre-commit hooks
+2. Creating Git commits
+3. Creating ZIP backups
+4. Handling errors and retries
+"""
+
 import argparse
 import os
 import subprocess
 import zipfile
 from datetime import datetime
 
+# Constants
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKUP_DIR = os.path.join(PROJECT_DIR, "backups")
+
+# Important directories that must be included
+IMPORTANT_DIRS = {
+    "database",  # Database-related modules
+    "tabs",  # Tab-related modules
+}
+
+# Important files that must be included
+IMPORTANT_FILES = {
+    "exclusion_periods.json",  # Exclusion periods configuration
+    "carrier_list.json",  # Carrier list configuration
+    "app_settings.json",  # Application settings
+}
+
+# Directories to exclude from backups
+EXCLUDE_DIRS = {
+    ".git",
+    "backups",
+    "__pycache__",
+    ".pytest_cache",
+    "output",
+    ".venv",
+    "spreadsheets",
+    "node_modules",
+    ".idea",
+    ".vscode",
+}
+
+# File extensions to exclude from backups
+EXCLUDE_EXTENSIONS = {
+    ".pyc",
+    ".pyo",
+    ".pyd",
+    ".zip",
+    ".log",
+    ".tmp",
+    ".temp",
+    ".bak",
+    ".swp",
+    ".swo",
+}
 
 
 def run_pre_commit():
@@ -76,10 +126,10 @@ def create_zip_backup(source_dir, target_dir):
     - Binary and compiled files (.pyc, .pyo, .pyd, .zip)
 
     Special handling for:
-    - /database directory (included)
-    - /tabs directory (included)
+    - /database directory (always included)
+    - /tabs directory (always included)
+    - Important configuration files (exclusion_periods.json, carrier_list.json, etc.)
     - All Python source files
-    - Configuration files
     """
     try:
         print("\nCreating ZIP backup...")
@@ -93,52 +143,32 @@ def create_zip_backup(source_dir, target_dir):
 
         print("Copying files...")
 
-        # Directories to exclude
-        exclude_dirs = {
-            ".git",
-            "backups",
-            "__pycache__",
-            ".pytest_cache",
-            "output",
-            ".venv",
-            "spreadsheets",
-            "node_modules",  # Added common exclusion
-            ".idea",  # Added common exclusion
-            ".vscode",  # Added common exclusion
-        }
-
-        # File extensions to exclude
-        exclude_extensions = {
-            ".pyc",
-            ".pyo",
-            ".pyd",
-            ".zip",
-            ".log",
-            ".tmp",
-            ".temp",  # Added common exclusions
-            ".bak",
-            ".swp",
-            ".swo",  # Added common exclusions
-        }
-
-        # Important directories to ensure are included
-        important_dirs = {"database", "tabs"}
-
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
             for root, dirs, files in os.walk(source_dir):
-                # Skip excluded directories but ensure important dirs are kept
+                # Get relative path for current directory
                 rel_path = os.path.relpath(root, source_dir)
-                if any(excl in rel_path.split(os.sep) for excl in exclude_dirs):
+                path_parts = rel_path.split(os.sep)
+
+                # Skip excluded directories unless they're part of important directories
+                if any(excl in path_parts for excl in EXCLUDE_DIRS):
                     # Check if this is a subdirectory of an important directory
-                    if not any(imp in rel_path.split(os.sep) for imp in important_dirs):
+                    if not any(imp in path_parts for imp in IMPORTANT_DIRS):
                         continue
 
                 # Filter out excluded directories for next iteration
-                dirs[:] = [d for d in dirs if d not in exclude_dirs]
+                dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
 
                 for file in files:
+                    # Always include important files
+                    if file in IMPORTANT_FILES:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, source_dir)
+                        print(f"Adding: {arcname}")
+                        zipf.write(file_path, arcname)
+                        continue
+
                     # Skip excluded file extensions
-                    if not any(file.endswith(ext) for ext in exclude_extensions):
+                    if not any(file.endswith(ext) for ext in EXCLUDE_EXTENSIONS):
                         file_path = os.path.join(root, file)
                         arcname = os.path.relpath(file_path, source_dir)
                         print(f"Adding: {arcname}")
