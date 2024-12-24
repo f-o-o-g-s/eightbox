@@ -2145,9 +2145,43 @@ class MainApp(QMainWindow):
             progress.setValue(30)
             QApplication.processEvents()
 
-            # Phase 2: Reprocess violations (30-90%)
-            progress.setLabelText("Reprocessing violations...")
+            # Phase 1.5: Merge carrier list data (30-50%)
+            progress.setLabelText("Updating carrier data...")
+            progress.setValue(40)
+            QApplication.processEvents()
+
+            try:
+                with open("carrier_list.json", "r") as json_file:
+                    carrier_list = pd.DataFrame(json.load(json_file))
+
+                # Normalize carrier names
+                carrier_list["carrier_name"] = carrier_list["carrier_name"].str.strip().str.lower()
+                current_data["carrier_name"] = current_data["carrier_name"].str.strip().str.lower()
+
+                # Drop existing list_status and hour_limit columns if they exist
+                columns_to_drop = ["list_status", "list_status_x", "list_status_y", "hour_limit"]
+                for col in columns_to_drop:
+                    if col in current_data.columns:
+                        current_data = current_data.drop(columns=[col])
+
+                # Merge with carrier list data
+                current_data = current_data.merge(
+                    carrier_list[["carrier_name", "list_status", "hour_limit"]],
+                    on="carrier_name",
+                    how="left"
+                )
+
+            except Exception as e:
+                print(f"Error merging carrier list data: {e}")
+                current_data["list_status"] = "unknown"
+                current_data["hour_limit"] = 12.00
+
             progress.setValue(50)
+            QApplication.processEvents()
+
+            # Phase 2: Reprocess violations (50-90%)
+            progress.setLabelText("Reprocessing violations...")
+            progress.setValue(60)
             QApplication.processEvents()
 
             self.update_violations_and_remedies(current_data)
