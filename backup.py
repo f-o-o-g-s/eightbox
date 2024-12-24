@@ -183,7 +183,11 @@ def create_zip_backup(source_dir, target_dir):
 
 
 def git_backup(description, target_branch="main"):
-    """Handle Git version control backup."""
+    """Handle Git version control backup.
+
+    This function handles Git operations including staging changes,
+    committing with a timestamped message, and pushing to the target branch.
+    """
     try:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         message = f"BACKUP ({timestamp}): {description}"
