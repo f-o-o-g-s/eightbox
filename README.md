@@ -115,6 +115,11 @@ This project uses:
 
 ## Version History
 
+### 2024.1.0.5
+- Updated clean moves functionality to use eightbox.sqlite
+- Fixed database synchronization issues in clean moves dialog
+- Improved database path handling consistency across application
+
 ### 2024.1.0.4
 - Fixed 85F 5th violation detection and highlighting
 - Fixed formula to exclude NS days when determining 5th overtime day
