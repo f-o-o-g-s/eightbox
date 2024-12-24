@@ -57,7 +57,6 @@ from database.path_manager import DatabasePathManager
 
 # Theme colors
 from theme import apply_material_dark_theme
-from utils import set_display
 from violation_85d_tab import Violation85dTab
 from violation_85f_5th_tab import Violation85f5thTab
 from violation_85f_ns_tab import Violation85fNsTab
