@@ -245,7 +245,6 @@ class MainApp(QMainWindow):
 
     VERSION = "2024.1.0.6"  # Updated by release.py
     BUILD_TIME = "2024-12-24 14:25"  # Updated by release.py
-    SETTINGS_FILE = "app_settings.json"  # File to store application settings
 
     def __init__(self):
         super().__init__()
@@ -255,7 +254,7 @@ class MainApp(QMainWindow):
         self.setMinimumSize(800, 600)
 
         # Initialize database path manager first
-        self.path_manager = DatabasePathManager(self.SETTINGS_FILE)
+        self.path_manager = DatabasePathManager()
 
         # Load database path with fallback behavior
         self.mandates_db_path = self.path_manager.load_database_path()

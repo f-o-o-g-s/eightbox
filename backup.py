@@ -43,7 +43,6 @@ IMPORTANT_DIRS = {
 IMPORTANT_FILES = {
     "exclusion_periods.json",  # Exclusion periods configuration
     "carrier_list.json",  # Carrier list configuration
-    "app_settings.json",  # Application settings
 }
 
 # Directories to exclude from backups

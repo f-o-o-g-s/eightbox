@@ -7,13 +7,9 @@ import sqlite3
 class DatabasePathManager:
     """Manages database path operations and validation."""
 
-    def __init__(self, config_path="settings.json"):
-        """Initialize the DatabasePathManager.
-
-        Args:
-            config_path (str): Path to the settings file (kept for compatibility)
-        """
-        self.config_path = config_path
+    def __init__(self):
+        """Initialize the DatabasePathManager."""
+        pass
 
     def load_database_path(self):
         """Load database path from default location.
