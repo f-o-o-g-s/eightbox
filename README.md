@@ -115,6 +115,18 @@ This project uses:
 
 ## Version History
 
+### 2024.1.0.4
+- Fixed 85F 5th violation detection and highlighting
+- Fixed formula to exclude NS days when determining 5th overtime day
+- Corrected remedy calculations for 85F 5th violations
+- Updated summary tab to properly identify NS days using display_indicator
+- Fixed violation date highlighting in UI
+- Major code refactoring:
+  - Split database functionality into dedicated modules (models, path_manager, service)
+  - Moved violation tab files to dedicated tabs directory
+  - Improved code organization and error handling
+  - Enhanced UI component initialization
+
 ### 2024.0.11.0
 - Updated all violation type documentation to reflect current implementation
 - Enhanced documentation with highlighted key contract language sections
