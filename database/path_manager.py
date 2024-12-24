@@ -24,12 +24,11 @@ class DatabasePathManager:
         # Default path for Klusterbox database
         if os.name == "nt":  # Windows
             default_path = os.path.join(
-                os.path.expanduser("~"),
-                "Documents",
-                ".klusterbox",
-                "mandates.sqlite"
+                os.path.expanduser("~"), "Documents", ".klusterbox", "mandates.sqlite"
             )
-            if os.path.exists(default_path) and self.validate_database_path(default_path):
+            if os.path.exists(default_path) and self.validate_database_path(
+                default_path
+            ):
                 return default_path
         return None
 
