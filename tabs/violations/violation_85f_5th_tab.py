@@ -152,8 +152,12 @@ class Violation85f5thTab(BaseViolationTab):
         # Get the 85F_5th_date for each carrier by finding the 5th overtime day
         def get_violation_date(group):
             ot_days = group[
-                (group["total_hours"] > 8.0) &
-                (~group["display_indicator"].str.contains("NS day", case=False, na=False))
+                (group["total_hours"] > 8.0)
+                & (
+                    ~group["display_indicator"].str.contains(
+                        "NS day", case=False, na=False
+                    )
+                )
             ]
             if len(ot_days) >= 5:
                 return ot_days.sort_values(date_column)["85F_5th_date"].iloc[4]
