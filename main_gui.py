@@ -4,7 +4,6 @@ Implements the primary window and core UI functionality, coordinating between
 different panes and managing the overall application state and user interactions.
 """
 
-# Test comment for line ending verification
 import json
 import os
 import sqlite3
