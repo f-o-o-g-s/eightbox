@@ -1950,6 +1950,7 @@ class MainApp(QMainWindow):
         # Update the date range display
         self.update_date_range_display(
             start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
+        )
 
         # Process the selected date range
         self.apply_date_range()
