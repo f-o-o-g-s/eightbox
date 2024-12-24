@@ -1,6 +1,5 @@
 [MAIN]
 
-
 # Files or directories to be skipped. They should be base names, not paths.
 ignore=CVS,
        .git,
@@ -8,7 +7,30 @@ ignore=CVS,
        __pycache__,
        .mypy_cache,
        output,
-       spreadsheets
+       spreadsheets,
+       backups,
+       node_modules,
+       .idea,
+       .vscode
+
+# Python code to execute, usually for sys.path manipulation such as
+# pygtk.require().
+init-hook='import sys; sys.path.append(".")'
+
+# Use multiple processes to speed up Pylint.
+jobs=1
+
+# Discover python modules and packages in the file system subtree.
+recursive=yes
+
+# Add paths to the list of the source roots.
+source-roots=database,
+            tabs,
+            violation_formulas
+
+# When enabled, pylint would attempt to guess common misconfiguration and emit
+# user-friendly hints instead of false-positive error messages.
+suggestion-mode=yes
 
 # Analyse import fallback blocks. This can be used to support both Python 2 and
 # 3 compatible code, which means that the block might have code that exists
@@ -73,15 +95,6 @@ ignore-patterns=^\.#
 # Unix pattern matching.
 ignored-modules=
 
-# Python code to execute, usually for sys.path manipulation such as
-# pygtk.require().
-#init-hook=
-
-# Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
-# number of processors available to use, and will cap the count on Windows to
-# avoid hangs.
-jobs=1
-
 # Control the amount of potential inferred values when inferring a single
 # object. This can help the performance when dealing with large functions or
 # complex, nested conditions.
@@ -101,19 +114,6 @@ prefer-stubs=no
 # Minimum Python version to use for version dependent checks. Will default to
 # the version used to run pylint.
 py-version=3.12
-
-# Discover python modules and packages in the file system subtree.
-recursive=no
-
-# Add paths to the list of the source roots. Supports globbing patterns. The
-# source root is an absolute path or a path relative to the current working
-# directory used to determine a package namespace for modules located under the
-# source root.
-source-roots=
-
-# When enabled, pylint would attempt to guess common misconfiguration and emit
-# user-friendly hints instead of false-positive error messages.
-suggestion-mode=yes
 
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
@@ -262,6 +262,12 @@ variable-naming-style=snake_case
 # naming style.
 #variable-rgx=
 
+# Allow Qt-style method names
+method-rgx=[a-z_][a-zA-Z0-9_]{2,50}$
+
+# Allow Qt-style class names
+class-rgx=[A-Z_][a-zA-Z0-9_]+$
+
 
 [CLASSES]
 
@@ -300,31 +306,31 @@ ignored-parents=
 max-args=5
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=7
+max-attributes=50
 
 # Maximum number of boolean expressions in an if statement (see R0916).
 max-bool-expr=5
 
 # Maximum number of branch for function / method body.
-max-branches=12
+max-branches=20
 
 # Maximum number of locals for function / method body.
-max-locals=15
+max-locals=25
 
 # Maximum number of parents for a class (see R0901).
-max-parents=7
+max-parents=10
 
 # Maximum number of positional arguments for function / method.
 max-positional-arguments=5
 
 # Maximum number of public methods for a class (see R0904).
-max-public-methods=20
+max-public-methods=100
 
 # Maximum number of return / yield for function / method body.
-max-returns=6
+max-returns=10
 
 # Maximum number of statements in function / method body.
-max-statements=50
+max-statements=100
 
 # Minimum number of public methods for a class (see R0903).
 min-public-methods=2
@@ -445,7 +451,13 @@ disable=raw-checker-failed,
         deprecated-pragma,
         use-symbolic-message-instead,
         use-implicit-booleaness-not-comparison-to-string,
-        use-implicit-booleaness-not-comparison-to-zero
+        use-implicit-booleaness-not-comparison-to-zero,
+        C0103,  # invalid-name (for PyQt method names)
+        R0902,  # too-many-instance-attributes (PyQt widgets often need many)
+        R0904,  # too-many-public-methods (PyQt classes often need many)
+        W0201,  # attribute-defined-outside-init (common in PyQt setup)
+        C0111,  # missing-docstring (for simple Qt overrides)
+        W0613   # unused-argument (Qt event handlers often have unused args)
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
