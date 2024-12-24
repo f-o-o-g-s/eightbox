@@ -1671,8 +1671,6 @@ class MainApp(QMainWindow):
             from settings_dialog import SettingsDialog
 
             self.settings_dialog = SettingsDialog(self.mandates_db_path, self)
-            # Connect the pathChanged signal
-            self.settings_dialog.pathChanged.connect(self.handle_database_path_change)
             self.settings_dialog.show()
         else:
             self.settings_dialog.activateWindow()  # Bring existing window to front
@@ -1924,15 +1922,6 @@ class MainApp(QMainWindow):
         )
         initializer = DatabaseInitializer(target_path, source_db_path, self)
         return initializer.initialize()
-
-    def handle_database_path_change(self, new_path):
-        """Handle database path changes from settings dialog.
-
-        Args:
-            new_path (str): New database path
-        """
-        # This method is no longer needed since we don't allow path changes
-        pass
 
     def show_clean_moves_dialog(self):
         """Show the Clean Moves dialog.
