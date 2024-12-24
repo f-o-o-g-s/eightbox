@@ -517,14 +517,10 @@ class MainApp(QMainWindow):
                 current_tab.update_stats()
 
     def init_top_button_row(self):
-        """Create a horizontal row for utility buttons.
-
-        Contains:
-        - Date Selection, Carrier List, and OTDL Maximization buttons
-        - Global carrier filter textbox
-        """
-        # Create top button row
+        """Create a horizontal row for utility buttons (Date Selection, Carrier List, OTDL Maximization)"""
+        # Create button row layout
         button_row_layout = QHBoxLayout()
+        button_row_layout.setContentsMargins(8, 8, 8, 8)
 
         # Create a container widget for the button row with a darker background
         button_container = QWidget()
@@ -549,21 +545,6 @@ class MainApp(QMainWindow):
                 background-color: #383838;
                 border-color: #4D4D4D;
             }
-            QLineEdit {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                border: 1px solid #404040;
-                border-radius: 4px;
-                padding: 8px;
-                margin: 8px 4px;
-                min-width: 250px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #BB86FC;
-            }
-            QLineEdit::placeholder {
-                color: #808080;
-            }
             """
         )
 
@@ -578,24 +559,84 @@ class MainApp(QMainWindow):
 
         self.otdl_maximization_button = QPushButton("  OTDL Maximization")
         self.otdl_maximization_button.setCheckable(True)
-        self.otdl_maximization_button.clicked.connect(
-            self.toggle_otdl_maximization_pane
-        )
+        self.otdl_maximization_button.clicked.connect(self.toggle_otdl_maximization_pane)
 
-        # Add global carrier filter
-        self.carrier_filter = QLineEdit()
-        self.carrier_filter.setPlaceholderText("Filter carriers across all tabs...")
-        self.carrier_filter.textChanged.connect(self.on_carrier_filter_changed)
-
-        # Add buttons and filter to layout
+        # Add buttons to layout
         button_row_layout.addWidget(self.date_selection_button)
         button_row_layout.addWidget(self.carrier_list_button)
         button_row_layout.addWidget(self.otdl_maximization_button)
-        button_row_layout.addWidget(self.carrier_filter)
         button_row_layout.addStretch()
 
         button_container.setLayout(button_row_layout)
         self.main_layout.addWidget(button_container)
+
+    def init_filter_row(self):
+        """Create a row for the carrier filter textbox."""
+        # Create filter row container
+        filter_container = QWidget()
+        filter_container.setStyleSheet(
+            """
+            QWidget {
+                background-color: #1E1E1E;
+                border-bottom: 1px solid #333333;
+            }
+            QLineEdit {
+                background-color: #2D2D2D;
+                color: #E1E1E1;
+                border: 1px solid #404040;
+                border-radius: 4px;
+                padding: 8px;
+                margin: 8px;
+            }
+            QLineEdit:focus {
+                border: 1px solid #BB86FC;
+            }
+            QLineEdit::placeholder {
+                color: #808080;
+            }
+            """
+        )
+
+        # Create layout for the filter row
+        filter_layout = QHBoxLayout()
+        filter_layout.setContentsMargins(8, 4, 8, 4)
+
+        # Create and add the filter textbox
+        self.carrier_filter = QLineEdit()
+        self.carrier_filter.setPlaceholderText("Filter carriers across all tabs...")
+        self.carrier_filter.textChanged.connect(self.on_carrier_filter_changed)
+        filter_layout.addWidget(self.carrier_filter)
+
+        filter_container.setLayout(filter_layout)
+        return filter_container
+
+    def _init_menu_content(self):
+        """Initialize the menu content area."""
+        # Setup main menu and toolbar
+        self.init_menu_toolbar()
+        self.menu_content_layout.addWidget(self.menuBar())
+
+        # Create main layout for buttons and central tab widget
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+
+        # Initialize button row and add to layout
+        self.init_top_button_row()
+
+        # Create and add central tab widget
+        self.central_tab_widget = QTabWidget()
+        self.central_tab_widget.setObjectName("centralTabs")
+        self.main_layout.addWidget(self.central_tab_widget)
+
+        # Add the filter row between central tab widget and violation tabs
+        self.main_layout.addWidget(self.init_filter_row())
+
+        # Initialize and add bottom filter row
+        self.init_filter_button_row()
+
+        # Add main layout to menu content
+        self.menu_content_layout.addLayout(self.main_layout)
 
     def init_filter_button_row(self):
         """Create a horizontal row for filter buttons at the bottom."""
@@ -2277,6 +2318,9 @@ class MainApp(QMainWindow):
         self.central_tab_widget = QTabWidget()
         self.central_tab_widget.setObjectName("centralTabs")
         self.main_layout.addWidget(self.central_tab_widget)
+
+        # Add the filter row between central tab widget and violation tabs
+        self.main_layout.addWidget(self.init_filter_row())
 
         # Initialize and add bottom filter row
         self.init_filter_button_row()
