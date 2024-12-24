@@ -502,7 +502,9 @@ class MainApp(QMainWindow):
                 if filter_text:
                     current_tab.current_filter = filter_text
                     current_tab.current_filter_type = "name"
-                    current_tab.filter_carriers(filter_text, filter_type="name")
+                    current_tab.filter_carriers(
+                        filter_text, filter_type="name"
+                    )  # Split to fix line length
 
             # 2. Apply status filter if it exists
             if (
@@ -517,7 +519,8 @@ class MainApp(QMainWindow):
                 current_tab.update_stats()
 
     def init_top_button_row(self):
-        """Create a horizontal row for utility buttons (Date Selection, Carrier List, OTDL Maximization)"""
+        """Create a horizontal row for utility buttons
+        (Date Selection, Carrier List, OTDL Maximization)"""
         # Create button row layout
         button_row_layout = QHBoxLayout()
         button_row_layout.setContentsMargins(8, 8, 8, 8)
@@ -559,7 +562,9 @@ class MainApp(QMainWindow):
 
         self.otdl_maximization_button = QPushButton("  OTDL Maximization")
         self.otdl_maximization_button.setCheckable(True)
-        self.otdl_maximization_button.clicked.connect(self.toggle_otdl_maximization_pane)
+        self.otdl_maximization_button.clicked.connect(
+            self.toggle_otdl_maximization_pane
+        )
 
         # Add buttons to layout
         button_row_layout.addWidget(self.date_selection_button)
@@ -2299,34 +2304,6 @@ class MainApp(QMainWindow):
         """Initialize the custom title bar."""
         self.title_bar = CustomTitleBar(self)
         self.title_bar.setObjectName("titleBar")
-
-    def _init_menu_content(self):
-        """Initialize the menu content area."""
-        # Setup main menu and toolbar
-        self.init_menu_toolbar()
-        self.menu_content_layout.addWidget(self.menuBar())
-
-        # Create main layout for buttons and central tab widget
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
-
-        # Initialize button row and add to layout
-        self.init_top_button_row()
-
-        # Create and add central tab widget
-        self.central_tab_widget = QTabWidget()
-        self.central_tab_widget.setObjectName("centralTabs")
-        self.main_layout.addWidget(self.central_tab_widget)
-
-        # Add the filter row between central tab widget and violation tabs
-        self.main_layout.addWidget(self.init_filter_row())
-
-        # Initialize and add bottom filter row
-        self.init_filter_button_row()
-
-        # Add main layout to menu content
-        self.menu_content_layout.addLayout(self.main_layout)
 
     def _init_tabs(self):
         """Initialize all tabs and panes."""
