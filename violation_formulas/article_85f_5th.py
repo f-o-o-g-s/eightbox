@@ -135,8 +135,9 @@ def detect_85f_5th_violations(
 
         # Find potential violation days
         overtime_days = carrier_data[
-            (carrier_data["day_of_week"] != 6)
-            & (carrier_data["daily_hours"] > 8)  # Exclude Sundays
+            (carrier_data["day_of_week"] != 6)  # Exclude Sundays
+            & (carrier_data["daily_hours"] > 8)
+            & (~carrier_data["code"].str.contains("ns day", case=False, na=False))  # Exclude non-scheduled days
         ].sort_values("date_dt")
 
         violation_date = None
@@ -146,7 +147,10 @@ def detect_85f_5th_violations(
 
         # Add all days for this carrier
         for _, day in carrier_data.iterrows():
-            is_violation = day["rings_date"] == violation_date
+            # Extract just the date part for comparison by splitting on space
+            day_date = day["rings_date"].split(" ")[0] if isinstance(day["rings_date"], str) else day["rings_date"]
+            is_violation = day_date == violation_date
+            
             base_result.append(
                 {
                     "carrier_name": carrier,
