@@ -2,4 +2,4 @@
 
 This package handles database initialization, schema management,
 and data synchronization for the Eightbox application.
-""" 
+"""

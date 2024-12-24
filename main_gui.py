@@ -48,12 +48,12 @@ from custom_widgets import (
 
 # Custom modules
 from database.initializer import DatabaseInitializer
-from database.models import ClockRingQueryParams, DatabaseError
+from database.models import ClockRingQueryParams
+from database.path_manager import DatabasePathManager
 from database.service import DatabaseService
 from date_selection_pane import DateSelectionPane
 from excel_export import ExcelExporter
 from otdl_maximization_pane import OTDLMaximizationPane
-from database.path_manager import DatabasePathManager
 
 # Theme colors
 from theme import apply_material_dark_theme
@@ -250,27 +250,27 @@ class MainApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        
+
         # Initialize window properties
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setMinimumSize(800, 600)
-        
+
         # Initialize database path manager first
         self.path_manager = DatabasePathManager(self.SETTINGS_FILE)
-        
+
         # Load database path with fallback behavior
         self.mandates_db_path = self.path_manager.load_database_path()
-        
+
         # Initialize database service
         self.db_service = DatabaseService()
-        
+
         # Initialize window attributes and UI components
         self._init_window_attributes()
         self._init_ui_components()
-        
+
         # Initialize database
         self._init_database()
-        
+
         # Show database configuration dialog only if path is not found
         if not self.mandates_db_path:
             self.open_settings_dialog()
@@ -295,7 +295,7 @@ class MainApp(QMainWindow):
 
         # Install event filter on the main window
         self.installEventFilter(self)
-        
+
     def _init_ui_components(self):
         """Initialize all UI components."""
         # Apply material dark theme
@@ -323,7 +323,7 @@ class MainApp(QMainWindow):
         self._init_menu_content()
         self._init_tabs()
         self._init_size_grip()
-        
+
     def _init_database(self):
         """Initialize the database with proper error handling."""
         if not self.initialize_eightbox_database(self.mandates_db_path):
@@ -331,7 +331,7 @@ class MainApp(QMainWindow):
                 self,
                 "Database Error",
                 "Failed to initialize the working database.\n"
-                "Please check the application logs for details."
+                "Please check the application logs for details.",
             )
 
     def setup_ui(self):
@@ -1535,9 +1535,9 @@ class MainApp(QMainWindow):
             params = ClockRingQueryParams(
                 start_date=start_date,
                 end_date=end_date,
-                mandates_db_path=self.mandates_db_path
+                mandates_db_path=self.mandates_db_path,
             )
-            
+
             data, error = self.db_service.fetch_clock_ring_data(params)
             if error:
                 # Error handler already called by service
@@ -1554,7 +1554,7 @@ class MainApp(QMainWindow):
                         "display_indicator",
                     ]
                 )
-            
+
             return data
 
         except Exception as e:
@@ -1873,30 +1873,27 @@ class MainApp(QMainWindow):
             bool: True if initialization successful, False otherwise
         """
         target_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 
-            "eightbox.sqlite"
+            os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite"
         )
         initializer = DatabaseInitializer(target_path, source_db_path, self)
         return initializer.initialize()
 
     def handle_database_path_change(self, new_path):
         """Handle database path changes from settings dialog.
-        
+
         Args:
             new_path (str): New database path
         """
         if self.path_manager.validate_database_path(new_path):
-            old_path = self.mandates_db_path
-            
             # If carrier_list.json exists, check for differences
             if os.path.exists("carrier_list.json"):
                 new_carriers = self.get_carriers_from_database(new_path)
                 existing_carriers = self.load_carrier_list()
-                
+
                 if self.carriers_differ(new_carriers, existing_carriers):
                     # Import the migration dialog here to avoid circular imports
                     from carrier_list_migration_dialog import CarrierListMigrationDialog
-                    
+
                     # Show migration dialog
                     migration_dialog = CarrierListMigrationDialog(
                         existing_carriers, new_carriers, self
@@ -1918,22 +1915,28 @@ class MainApp(QMainWindow):
                             return
                     else:
                         return  # User cancelled
-            
+
             # Continue with database path change
             self.mandates_db_path = new_path
             self.path_manager.save_database_path(new_path)
-            
+
             # Update carrier list pane with new path
-            if hasattr(self, "carrier_list_pane") and self.carrier_list_pane is not None:
+            if (
+                hasattr(self, "carrier_list_pane")
+                and self.carrier_list_pane is not None
+            ):
                 self.carrier_list_pane.update_database_path(new_path)
-                
+
             # Show success message
             CustomInfoDialog.information(
                 self, "Database Updated", "Database path has been updated successfully."
             )
-            
+
             # Refresh data if date range is selected
-            if hasattr(self, "date_selection_pane") and self.date_selection_pane is not None:
+            if (
+                hasattr(self, "date_selection_pane")
+                and self.date_selection_pane is not None
+            ):
                 QTimer.singleShot(100, self.apply_date_range)
 
     def get_carriers_from_database(self, db_path):
@@ -2172,24 +2175,20 @@ class MainApp(QMainWindow):
 
     def _handle_database_error(self, error):
         """Handle database errors with appropriate GUI feedback."""
-        QMessageBox.critical(
-            self,
-            "Database Error",
-            error.message
-        )
+        QMessageBox.critical(self, "Database Error", error.message)
 
     def _init_container(self):
         """Initialize the main container and layout."""
         # Create main container widget
         self.container = QWidget()
         self.container.setObjectName("mainContainer")
-        
+
         # Create main container layout
         container_layout = QVBoxLayout()
         container_layout.setContentsMargins(0, 0, 0, 0)
         container_layout.setSpacing(0)
         self.container.setLayout(container_layout)
-        
+
         # Create menu content widget
         self.menu_content_widget = QWidget()
         self.menu_content_widget.setObjectName("menuContent")
@@ -2197,11 +2196,11 @@ class MainApp(QMainWindow):
         self.menu_content_layout.setContentsMargins(0, 0, 0, 0)
         self.menu_content_layout.setSpacing(0)
         self.menu_content_widget.setLayout(self.menu_content_layout)
-        
+
         # Add title bar and menu content to container
         container_layout.addWidget(self.title_bar)
         container_layout.addWidget(self.menu_content_widget)
-        
+
         # Set as central widget
         self.setCentralWidget(self.container)
 
@@ -2215,23 +2214,23 @@ class MainApp(QMainWindow):
         # Setup main menu and toolbar
         self.init_menu_toolbar()
         self.menu_content_layout.addWidget(self.menuBar())
-        
+
         # Create main layout for buttons and central tab widget
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
-        
+
         # Initialize button row and add to layout
         self.init_top_button_row()
-        
+
         # Create and add central tab widget
         self.central_tab_widget = QTabWidget()
         self.central_tab_widget.setObjectName("centralTabs")
         self.main_layout.addWidget(self.central_tab_widget)
-        
+
         # Initialize and add bottom filter row
         self.init_filter_button_row()
-        
+
         # Add main layout to menu content
         self.menu_content_layout.addLayout(self.main_layout)
 
@@ -2241,11 +2240,11 @@ class MainApp(QMainWindow):
         self.date_selection_pane = None
         self.carrier_list_pane = None
         self.otdl_maximization_pane = None
-        
+
         # Initialize carrier list and OTDL panes
         self.init_carrier_list_pane()
         self.init_otdl_maximization_pane()
-        
+
         # Initialize violation tabs
         self.init_85d_tab()
         self.init_85f_tab()
@@ -2255,10 +2254,10 @@ class MainApp(QMainWindow):
         self.init_MAX12_tab()
         self.init_MAX60_tab()
         self.init_remedies_tab()
-        
+
         # Initialize settings dialog reference
         self.settings_dialog = None
-        
+
         # Add export action to file menu
         export_all_action = QAction("Generate All Excel Spreadsheets", self)
         export_all_action.triggered.connect(self.excel_exporter.export_all_violations)

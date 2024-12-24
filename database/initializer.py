@@ -9,6 +9,7 @@ import sqlite3
 from datetime import datetime
 
 import pandas as pd
+
 from custom_widgets import CustomWarningDialog
 
 
@@ -343,4 +344,4 @@ class DatabaseInitializer:
         cursor.execute("CREATE INDEX idx_carrier_name ON carriers(carrier_name)")
         cursor.execute(
             "CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)"
-        ) 
+        )
