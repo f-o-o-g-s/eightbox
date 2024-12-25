@@ -271,6 +271,41 @@ def update_version_and_build_time(version):
         f.write(content)
 
 
+def build_and_package(version):
+    """Build the executable and create distribution ZIP.
+
+    Args:
+        version (str): Version number for the ZIP file name
+
+    Returns:
+        str: Path to the created ZIP file
+    """
+    try:
+        # Import functions from release_build
+        from release_build import (
+            clean_old_builds,
+            create_distribution_zip,
+            run_build,
+        )
+
+        print("\nBuilding executable and creating distribution package...")
+
+        # Clean old builds
+        clean_old_builds()
+
+        # Run build
+        run_build()
+
+        # Create distribution ZIP
+        zip_file = create_distribution_zip()
+
+        return zip_file
+
+    except Exception as e:
+        print(f"\nError during build process: {str(e)}")
+        raise
+
+
 def create_release():
     """Create a new release with version bump and release notes."""
     try:
@@ -339,6 +374,9 @@ def create_release():
         )
         subprocess.run(["git", "push", "origin", "--tags"], check=True)
 
+        # Build and package the application
+        zip_file = build_and_package(new_version)
+
         # 6. Create GitHub Release
         token = get_github_token()
         g = Github(token)
@@ -353,6 +391,11 @@ def create_release():
             prerelease=False,
             target_commitish=commit_sha,
         )
+
+        # Upload the distribution ZIP
+        if os.path.exists(zip_file):
+            release.upload_asset(zip_file)
+            print(f"\nUploaded distribution package: {zip_file}")
 
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")
@@ -425,6 +468,9 @@ def create_release_non_interactive(release_type, commit_msg, notes):
         )
         subprocess.run(["git", "push", "origin", "--tags"], check=True)
 
+        # Build and package the application
+        zip_file = build_and_package(new_version)
+
         # 6. Create GitHub Release
         token = get_github_token()
         g = Github(token)
@@ -439,6 +485,11 @@ def create_release_non_interactive(release_type, commit_msg, notes):
             prerelease=False,
             target_commitish=commit_sha,
         )
+
+        # Upload the distribution ZIP
+        if os.path.exists(zip_file):
+            release.upload_asset(zip_file)
+            print(f"\nUploaded distribution package: {zip_file}")
 
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")
