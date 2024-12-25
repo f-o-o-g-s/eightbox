@@ -55,6 +55,7 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 ### Prerequisites
 1. Install and configure [Klusterbox](https://github.com/TomOfHelatrobus/klusterbox)
 2. Use Klusterbox's auto data entry to populate the mandates.sqlite database
+   - Alternatively, you can use the test database included in this repository
 3. Ensure Klusterbox is working correctly with your data
 
 ### Installation
@@ -101,7 +102,42 @@ copy mandates.sqlite.backup mandates.sqlite
 ```
 
 ## Usage
-[Basic usage instructions to be added]
+
+### Basic Workflow
+1. Click on Date Selection
+2. Find a date range you want to investigate
+3. Setup your carrier list when prompted
+4. Configure carrier settings:
+   - Set carrier status and hourly limits (primarily for OTDL)
+   - Remove carriers from investigation if needed (can be restored via "Removed" button)
+   - Click Save (settings stored in `carrier_list.json`)
+
+### Violation Detection
+5. The program will analyze the date range for violations
+6. OTDL Maximization management:
+   - Excuse OTDL carriers who didn't reach their hour limits
+   - Apply changes to update violations and remedies
+
+### Data Cleanup (Optional)
+7. For detailed analysis, use File > Clean Invalid Moves to fix problematic clock rings:
+   - Look for moves > 4.25 hours (possible scanner/editing issues)
+   - Check for invalid route numbers (e.g., rt0000)
+   - Use Employee Everything Report as reference
+   - Click "Save All" to apply fixes
+
+### Export and Documentation
+8. Generate reports:
+   - File > Generate All Excel Spreadsheets
+   - Creates 8 Excel files in `eightbox/spreadsheets/daterange/`
+   - Each file includes daily sub-tabs as worksheets
+   - Preserves formatting and colors from Eightbox
+
+### Notes
+- Manual cell editing is possible but won't affect violation detection
+- Help > Article 8 Violation Formulas Documentation explains detection methods
+- Violation detection is based on specific branch settlements and escalated remedies
+- MAX60/MAX12 violations may be more universally applicable
+- Always verify violations manually as the program's detection is not infallible
 
 ## Development
 This project uses:
