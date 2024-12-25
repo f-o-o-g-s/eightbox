@@ -54,3 +54,26 @@ black_changes.txt
 # SQLite databases (except the fake test database)
 *.sqlite
 !fake_mandates_db.sqlite
+
+# ZIP files
+*.zip
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.idea/
+.vscode/
+*.sqlite
+*.db
+*.log
+*.spec
