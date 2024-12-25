@@ -116,7 +116,7 @@ This project uses:
 
 ## Version History
 
-### 2024.1.1.0
+### 2024.1.2.0
 - Added removed carriers management functionality
 - Implemented restore functionality for removed carriers
 - Enhanced carrier list UI with better button layout
