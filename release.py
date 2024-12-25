@@ -1,11 +1,73 @@
-"""Module for managing application releases and version updates.
+"""Release script for Eightbox.
 
-This module provides functionality for:
-- Version number management (YYYY.MAJOR.MINOR.PATCH format)
-- Release notes generation
-- Git operations (commits, tags, pushes)
-- GitHub release creation
-- Build time tracking
+This script handles version management and release creation for Eightbox.
+It follows semantic versioning with the format YYYY.MAJOR.MINOR.PATCH.
+
+Interactive Usage:
+    python release.py
+
+Non-Interactive Usage:
+    python release.py --non-interactive --type TYPE --message MSG --notes NOTE1 NOTE2
+
+Examples:
+    # Interactive mode
+    python release.py
+
+    # Non-interactive patch release
+    python release.py --non-interactive \
+        --type patch \
+        --message "fix: correct OTDL excusal handling" \
+        --notes "Fixed bug in 8.5.G violations" "Updated error messages"
+
+    # Non-interactive minor release
+    python release.py --non-interactive \
+        --type minor \
+        --message "feat: add new carrier filtering" \
+        --notes "Added carrier name filtering" "Improved UI responsiveness"
+
+    # Non-interactive major release
+    python release.py --non-interactive \
+        --type major \
+        --message "feat!: redesign violation detection system" \
+        --notes "Complete overhaul of violation detection" "Breaking API changes"
+
+Commit Message Format:
+    The script enforces conventional commit format:
+    <type>: <description>
+
+    Types:
+    - feat: A new feature
+    - fix: A bug fix
+    - docs: Documentation changes
+    - style: Code style/formatting changes
+    - refactor: Code changes that neither fix a bug nor add a feature
+    - perf: Performance improvements
+    - test: Adding or fixing tests
+    - build: Build system changes
+    - ci: CI configuration changes
+    - chore: Other changes that don't modify src or test files
+    - revert: Reverting previous changes
+
+    Breaking Changes:
+    Add ! after type for breaking changes: feat!: description
+
+    Scopes (optional):
+    Add scope in parentheses: feat(ui): description
+
+Release Types:
+    - patch: Bug fixes and minor changes (Z in X.Y.Z)
+    - minor: New features (Y in X.Y.Z)
+    - major: Breaking changes (X in X.Y.Z)
+
+Notes for AI Assistant:
+    1. Always use --non-interactive mode for consistency
+    2. Match commit type to release type:
+       - patch → fix:, docs:, style:, test:
+       - minor → feat:
+       - major → feat!:
+    3. Include relevant scope if known (e.g., fix(85g):)
+    4. Notes should be specific and descriptive
+    5. For major releases, emphasize breaking changes in notes
 """
 
 import argparse
@@ -15,6 +77,51 @@ import subprocess
 from datetime import datetime
 
 from github import Github
+
+# Conventional commit types
+COMMIT_TYPES = [
+    "feat",
+    "fix",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "build",
+    "ci",
+    "chore",
+    "revert",
+]
+
+
+def format_conventional_commit(message, release_type):
+    """Format message to follow conventional commit standards.
+
+    Args:
+        message (str): The commit message
+        release_type (str): The type of release (patch, minor, major)
+
+    Returns:
+        str: Properly formatted conventional commit message
+    """
+    # If message already follows convention, return as is
+    if any(
+        message.startswith(f"{t}:")
+        or message.startswith(f"{t}!:")
+        or message.startswith(f"{t}(")
+        for t in COMMIT_TYPES
+    ):
+        return message
+
+    # Auto-prefix based on release type
+    if release_type == "major":
+        prefix = "feat!"
+    elif release_type == "minor":
+        prefix = "feat"
+    else:  # patch
+        prefix = "fix"
+
+    return f"{prefix}: {message}"
 
 
 def show_help():
@@ -189,13 +296,22 @@ def create_release():
             return False
 
         choice = int(choice)  # Convert to integer for version calculation
+        release_type = {1: "patch", 2: "minor", 3: "major"}[choice]
 
         print("\nEnter a short commit message:")
+        print("Format: <type>: <description>")
+        print(
+            "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+        )
+        print("Example: feat: add new carrier filtering")
         commit_msg = input().strip()
 
         if not commit_msg:
             print("\nCommit message cannot be empty")
             return False
+
+        # Format commit message to follow conventional commits
+        commit_msg = format_conventional_commit(commit_msg, release_type)
 
         print("\nEnter release notes (one per line, empty line to finish):")
         release_notes = []
@@ -248,6 +364,14 @@ def create_release():
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")
         print(f"Commit SHA: {commit_sha}")
+        print("\nRelease Summary:")
+        print(f"Type: {release_type}")
+        print(f"Version: {new_version}")
+        print(f"Commit Message: {commit_msg}")
+        print("\nRelease Notes:")
+        for note in formatted_notes.split("\n"):
+            if note.strip():
+                print(note)
 
         return True
 
@@ -272,6 +396,9 @@ def create_release_non_interactive(release_type, commit_msg, notes):
         # Convert release type to choice number
         type_map = {"patch": 1, "minor": 2, "major": 3}
         choice = type_map[release_type.lower()]
+
+        # Format commit message to follow conventional commits
+        commit_msg = format_conventional_commit(commit_msg, release_type)
 
         # Format notes if they're not already formatted
         formatted_notes = []
@@ -323,6 +450,14 @@ def create_release_non_interactive(release_type, commit_msg, notes):
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")
         print(f"Commit SHA: {commit_sha}")
+        print("\nRelease Summary:")
+        print(f"Type: {release_type}")
+        print(f"Version: {new_version}")
+        print(f"Commit Message: {commit_msg}")
+        print("\nRelease Notes:")
+        for note in formatted_notes.split("\n"):
+            if note.strip():
+                print(note)
 
         return True
 
