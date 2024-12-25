@@ -4,8 +4,6 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 
 ## Features
 
-## testing pre-commit hooks format
-
 ### Violation Tracking
 - 8.5.D Violations (Overtime Off Route when OTDL wasn't utilized to their hourly limits)
 - 8.5.F Violations (Regular, Non-Scheduled, 5th Day)
