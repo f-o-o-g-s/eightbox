@@ -671,31 +671,40 @@ class MainApp(QMainWindow):
                 border-top: 1px solid #333333;
             }
             QPushButton {
-                background-color: rgba(187, 134, 252, 0.1);
+                background-color: rgba(187, 134, 252, 0.05);
                 border: none;
-                color: #BB86FC;
-                padding: 8px 8px;
+                color: rgba(187, 134, 252, 0.87);
+                padding: 4px 12px;
                 font-size: 12px;
                 margin: 1px;
                 min-width: 90px;
                 max-height: 24px;
                 border-radius: 4px;
                 text-align: center;
+                font-weight: 500;
+                letter-spacing: 0.15px;
             }
             QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.2);
+                background-color: rgba(187, 134, 252, 0.08);
+                color: rgba(187, 134, 252, 1.0);
             }
             QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.3);
+                background-color: rgba(187, 134, 252, 0.12);
+                color: rgba(187, 134, 252, 1.0);
             }
             QPushButton:checked {
-                background-color: #BB86FC;
-                color: #000000;
+                background-color: rgba(187, 134, 252, 0.12);
+                color: rgba(187, 134, 252, 1.0);
+                font-weight: 600;
             }
             QLabel {
-                color: #E1E1E1;
+                color: rgba(187, 134, 252, 0.87);
                 font-size: 12px;
-                padding: 4px 8px;
+                padding: 4px 12px;
+                background-color: rgba(187, 134, 252, 0.05);
+                border-radius: 4px;
+                font-weight: 500;
+                letter-spacing: 0.15px;
             }
         """
         )
