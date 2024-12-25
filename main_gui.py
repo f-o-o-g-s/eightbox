@@ -725,7 +725,7 @@ class MainApp(QMainWindow):
             filter_layout.addWidget(btn)
 
         # Add date range label
-        self.date_range_label = QLabel("Selected Date Range: ")
+        self.date_range_label = QLabel("Selected Date Range: None")
         self.date_range_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         filter_layout.addStretch()
         filter_layout.addWidget(self.date_range_label)
@@ -1825,9 +1825,12 @@ class MainApp(QMainWindow):
             end_date (str): End date in YYYY-MM-DD format
         """
         if hasattr(self, "date_range_label"):
-            self.date_range_label.setText(
-                f"Selected Date Range: {start_date} to {end_date}"
-            )
+            if start_date and end_date:
+                self.date_range_label.setText(
+                    f"Selected Date Range: {start_date} to {end_date}"
+                )
+            else:
+                self.date_range_label.setText("Selected Date Range: None")
 
     def toggle_date_selection_pane(self):
         """Toggle the Date Selection Pane and button state."""
