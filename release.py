@@ -272,13 +272,13 @@ def update_version_and_build_time(version):
 
 
 def build_and_package(version):
-    """Build the executable and create distribution ZIP.
+    """Build the executable and create distribution package.
 
     Args:
-        version (str): Version number for the ZIP file name
+        version (str): Version number for the package name
 
     Returns:
-        str: Path to the created ZIP file
+        str: Path to the created archive file
     """
     try:
         # Import functions from release_build
@@ -296,10 +296,10 @@ def build_and_package(version):
         # Run build
         run_build()
 
-        # Create distribution ZIP
-        zip_file = create_distribution_zip()
+        # Create distribution archive (7z or ZIP)
+        archive_file = create_distribution_zip()
 
-        return zip_file
+        return archive_file
 
     except Exception as e:
         print(f"\nError during build process: {str(e)}")
@@ -375,7 +375,7 @@ def create_release():
         subprocess.run(["git", "push", "origin", "--tags"], check=True)
 
         # Build and package the application
-        zip_file = build_and_package(new_version)
+        archive_file = build_and_package(new_version)
 
         # 6. Create GitHub Release
         token = get_github_token()
@@ -392,10 +392,20 @@ def create_release():
             target_commitish=commit_sha,
         )
 
-        # Upload the distribution ZIP
-        if os.path.exists(zip_file):
-            release.upload_asset(zip_file)
-            print(f"\nUploaded distribution package: {zip_file}")
+        # Upload the distribution archive
+        if os.path.exists(archive_file):
+            # Determine content type based on file extension
+            content_type = (
+                "application/x-7z-compressed"
+                if archive_file.endswith(".7z")
+                else "application/zip"
+            )
+            release.upload_asset(
+                path=archive_file,
+                content_type=content_type,
+                name=os.path.basename(archive_file),
+            )
+            print(f"\nUploaded distribution package: {archive_file}")
 
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")
@@ -469,7 +479,7 @@ def create_release_non_interactive(release_type, commit_msg, notes):
         subprocess.run(["git", "push", "origin", "--tags"], check=True)
 
         # Build and package the application
-        zip_file = build_and_package(new_version)
+        archive_file = build_and_package(new_version)
 
         # 6. Create GitHub Release
         token = get_github_token()
@@ -486,10 +496,20 @@ def create_release_non_interactive(release_type, commit_msg, notes):
             target_commitish=commit_sha,
         )
 
-        # Upload the distribution ZIP
-        if os.path.exists(zip_file):
-            release.upload_asset(zip_file)
-            print(f"\nUploaded distribution package: {zip_file}")
+        # Upload the distribution archive
+        if os.path.exists(archive_file):
+            # Determine content type based on file extension
+            content_type = (
+                "application/x-7z-compressed"
+                if archive_file.endswith(".7z")
+                else "application/zip"
+            )
+            release.upload_asset(
+                path=archive_file,
+                content_type=content_type,
+                name=os.path.basename(archive_file),
+            )
+            print(f"\nUploaded distribution package: {archive_file}")
 
         print(f"\nSuccessfully released version {new_version}!")
         print(f"Release URL: {release.html_url}")

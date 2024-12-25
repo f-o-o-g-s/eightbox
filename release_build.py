@@ -48,17 +48,60 @@ def run_build():
 
 
 def create_distribution_zip():
-    """Create ZIP file for distribution."""
+    """Create distribution archive using 7-Zip with maximum compression.
+
+    Uses 7-Zip's Ultra compression preset with LZMA2 algorithm and a large dictionary
+    size for maximum compression. The -mx=9 flag sets compression to Ultra level.
+
+    Returns:
+        str: Path to the created archive file
+    """
     version = get_version()
-    zip_name = f"eightbox-{version}-windows"
+    archive_name = f"eightbox-{version}-windows"
+    archive_path = os.path.abspath(f"{archive_name}.7z")
+    dist_path = os.path.abspath("dist/eightbox")
 
-    print(f"Creating distribution ZIP: {zip_name}.zip")
+    print(f"Creating distribution archive: {archive_path}")
 
-    # Create ZIP file
-    shutil.make_archive(zip_name, "zip", "dist/eightbox")
+    try:
+        # Try to use 7-Zip with maximum compression
+        sevenzip_path = "C:/Program Files/7-Zip/7z.exe"
+        if not os.path.exists(sevenzip_path):
+            sevenzip_path = "C:/Program Files (x86)/7-Zip/7z.exe"
 
-    print(f"ZIP file created: {zip_name}.zip")
-    return f"{zip_name}.zip"
+        if os.path.exists(sevenzip_path):
+            # Remove existing archive if it exists
+            if os.path.exists(archive_path):
+                os.remove(archive_path)
+
+            # Use 7-Zip with absolute paths and maximum compression
+            subprocess.run(
+                [
+                    sevenzip_path,
+                    "a",  # Add to archive
+                    "-t7z",  # 7z format
+                    "-m0=lzma2",  # LZMA2 method
+                    "-mx=9",  # Ultra compression
+                    "-mfb=273",  # Maximum number of fast bytes
+                    "-ms=on",  # Solid archive
+                    archive_path,  # Output file
+                    f"{dist_path}/*",  # Input files
+                ],
+                check=True,
+            )
+            print(f"Archive created with 7-Zip compression: {archive_path}")
+            return archive_path
+        else:
+            raise FileNotFoundError("7-Zip not found in Program Files")
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        print(
+            f"7-Zip compression failed ({str(e)}), falling back to standard ZIP compression..."
+        )
+        # Fallback to standard ZIP if 7-Zip is not available
+        zip_path = os.path.abspath(f"{archive_name}.zip")
+        shutil.make_archive(archive_name, "zip", "dist/eightbox")
+        print(f"ZIP file created with standard compression: {zip_path}")
+        return zip_path
 
 
 def main():
