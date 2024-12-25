@@ -44,6 +44,7 @@ from custom_widgets import (
     CustomErrorDialog,
     CustomNotificationDialog,
     CustomTitleBarWidget,
+    CustomWarningDialog,
     NewCarriersDialog,
 )
 from table_utils import setup_table_copy_functionality
@@ -366,6 +367,9 @@ class CarrierListPane(QWidget):
 
         # Initialize data
         self.mandates_db_path = mandates_db_path
+        self.eightbox_db_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "eightbox.sqlite"
+        )
         self.json_path = "carrier_list.json"
 
         # Load and pre-sort the carrier data
@@ -680,91 +684,75 @@ class CarrierListPane(QWidget):
             QPushButton {
                 background-color: #2D2D2D;
                 color: #BB86FC;
-                border: 1px solid #3D3D3D;
-                border-bottom: 2px solid #1D1D1D;
-                padding: 8px 24px;
-                font-weight: 500;
-                min-height: 32px;
+                border: none;
                 border-radius: 4px;
-                font-size: 14px;
+                padding: 4px 8px;
+                font-weight: 500;
+                min-height: 28px;
+                min-width: 60px;
+                font-size: 11px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
             }
             QPushButton:hover {
                 background-color: #353535;
-                border: 1px solid #454545;
-                border-bottom: 2px solid #252525;
-                color: #CBB0FF;
             }
             QPushButton:pressed {
                 background-color: #252525;
-                border: 1px solid #353535;
-                border-top: 2px solid #151515;
-                border-bottom: 1px solid #353535;
-                padding-top: 9px;
-                color: #BB86FC;
             }
             QPushButton:disabled {
                 background-color: #252525;
                 color: rgba(225, 225, 225, 0.3);
-                border: 1px solid #2D2D2D;
             }
             QPushButton#primary {
                 background-color: #BB86FC;
                 color: #000000;
-                border: 1px solid #9965DA;
-                border-bottom: 2px solid #7B4FAF;
             }
             QPushButton#primary:hover {
                 background-color: #CBB0FF;
-                border: 1px solid #BB86FC;
-                border-bottom: 2px solid #9965DA;
             }
             QPushButton#primary:pressed {
-                background-color: #BB86FC;
-                border: 1px solid #9965DA;
-                border-top: 2px solid #7B4FAF;
-                border-bottom: 1px solid #9965DA;
-                padding-top: 9px;
+                background-color: #9965DA;
             }
             QPushButton#destructive {
                 background-color: #CF6679;
                 color: #000000;
-                border: 1px solid #B4424F;
-                border-bottom: 2px solid #8F2A35;
             }
             QPushButton#destructive:hover {
                 background-color: #FF8296;
-                border: 1px solid #CF6679;
-                border-bottom: 2px solid #B4424F;
             }
             QPushButton#destructive:pressed {
-                background-color: #CF6679;
-                border: 1px solid #B4424F;
-                border-top: 2px solid #8F2A35;
-                border-bottom: 1px solid #B4424F;
-                padding-top: 9px;
+                background-color: #B4424F;
             }
-        """
+            """
         )
         button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(8, 6, 8, 6)
-        button_layout.setSpacing(8)
+        button_layout.setContentsMargins(8, 4, 8, 4)
+        button_layout.setSpacing(4)
 
         # Left-aligned buttons
         left_button_container = QWidget()
         left_button_layout = QHBoxLayout(left_button_container)
         left_button_layout.setContentsMargins(0, 0, 0, 0)
-        left_button_layout.setSpacing(8)
+        left_button_layout.setSpacing(4)
 
-        edit_button = QPushButton("Edit")
+        # Create action buttons with consistent sizing
+        edit_button = QPushButton("EDIT")
+        edit_button.setFixedWidth(60)
         edit_button.clicked.connect(self.edit_carrier)
         left_button_layout.addWidget(edit_button)
 
-        remove_button = QPushButton("Remove")
+        remove_button = QPushButton("REMOVE")
+        remove_button.setFixedWidth(60)
         remove_button.setObjectName("destructive")
         remove_button.clicked.connect(self.remove_carrier)
         left_button_layout.addWidget(remove_button)
+
+        # Add Removed Carriers button
+        removed_button = QPushButton("REMOVED")
+        removed_button.setFixedWidth(60)
+        removed_button.clicked.connect(self.show_removed_carriers)
+        left_button_layout.addWidget(removed_button)
 
         button_layout.addWidget(left_button_container)
         button_layout.addStretch()
@@ -773,13 +761,15 @@ class CarrierListPane(QWidget):
         right_button_container = QWidget()
         right_button_layout = QHBoxLayout(right_button_container)
         right_button_layout.setContentsMargins(0, 0, 0, 0)
-        right_button_layout.setSpacing(8)
+        right_button_layout.setSpacing(4)
 
-        reset_button = QPushButton("Reset List")
+        reset_button = QPushButton("RESET")
+        reset_button.setFixedWidth(60)
         reset_button.clicked.connect(self.reset_carrier_list)
         right_button_layout.addWidget(reset_button)
 
-        save_button = QPushButton("Save/Apply")
+        save_button = QPushButton("SAVE")
+        save_button.setFixedWidth(60)
         save_button.setObjectName("primary")
         save_button.clicked.connect(self.save_to_json)
         right_button_layout.addWidget(save_button)
@@ -806,6 +796,12 @@ class CarrierListPane(QWidget):
         # Connect model changes to statistics updates
         self.proxy_model.layoutChanged.connect(self.update_statistics)
         self.filter_input.textChanged.connect(self.update_statistics)
+
+        # Create ignored_carriers table if it doesn't exist
+        self.create_ignored_carriers_table()
+
+        # Connect our own signal to refresh the view
+        self.carrier_list_updated.connect(self.refresh_carrier_list)
 
     def minimize_to_button(self):
         """Custom minimize handler that properly hides the window"""
@@ -1027,10 +1023,23 @@ class CarrierListPane(QWidget):
             new_carrier_names (list): List of new carrier names
             df (pd.DataFrame): Current carrier list DataFrame
         """
+        # Filter out ignored carriers
+        ignored_carriers = self.get_ignored_carriers()
+        new_carrier_names = [
+            name for name in new_carrier_names if name not in ignored_carriers
+        ]
+
+        if not new_carrier_names:
+            return
+
         # Show custom dialog and get selected carriers
-        selected_carriers = NewCarriersDialog.get_new_carriers(
+        selected_carriers, carriers_to_ignore = NewCarriersDialog.get_new_carriers(
             self.parent_widget, new_carrier_names
         )
+
+        # Add selected carriers to ignored list
+        if carriers_to_ignore:
+            self.add_to_ignored_carriers(carriers_to_ignore)
 
         if selected_carriers:
             # Add selected carriers to the DataFrame
@@ -1332,6 +1341,7 @@ class CarrierListPane(QWidget):
 
         Shows confirmation dialog before removal. Updates the model,
         JSON file, and emits appropriate signals after successful removal.
+        Also adds the removed carrier to the ignored list.
         """
         try:
             selected_index = self.table_view.selectionModel().currentIndex()
@@ -1353,9 +1363,15 @@ class CarrierListPane(QWidget):
 
             # Create and show custom confirmation dialog
             confirm_dialog = ConfirmDialog(
-                f"Are you sure you want to remove carrier '{carrier_name}'?", self
+                f"Are you sure you want to remove carrier '{carrier_name}'?\n\n"
+                "The carrier will be added to the removed list\n\n"
+                "and won't appear in violation detection.",
+                self,
             )
             if confirm_dialog.exec_() == QDialog.Accepted:
+                # Add carrier to ignored list
+                self.add_to_ignored_carriers([carrier_name])
+
                 # Drop the row from the DataFrame using the correct index
                 self.main_model.df.drop(index=sorted_df_index, inplace=True)
                 self.main_model.df.reset_index(drop=True, inplace=True)
@@ -1376,7 +1392,9 @@ class CarrierListPane(QWidget):
                 self.data_updated.emit(self.main_model.df)
 
                 CustomNotificationDialog.show_notification(
-                    self, "Success", f"Carrier '{carrier_name}' removed successfully."
+                    self,
+                    "Success",
+                    f"Carrier '{carrier_name}' removed successfully and added to ignored list.",
                 )
 
                 # Clear the selection after removal
@@ -1726,3 +1744,98 @@ class CarrierListPane(QWidget):
         if hasattr(self.parent_main, "carrier_list_button"):
             self.parent_main.carrier_list_button.setChecked(False)
         super().hideEvent(event)
+
+    def create_ignored_carriers_table(self):
+        """Create the ignored_carriers table if it doesn't exist."""
+        try:
+            with sqlite3.connect(self.eightbox_db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS ignored_carriers (
+                        carrier_name varchar PRIMARY KEY,
+                        ignored_date datetime DEFAULT CURRENT_TIMESTAMP
+                    )
+                """
+                )
+                conn.commit()
+        except Exception as e:
+            CustomErrorDialog.error(
+                self, "Database Error", f"Failed to create ignored carriers table: {e}"
+            )
+
+    def get_ignored_carriers(self):
+        """Get list of carriers that have been marked as ignored."""
+        try:
+            with sqlite3.connect(self.eightbox_db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT carrier_name FROM ignored_carriers")
+                return [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            CustomErrorDialog.error(
+                self, "Database Error", f"Failed to fetch ignored carriers: {e}"
+            )
+            return []
+
+    def add_to_ignored_carriers(self, carriers):
+        """Add carriers to the ignored list.
+
+        Args:
+            carriers (list): List of carrier names to ignore
+        """
+        if not carriers:
+            return
+
+        try:
+            with sqlite3.connect(self.eightbox_db_path) as conn:
+                cursor = conn.cursor()
+                cursor.executemany(
+                    "INSERT OR REPLACE INTO ignored_carriers (carrier_name) VALUES (?)",
+                    [(carrier,) for carrier in carriers],
+                )
+                conn.commit()
+        except Exception as e:
+            CustomErrorDialog.error(
+                self, "Database Error", f"Failed to add carriers to ignore list: {e}"
+            )
+
+    def show_removed_carriers(self):
+        """Show the removed carriers manager dialog."""
+        from removed_carriers_manager import RemovedCarriersManager
+
+        dialog = RemovedCarriersManager(self.eightbox_db_path, self)
+        dialog.exec_()
+
+    def refresh_carrier_list(self, updated_df=None):
+        """Refresh the carrier list view with updated data.
+
+        Args:
+            updated_df (pd.DataFrame, optional): Updated carrier data. If None,
+                reloads from the JSON file.
+        """
+        try:
+            if updated_df is None:
+                # Reload from JSON file
+                updated_df = pd.read_json(self.json_path, orient="records")
+
+            # Sort the DataFrame
+            status_order = ["nl", "wal", "otdl", "ptf"]
+            updated_df["list_status"] = pd.Categorical(
+                updated_df["list_status"], categories=status_order, ordered=True
+            )
+            updated_df = updated_df.sort_values(
+                ["list_status", "carrier_name"], ascending=[True, True]
+            ).reset_index(drop=True)
+
+            # Update the model
+            self.carrier_df = updated_df
+            self.main_model.update_data(updated_df)
+            self.proxy_model.invalidate()
+
+            # Update statistics
+            self.update_statistics()
+
+        except Exception as e:
+            CustomWarningDialog.warning(
+                self, "Refresh Error", f"Failed to refresh carrier list: {e}"
+            )

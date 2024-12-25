@@ -4,15 +4,10 @@ Contains specialized widgets and UI components that extend PyQt's base widgets
 with additional functionality specific to the application's needs.
 """
 
-from PyQt5.QtCore import (
-    QByteArray,
-    Qt,
-    QTimer,
-)
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import (
     QColor,
     QPainter,
-    QPixmap,
 )
 from PyQt5.QtWidgets import (
     QApplication,
@@ -24,7 +19,6 @@ from PyQt5.QtWidgets import (
     QProgressBar,
     QProgressDialog,
     QPushButton,
-    QScrollArea,
     QSizeGrip,
     QVBoxLayout,
     QWidget,
@@ -903,29 +897,38 @@ class ConfirmDialog(QDialog):
 
 
 class NewCarriersDialog(QDialog):
-    """Custom dialog for selecting new carriers to add.
+    """Dialog for selecting new carriers to add to the list.
 
-    Provides a dialog with checkboxes for selecting multiple carriers from a list.
-    Features Material Design styling and custom checkmark icons.
-
-    Args:
-        carriers (list): List of carrier names to display
-        parent (QWidget): Parent widget
-
-    Attributes:
-        checkboxes (dict): Dictionary mapping carrier names to their checkboxes
+    Displays a list of newly detected carriers and allows the user to
+    select which ones to add to the carrier list.
     """
 
-    def __init__(self, carriers, parent=None):
+    @staticmethod
+    def get_new_carriers(parent, carrier_names):
+        """Show dialog for selecting new carriers to add.
+
+        Args:
+            parent: Parent widget
+            carrier_names (list): List of new carrier names
+
+        Returns:
+            tuple: (selected_carriers, []) - List of selected carriers
+            and empty list for compatibility
+        """
+        dialog = NewCarriersDialog(parent, carrier_names)
+        if dialog.exec_() == QDialog.Accepted:
+            return dialog.get_selected_carriers(), []
+        return [], []
+
+    def __init__(self, parent, carrier_names):
+        """Initialize the dialog.
+
+        Args:
+            parent: Parent widget
+            carrier_names (list): List of new carrier names
+        """
         super().__init__(parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
-
-        # Create the checkmark icon
-        pixmap = QPixmap()
-        pixmap.loadFromData(QByteArray.fromBase64(CHECKMARK_BASE64.encode()))
-
-        # Set the icon as a property of the dialog
-        self.setProperty("checkmark", pixmap)
 
         # Create main layout
         layout = QVBoxLayout()
@@ -933,8 +936,8 @@ class NewCarriersDialog(QDialog):
         layout.setSpacing(0)
 
         # Add custom title bar
-        self.title_bar = CustomTitleBarWidget("New Carriers Detected", self)
-        layout.addWidget(self.title_bar)
+        title_bar = CustomTitleBarWidget("New Carriers Detected", self)
+        layout.addWidget(title_bar)
 
         # Create content widget
         content_widget = QWidget()
@@ -942,31 +945,28 @@ class NewCarriersDialog(QDialog):
             """
             QWidget {
                 background-color: #1E1E1E;
+                color: #E1E1E1;
             }
             QLabel {
                 color: #E1E1E1;
                 font-size: 12px;
+                padding: 4px;
             }
             QCheckBox {
                 color: #E1E1E1;
                 font-size: 12px;
-                spacing: 8px;  /* Space between checkbox and text */
+                padding: 4px;
             }
             QCheckBox::indicator {
                 width: 18px;
                 height: 18px;
-                border-radius: 3px;
                 border: 2px solid #BB86FC;
-            }
-            QCheckBox::indicator:unchecked {
+                border-radius: 4px;
                 background-color: transparent;
             }
             QCheckBox::indicator:checked {
                 background-color: #BB86FC;
-                image: url("data:image/svg+xml;base64,%s");
-            }
-            QCheckBox::indicator:hover {
-                border-color: #9965DA;
+                image: url(resources/check.png);
             }
             QPushButton {
                 background-color: #BB86FC;
@@ -974,7 +974,7 @@ class NewCarriersDialog(QDialog):
                 border-radius: 4px;
                 padding: 8px 16px;
                 color: black;
-                min-width: 80px;
+                min-width: 100px;
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -983,134 +983,74 @@ class NewCarriersDialog(QDialog):
             QPushButton:pressed {
                 background-color: #7B4FAF;
             }
-            QScrollArea {
-                border: none;
-                background-color: transparent;
+            QPushButton#secondary {
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                border: 1px solid #BB86FC;
+            }
+            QPushButton#secondary:hover {
+                background-color: #353535;
+            }
+            QPushButton#secondary:pressed {
+                background-color: #252525;
             }
             """
-            % CHECKMARK_BASE64
         )
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(15)
 
-        # Add label
-        label = QLabel("Select the new carriers to add to the carrier list:")
-        content_layout.addWidget(label)
-
-        # Create a widget to hold checkboxes
-        checkbox_widget = QWidget()
-        checkbox_layout = QVBoxLayout(checkbox_widget)
-        checkbox_layout.setSpacing(8)
+        # Add description label
+        description = QLabel("Select the new carriers to add to the carrier list:")
+        description.setWordWrap(True)
+        content_layout.addWidget(description)
 
         # Add checkboxes for carriers
-        self.checkboxes = {}
-        for carrier in carriers:
+        self.carrier_checkboxes = {}
+        for carrier in carrier_names:
             checkbox = QCheckBox(carrier)
-            checkbox.setChecked(False)  # Start unchecked
-            self.checkboxes[carrier] = checkbox
-            checkbox_layout.addWidget(checkbox)
+            checkbox.setChecked(True)  # Default to checked
+            self.carrier_checkboxes[carrier] = checkbox
+            content_layout.addWidget(checkbox)
 
-        # Add stretch to push checkboxes to the top
-        checkbox_layout.addStretch()
-
-        # Create scroll area for checkboxes
-        scroll = QScrollArea()
-        scroll.setWidget(checkbox_widget)
-        scroll.setWidgetResizable(True)
-        scroll.setMinimumHeight(300)  # Set minimum height
-        content_layout.addWidget(scroll)
-
-        # Add buttons
-        button_layout = QHBoxLayout()
+        # Add button container
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.addStretch()
 
-        ok_button = QPushButton("OK")
+        # Add Cancel button
         cancel_button = QPushButton("Cancel")
-
-        ok_button.clicked.connect(self.accept)
+        cancel_button.setObjectName("secondary")
         cancel_button.clicked.connect(self.reject)
-
-        button_layout.addWidget(ok_button)
         button_layout.addWidget(cancel_button)
 
-        content_layout.addLayout(button_layout)
+        # Add OK button
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(self.accept)
+        button_layout.addWidget(ok_button)
 
+        content_layout.addWidget(button_container)
+
+        # Add content widget to main layout
         layout.addWidget(content_widget)
         self.setLayout(layout)
 
-        # Set minimum size and adjust based on content
-        self.setMinimumSize(400, 500)  # Increased minimum size
-        self.adjustSize()
-
-        # Center on screen if no parent, otherwise center on parent
-        if parent:
-            parent_center = parent.mapToGlobal(parent.rect().center())
-            geometry = self.frameGeometry()
-            geometry.moveCenter(parent_center)
-            self.move(geometry.topLeft())
-        else:
-            # Center on screen
-            screen = QApplication.primaryScreen().geometry()
-            geometry = self.frameGeometry()
-            geometry.moveCenter(screen.center())
-            self.move(geometry.topLeft())
+        # Set minimum size
+        self.setMinimumSize(300, 200)
 
     def get_selected_carriers(self):
-        """Return list of selected carriers.
+        """Get the list of selected carriers.
 
         Returns:
-            list: Names of carriers whose checkboxes are checked
+            list: Names of selected carriers
         """
         return [
             carrier
-            for carrier, checkbox in self.checkboxes.items()
+            for carrier, checkbox in self.carrier_checkboxes.items()
             if checkbox.isChecked()
         ]
-
-    @staticmethod
-    def center_dialog(dialog, parent):
-        """Center the dialog on its parent.
-
-        Args:
-            dialog (QDialog): The dialog to center
-            parent (QWidget): Parent widget to center on
-        """
-        if parent and parent.isVisible():
-            parent_geo = parent.geometry()
-            dialog_geo = dialog.geometry()
-            x = parent_geo.x() + (parent_geo.width() - dialog_geo.width()) // 2
-            y = parent_geo.y() + (parent_geo.height() - dialog_geo.height()) // 2
-            dialog.move(x, y)
-
-    @staticmethod
-    def get_new_carriers(parent, carriers):
-        """Show dialog and return selected carriers.
-
-        Creates and shows the dialog, handling centering and execution.
-
-        Args:
-            parent (QWidget): Parent widget
-            carriers (list): List of carrier names to display
-
-        Returns:
-            list: Names of carriers selected by the user, or empty list if cancelled
-        """
-        dialog = NewCarriersDialog(carriers, parent)
-
-        # Force the dialog to be centered on the parent window
-        if parent:
-            # Wait a brief moment to ensure parent window is fully positioned
-            QTimer.singleShot(
-                100, lambda: NewCarriersDialog.center_dialog(dialog, parent)
-            )
-
-        result = dialog.exec_()
-
-        if result == QDialog.Accepted:
-            return dialog.get_selected_carriers()
-        return []
 
 
 class CustomSizeGrip(QSizeGrip):

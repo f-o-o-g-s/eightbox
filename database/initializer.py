@@ -334,6 +334,15 @@ class DatabaseInitializer:
         """
         )
 
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS ignored_carriers (
+                carrier_name varchar PRIMARY KEY,
+                ignored_date datetime DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+        )
+
     def _create_indexes(self, cursor):
         """Create the recommended database indexes.
 
@@ -344,4 +353,7 @@ class DatabaseInitializer:
         cursor.execute("CREATE INDEX idx_carrier_name ON carriers(carrier_name)")
         cursor.execute(
             "CREATE INDEX idx_rings3_carrier_date ON rings3(carrier_name, rings_date)"
+        )
+        cursor.execute(
+            "CREATE INDEX idx_ignored_carriers_name ON ignored_carriers(carrier_name)"
         )
