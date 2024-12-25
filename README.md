@@ -51,7 +51,27 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 - isort (import sorting)
 
 ## Setup
-[Installation instructions to be added]
+
+### Prerequisites
+1. Install and configure [Klusterbox](https://github.com/TomOfHelatrobus/klusterbox) - a companion application for USPS carrier data management
+2. Use Klusterbox's auto data entry to populate the mandates.sqlite database
+3. Ensure Klusterbox is working correctly with your data
+
+### Installation
+1. Download the latest release (.7z file) from the GitHub releases page
+2. Extract the .7z file to a new folder named `eightbox`
+3. Launch `eightbox.exe` from the extracted folder
+
+### Configuration
+- Eightbox will automatically:
+  - Detect your Klusterbox database location
+  - Create its own `eightbox.sqlite` file (a mirror of mandates.sqlite)
+  - Sync with mandates.sqlite on startup
+
+### Database Synchronization
+Eightbox automatically syncs with Klusterbox's database. If you update data in Klusterbox while Eightbox is running:
+1. Go to Settings > Database Path
+2. Click "Sync Database" to manually update Eightbox's data
 
 ## Test Database
 The repository includes a sanitized test database (`fake_mandates_db.sqlite`) that you can use to try out the application without needing real carrier data. This database:
