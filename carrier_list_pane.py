@@ -618,6 +618,8 @@ class CarrierListPane(QWidget):
                 gridline-color: transparent;
                 border: 1px solid #333333;
                 border-radius: 4px;
+                selection-background-color: #BB86FC;
+                selection-color: #000000;
             }
             QHeaderView::section {
                 background-color: #2D2D2D;
@@ -632,16 +634,20 @@ class CarrierListPane(QWidget):
                 border-bottom: 1px solid rgba(51, 51, 51, 0.5);
             }
             QTableView::item:selected {
-                background: rgba(103, 80, 164, 0.15);
-                /* Material Design primary container color with lower opacity */
-                color: inherit;  /* Keep the text color unchanged when selected */
+                background: #BB86FC;
+                color: #000000;
+            }
+            QTableView::item:hover {
+                background-color: rgba(187, 134, 252, 0.1);
             }
             QTableView::item:focus {
-                background: transparent;
-                outline: none;  /* Remove the focus outline */
+                background: #BB86FC;
+                color: #000000;
+                outline: none;
             }
             QTableView::item:selected:focus {
-                background: rgba(103, 80, 164, 0.15);  /* Keep the same as normal selection */
+                background: #BB86FC;
+                color: #000000;
                 outline: none;
             }
         """
