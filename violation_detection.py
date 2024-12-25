@@ -109,7 +109,7 @@ def detect_violations(data, violation_type, date_maximized_status=None):
         date_maximized_status = {}
 
     # For violations that don't need excusal data, convert to simple boolean
-    if violation_type not in ["8.5.G OTDL Not Maximized"]:
+    if violation_type not in ["8.5.G", "8.5.G OTDL Not Maximized"]:
         # Convert date_maximized_status values to simple boolean if needed
         if any(isinstance(v, dict) for v in date_maximized_status.values()):
             date_maximized_status = {
