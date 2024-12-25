@@ -67,7 +67,7 @@ from violation_detection import (
     get_violation_remedies,
 )
 
-VERSION = "2024.1.4.0"
+VERSION = "2024.1.2.3"
 BUILD_TIME = "2024-12-25 13:51"
 
 
@@ -244,7 +244,7 @@ class MainApp(QMainWindow):
         otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
     """
 
-    VERSION = "2024.1.4.0"  # Updated by release.py
+    VERSION = "2024.1.2.3"  # Updated by release.py
     BUILD_TIME = "2024-12-25 13:51"  # Updated by release.py
 
     def __init__(self):
