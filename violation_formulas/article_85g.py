@@ -33,8 +33,6 @@ def detect_85g_violations(data, date_maximized_status=None):
         - Not manually excused in maximization status
         - Not a Sunday
     """
-    # Debug output
-    print("Received date_maximized_status:", date_maximized_status)
 
     # First prepare the basic data
     result_df = data.copy()
@@ -102,12 +100,6 @@ def detect_85g_violations(data, date_maximized_status=None):
                 )
         max_status_df = pd.DataFrame(max_status_records)
 
-    # Debug output for excused carriers
-    if not max_status_df.empty:
-        print("Excused carriers by date:")
-        for _, row in max_status_df.iterrows():
-            print(f"{row['date'].strftime('%Y-%m-%d')}: {row['excused_carriers']}")
-
     # Merge maximized status with result_df
     if not max_status_df.empty:
         result_df = pd.merge(
@@ -131,13 +123,6 @@ def detect_85g_violations(data, date_maximized_status=None):
         carrier_excusals = (
             row["carrier_excusals"] if isinstance(row["carrier_excusals"], dict) else {}
         )
-
-        # Debug output for carrier excusal check
-        print(
-            f"Checking excusal for {carrier_str} on {row['date_dt'].strftime('%Y-%m-%d')}:"
-        )
-        print(f"  - In excused_carriers: {carrier_str in excused_carriers}")
-        print(f"  - In carrier_excusals: {carrier_excusals.get(carrier_str, False)}")
 
         return carrier_str in excused_carriers or carrier_excusals.get(
             carrier_str, False
@@ -205,14 +190,6 @@ def detect_85g_violations(data, date_maximized_status=None):
                     for indicator in auto_excusal_indicators
                 )
 
-                # Debug output for violation determination
-                print(f"\nViolation check for {otdl['carrier_name']} on {date_str}:")
-                print(f"  Auto excused: {is_auto_excused}")
-                print(f"  Is Sunday: {otdl['is_sunday']}")
-                print(f"  Manually excused: {otdl['is_manually_excused']}")
-                print(f"  Hours worked: {otdl['total_hours']}")
-                print(f"  Hour limit: {otdl['hour_limit']}")
-
                 violation_type = (
                     "No Violation (Auto Excused)"
                     if is_auto_excused or otdl["is_sunday"]
@@ -222,8 +199,6 @@ def detect_85g_violations(data, date_maximized_status=None):
                     if otdl["total_hours"] >= otdl["hour_limit"]
                     else "8.5.G OTDL Not Maximized"
                 )
-
-                print(f"  Final violation type: {violation_type}")
 
                 remedy_total = (
                     max(0, round(otdl["hour_limit"] - otdl["total_hours"], 2))
