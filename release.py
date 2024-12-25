@@ -306,6 +306,50 @@ def build_and_package(version):
         raise
 
 
+def upload_release_asset(release, archive_file, max_retries=3, timeout=300):
+    """Upload an asset to a GitHub release with retries.
+
+    Args:
+        release: GitHub release object
+        archive_file (str): Path to the archive file
+        max_retries (int): Maximum number of retry attempts
+        timeout (int): Timeout in seconds for the upload
+
+    Returns:
+        bool: True if upload successful, False otherwise
+    """
+    if not os.path.exists(archive_file):
+        print(f"\nError: Distribution file not found: {archive_file}")
+        return False
+
+    content_type = (
+        "application/x-7z-compressed"
+        if archive_file.endswith(".7z")
+        else "application/zip"
+    )
+
+    for attempt in range(max_retries):
+        try:
+            print(
+                f"\nUploading distribution package (attempt {attempt + 1}/{max_retries})..."
+            )
+            release.upload_asset(
+                path=archive_file,
+                content_type=content_type,
+                name=os.path.basename(archive_file),
+                timeout=timeout,
+            )
+            print(f"Successfully uploaded: {archive_file}")
+            return True
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"Upload failed ({str(e)}), retrying...")
+                continue
+            else:
+                print(f"\nFailed to upload after {max_retries} attempts: {str(e)}")
+                return False
+
+
 def create_release():
     """Create a new release with version bump and release notes."""
     try:
@@ -392,32 +436,24 @@ def create_release():
             target_commitish=commit_sha,
         )
 
-        # Upload the distribution archive
-        if os.path.exists(archive_file):
-            # Determine content type based on file extension
-            content_type = (
-                "application/x-7z-compressed"
-                if archive_file.endswith(".7z")
-                else "application/zip"
-            )
-            release.upload_asset(
-                path=archive_file,
-                content_type=content_type,
-                name=os.path.basename(archive_file),
-            )
-            print(f"\nUploaded distribution package: {archive_file}")
-
-        print(f"\nSuccessfully released version {new_version}!")
-        print(f"Release URL: {release.html_url}")
-        print(f"Commit SHA: {commit_sha}")
-        print("\nRelease Summary:")
-        print(f"Type: {release_type}")
-        print(f"Version: {new_version}")
-        print(f"Commit Message: {commit_msg}")
-        print("\nRelease Notes:")
-        for note in formatted_notes.split("\n"):
-            if note.strip():
-                print(note)
+        # Upload the distribution archive with retries
+        if not upload_release_asset(release, archive_file):
+            print("\nWarning: Release created but asset upload failed.")
+            print("You can manually upload the distribution file later.")
+            print(f"File to upload: {archive_file}")
+            print(f"Release URL: {release.html_url}")
+        else:
+            print(f"\nSuccessfully released version {new_version}!")
+            print(f"Release URL: {release.html_url}")
+            print(f"Commit SHA: {commit_sha}")
+            print("\nRelease Summary:")
+            print(f"Type: {release_type}")
+            print(f"Version: {new_version}")
+            print(f"Commit Message: {commit_msg}")
+            print("\nRelease Notes:")
+            for note in formatted_notes.split("\n"):
+                if note.strip():
+                    print(note)
 
         return True
 
@@ -496,32 +532,24 @@ def create_release_non_interactive(release_type, commit_msg, notes):
             target_commitish=commit_sha,
         )
 
-        # Upload the distribution archive
-        if os.path.exists(archive_file):
-            # Determine content type based on file extension
-            content_type = (
-                "application/x-7z-compressed"
-                if archive_file.endswith(".7z")
-                else "application/zip"
-            )
-            release.upload_asset(
-                path=archive_file,
-                content_type=content_type,
-                name=os.path.basename(archive_file),
-            )
-            print(f"\nUploaded distribution package: {archive_file}")
-
-        print(f"\nSuccessfully released version {new_version}!")
-        print(f"Release URL: {release.html_url}")
-        print(f"Commit SHA: {commit_sha}")
-        print("\nRelease Summary:")
-        print(f"Type: {release_type}")
-        print(f"Version: {new_version}")
-        print(f"Commit Message: {commit_msg}")
-        print("\nRelease Notes:")
-        for note in formatted_notes.split("\n"):
-            if note.strip():
-                print(note)
+        # Upload the distribution archive with retries
+        if not upload_release_asset(release, archive_file):
+            print("\nWarning: Release created but asset upload failed.")
+            print("You can manually upload the distribution file later.")
+            print(f"File to upload: {archive_file}")
+            print(f"Release URL: {release.html_url}")
+        else:
+            print(f"\nSuccessfully released version {new_version}!")
+            print(f"Release URL: {release.html_url}")
+            print(f"Commit SHA: {commit_sha}")
+            print("\nRelease Summary:")
+            print(f"Type: {release_type}")
+            print(f"Version: {new_version}")
+            print(f"Commit Message: {commit_msg}")
+            print("\nRelease Notes:")
+            for note in formatted_notes.split("\n"):
+                if note.strip():
+                    print(note)
 
         return True
 
