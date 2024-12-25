@@ -246,7 +246,7 @@ class MainApp(QMainWindow):
     """
 
     VERSION = "2024.1.4.0"  # Updated by release.py
-    BUILD_TIME = "2024-12-25 13:17"  # Updated by release.py
+    BUILD_TIME = "2024-12-25 13:23"  # Updated by release.py
 
     def __init__(self):
         super().__init__()
