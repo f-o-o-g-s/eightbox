@@ -13,6 +13,7 @@ import pandas as pd
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
+    QFrame,
     QLabel,
     QPushButton,
     QVBoxLayout,
@@ -24,6 +25,23 @@ from custom_widgets import (
     CustomTitleBarWidget,
     CustomWarningDialog,
 )
+
+
+class SectionFrame(QFrame):
+    """Custom frame for settings sections with enhanced styling."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("sectionFrame")
+        self.setStyleSheet(
+            """
+            QFrame#sectionFrame {
+                background-color: #1E1E1E;
+                border: 1px solid #333333;
+                border-radius: 8px;
+            }
+        """
+        )
 
 
 class SettingsDialog(QDialog):
@@ -44,6 +62,34 @@ class SettingsDialog(QDialog):
         # Set window flags for frameless window
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
 
+        # Set dialog style
+        self.setStyleSheet(
+            """
+            QDialog {
+                background-color: #121212;
+            }
+            QPushButton {
+                background-color: rgba(187, 134, 252, 0.1);
+                border: none;
+                border-radius: 4px;
+                color: #BB86FC;
+                padding: 8px 16px;
+                font-size: 13px;
+                font-weight: 500;
+                min-width: 120px;
+            }
+            QPushButton:hover {
+                background-color: rgba(187, 134, 252, 0.15);
+            }
+            QPushButton:pressed {
+                background-color: rgba(187, 134, 252, 0.2);
+            }
+            QLabel {
+                color: #E1E1E1;
+            }
+        """
+        )
+
         # Main layout
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -53,20 +99,35 @@ class SettingsDialog(QDialog):
         self.title_bar = CustomTitleBarWidget(title="Settings", parent=self)
         layout.addWidget(self.title_bar)
 
-        # Content widget
+        # Content widget with shadow effect
         content_widget = QWidget()
+        content_widget.setObjectName("contentWidget")
+        content_widget.setStyleSheet(
+            """
+            QWidget#contentWidget {
+                background-color: #121212;
+            }
+        """
+        )
+
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(20, 20, 20, 20)
-        content_layout.setSpacing(15)
+        content_layout.setContentsMargins(24, 24, 24, 24)
+        content_layout.setSpacing(20)
 
         # Klusterbox Database Section
-        klusterbox_section = QWidget()
+        klusterbox_section = SectionFrame()
         klusterbox_layout = QVBoxLayout(klusterbox_section)
-        klusterbox_layout.setSpacing(5)
+        klusterbox_layout.setContentsMargins(16, 16, 16, 16)
+        klusterbox_layout.setSpacing(8)
 
         klusterbox_header = QLabel("Klusterbox Database (Source)")
         klusterbox_header.setStyleSheet(
-            "font-size: 14px; font-weight: bold; color: #BB86FC;"
+            """
+            font-size: 14px;
+            font-weight: bold;
+            color: #BB86FC;
+            padding-bottom: 4px;
+            """
         )
 
         klusterbox_desc = QLabel(
@@ -80,21 +141,24 @@ class SettingsDialog(QDialog):
             """
             color: #9575CD;
             font-size: 11px;
-            padding: 5px;
-            background-color: #1E1E1E;
+            padding: 8px;
+            background-color: rgba(30, 30, 30, 0.6);
             border-radius: 4px;
-        """
+            border: 1px solid #333333;
+            """
         )
         self.klusterbox_path_display.setWordWrap(True)
         self.klusterbox_path_display.setMinimumWidth(360)
+        self.klusterbox_path_display.setToolTip("Path to the Klusterbox database file")
 
         self.klusterbox_status = QLabel("Connected ✓")
         self.klusterbox_status.setStyleSheet(
             """
             color: #81C784;
             font-size: 11px;
-            padding: 5px;
-        """
+            padding: 8px;
+            font-weight: 500;
+            """
         )
 
         klusterbox_layout.addWidget(klusterbox_header)
@@ -103,13 +167,19 @@ class SettingsDialog(QDialog):
         klusterbox_layout.addWidget(self.klusterbox_status)
 
         # Eightbox Database Section
-        eightbox_section = QWidget()
+        eightbox_section = SectionFrame()
         eightbox_layout = QVBoxLayout(eightbox_section)
-        eightbox_layout.setSpacing(5)
+        eightbox_layout.setContentsMargins(16, 16, 16, 16)
+        eightbox_layout.setSpacing(8)
 
         eightbox_header = QLabel("Eightbox Database (Working)")
         eightbox_header.setStyleSheet(
-            "font-size: 14px; font-weight: bold; color: #BB86FC;"
+            """
+            font-size: 14px;
+            font-weight: bold;
+            color: #BB86FC;
+            padding-bottom: 4px;
+            """
         )
 
         eightbox_desc = QLabel(
@@ -123,21 +193,26 @@ class SettingsDialog(QDialog):
             """
             color: #9575CD;
             font-size: 11px;
-            padding: 5px;
-            background-color: #1E1E1E;
+            padding: 8px;
+            background-color: rgba(30, 30, 30, 0.6);
             border-radius: 4px;
-        """
+            border: 1px solid #333333;
+            """
         )
         self.eightbox_path_display.setWordWrap(True)
         self.eightbox_path_display.setMinimumWidth(360)
+        self.eightbox_path_display.setToolTip(
+            "Path to the Eightbox working database file"
+        )
 
         self.eightbox_status = QLabel("Initialized ✓")
         self.eightbox_status.setStyleSheet(
             """
             color: #81C784;
             font-size: 11px;
-            padding: 5px;
-        """
+            padding: 8px;
+            font-weight: 500;
+            """
         )
 
         eightbox_layout.addWidget(eightbox_header)
@@ -147,24 +222,84 @@ class SettingsDialog(QDialog):
 
         # Button container
         button_container = QWidget()
-        button_layout = QVBoxLayout(button_container)
-        button_layout.setSpacing(10)
-        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_container.setObjectName("buttonContainer")
+        button_container.setStyleSheet(
+            """
+            QWidget#buttonContainer {
+                background-color: #1A1A1A;
+                border-radius: 8px;
+                border: 1px solid #333333;
+            }
+        """
+        )
 
-        # Add sync button
+        button_layout = QVBoxLayout(button_container)
+        button_layout.setSpacing(12)
+        button_layout.setContentsMargins(16, 16, 16, 16)
+
+        # Add sync button (without icon)
         sync_button = QPushButton("Sync Database")
+        sync_button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: rgba(187, 134, 252, 0.1);
+                border: none;
+                border-radius: 4px;
+                color: #BB86FC;
+                padding: 12px 24px;
+                font-size: 13px;
+                font-weight: 500;
+                min-width: 200px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background-color: rgba(187, 134, 252, 0.15);
+            }
+            QPushButton:pressed {
+                background-color: rgba(187, 134, 252, 0.2);
+                padding-top: 13px;
+                padding-bottom: 11px;
+            }
+        """
+        )
+        sync_button.setToolTip(
+            "Synchronize data between Klusterbox and Eightbox databases"
+        )
         sync_button.clicked.connect(self.sync_database)
         button_layout.addWidget(sync_button)
 
+        # Add close button (without icon)
         close_button = QPushButton("Close")
+        close_button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: none;
+                border-radius: 4px;
+                color: #E1E1E1;
+                padding: 12px 24px;
+                font-size: 13px;
+                font-weight: 500;
+                min-width: 200px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.08);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.12);
+                padding-top: 13px;
+                padding-bottom: 11px;
+            }
+        """
+        )
+        close_button.setToolTip("Close the settings dialog")
         close_button.clicked.connect(self.hide)
         button_layout.addWidget(close_button)
 
         # Add sections to content layout
         content_layout.addWidget(klusterbox_section)
-        content_layout.addSpacing(20)
         content_layout.addWidget(eightbox_section)
-        content_layout.addSpacing(20)
         content_layout.addWidget(button_container, alignment=Qt.AlignCenter)
 
         # Add content widget to main layout
