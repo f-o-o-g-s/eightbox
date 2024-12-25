@@ -116,6 +116,11 @@ This project uses:
 
 ## Version History
 
+### 2024.1.2.1
+- Fixed OTDL carrier excusal handling in 8.5.G violations
+- Improved case-insensitive carrier name matching
+- Enhanced excusal data handling in violation detection
+
 ### 2024.1.2.0
 - Added removed carriers management functionality
 - Implemented restore functionality for removed carriers
