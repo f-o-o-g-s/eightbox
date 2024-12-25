@@ -1714,3 +1714,9 @@ class CarrierListPane(QWidget):
                 CustomErrorDialog.error(
                     self, "Error", f"Failed to reset carrier list: {e}"
                 )
+
+    def hideEvent(self, event):
+        """Handle hide event by unchecking the corresponding button."""
+        if hasattr(self.parent_main, "carrier_list_button"):
+            self.parent_main.carrier_list_button.setChecked(False)
+        super().hideEvent(event)

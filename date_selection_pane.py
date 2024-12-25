@@ -176,13 +176,19 @@ class DateSelectionPane(QWidget):
 
     def __init__(self, db_path, parent=None):
         super().__init__(parent)
+        self.parent_main = parent
         self.db_path = db_path
-        self.parent_widget = parent
         self.selected_range = None
-
+        self.date_range_selected = pyqtSignal(QDate, QDate)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setup_ui()
         self.load_data()
+
+    def hideEvent(self, event):
+        """Handle hide event by unchecking the corresponding button."""
+        if hasattr(self.parent_main, "date_selection_button"):
+            self.parent_main.date_selection_button.setChecked(False)
+        super().hideEvent(event)
 
     def setup_ui(self):
         """Set up the UI components."""

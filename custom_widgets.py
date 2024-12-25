@@ -70,11 +70,11 @@ class CustomTitleBarWidget(QWidget):
         window_controls_layout.setSpacing(0)
 
         minimize_btn = QPushButton("─")
-        minimize_btn.clicked.connect(self.parent.hide)
+        minimize_btn.clicked.connect(self.handle_minimize)
 
         close_btn = QPushButton("×")
         close_btn.setStyleSheet("QPushButton:hover { background-color: #c42b1c; }")
-        close_btn.clicked.connect(self.parent.hide)
+        close_btn.clicked.connect(self.handle_close)
 
         window_controls_layout.addWidget(minimize_btn)
         window_controls_layout.addWidget(close_btn)
@@ -108,6 +108,42 @@ class CustomTitleBarWidget(QWidget):
             QPushButton:hover { background-color: #455A64; }
         """
         )
+
+    def handle_minimize(self):
+        """Handle minimize button click by unchecking the corresponding button in main window."""
+        if hasattr(self.parent, "parent_main"):
+            main_window = self.parent.parent_main
+            if "Date Selection" in self.parent.windowTitle() and hasattr(
+                main_window, "date_selection_button"
+            ):
+                main_window.date_selection_button.setChecked(False)
+            elif "Carrier List" in self.parent.windowTitle() and hasattr(
+                main_window, "carrier_list_button"
+            ):
+                main_window.carrier_list_button.setChecked(False)
+            elif "OTDL Maximization" in self.parent.windowTitle() and hasattr(
+                main_window, "otdl_maximization_button"
+            ):
+                main_window.otdl_maximization_button.setChecked(False)
+        self.parent.hide()
+
+    def handle_close(self):
+        """Handle close button click by unchecking the corresponding button in main window."""
+        if hasattr(self.parent, "parent_main"):
+            main_window = self.parent.parent_main
+            if "Date Selection" in self.parent.windowTitle() and hasattr(
+                main_window, "date_selection_button"
+            ):
+                main_window.date_selection_button.setChecked(False)
+            elif "Carrier List" in self.parent.windowTitle() and hasattr(
+                main_window, "carrier_list_button"
+            ):
+                main_window.carrier_list_button.setChecked(False)
+            elif "OTDL Maximization" in self.parent.windowTitle() and hasattr(
+                main_window, "otdl_maximization_button"
+            ):
+                main_window.otdl_maximization_button.setChecked(False)
+        self.parent.hide()
 
     def mouse_press_event(self, event):
         """Handle mouse press events for window dragging.

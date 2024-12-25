@@ -816,3 +816,9 @@ class OTDLMaximizationPane(QWidget):
 
         # Convert all carrier names to strings and return as sorted list
         return sorted(excused_carriers)
+
+    def hideEvent(self, event):
+        """Handle hide event by unchecking the corresponding button."""
+        if hasattr(self.parent_main, "otdl_maximization_button"):
+            self.parent_main.otdl_maximization_button.setChecked(False)
+        super().hideEvent(event)

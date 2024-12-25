@@ -530,9 +530,10 @@ class MainApp(QMainWindow):
                 border-bottom: 1px solid #333333;
             }
             QPushButton {
-                background-color: #2D2D2D;
-                border: 1px solid #404040;
-                border-radius: 4px;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #4A148C, stop:1 #311B92);
+                border: none;
+                border-radius: 0px;
                 color: #E1E1E1;
                 padding: 12px 24px;
                 font-size: 13px;
@@ -541,8 +542,13 @@ class MainApp(QMainWindow):
                 margin: 8px 4px;
             }
             QPushButton:hover {
-                background-color: #383838;
-                border-color: #4D4D4D;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #6A1B9A, stop:1 #4527A0);
+            }
+            QPushButton:checked {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #7B1FA2, stop:1 #512DA8);
+                color: #FFFFFF;
             }
             """
         )
