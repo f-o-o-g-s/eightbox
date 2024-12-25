@@ -47,6 +47,13 @@ from custom_widgets import (
     NewCarriersDialog,
 )
 from table_utils import setup_table_copy_functionality
+from theme import (
+    COLOR_TEXT_DIM,
+    COLOR_TEXT_LIGHT,
+    MATERIAL_BACKGROUND,
+    MATERIAL_PRIMARY,
+    MATERIAL_SURFACE,
+)
 
 
 class RightAlignDelegate(QStyledItemDelegate):
@@ -1101,128 +1108,136 @@ class CarrierListPane(QWidget):
         # Create content widget with Material Design styling
         content_widget = QWidget()
         content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-                color: #E1E1E1;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
+            f"""
+            QWidget {{
+                background-color: {MATERIAL_BACKGROUND.name()};
+                color: {COLOR_TEXT_LIGHT.name()};
+            }}
+            QLabel {{
+                color: {COLOR_TEXT_LIGHT.name()};
+                font-size: 13px;
+                font-weight: bold;
                 padding: 4px;
-            }
-            QLineEdit {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                border: 1px solid #333333;
+                margin-top: 8px;
+            }}
+            QLineEdit {{
+                background-color: {MATERIAL_SURFACE.name()};
+                color: {COLOR_TEXT_LIGHT.name()};
+                border: 2px solid {COLOR_TEXT_DIM.name()};
                 border-radius: 4px;
-                padding: 8px;
-                margin: 4px 0px;
-            }
-            QLineEdit:disabled {
-                background-color: #1A1A1A;
-                color: #666666;
-            }
-            QComboBox {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                border: 1px solid #333333;
+                padding: 12px;
+                margin: 4px 0px 12px 0px;
+                font-size: 14px;
+            }}
+            QLineEdit:disabled {{
+                background-color: {MATERIAL_BACKGROUND.name()};
+                color: {COLOR_TEXT_DIM.name()};
+                border: 1px solid {COLOR_TEXT_DIM.name()};
+            }}
+            QComboBox {{
+                background-color: {MATERIAL_SURFACE.name()};
+                color: {COLOR_TEXT_LIGHT.name()};
+                border: 2px solid {COLOR_TEXT_DIM.name()};
                 border-radius: 4px;
-                padding: 8px;
-                padding-right: 24px;
-                margin: 4px 0px;
+                padding: 12px;
+                padding-right: 36px;
+                margin: 4px 0px 12px 0px;
+                font-size: 14px;
                 min-width: 200px;
-            }
-            QComboBox::drop-down {
+            }}
+            QComboBox::drop-down {{
                 border: none;
-                width: 24px;
-            }
-            QComboBox::down-arrow {
+                width: 36px;
+            }}
+            QComboBox::down-arrow {{
                 image: none;
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-top: 5px solid #BB86FC;
-                width: 8px;
-                height: 8px;
-                margin-right: 8px;
-            }
-            QComboBox:hover {
-                border-color: #BB86FC;
-            }
-            QComboBox:hover::down-arrow {
-                border-top-color: #9965DA;
-            }
-            QComboBox:on {
-                border: 2px solid #BB86FC;
-            }
-            QComboBox:on::down-arrow {
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-top: 5px solid #9965DA;
-            }
-            QComboBox QAbstractItemView {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                selection-background-color: #BB86FC;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 6px solid {MATERIAL_PRIMARY.name()};
+                width: 10px;
+                height: 10px;
+                margin-right: 12px;
+            }}
+            QComboBox:hover {{
+                border-color: {MATERIAL_PRIMARY.name()};
+            }}
+            QComboBox:focus {{
+                border: 2px solid {MATERIAL_PRIMARY.name()};
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {MATERIAL_SURFACE.name()};
+                color: {COLOR_TEXT_LIGHT.name()};
+                selection-background-color: {MATERIAL_PRIMARY.name()};
                 selection-color: black;
-                border: 1px solid #333333;
-            }
-            QPushButton {
-                background-color: #2D2D2D;
-                color: #BB86FC;
-                border: 1px solid #3D3D3D;
-                border-bottom: 2px solid #1D1D1D;
-                padding: 8px 24px;
-                font-weight: 500;
-                min-height: 32px;
+                border: 1px solid {COLOR_TEXT_DIM.name()};
+                padding: 4px;
+            }}
+            QPushButton {{
+                background-color: {MATERIAL_SURFACE.name()};
+                color: {MATERIAL_PRIMARY.name()};
+                border: 2px solid {MATERIAL_PRIMARY.name()};
                 border-radius: 4px;
+                padding: 12px 24px;
+                font-weight: bold;
+                min-width: 120px;
                 font-size: 14px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-            }
-            QPushButton:hover {
-                background-color: #353535;
-                border: 1px solid #454545;
-                border-bottom: 2px solid #252525;
-                color: #CBB0FF;
-            }
-            QPushButton:pressed {
-                background-color: #252525;
-                border: 1px solid #353535;
-                border-top: 2px solid #151515;
-                border-bottom: 1px solid #353535;
-                padding-top: 9px;
-                color: #BB86FC;
-            }
-            QPushButton:disabled {
-                background-color: #252525;
-                color: rgba(225, 225, 225, 0.3);
-                border: 1px solid #2D2D2D;
-            }
+                margin: 8px;
+            }}
+            QPushButton:hover {{
+                background-color: rgba(187, 134, 252, 0.1);
+            }}
+            QPushButton:pressed {{
+                background-color: rgba(187, 134, 252, 0.2);
+            }}
+            QPushButton#primary {{
+                background-color: {MATERIAL_PRIMARY.name()};
+                color: black;
+                border: none;
+            }}
+            QPushButton#primary:hover {{
+                background-color: {MATERIAL_PRIMARY.lighter(110).name()};
+            }}
+            QPushButton#primary:pressed {{
+                background-color: {MATERIAL_PRIMARY.darker(110).name()};
+            }}
             """
         )
 
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(20, 20, 20, 20)
-        content_layout.setSpacing(10)
+        content_layout.setContentsMargins(24, 24, 24, 24)
+        content_layout.setSpacing(8)
 
-        # Carrier name input
-        name_label = QLabel("Carrier Name:")
+        # Add a title label
+        title_label = QLabel(f"Editing Carrier: {carrier_data['carrier_name']}")
+        title_label.setStyleSheet(
+            f"""
+            font-size: 18px;
+            font-weight: bold;
+            color: {COLOR_TEXT_LIGHT.name()};
+            padding: 0px 0px 16px 0px;
+            """
+        )
+        content_layout.addWidget(title_label)
+
+        # Carrier name input with icon
+        name_label = QLabel("Carrier Name")
         name_input = QLineEdit(carrier_data["carrier_name"])
         name_input.setReadOnly(True)
         content_layout.addWidget(name_label)
         content_layout.addWidget(name_input)
 
-        # List status dropdown
-        list_status_label = QLabel("List Status:")
+        # List status dropdown with icon
+        list_status_label = QLabel("List Status")
         list_status_dropdown = QComboBox()
         list_status_dropdown.addItems(["otdl", "ptf", "wal", "nl"])
         list_status_dropdown.setCurrentText(carrier_data["list_status"])
         content_layout.addWidget(list_status_label)
         content_layout.addWidget(list_status_dropdown)
 
-        # Hour limit dropdown
-        hour_limit_label = QLabel("Hour Limit:")
+        # Hour limit dropdown with icon
+        hour_limit_label = QLabel("Hour Limit")
         hour_limit_dropdown = QComboBox()
         content_layout.addWidget(hour_limit_label)
         content_layout.addWidget(hour_limit_dropdown)
@@ -1238,7 +1253,7 @@ class CarrierListPane(QWidget):
         update_hour_limit_options()
         list_status_dropdown.currentTextChanged.connect(update_hour_limit_options)
 
-        # Ensure `hour_limit` is a string and set the current selection
+        # Set current hour limit
         current_hour_limit = carrier_data["hour_limit"]
         if current_hour_limit is not None:
             try:
@@ -1255,17 +1270,23 @@ class CarrierListPane(QWidget):
         else:
             hour_limit_dropdown.setCurrentText("(none)")
 
+        # Add spacing before buttons
+        content_layout.addSpacing(16)
+
         # Create button container with horizontal layout
         button_container = QWidget()
         button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.setSpacing(16)
         button_layout.addStretch()
 
         # Create OK and Cancel buttons
-        ok_button = QPushButton("OK")
+        ok_button = QPushButton("Save")
+        ok_button.setObjectName("primary")
         cancel_button = QPushButton("Cancel")
 
-        button_layout.addWidget(ok_button)
         button_layout.addWidget(cancel_button)
+        button_layout.addWidget(ok_button)
         content_layout.addWidget(button_container)
 
         # Add content widget to main layout
@@ -1273,7 +1294,7 @@ class CarrierListPane(QWidget):
         dialog.setLayout(main_layout)
 
         # Set minimum size and center on parent
-        dialog.setMinimumSize(400, 300)
+        dialog.setMinimumSize(400, 500)
         if self.parent():
             dialog.move(
                 self.parent().x() + (self.parent().width() - dialog.width()) // 2,
