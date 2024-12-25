@@ -4,23 +4,40 @@ This module provides functionality for both ZIP and Git backups of the project.
 It includes pre-commit hook integration for code quality checks before commits.
 
 Commit Message Format:
-    All commit messages must start with one of these prefixes:
-    - Fix: for bug fixes and minor changes
-    - Feature: for new features and enhancements
-    - Breaking: for breaking changes
-    If no prefix is provided, 'Fix:' will be used as default.
+    The script enforces conventional commit format:
+    <type>: <description>
+
+    Types:
+    - feat: A new feature
+    - fix: A bug fix
+    - docs: Documentation changes
+    - style: Code style/formatting changes
+    - refactor: Code changes that neither fix a bug nor add a feature
+    - perf: Performance improvements
+    - test: Adding or fixing tests
+    - build: Build system changes
+    - ci: CI configuration changes
+    - chore: Other changes that don't modify src or test files
+    - revert: Reverting previous changes
+
+    Breaking Changes:
+    Add ! after type for breaking changes: feat!: description
+
+    Scopes (optional):
+    Add scope in parentheses: feat(ui): description
 
 Pre-commit Hooks:
     The following checks are run before each commit:
     - isort: sorts Python imports
     - black: formats Python code
     - flake8: checks code style and quality
+    - conventional-pre-commit: enforces commit message format
 
 Usage:
-    python backup.py "description"  # Will add "Fix:" prefix by default
-    python backup.py "Fix: description"
-    python backup.py "Feature: new functionality"
-    python backup.py "Breaking: major change"
+    python backup.py "description"  # Will add "fix:" prefix by default
+    python backup.py "feat: new feature"
+    python backup.py "fix(ui): bug in carrier list"
+    python backup.py "feat!: breaking change"
 """
 
 # Test
@@ -74,6 +91,21 @@ EXCLUDE_EXTENSIONS = {
     ".swp",
     ".swo",
 }
+
+# Conventional commit types
+COMMIT_TYPES = [
+    "feat",
+    "fix",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "build",
+    "ci",
+    "chore",
+    "revert",
+]
 
 
 def run_pre_commit():
@@ -188,29 +220,42 @@ def create_zip_backup(source_dir, target_dir):
         return None
 
 
+def format_conventional_commit(description):
+    """Format message to follow conventional commit standards.
+
+    Args:
+        description (str): The commit message
+
+    Returns:
+        str: Properly formatted conventional commit message
+    """
+    # If message already follows convention, return as is
+    if any(
+        description.startswith(f"{t}:")
+        or description.startswith(f"{t}!:")
+        or description.startswith(f"{t}(")
+        for t in COMMIT_TYPES
+    ):
+        return description
+
+    # Default to fix: prefix
+    return f"fix: {description}"
+
+
 def git_backup(description, target_branch="main"):
     """Handle Git version control backup.
 
     This function handles Git operations including staging changes,
     committing with a timestamped message, and pushing to the target branch.
-    The commit message will be prefixed with one of: Fix:, Feature:, or Breaking:
-    If no prefix is provided, 'Fix:' will be used as default.
+    The commit message will follow conventional commit format.
+    If no type prefix is provided, 'fix:' will be used as default.
     """
     try:
-        # Define valid prefixes
-        valid_prefixes = ["Fix:", "Feature:", "Breaking:"]
-
-        # Check if description starts with a valid prefix
-        has_valid_prefix = any(
-            description.startswith(prefix) for prefix in valid_prefixes
-        )
-
-        # If no valid prefix, add 'Fix:' as default
-        if not has_valid_prefix:
-            description = f"Fix: {description}"
+        # Format commit message to follow conventional format
+        description = format_conventional_commit(description)
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-        message = f"BACKUP ({timestamp}): {description}"
+        message = f"{description} ({timestamp})"
 
         # Check for changes
         status = subprocess.run(
@@ -270,7 +315,13 @@ def create_backup(cli_description=None, cli_backup_type=None):
         # Get backup description and type
         description = cli_description
         if description is None:
-            print("\nEnter a description of your changes:")
+            print(
+                "\nEnter a description of your changes (format: <type>: <description>):"
+            )
+            print(
+                "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+            )
+            print("Example: fix: correct OTDL excusal handling")
             description = input().strip()
 
         if not description:
@@ -306,8 +357,36 @@ def create_backup(cli_description=None, cli_backup_type=None):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create project backups")
-    parser.add_argument("description", nargs="?", help="Commit message for the backup")
+    parser = argparse.ArgumentParser(
+        description="""Create project backups with conventional commit messages.
+
+Examples:
+    python backup.py "description"          # Will add "fix:" prefix by default
+    python backup.py "feat: new feature"    # For new features
+    python backup.py "fix(ui): bug fix"     # With scope
+    python backup.py "feat!: breaking"      # Breaking change
+
+Commit Types:
+    feat:     A new feature
+    fix:      A bug fix
+    docs:     Documentation changes
+    style:    Code style/formatting
+    refactor: Code restructuring
+    perf:     Performance improvements
+    test:     Testing
+    build:    Build system changes
+    ci:       CI configuration
+    chore:    Maintenance
+    revert:   Reverting changes
+
+Optional Formats:
+    Breaking changes: Add ! after type (feat!:)
+    Scopes: Add in parentheses (fix(ui):)""",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "description", nargs="?", help="Commit message (format: <type>: <description>)"
+    )
     parser.add_argument(
         "--zip", action="store_true", help="Create ZIP backup in addition to Git backup"
     )
