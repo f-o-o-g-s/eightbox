@@ -53,10 +53,16 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 ## Setup
 
 ### Prerequisites
-1. Install and configure [Klusterbox](https://github.com/TomOfHelatrobus/klusterbox)
+1. Install and configure [Klusterbox](https://github.com/TomOfHelatrobus/klusterbox) - a companion application for USPS carrier data management
 2. Use Klusterbox's auto data entry to populate the mandates.sqlite database
    - Alternatively, you can use the test database included in this repository
 3. Ensure Klusterbox is working correctly with your data
+4. ⚠️ **IMPORTANT**: Always backup your Klusterbox database before first use:
+   ```
+   cd %USERPROFILE%\Documents\.klusterbox
+   copy mandates.sqlite mandates.sqlite.backup
+   ```
+   While Eightbox should not modify your Klusterbox database, it's always wise to have a backup.
 
 ### Installation
 1. Download the latest release (.7z file) from the GitHub releases page
