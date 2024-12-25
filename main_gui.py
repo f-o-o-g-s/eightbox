@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QMenuBar,
     QMessageBox,
     QPushButton,
+    QTabBar,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -534,35 +535,35 @@ class MainApp(QMainWindow):
                 border: none;
                 border-radius: 4px;
                 color: #BB86FC;  /* Primary color */
-                padding: 12px 24px;
-                font-size: 13px;
+                padding: 16px 32px;  /* Increased padding */
+                font-size: 14px;  /* Increased font size */
                 font-weight: 500;
-                text-align: center;  /* Center alignment for navigation buttons */
-                margin: 8px 4px;
-                min-width: 160px;
-                letter-spacing: 0.15px;  /* Material type scale */
-                text-transform: uppercase;  /* Material Design style */
+                text-align: center;
+                margin: 12px 6px;  /* Increased margins */
+                min-width: 180px;  /* Increased width */
+                letter-spacing: 0.15px;
+                text-transform: uppercase;
             }
             QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.08);  /* Primary color with 8% opacity */
-                color: #CBB0FF;  /* Lighter primary */
+                background-color: rgba(187, 134, 252, 0.08);
+                color: #CBB0FF;
             }
             QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.12);  /* Primary color with 12% opacity */
-                padding-top: 13px;
+                background-color: rgba(187, 134, 252, 0.12);
+                padding-top: 17px;
                 color: #BB86FC;
             }
             QPushButton:checked {
-                background-color: rgba(187, 134, 252, 0.12);  /* Primary color with 12% opacity */
-                color: #E9B7FF;  /* Even lighter primary */
-                font-weight: 600;  /* Slightly bolder when selected */
+                background-color: rgba(187, 134, 252, 0.12);
+                color: #E9B7FF;
+                font-weight: 600;
             }
             QPushButton:checked:hover {
-                background-color: rgba(187, 134, 252, 0.16);  /* Primary color with 16% opacity */
+                background-color: rgba(187, 134, 252, 0.16);
             }
             QPushButton:disabled {
-                background-color: rgba(255, 255, 255, 0.12);  /* White with 12% opacity */
-                color: rgba(255, 255, 255, 0.38);  /* White with 38% opacity */
+                background-color: rgba(255, 255, 255, 0.12);
+                color: rgba(255, 255, 255, 0.38);
             }
             """
         )
@@ -810,28 +811,29 @@ class MainApp(QMainWindow):
     def init_85d_tab(self):
         """Initialize the Article 8.5.D violation tab."""
         self.vio_85d_tab = Violation85dTab()
-        self.central_tab_widget.addTab(self.vio_85d_tab, "8.5.D Violations")
+        self.central_tab_widget.addTab(self.vio_85d_tab, "8.5.D")
+        self.central_tab_widget.setTabToolTip(0, "8.5.D Violations")
         self.vio_85d_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
-
-        # Connect tab change signal
-        self.central_tab_widget.currentChanged.connect(self.handle_main_tab_change)
 
     def init_85f_tab(self):
         """Initialize the Article 8.5.F violation tab."""
         self.vio_85f_tab = Violation85fTab()
-        self.central_tab_widget.addTab(self.vio_85f_tab, "8.5.F Violations")
+        self.central_tab_widget.addTab(self.vio_85f_tab, "8.5.F")
+        self.central_tab_widget.setTabToolTip(1, "8.5.F Violations")
         self.vio_85f_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_85f_ns_tab(self):
         """Initialize the Article 8.5.F non-scheduled day violation tab."""
         self.vio_85f_ns_tab = Violation85fNsTab()
-        self.central_tab_widget.addTab(self.vio_85f_ns_tab, "8.5.F NS Violations")
+        self.central_tab_widget.addTab(self.vio_85f_ns_tab, "8.5.F NS")
+        self.central_tab_widget.setTabToolTip(2, "8.5.F Non-Scheduled Day Violations")
         self.vio_85f_ns_tab.initUI(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_85f_5th_tab(self):
         """Initialize the Article 8.5.F fifth overtime day violation tab."""
         self.vio_85f_5th_tab = Violation85f5thTab()
-        self.central_tab_widget.addTab(self.vio_85f_5th_tab, "8.5.F 5th Violations")
+        self.central_tab_widget.addTab(self.vio_85f_5th_tab, "8.5.F 5th")
+        self.central_tab_widget.setTabToolTip(3, "8.5.F Fifth Day Violations")
         self.vio_85f_5th_tab.refresh_data(
             pd.DataFrame()
         )  # Start with an empty DataFrame
@@ -839,23 +841,27 @@ class MainApp(QMainWindow):
     def init_85g_tab(self):
         """Initialize the Article 8.5.G violation tab."""
         self.vio_85g_tab = Violation85gTab()
-        self.central_tab_widget.addTab(self.vio_85g_tab, "8.5.G Violations")
+        self.central_tab_widget.addTab(self.vio_85g_tab, "8.5.G")
+        self.central_tab_widget.setTabToolTip(4, "8.5.G Violations")
         self.vio_85g_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
 
     def init_MAX12_tab(self):
         """Initialize the Maximum 12-Hour Rule violation tab."""
         self.vio_MAX12_tab = ViolationMax12Tab(self)
         self.central_tab_widget.addTab(self.vio_MAX12_tab, "MAX12")
+        self.central_tab_widget.setTabToolTip(5, "Maximum 12-Hour Rule Violations")
 
     def init_MAX60_tab(self):
         """Initialize the Maximum 60-Hour Rule violation tab."""
         self.vio_MAX60_tab = ViolationMax60Tab(self)
         self.central_tab_widget.addTab(self.vio_MAX60_tab, "MAX60")
+        self.central_tab_widget.setTabToolTip(6, "Maximum 60-Hour Rule Violations")
 
     def init_remedies_tab(self):
         """Initialize the violation remedies summary tab."""
         self.remedies_tab = ViolationRemediesTab()
-        self.central_tab_widget.addTab(self.remedies_tab, "Violations Summary")
+        self.central_tab_widget.addTab(self.remedies_tab, "Summary")
+        self.central_tab_widget.setTabToolTip(7, "Violations Summary")
         self.remedies_tab.refresh_data(pd.DataFrame())  # Start with an empty DataFrame
 
     def apply_date_range(self):
@@ -2160,9 +2166,44 @@ class MainApp(QMainWindow):
         self.carrier_list_pane = None
         self.otdl_maximization_pane = None
 
-        # Initialize carrier list and OTDL panes
-        self.init_carrier_list_pane()
-        self.init_otdl_maximization_pane()
+        # Configure main tab bar
+        self.central_tab_widget.setDocumentMode(True)
+        self.central_tab_widget.setMovable(False)
+        self.central_tab_widget.setTabsClosable(False)
+
+        # Set tab widget style
+        self.central_tab_widget.setStyleSheet(
+            """
+            QTabWidget::pane {
+                border: none;
+                background-color: #121212;
+            }
+            QTabBar {
+                qproperty-drawBase: 0;
+            }
+            QTabBar::tab {
+                background-color: #1E1E1E;
+                color: rgba(255, 255, 255, 0.6);
+                padding: 8px 16px;
+                border: none;
+                border-right: 1px solid #2D2D2D;
+                min-width: 80px;
+                font: 11px;
+            }
+            QTabBar::tab:selected {
+                color: #BB86FC;
+                background-color: rgba(187, 134, 252, 0.12);
+                border-bottom: 2px solid #BB86FC;
+            }
+            QTabBar::tab:hover {
+                background-color: rgba(187, 134, 252, 0.08);
+                color: #CBB0FF;
+            }
+            QTabBar::scroller {
+                width: 0px;
+            }
+        """
+        )
 
         # Initialize violation tabs
         self.init_85d_tab()
@@ -2174,6 +2215,13 @@ class MainApp(QMainWindow):
         self.init_MAX60_tab()
         self.init_remedies_tab()
 
+        # Connect tab change signal
+        self.central_tab_widget.currentChanged.connect(self.handle_main_tab_change)
+
+        # Initialize carrier list and OTDL panes
+        self.init_carrier_list_pane()
+        self.init_otdl_maximization_pane()
+
         # Initialize settings dialog reference
         self.settings_dialog = None
 
@@ -2181,6 +2229,53 @@ class MainApp(QMainWindow):
         export_all_action = QAction("Generate All Excel Spreadsheets", self)
         export_all_action.triggered.connect(self.excel_exporter.export_all_violations)
         self.file_menu.addAction(export_all_action)
+
+    def _init_sub_tab_bar(self, tab_widget):
+        """Initialize a sub-tab bar with compact styling."""
+        sub_tab_bar = QTabBar()
+        sub_tab_bar.setExpanding(False)
+        sub_tab_bar.setFixedHeight(28)  # Smaller height for sub-tabs
+        tab_widget.setTabBar(sub_tab_bar)
+
+        # Set sub-tab specific style
+        tab_widget.setStyleSheet(
+            """
+            QTabWidget::pane {
+                border: none;
+                background-color: #121212;
+                padding-top: 2px;
+            }
+            QTabBar {
+                qproperty-drawBase: 0;
+            }
+            QTabBar::tab {
+                background-color: #1A1A1A;
+                color: rgba(255, 255, 255, 0.6);
+                padding: 6px 12px;
+                min-width: 60px;
+                margin: 0;
+                border-right: 1px solid #2D2D2D;
+                font-size: 10px;
+                font-weight: normal;
+                text-transform: uppercase;
+                letter-spacing: 0.05px;
+            }
+            QTabBar::tab:hover {
+                background-color: rgba(187, 134, 252, 0.08);
+                color: #CBB0FF;
+            }
+            QTabBar::tab:selected {
+                color: #BB86FC;
+                border-bottom: 2px solid #BB86FC;
+                background-color: rgba(187, 134, 252, 0.12);
+                border-right: 1px solid #BB86FC;
+                font-weight: 500;
+            }
+            QTabBar::scroller {
+                width: 0px;
+            }
+        """
+        )
 
     def _init_size_grip(self):
         """Initialize the custom size grip."""

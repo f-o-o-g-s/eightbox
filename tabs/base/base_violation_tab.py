@@ -228,6 +228,45 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
 
         # Create tab widget
         self.date_tabs = QTabWidget()
+        self.date_tabs.setDocumentMode(True)
+
+        # Set tab bar styling
+        self.date_tabs.setStyleSheet(
+            """
+            QTabWidget::pane {
+                border: none;
+                background-color: #121212;
+            }
+            QTabBar {
+                qproperty-drawBase: 0;
+            }
+            QTabBar::tab {
+                background-color: #1E1E1E;
+                color: rgba(255, 255, 255, 0.6);
+                padding: 4px 8px;
+                border: none;
+                border-right: 1px solid #2D2D2D;
+                min-width: 60px;
+                font-size: 10px;
+                font-weight: normal;
+                text-transform: uppercase;
+                letter-spacing: 0.05px;
+            }
+            QTabBar::tab:selected {
+                color: #BB86FC;
+                background-color: rgba(187, 134, 252, 0.12);
+                border-bottom: 2px solid #BB86FC;
+            }
+            QTabBar::tab:hover {
+                background-color: rgba(187, 134, 252, 0.08);
+                color: #CBB0FF;
+            }
+            QTabBar::scroller {
+                width: 0px;
+            }
+        """
+        )
+
         self.main_layout.addWidget(self.date_tabs)
 
         # Connect tab change signal
