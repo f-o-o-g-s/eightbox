@@ -68,7 +68,7 @@ from violation_detection import (
 )
 
 VERSION = "2024.1.3.0"
-BUILD_TIME = "2024-12-25 14:00"
+BUILD_TIME = "2024-12-25 14:03"
 
 
 def qt_message_handler(mode, context, message):
@@ -245,7 +245,7 @@ class MainApp(QMainWindow):
     """
 
     VERSION = "2024.1.3.0"  # Updated by release.py
-    BUILD_TIME = "2024-12-25 14:00"  # Updated by release.py
+    BUILD_TIME = "2024-12-25 14:03"  # Updated by release.py
 
     def __init__(self):
         super().__init__()

@@ -313,7 +313,7 @@ def upload_release_asset(release, archive_file, max_retries=3, timeout=300):
         release: GitHub release object
         archive_file (str): Path to the archive file
         max_retries (int): Maximum number of retry attempts
-        timeout (int): Timeout in seconds for the upload
+        timeout (int): Timeout in seconds for the upload (currently unused)
 
     Returns:
         bool: True if upload successful, False otherwise
@@ -337,7 +337,6 @@ def upload_release_asset(release, archive_file, max_retries=3, timeout=300):
                 path=archive_file,
                 content_type=content_type,
                 name=os.path.basename(archive_file),
-                timeout=timeout,
             )
             print(f"Successfully uploaded: {archive_file}")
             return True
