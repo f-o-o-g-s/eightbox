@@ -21,6 +21,7 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 ### Data Management
 - Import carrier data from JSON
 - Customizable carrier list management
+- Removed carriers management with restore functionality
 - Date-based violation filtering
 - Excel export functionality with consistent carrier name sorting
 - Progress tracking for long operations
@@ -114,6 +115,13 @@ This project uses:
 - isort for import sorting
 
 ## Version History
+
+### 2024.1.1.0
+- Added removed carriers management functionality
+- Implemented restore functionality for removed carriers
+- Enhanced carrier list UI with better button layout
+- Improved carrier removal workflow
+- Updated database initialization for removed carriers tracking
 
 ### 2024.1.0.6
 - Fixed linting issues and line length problems
