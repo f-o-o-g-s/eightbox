@@ -166,18 +166,16 @@ class SettingsDialog(QDialog):
         content_layout.addWidget(eightbox_section)
         content_layout.addSpacing(20)
         content_layout.addWidget(button_container, alignment=Qt.AlignCenter)
-        content_layout.addStretch()
 
         # Add content widget to main layout
         layout.addWidget(content_widget)
 
-        # Set minimum size
-        self.setMinimumSize(500, 600)
-        self.adjustSize()
-
         # Update initial status
         self.validate_database(self.mandates_db_path)
         self.validate_eightbox_database()
+
+        # Adjust size to content
+        self.adjustSize()
 
     def mouse_press_event(self, event):
         """Handle mouse press events for window dragging."""

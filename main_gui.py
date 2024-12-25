@@ -52,6 +52,7 @@ from database.service import DatabaseService
 from date_selection_pane import DateSelectionPane
 from excel_export import ExcelExporter
 from otdl_maximization_pane import OTDLMaximizationPane
+from settings_dialog import SettingsDialog
 
 # Theme colors
 from tabs.violations import (
@@ -1196,8 +1197,6 @@ class MainApp(QMainWindow):
     def open_settings_dialog(self):
         """Open the settings dialog to configure database path."""
         if self.settings_dialog is None or not self.settings_dialog.isVisible():
-            from settings_dialog import SettingsDialog
-
             self.settings_dialog = SettingsDialog(self.mandates_db_path, self)
             self.settings_dialog.show()
         else:
