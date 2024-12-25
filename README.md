@@ -61,12 +61,24 @@ The repository includes a sanitized test database (`fake_mandates_db.sqlite`) th
 - Is safe to use and share as it contains no real carrier information
 
 To use the test database:
-1. Launch the application
-2. Click Settings > Database Path in the menu bar
-3. Set the database path to `fake_mandates_db.sqlite` in your project directory
-4. Click Save to apply the changes
+1. First, backup your existing Klusterbox database:
+   ```
+   cd %USERPROFILE%\Documents\.klusterbox
+   copy mandates.sqlite mandates.sqlite.backup
+   ```
+2. Copy the test database to the Klusterbox directory:
+   ```
+   copy path\to\fake_mandates_db.sqlite %USERPROFILE%\Documents\.klusterbox\mandates.sqlite
+   ```
+3. Launch Eightbox - it will automatically detect the database
 
 You can also use the test database as a template to understand the required schema for your own data.
+
+To restore your original database:
+```
+cd %USERPROFILE%\Documents\.klusterbox
+copy mandates.sqlite.backup mandates.sqlite
+```
 
 ## Usage
 [Basic usage instructions to be added]
