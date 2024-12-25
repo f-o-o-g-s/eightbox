@@ -43,8 +43,6 @@ from custom_widgets import (
     CustomSizeGrip,
     CustomWarningDialog,
 )
-
-# Custom modules
 from database.initializer import DatabaseInitializer
 from database.models import ClockRingQueryParams
 from database.path_manager import DatabasePathManager
@@ -53,8 +51,6 @@ from date_selection_pane import DateSelectionPane
 from excel_export import ExcelExporter
 from otdl_maximization_pane import OTDLMaximizationPane
 from settings_dialog import SettingsDialog
-
-# Theme colors
 from tabs.violations import (
     Violation85dTab,
     Violation85f5thTab,
@@ -70,6 +66,9 @@ from violation_detection import (
     detect_violations,
     get_violation_remedies,
 )
+
+VERSION = "2024.1.0.0"
+BUILD_TIME = "2024-01-09 12:00"
 
 
 def qt_message_handler(mode, context, message):
