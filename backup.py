@@ -249,6 +249,9 @@ def git_backup(description, target_branch="main"):
     committing with a timestamped message, and pushing to the target branch.
     The commit message will follow conventional commit format.
     If no type prefix is provided, 'fix:' will be used as default.
+
+    Returns:
+        tuple: (success, had_changes) - Whether the operation succeeded and if there were changes
     """
     try:
         # Format commit message to follow conventional format
@@ -264,18 +267,18 @@ def git_backup(description, target_branch="main"):
 
         if not status:
             print("\nNo changes to commit in Git.")
-            return True
+            return True, False
 
         # Git commands
         subprocess.run(["git", "add", "-u"], check=True)
         subprocess.run(["git", "commit", "-m", message], check=True)
         subprocess.run(["git", "push", "origin", target_branch], check=True)
 
-        return True
+        return True, True
 
     except subprocess.CalledProcessError as e:
         print(f"\nGit operation failed: {str(e)}")
-        return False
+        return False, False
 
 
 def create_backup(cli_description=None, cli_backup_type=None):
@@ -338,15 +341,32 @@ def create_backup(cli_description=None, cli_backup_type=None):
             backup_type = input("\nEnter choice (1-3): ").strip()
 
         success = True
+        had_git_changes = False
+        had_zip_backup = False
+
         if backup_type in ["1", "3"]:
-            success &= git_backup(description, target_branch)
+            git_success, had_changes = git_backup(description, target_branch)
+            success &= git_success
+            had_git_changes = had_changes
 
         if backup_type in ["2", "3"]:
             zip_path = create_zip_backup(PROJECT_DIR, BACKUP_DIR)
-            success &= bool(zip_path)
+            had_zip_backup = bool(zip_path)
+            success &= had_zip_backup
 
         if success:
-            print(f"\nBackup successfully pushed to {target_branch} branch!")
+            messages = []
+            if had_git_changes:
+                messages.append(
+                    f"Changes successfully pushed to {target_branch} branch"
+                )
+            elif backup_type in ["1", "3"]:
+                messages.append("No changes to commit in Git")
+
+            if had_zip_backup:
+                messages.append("ZIP backup created successfully")
+
+            print("\n" + "\n".join(messages) + "!")
         else:
             print("\nSome backup operations failed. Please check the logs above.")
 
