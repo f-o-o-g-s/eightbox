@@ -179,7 +179,6 @@ class DateSelectionPane(QWidget):
         self.parent_main = parent
         self.db_path = db_path
         self.selected_range = None
-        self.date_range_selected = pyqtSignal(QDate, QDate)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setup_ui()
         self.load_data()

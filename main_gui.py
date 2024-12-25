@@ -526,43 +526,57 @@ class MainApp(QMainWindow):
         button_container.setStyleSheet(
             """
             QWidget {
-                background-color: #1E1E1E;
-                border-bottom: 1px solid #333333;
+                background-color: #121212;  /* Material Dark background */
+                border-bottom: 1px solid #2D2D2D;
             }
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #4A148C, stop:1 #311B92);
+                background-color: rgba(187, 134, 252, 0.05);  /* Primary color with 5% opacity */
                 border: none;
-                border-radius: 0px;
-                color: #E1E1E1;
+                border-radius: 4px;
+                color: #BB86FC;  /* Primary color */
                 padding: 12px 24px;
                 font-size: 13px;
-                font-weight: normal;
-                text-align: left;
+                font-weight: 500;
+                text-align: center;  /* Center alignment for navigation buttons */
                 margin: 8px 4px;
+                min-width: 160px;
+                letter-spacing: 0.15px;  /* Material type scale */
+                text-transform: uppercase;  /* Material Design style */
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #6A1B9A, stop:1 #4527A0);
+                background-color: rgba(187, 134, 252, 0.08);  /* Primary color with 8% opacity */
+                color: #CBB0FF;  /* Lighter primary */
+            }
+            QPushButton:pressed {
+                background-color: rgba(187, 134, 252, 0.12);  /* Primary color with 12% opacity */
+                padding-top: 13px;
+                color: #BB86FC;
             }
             QPushButton:checked {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #7B1FA2, stop:1 #512DA8);
-                color: #FFFFFF;
+                background-color: rgba(187, 134, 252, 0.12);  /* Primary color with 12% opacity */
+                color: #E9B7FF;  /* Even lighter primary */
+                font-weight: 600;  /* Slightly bolder when selected */
+            }
+            QPushButton:checked:hover {
+                background-color: rgba(187, 134, 252, 0.16);  /* Primary color with 16% opacity */
+            }
+            QPushButton:disabled {
+                background-color: rgba(255, 255, 255, 0.12);  /* White with 12% opacity */
+                color: rgba(255, 255, 255, 0.38);  /* White with 38% opacity */
             }
             """
         )
 
         # Create buttons with icons
-        self.date_selection_button = QPushButton("  Date Selection")
+        self.date_selection_button = QPushButton("Date Selection")
         self.date_selection_button.setCheckable(True)
         self.date_selection_button.clicked.connect(self.toggle_date_selection_pane)
 
-        self.carrier_list_button = QPushButton("  Carrier List")
+        self.carrier_list_button = QPushButton("Carrier List")
         self.carrier_list_button.setCheckable(True)
         self.carrier_list_button.clicked.connect(self.toggle_carrier_list_pane)
 
-        self.otdl_maximization_button = QPushButton("  OTDL Maximization")
+        self.otdl_maximization_button = QPushButton("OTDL Maximization")
         self.otdl_maximization_button.setCheckable(True)
         self.otdl_maximization_button.clicked.connect(
             self.toggle_otdl_maximization_pane
