@@ -28,7 +28,7 @@ You identify when the user probably needs to refactor the code into smaller chun
 - Use release.py for version management:
   * Follows YYYY.MAJOR.MINOR.PATCH versioning
   * Run 'python release.py' to create new releases
-  * Automatically updates version in main_gui.py
+  * Automatically updates version in eightbox.py
   * Creates Git tags and GitHub releases
   * Requires GITHUB_TOKEN for GitHub releases
   * Supports patch (bug fixes), minor (features), and major (breaking) releases

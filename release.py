@@ -248,34 +248,27 @@ def get_new_version(current_version, update_type):
 
 
 def get_current_version():
-    """Get the current version from main_gui.py file."""
-    with open("main_gui.py", "r", encoding="utf-8") as f:
+    """Get the current version from eightbox.py file."""
+    with open("eightbox.py", "r", encoding="utf-8") as f:
         content = f.read()
-        version_match = re.search(r'VERSION = "([^"]+)"', content)
-        if version_match:
-            return version_match.group(1)
-        raise ValueError("Could not find VERSION in main_gui.py")
+        match = re.search(r'VERSION = "([^"]+)"', content)
+        if match:
+            return match.group(1)
+        raise ValueError("Could not find VERSION in eightbox.py")
 
 
-def update_version_and_time(old_version, new_version):
-    """Update version and build time in main_gui.py file."""
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+def update_version_and_build_time(version):
+    """Update version and build time in eightbox.py file."""
+    build_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    with open("main_gui.py", "r", encoding="utf-8") as f:
+    with open("eightbox.py", "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Update version
-    content = content.replace(
-        f'VERSION = "{old_version}"', f'VERSION = "{new_version}"'
-    )
+    content = re.sub(r'VERSION = "[^"]+"', f'VERSION = "{version}"', content)
+    content = re.sub(r'BUILD_TIME = "[^"]+"', f'BUILD_TIME = "{build_time}"', content)
 
-    # Update build time using regex to handle any existing time
-    content = re.sub(r'BUILD_TIME = "[^"]+"', f'BUILD_TIME = "{current_time}"', content)
-
-    with open("main_gui.py", "w", encoding="utf-8") as f:
+    with open("eightbox.py", "w", encoding="utf-8") as f:
         f.write(content)
-
-    return current_time
 
 
 def create_release():
@@ -323,7 +316,7 @@ def create_release():
 
         # 4. Update version and build time
         new_version = get_new_version(old_version, choice)
-        update_version_and_time(old_version, new_version)
+        update_version_and_build_time(new_version)
 
         # 5. Git commands - now adding all changes
         subprocess.run(["git", "add", "."], check=True)
@@ -409,7 +402,7 @@ def create_release_non_interactive(release_type, commit_msg, notes):
 
         # 4. Update version and build time
         new_version = get_new_version(old_version, choice)
-        update_version_and_time(old_version, new_version)
+        update_version_and_build_time(new_version)
 
         # 5. Git commands - now adding all changes
         subprocess.run(["git", "add", "."], check=True)
