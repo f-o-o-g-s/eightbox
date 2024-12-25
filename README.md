@@ -33,43 +33,6 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 - Comprehensive documentation for all violation types
 - Real-time progress feedback for long operations
 
-## Documentation
-
-Documentation is maintained in the `feature/add-documentation` branch using MkDocs with Material theme.
-
-### Documentation Workflow
-
-1. Switch to documentation branch:
-   ```bash
-   git checkout feature/add-documentation
-   ```
-
-2. Install MkDocs if needed:
-   ```bash
-   python -m pip install mkdocs-material
-   ```
-
-3. Preview documentation:
-   ```bash
-   cd docs && python -m mkdocs serve
-   ```
-   Then visit http://127.0.0.1:8000
-
-4. Edit documentation files in `docs/src/`
-   - Main pages are in the root
-   - Feature docs in `features/`
-   - User guide in `user-guide/`
-
-5. When done:
-   - Stop the server (Ctrl+C)
-   - Commit your changes
-   - The `site/` directory can be safely deleted (it's regenerated as needed)
-
-6. Switch back to main:
-   ```bash
-   git checkout main
-   ```
-
 ## Requirements
 
 ### Runtime Dependencies
@@ -115,6 +78,11 @@ This project uses:
 - isort for import sorting
 
 ## Version History
+
+### 2024.1.3.0
+- Added 7-Zip compression for smaller distribution files
+- Improved GitHub release upload handling
+- Added fallback to ZIP if 7-Zip is not available
 
 ### 2024.1.2.1
 - Fixed OTDL carrier excusal handling in 8.5.G violations
