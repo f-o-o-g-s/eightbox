@@ -284,7 +284,7 @@ class RemovedCarriersManager(QDialog):
 
                 # Get carrier data from mandates database
                 with sqlite3.connect(self.mandates_db_path) as conn:
-                    query = """
+                    query = f"""
                         SELECT
                             carrier_name,
                             DATE(MAX(effective_date)) as effective_date,
@@ -292,11 +292,9 @@ class RemovedCarriersManager(QDialog):
                             route_s,
                             station
                         FROM carriers
-                        WHERE carrier_name IN ({})
+                        WHERE carrier_name IN ({','.join('?' * len(carriers_to_restore))})
                         GROUP BY carrier_name
-                    """.format(
-                        ",".join("?" * len(carriers_to_restore))
-                    )
+                    """
 
                     df = pd.read_sql_query(query, conn, params=carriers_to_restore)
 
