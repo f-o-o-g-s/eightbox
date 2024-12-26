@@ -597,13 +597,13 @@ DOCUMENTATION_85G = """
 
 <h3 style='color: #03DAC6;'>Contract Language:</h3>
 <p style='background-color: #2D2D2D; padding: 10px; border-radius: 4px;'>
-"<strong style='color: #BB86FC;'>Full-time employees not on the 'Overtime Desired' list may be required to work overtime only if all available employees on the 'Overtime Desired' list have worked up to twelve (12) hours in a day or sixty (60) hours in a service week</strong>."
+Full-time employees not on the 'Overtime Desired' list may be required to work overtime <strong style='color: #BB86FC;'>"only if all available employees on the 'Overtime Desired' list have worked up to twelve (12) hours in a day or sixty (60) hours in a service week</strong>."
 </p>
 
 <h3 style='color: #03DAC6;'>When Does a Violation Occur?</h3>
 <p>A violation occurs when ALL of these conditions are met:</p>
 <ul>
-    <li>A WAL or NL carrier works overtime (more than 8 hours)</li>
+    <li>A WAL or NL carrier works overtime off assignment (more than 8 hours)</li>
     <li>An OTDL carrier was available to work (not excused)</li>
     <li>The available OTDL carrier had not reached their daily limit (usually 12 hours)</li>
     <li>The day was not marked as "OTDL Maximized" in the OTDL Maximization pane</li>
