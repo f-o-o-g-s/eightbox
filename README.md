@@ -110,7 +110,7 @@ copy mandates.sqlite.backup mandates.sqlite
 
 ## Usage
 
-⚠️ **IMPORTANT**: Always verify clock ring information with the Employee Everything Report obtained through a Request for Information (RFI). This report is the source of truth for clock ring data. Never rely solely on the program's violation detection - while the program aims to be accurate, there may be bugs or data inconsistencies that could affect results.
+⚠️ **IMPORTANT**: Always verify clock ring information with the Employee Everything Report obtained through a Request for Information (RFI). This report is the source of truth for clock ring data. Never rely solely on the program's violation detection - while the program aims to be accurate, there may be bugs or data inconsistencies that could affect results. Also the remedies are based on the branch settlements and escalated remedies, so they may not be universally applicable.
 
 ### Basic Workflow
 1. Click on Date Selection
