@@ -84,7 +84,7 @@ def load_exclusion_periods():
 
             # Create a list of all exclusion dates for vectorized comparison
             all_dates = []
-            for year, year_data in periods.items():
+            for _, year_data in periods.items():
                 if "december_exclusion" in year_data:
                     period = year_data["december_exclusion"]
                     start = pd.to_datetime(period["start"])

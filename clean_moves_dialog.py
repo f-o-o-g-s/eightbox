@@ -95,6 +95,10 @@ class SplitMoveDialog(QDialog):
         button_box.addWidget(self.ok_button)
         button_box.addWidget(cancel_button)
 
+        # Add each move as a group
+        for start, end, route in self.moves:
+            self.add_move_group(start, end, route)
+
         # Add layouts to content layout
         content_layout.addLayout(self.moves_layout)
         content_layout.addLayout(button_box)
@@ -385,7 +389,7 @@ class EditMovesDialog(QDialog):
         button_box.addWidget(cancel_button)
 
         # Add each move as a group
-        for i, (start, end, route) in enumerate(self.moves):
+        for start, end, route in self.moves:
             self.add_move_group(start, end, route)
 
         # Add layouts to content layout
