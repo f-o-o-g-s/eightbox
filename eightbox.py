@@ -782,9 +782,21 @@ class MainApp(QMainWindow):
             self.apply_global_status_filter("violations")
 
     def update_filter_stats(self, total, wal, nl, otdl, ptf, violations):
-        """Update internal stats without modifying button text."""
-        # Store stats internally if needed but don't update button text
-        pass
+        """Interface method called by violation tabs to notify parent of stat changes.
+
+        This implementation intentionally does nothing as the main app doesn't need
+        to track these stats, but the method exists to satisfy the interface
+        expected by the violation tabs.
+
+        Args:
+            total (int): Total number of carriers
+            wal (int): Number of WAL carriers
+            nl (int): Number of NL carriers
+            otdl (int): Number of OTDL carriers
+            ptf (int): Number of PTF carriers
+            violations (int): Number of carriers with violations
+        """
+        # Intentionally empty - main app doesn't need to track these stats
 
     def apply_global_status_filter(self, status):
         """Apply the global status filter to all tabs."""
@@ -889,7 +901,7 @@ class MainApp(QMainWindow):
             ):
                 if hasattr(self.carrier_list_pane, "data_updated"):
                     self.carrier_list_pane.data_updated.connect(
-                        lambda: self.retry_apply_date_range()
+                        self.retry_apply_date_range
                     )
             return
 
@@ -911,9 +923,7 @@ class MainApp(QMainWindow):
                 hasattr(self, "carrier_list_pane")
                 and self.carrier_list_pane is not None
             ):
-                self.carrier_list_pane.data_updated.connect(
-                    lambda: self.retry_apply_date_range()
-                )
+                self.carrier_list_pane.data_updated.connect(self.retry_apply_date_range)
             return
 
         # Third check: Carrier List content validation
