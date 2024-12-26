@@ -6,7 +6,7 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 
 ### Violation Detection
 - 8.5.D Violations (Overtime Off Route when OTDL wasn't utilized to their hourly limits)
-- 8.5.F Violations (Regular, Non-Scheduled, 5th Day)
+- 8.5.F Violations (Over 10, Non-Scheduled, 5th Day)
 - 8.5.G Violations (OTDL Maximization)
 - MAX12 Violations (12-Hour Daily Limit)
 - MAX60 Violations (60-Hour Weekly Limit)
