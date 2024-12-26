@@ -51,7 +51,7 @@ class RemovedCarriersTableModel(QAbstractTableModel):
             return str(value)
 
         if role == Qt.TextAlignmentRole:
-            return Qt.AlignLeft | Qt.AlignVCenter
+            return Qt.AlignCenter  # Center align both horizontally and vertically
 
         return None
 
@@ -63,6 +63,8 @@ class RemovedCarriersTableModel(QAbstractTableModel):
                 return col_name.replace("_", " ").title()
             if orientation == Qt.Vertical:
                 return str(section + 1)
+        elif role == Qt.TextAlignmentRole:
+            return Qt.AlignCenter  # Center align headers too
         return None
 
 
@@ -166,10 +168,14 @@ class RemovedCarriersManager(QDialog):
         # Create table view
         self.table_view = QTableView()
         self.table_view.setSelectionBehavior(QTableView.SelectRows)
-        self.table_view.setSelectionMode(QTableView.MultiSelection)
+        self.table_view.setSelectionMode(QTableView.SingleSelection)
         self.table_view.setAlternatingRowColors(True)
         self.table_view.verticalHeader().setVisible(False)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table_view.setEditTriggers(QTableView.NoEditTriggers)
+
+        # Clear selection when clicking empty area
+        self.table_view.clicked.connect(self._clear_selection_if_empty)
         content_layout.addWidget(self.table_view)
 
         # Add button container
@@ -343,3 +349,9 @@ class RemovedCarriersManager(QDialog):
         self.restore_button.setEnabled(
             len(self.table_view.selectionModel().selectedRows()) > 0
         )
+
+    def _clear_selection_if_empty(self, index):
+        """Clear selection if user clicks in empty area."""
+        if not index.isValid():
+            self.table_view.clearSelection()
+            self.restore_button.setEnabled(False)
