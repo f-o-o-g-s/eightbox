@@ -110,6 +110,8 @@ copy mandates.sqlite.backup mandates.sqlite
 
 ## Usage
 
+⚠️ **IMPORTANT**: Always verify clock ring information with the Employee Everything Report obtained through a Request for Information (RFI). This report is the source of truth for clock ring data. Never rely solely on the program's violation detection - while the program aims to be accurate, there may be bugs or data inconsistencies that could affect results.
+
 ### Basic Workflow
 1. Click on Date Selection
 2. Find a date range you want to investigate
@@ -145,6 +147,8 @@ copy mandates.sqlite.backup mandates.sqlite
 - Violation detection is based on specific branch settlements and escalated remedies
 - MAX60/MAX12 violations may be more universally applicable
 - Always verify violations manually as the program's detection is not infallible
+- Cross-reference all findings with the Employee Everything Report before taking action
+- Remember that this tool is meant to assist in violation detection, not replace human verification
 
 ## Development
 This project uses:
