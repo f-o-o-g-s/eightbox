@@ -37,18 +37,20 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 
 ### Runtime Dependencies
 - Python 3.11 or higher
-- PyQt5 >= 5.15.2
-- pandas >= 2.2.3
-- openpyxl >= 3.1.5
-- numpy >= 1.24.0
-- xlsxwriter >= 3.1.2
-- PyGithub >= 2.1.1 (for release management)
+- PyQt5 == 5.15.11 (with Qt5 5.15.2)
+- pandas == 2.2.3
+- openpyxl == 3.1.5
+- numpy == 2.2.0
+- xlsxwriter == 3.2.0
+- PyGithub == 2.5.0 (for release management)
 - sqlite3 (included with Python)
 
 ### Development Dependencies
-- black (code formatting)
-- flake8 (style guide)
-- isort (import sorting)
+- black == 24.10.0 (code formatting)
+- flake8 == 7.1.1 (style guide)
+- isort == 5.13.2 (import sorting)
+- pre-commit == 4.0.1 (git hooks)
+- pylint == 3.3.2 (additional linting)
 
 ## Setup
 
@@ -150,6 +152,19 @@ This project uses:
 - black for code formatting
 - flake8 for style guide enforcement
 - isort for import sorting
+
+### Pre-commit Hooks
+The project uses pre-commit hooks to ensure code quality:
+- isort: Sorts Python imports
+- black: Formats Python code
+- flake8: Checks code style
+- Conventional Commit: Enforces commit message format
+
+To set up pre-commit hooks:
+```bash
+pip install pre-commit
+pre-commit install
+```
 
 ## Version History
 
