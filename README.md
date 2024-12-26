@@ -4,7 +4,7 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 
 ## Features
 
-### Violation Tracking
+### Violation Detection
 - 8.5.D Violations (Overtime Off Route when OTDL wasn't utilized to their hourly limits)
 - 8.5.F Violations (Regular, Non-Scheduled, 5th Day)
 - 8.5.G Violations (OTDL Maximization)
@@ -12,7 +12,7 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 - MAX60 Violations (60-Hour Weekly Limit)
 - Comprehensive violation summaries with remedy calculations
 
-### OTDL Management
+### OTDL Maximization Checking
 - OTDL Maximization tracking and status management
 - Carrier excusal system for 8.5.G violations
 - Single-click application of changes across multiple dates
@@ -31,7 +31,6 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 - Tabbed interface for different violation types
 - Global carrier filtering across all tabs
 - Comprehensive documentation for all violation types
-- Real-time progress feedback for long operations
 
 ## Requirements
 
