@@ -206,21 +206,28 @@ class RemovedCarriersManager(QDialog):
         try:
             with sqlite3.connect(self.eightbox_db_path) as conn:
                 query = """
-                    SELECT carrier_name,
-                           datetime(ignored_date) as removed_date
+                    SELECT carrier_name
                     FROM ignored_carriers
-                    ORDER BY ignored_date DESC
+                    ORDER BY carrier_name ASC
                 """
                 df = pd.read_sql_query(query, conn)
-
-                # Format the datetime for display
-                df["removed_date"] = pd.to_datetime(df["removed_date"]).dt.strftime(
-                    "%Y-%m-%d %H:%M"
-                )
 
                 # Create and set the model
                 model = RemovedCarriersTableModel(df, self)
                 self.table_view.setModel(model)
+
+                # Disconnect any existing selection signals to prevent multiple connections
+                try:
+                    self.table_view.selectionModel().selectionChanged.disconnect()
+                except (
+                    TypeError
+                ):  # This occurs when there are no connections to disconnect
+                    pass
+
+                # Connect selection signal to update button state
+                self.table_view.selectionModel().selectionChanged.connect(
+                    self.on_selection_changed
+                )
 
                 # Update button state
                 self.restore_button.setEnabled(False)
