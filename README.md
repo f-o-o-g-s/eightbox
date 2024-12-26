@@ -57,7 +57,7 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 1. Install and configure [Klusterbox](https://github.com/TomOfHelatrobus/klusterbox)
    - Alternatively, you can use the test database included in this repository
 3. Ensure Klusterbox is working correctly with your data
-4. ⚠️ **IMPORTANT**: Always backup your Klusterbox database before first use:
+4. ⚠️ **IMPORTANT**: Always backup your Klusterbox database before use:
    ```
    cd %USERPROFILE%\Documents\.klusterbox
    copy mandates.sqlite mandates.sqlite.backup
