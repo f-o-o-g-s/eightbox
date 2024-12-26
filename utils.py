@@ -79,7 +79,7 @@ def load_exclusion_periods():
     try:
         config_path = os.path.join(os.path.dirname(__file__), "exclusion_periods.json")
         if os.path.exists(config_path):
-            with open(config_path, "r") as f:
+            with open(config_path, "r", encoding="utf-8") as f:
                 periods = json.load(f)
 
             # Create a list of all exclusion dates for vectorized comparison

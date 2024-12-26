@@ -928,7 +928,7 @@ class MainApp(QMainWindow):
 
         # Third check: Carrier List content validation
         try:
-            with open("carrier_list.json", "r") as json_file:
+            with open("carrier_list.json", "r", encoding="utf-8") as json_file:
                 carrier_list = pd.DataFrame(json.load(json_file))
                 if carrier_list.empty:
                     QMessageBox.warning(
@@ -996,7 +996,7 @@ class MainApp(QMainWindow):
             # Process carrier list (30%)
             update_progress(20, "Processing carrier list...")
             try:
-                with open("carrier_list.json", "r") as json_file:
+                with open("carrier_list.json", "r", encoding="utf-8") as json_file:
                     carrier_list = pd.DataFrame(json.load(json_file))
 
                 # Ensure required columns exist in carrier_list
@@ -1278,7 +1278,7 @@ class MainApp(QMainWindow):
             progress.setValue(20)
             QApplication.processEvents()
 
-            with open("carrier_list.json", "r") as json_file:
+            with open("carrier_list.json", "r", encoding="utf-8") as json_file:
                 carrier_list = pd.DataFrame(json.load(json_file))
 
             # Phase 4: Processing Data (30-60%)
@@ -1512,7 +1512,7 @@ class MainApp(QMainWindow):
 
         # Load the most up-to-date carrier data from the JSON file
         try:
-            with open("carrier_list.json", "r") as json_file:
+            with open("carrier_list.json", "r", encoding="utf-8") as json_file:
                 carrier_list = pd.DataFrame(json.load(json_file))
         except FileNotFoundError:
             QMessageBox.critical(self, "Error", "carrier_list.json not found.")
@@ -1995,7 +1995,7 @@ class MainApp(QMainWindow):
 
         # Load carrier list
         try:
-            with open("carrier_list.json", "r") as f:
+            with open("carrier_list.json", "r", encoding="utf-8") as f:
                 carrier_list = json.load(f)
                 # Only include WAL and NL carriers
                 valid_carriers = {
@@ -2076,7 +2076,7 @@ class MainApp(QMainWindow):
             QApplication.processEvents()
 
             try:
-                with open("carrier_list.json", "r") as json_file:
+                with open("carrier_list.json", "r", encoding="utf-8") as json_file:
                     carrier_list = pd.DataFrame(json.load(json_file))
 
                 # Normalize carrier names
