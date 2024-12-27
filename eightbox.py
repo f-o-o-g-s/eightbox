@@ -67,8 +67,8 @@ from violation_detection import (
     get_violation_remedies,
 )
 
-VERSION = "2024.1.3.2"  # Updated by release.py
-BUILD_TIME = "2024-12-26 20:34"  # Updated by release.py
+VERSION = "2024.1.3.3"  # Updated by release.py
+BUILD_TIME = "2024-12-26 20:49"  # Updated by release.py
 
 
 def qt_message_handler(mode, context, message):
@@ -244,8 +244,8 @@ class MainApp(QMainWindow):
         otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
     """
 
-    VERSION = "2024.1.3.2"  # Updated by release.py
-    BUILD_TIME = "2024-12-26 20:34"  # Updated by release.py
+    VERSION = "2024.1.3.3"  # Updated by release.py
+    BUILD_TIME = "2024-12-26 20:49"  # Updated by release.py
 
     def __init__(self):
         super().__init__()
