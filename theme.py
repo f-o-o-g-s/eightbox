@@ -120,12 +120,30 @@ def apply_material_dark_theme(app: QApplication):
             selection-background-color: #3700B3;
             selection-color: #FFFFFF;
             gridline-color: #333333;
+            border-radius: 4px;
+        }
+        QTableView::item {
+            /* Keep minimal styling to not interfere with dynamic colors */
         }
         QHeaderView::section {
             background-color: #2D2D2D;
             color: #E1E1E1;
             padding: 4px;
             border: 1px solid #333333;
+        }
+        QHeaderView::section:first {
+            border-top-left-radius: 4px;
+        }
+        QHeaderView::section:last {
+            border-top-right-radius: 4px;
+        }
+        QTableCornerButton::section {
+            background-color: #1E1E1E;
+            border: none;
+        }
+        QTableView::item:focus {
+            border: none;
+            outline: none;
         }
         QTabWidget::pane {
             border: 1px solid #333333;
