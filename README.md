@@ -170,6 +170,11 @@ pre-commit install
 
 ## Version History
 
+### 2024.1.3.2
+- Added cancel button functionality to progress dialogs
+- Enhanced progress dialog styling with Material Design theme
+- Improved user control over long-running operations
+
 ### 2024.1.3.1
 - Improved removed carriers manager UI with single selection and simplified view
 - Added proper UTF-8 encoding to all file operations
