@@ -239,20 +239,32 @@ class CustomProgressDialog(QProgressDialog):
                 margin-bottom: 5px;
             }
             QPushButton {
-                background-color: #2D2D2D;
-                color: #BB86FC;
-                border: 1px solid #3D3D3D;
+                background-color: rgba(255, 255, 255, 0.05);
+                color: #E1E1E1;
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 border-radius: 4px;
-                padding: 8px 16px;
-                min-width: 80px;
+                padding: 8px 24px;
+                font-size: 13px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                min-width: 120px;
+                margin: 8px 0px;
             }
             QPushButton:hover {
-                background-color: #353535;
-                border: 1px solid #454545;
+                background-color: rgba(187, 134, 252, 0.15);
+                border: 1px solid #BB86FC;
+                color: #BB86FC;
             }
             QPushButton:pressed {
-                background-color: #252525;
-                border: 1px solid #353535;
+                background-color: rgba(187, 134, 252, 0.25);
+                padding-top: 9px;
+                padding-bottom: 7px;
+            }
+            QPushButton:disabled {
+                background-color: rgba(255, 255, 255, 0.03);
+                color: rgba(255, 255, 255, 0.38);
+                border: 1px solid rgba(255, 255, 255, 0.05);
             }
         """
         )
