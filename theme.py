@@ -120,6 +120,7 @@ def apply_material_dark_theme(app: QApplication):
             selection-background-color: #3700B3;
             selection-color: #FFFFFF;
             gridline-color: #333333;
+            border-radius: 4px;
         }
         QHeaderView::section {
             background-color: #2D2D2D;
