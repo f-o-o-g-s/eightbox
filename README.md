@@ -174,18 +174,18 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
-### 4.1.3.2
+### 2024.1.3.2
 - Added cancel button functionality to progress dialogs
 - Enhanced progress dialog styling with Material Design theme
 - Improved user control over long-running operations
 
-### 4.1.3.1
+### 2024.1.3.1
 - Improved removed carriers manager UI with single selection and simplified view
 - Added proper UTF-8 encoding to all file operations
 - Fixed restore button functionality in removed carriers manager
 - Removed unused code and improved code quality
 
-### 4.1.3.0
+### 2024.1.3.0
 - Added 7-Zip compression for smaller distribution files
 - Improved GitHub release upload handling
 - Added fallback to ZIP if 7-Zip is not available
