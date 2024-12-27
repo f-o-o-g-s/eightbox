@@ -964,10 +964,13 @@ class MainApp(QMainWindow):
             progress.setValue(value)
             progress.setLabelText(message)
             QApplication.processEvents()
+            # Check for cancellation
+            return progress.was_canceled()
 
         try:
             # Initial setup (10%)
-            update_progress(0, "Initializing...")
+            if update_progress(0, "Initializing..."):
+                return
             QApplication.processEvents()
 
             # Validate the date selection
@@ -989,12 +992,14 @@ class MainApp(QMainWindow):
             end_date_str = end_date.strftime("%Y-%m-%d")
 
             # Fetch clock ring data (20%)
-            update_progress(10, "Fetching clock ring data...")
+            if update_progress(10, "Fetching clock ring data..."):
+                return
             self.update_date_range_display(start_date_str, end_date_str)
             clock_ring_data = self.fetch_clock_ring_data(start_date_str, end_date_str)
 
             # Process carrier list (30%)
-            update_progress(20, "Processing carrier list...")
+            if update_progress(20, "Processing carrier list..."):
+                return
             try:
                 with open("carrier_list.json", "r", encoding="utf-8") as json_file:
                     carrier_list = pd.DataFrame(json.load(json_file))
@@ -1054,7 +1059,8 @@ class MainApp(QMainWindow):
                 )
 
             # Clear existing data (35%)
-            update_progress(30, "Clearing existing data...")
+            if update_progress(30, "Clearing existing data..."):
+                return
             self.vio_85d_tab.refresh_data(pd.DataFrame())
             self.vio_85f_tab.refresh_data(pd.DataFrame())
             self.vio_85f_ns_tab.refresh_data(pd.DataFrame())
@@ -1065,11 +1071,13 @@ class MainApp(QMainWindow):
             self.remedies_tab.refresh_data(pd.DataFrame())
 
             # Process violations (40-90%)
-            update_progress(40, "Processing violations...")
+            if update_progress(40, "Processing violations..."):
+                return
             self.update_violations_and_remedies(clock_ring_data, update_progress)
 
             # Update OTDL data (95%)
-            update_progress(95, "Updating OTDL data...")
+            if update_progress(95, "Updating OTDL data..."):
+                return
             if self.otdl_maximization_pane is None:
                 self.otdl_maximization_pane = OTDLMaximizationPane(self)
             self.otdl_maximization_pane.refresh_data(clock_ring_data, clock_ring_data)
@@ -1236,7 +1244,7 @@ class MainApp(QMainWindow):
         # Create and show progress dialog immediately
         progress = CustomProgressDialog(
             "Starting update...",
-            None,  # No cancel button
+            "Cancel",  # Add cancel button
             0,  # Minimum value
             100,  # Maximum value
             self,  # Parent widget
@@ -1251,6 +1259,11 @@ class MainApp(QMainWindow):
             progress.setLabelText("Initializing date range...")
             progress.setValue(5)
             QApplication.processEvents()
+
+            # Check for cancellation after each major step
+            if progress.was_canceled():
+                self.cleanup_progress_dialog(progress)
+                return
 
             # Get the selected date range from the date selection pane
             if (
@@ -1269,6 +1282,11 @@ class MainApp(QMainWindow):
             progress.setValue(10)
             QApplication.processEvents()
 
+            # Check for cancellation
+            if progress.was_canceled():
+                self.cleanup_progress_dialog(progress)
+                return
+
             clock_ring_data = self.fetch_clock_ring_data(start_date_str, end_date_str)
             if clock_ring_data.empty:
                 return
@@ -1278,6 +1296,11 @@ class MainApp(QMainWindow):
             progress.setValue(20)
             QApplication.processEvents()
 
+            # Check for cancellation
+            if progress.was_canceled():
+                self.cleanup_progress_dialog(progress)
+                return
+
             with open("carrier_list.json", "r", encoding="utf-8") as json_file:
                 carrier_list = pd.DataFrame(json.load(json_file))
 
@@ -1285,6 +1308,11 @@ class MainApp(QMainWindow):
             progress.setLabelText("Processing carrier data...")
             progress.setValue(30)
             QApplication.processEvents()
+
+            # Check for cancellation
+            if progress.was_canceled():
+                self.cleanup_progress_dialog(progress)
+                return
 
             carrier_list["carrier_name"] = (
                 carrier_list["carrier_name"].str.strip().str.lower()
@@ -1297,6 +1325,11 @@ class MainApp(QMainWindow):
             progress.setLabelText("Merging carrier data...")
             progress.setValue(40)
             QApplication.processEvents()
+
+            # Check for cancellation
+            if progress.was_canceled():
+                self.cleanup_progress_dialog(progress)
+                return
 
             if "list_status" in clock_ring_data.columns:
                 clock_ring_data = clock_ring_data.drop(columns=["list_status"])
@@ -1313,6 +1346,11 @@ class MainApp(QMainWindow):
             progress.setLabelText("Processing maximization status...")
             progress.setValue(60)
             QApplication.processEvents()
+
+            # Check for cancellation
+            if progress.was_canceled():
+                self.cleanup_progress_dialog(progress)
+                return
 
             date_maximized_status = {}
             for d in pd.date_range(start_date_str, end_date_str):
@@ -1335,6 +1373,11 @@ class MainApp(QMainWindow):
                 progress.setValue(80)
                 QApplication.processEvents()
 
+                # Check for cancellation
+                if progress.was_canceled():
+                    self.cleanup_progress_dialog(progress)
+                    return
+
                 new_violations = detect_violations(
                     clock_ring_data,
                     "8.5.D Overtime Off Route",
@@ -1348,6 +1391,11 @@ class MainApp(QMainWindow):
                 progress.setValue(85)
                 QApplication.processEvents()
 
+                # Check for cancellation
+                if progress.was_canceled():
+                    self.cleanup_progress_dialog(progress)
+                    return
+
                 new_violations = detect_violations(
                     clock_ring_data, "8.5.G", date_maximized_status
                 )
@@ -1358,6 +1406,11 @@ class MainApp(QMainWindow):
             progress.setLabelText("Updating violation summary...")
             progress.setValue(95)
             QApplication.processEvents()
+
+            # Check for cancellation
+            if progress.was_canceled():
+                self.cleanup_progress_dialog(progress)
+                return
 
             # Calculate and update remedies
             remedies_data = get_violation_remedies(clock_ring_data, self.violations)
@@ -1373,7 +1426,7 @@ class MainApp(QMainWindow):
 
             traceback.print_exc()
         finally:
-            progress.close()
+            self.cleanup_progress_dialog(progress)
 
     def init_otdl_maximization_pane(self):
         """Initialize the OTDL maximization pane."""
@@ -1450,9 +1503,10 @@ class MainApp(QMainWindow):
             # Detect violations (45% of progress)
             for key, violation_type in violation_types.items():
                 if progress_callback:
-                    progress_callback(
+                    if progress_callback(
                         int(current_progress), f"Detecting {key} violations..."
-                    )
+                    ):
+                        return  # Cancel if requested
 
                 self.violations[key] = detect_violations(
                     clock_ring_data,
@@ -1461,9 +1515,10 @@ class MainApp(QMainWindow):
                 )
                 current_progress += progress_per_step
                 if progress_callback:
-                    progress_callback(
+                    if progress_callback(
                         int(current_progress), f"Detected {key} violations"
-                    )
+                    ):
+                        return  # Cancel if requested
 
             # Update violation tabs (45% of progress)
             tab_updates = [
@@ -1478,19 +1533,22 @@ class MainApp(QMainWindow):
 
             for tab, key, description in tab_updates:
                 if progress_callback:
-                    progress_callback(
+                    if progress_callback(
                         int(current_progress), f"Updating {description} tab..."
-                    )
+                    ):
+                        return  # Cancel if requested
                 tab.refresh_data(self.violations[key])
                 current_progress += progress_per_step
                 if progress_callback:
-                    progress_callback(
+                    if progress_callback(
                         int(current_progress), f"Updated {description} tab"
-                    )
+                    ):
+                        return  # Cancel if requested
 
             # Calculate and update remedies (final 10%)
             if progress_callback:
-                progress_callback(90, "Calculating final remedies...")
+                if progress_callback(90, "Calculating final remedies..."):
+                    return  # Cancel if requested
 
             remedies_data = get_violation_remedies(clock_ring_data, self.violations)
             self.remedies_tab.refresh_data(remedies_data)
@@ -1924,8 +1982,9 @@ class MainApp(QMainWindow):
         Returns:
             CustomProgressDialog: The created progress dialog
         """
-        progress = CustomProgressDialog(initial_text, "", 0, 100, self, title=title)
-        progress.setCancelButton(None)
+        progress = CustomProgressDialog(
+            initial_text, "Cancel", 0, 100, self, title=title
+        )
         progress.setWindowModality(Qt.WindowModal)
         self.active_progress_dialogs.append(progress)
         return progress

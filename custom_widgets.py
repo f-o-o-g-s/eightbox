@@ -183,7 +183,7 @@ class CustomProgressDialog(QProgressDialog):
 
     Args:
         label_text (str): Text describing the operation in progress
-        cancel_button_text (str): Text for the cancel button
+        cancel_button_text (str): Text for the cancel button. If None, no cancel button is shown.
         minimum (int): Minimum progress value
         maximum (int): Maximum progress value
         parent (QWidget): Parent widget
@@ -201,6 +201,7 @@ class CustomProgressDialog(QProgressDialog):
     ):
         super().__init__(label_text, cancel_button_text, minimum, maximum, parent)
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+        self.canceled = False
 
         # Create custom title bar with passed title
         self.title_bar = CustomTitleBarWidget(title, self)
@@ -237,6 +238,22 @@ class CustomProgressDialog(QProgressDialog):
                 font-size: 11px;
                 margin-bottom: 5px;
             }
+            QPushButton {
+                background-color: #2D2D2D;
+                color: #BB86FC;
+                border: 1px solid #3D3D3D;
+                border-radius: 4px;
+                padding: 8px 16px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: #353535;
+                border: 1px solid #454545;
+            }
+            QPushButton:pressed {
+                background-color: #252525;
+                border: 1px solid #353535;
+            }
         """
         )
 
@@ -259,6 +276,14 @@ class CustomProgressDialog(QProgressDialog):
             progress_layout.addWidget(label)
             progress_layout.addWidget(progress_bar)
 
+        # Create cancel button if text is provided
+        if cancel_button_text:
+            self.cancel_button = QPushButton(cancel_button_text)
+            self.cancel_button.clicked.connect(self.handle_cancel)
+            progress_layout.addWidget(self.cancel_button, alignment=Qt.AlignCenter)
+        else:
+            self.cancel_button = None
+
         # Add the progress container to the content layout
         content_layout.addWidget(progress_container, alignment=Qt.AlignCenter)
         layout.addWidget(content_widget)
@@ -275,6 +300,19 @@ class CustomProgressDialog(QProgressDialog):
                 parent.x() + (parent.width() - self.width()) // 2,
                 parent.y() + (parent.height() - self.height()) // 2,
             )
+
+    def handle_cancel(self):
+        """Handle cancel button click."""
+        self.canceled = True
+        self.cancel()
+
+    def was_canceled(self):
+        """Check if the operation was canceled.
+
+        Returns:
+            bool: True if the operation was canceled, False otherwise
+        """
+        return self.canceled
 
 
 class CustomMessageBox(QWidget):
