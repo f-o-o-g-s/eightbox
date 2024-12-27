@@ -251,13 +251,20 @@ All notable changes to Eightbox will be documented in this file.
             # Find the Recent Changes section
             start = content.find("### Recent Changes")
             if start != -1:
-                # Keep only the 3 most recent versions
-                versions = content[start:].split("### 202")[1:4]
-                new_content = (
-                    content[:start]
-                    + "### Recent Changes\n\n### "
-                    + "### ".join(versions)
-                )
+                # Create the new version entry
+                new_version_entry = f"""### {version}
+{chr(10).join(notes)}
+
+"""
+                # Get the content before the Recent Changes section
+                prefix = content[:start]
+                # Add the Recent Changes header and new version
+                new_content = prefix + "### Recent Changes\n\n" + new_version_entry
+                # Get existing versions and keep only the
+                # 2 most recent (since we're adding a new one)
+                versions = content[start:].split("### 202")[1:3]
+                if versions:
+                    new_content += "### " + "### ".join(versions)
                 with open("README.md", "w", encoding="utf-8") as f:
                     f.write(new_content)
     except FileNotFoundError:
