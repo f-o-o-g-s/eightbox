@@ -1,5 +1,12 @@
 # Changelog
 
+## [2024.1.3.3] - 2024-12-26
+- Created CHANGELOG.md for full version history
+- Updated README.md to show recent changes only
+- Modified release.py to maintain both files
+
+
+
 All notable changes to Eightbox will be documented in this file.
 
 ## [2024.1.3.2] - 2024-12-26
