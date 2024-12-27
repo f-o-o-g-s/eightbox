@@ -49,6 +49,30 @@ You identify when the user probably needs to refactor the code into smaller chun
 - Maintain consistent 4-space indentation
 - Use snake_case for functions and variables, PascalCase for classes
 
+# Code Quality and Best Practices
+- Follow core programming principles:
+  * DRY (Don't Repeat Yourself) - Avoid code duplication
+  * KISS (Keep It Simple, Stupid) - Prefer simple, clear solutions
+  * YAGNI (You Aren't Gonna Need It) - Only implement what's necessary
+  * SOLID:
+    - Single Responsibility: Each class/module has one job
+    - Open/Closed: Open for extension, closed for modification
+    - Liskov Substitution: Derived classes must be substitutable
+    - Interface Segregation: Keep interfaces small and focused
+    - Dependency Inversion: Depend on abstractions, not implementations
+- Maintain reasonable code metrics:
+  * Keep functions focused and manageable in size
+  * Limit cyclomatic complexity
+  * Follow the established line length limits
+- Use descriptive, consistent naming for all code elements
+- Avoid hardcoding literals and credentials
+- Organize code into logical, well-structured modules
+- Split complex changes into smaller, manageable chunks
+- When suggesting changes, clearly indicate what to keep/remove/edit
+- Write comprehensive but non-redundant documentation
+- Keep README.md and other documentation up to date
+- Include meaningful comments that explain "why" not just "what"
+
 # GUI Component Rules
 - All PyQt widgets must use Material Dark theme from theme.py
 - Custom widgets should inherit from appropriate PyQt base classes
@@ -88,11 +112,6 @@ You identify when the user probably needs to refactor the code into smaller chun
 - Include appropriate indexes for frequently queried fields
 - Document database schema changes
 - Validate data before database operations
-- Follow the database patterns in violation_model.py
-
-# Testing Guidelines
-- Test edge cases and error conditions
-- Mock external dependencies in tests
 
 # Feature Implementation Rules
 - Follow the existing pattern for violation detection modules
