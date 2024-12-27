@@ -178,7 +178,7 @@ def get_github_token():
 
 
 def format_release_notes(version, notes, commit_msg):
-    """Format release notes in a structured markdown format.
+    """Format release notes in a standardized markdown format.
 
     Creates a standardized release notes document including:
     - Version number
@@ -186,6 +186,10 @@ def format_release_notes(version, notes, commit_msg):
     - What's New (bullet points)
     - Technical details (date, time, commit hash)
     - Link to full changelog
+
+    Also updates:
+    - CHANGELOG.md with the new version entry
+    - README.md's recent changes section
 
     Args:
         version (str): Version number in YYYY.MAJOR.MINOR.PATCH format
@@ -198,7 +202,8 @@ def format_release_notes(version, notes, commit_msg):
     Note:
         Includes the current git commit hash truncated to 8 characters
     """
-    return f"""# Version {version}
+    # Format the release notes for GitHub release
+    release_notes = f"""# Version {version}
 
 ## Overview
 {commit_msg}
@@ -213,6 +218,52 @@ def format_release_notes(version, notes, commit_msg):
 
 [Full Changelog](https://github.com/f-o-o-g-s/eightbox/commits/main)
 """
+
+    # Update CHANGELOG.md
+    changelog_entry = f"""## [{version}] - {datetime.now().strftime('%Y-%m-%d')}
+{chr(10).join(notes)}
+
+"""
+    try:
+        with open("CHANGELOG.md", "r", encoding="utf-8") as f:
+            content = f.read()
+            # Insert after the first line (# Changelog)
+            content = content.split("\n", 2)
+            content.insert(1, "\n" + changelog_entry)
+            content = "\n".join(content)
+        with open("CHANGELOG.md", "w", encoding="utf-8") as f:
+            f.write(content)
+    except FileNotFoundError:
+        # Create new CHANGELOG.md if it doesn't exist
+        with open("CHANGELOG.md", "w", encoding="utf-8") as f:
+            f.write(
+                f"""# Changelog
+
+All notable changes to Eightbox will be documented in this file.
+
+{changelog_entry}"""
+            )
+
+    # Update README.md recent changes
+    try:
+        with open("README.md", "r", encoding="utf-8") as f:
+            content = f.read()
+            # Find the Recent Changes section
+            start = content.find("### Recent Changes")
+            if start != -1:
+                # Keep only the 3 most recent versions
+                versions = content[start:].split("### 202")[1:4]
+                new_content = (
+                    content[:start]
+                    + "### Recent Changes\n\n### "
+                    + "### ".join(versions)
+                )
+                with open("README.md", "w", encoding="utf-8") as f:
+                    f.write(new_content)
+    except FileNotFoundError:
+        print("README.md not found, skipping recent changes update")
+
+    return release_notes
 
 
 def get_new_version(current_version, update_type):

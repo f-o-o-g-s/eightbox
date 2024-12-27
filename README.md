@@ -170,6 +170,10 @@ pre-commit install
 
 ## Version History
 
+For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
+
+### Recent Changes
+
 ### 2024.1.3.2
 - Added cancel button functionality to progress dialogs
 - Enhanced progress dialog styling with Material Design theme
