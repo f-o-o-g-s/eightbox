@@ -100,6 +100,9 @@ class ViolationRemediesTab(BaseViolationTab):
             return
 
         try:
+            # Store current tab index before clearing
+            current_tab_index = self.date_tabs.currentIndex()
+
             # Clear existing tabs
             while self.date_tabs.count():
                 self.date_tabs.removeTab(0)
@@ -182,9 +185,12 @@ class ViolationRemediesTab(BaseViolationTab):
                 summary_data[violation_columns].sum(axis=1).round(2)
             )
 
-            # Add summary tab and make it active
+            # Add summary tab
             self.add_summary_tab(summary_data)
-            self.date_tabs.setCurrentIndex(0)
+
+            # Restore previous tab selection if it was valid
+            if 0 <= current_tab_index < self.date_tabs.count():
+                self.date_tabs.setCurrentIndex(current_tab_index)
 
         except Exception:
             traceback.print_exc()
