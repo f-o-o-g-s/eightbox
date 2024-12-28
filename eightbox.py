@@ -1227,6 +1227,93 @@ class MainApp(QMainWindow):
         self.carrier_list_pane.request_apply_date_range.connect(self.apply_date_range)
         self.carrier_list_pane.hide()
 
+    def update_otdl_violations(
+        self, clock_ring_data, progress_callback=None, date_maximized_status=None
+    ):
+        """Update only OTDL-related violations (8.5.D and 8.5.G) and their tabs.
+
+        Args:
+            clock_ring_data: DataFrame containing clock ring data
+            progress_callback: Function to update progress dialog
+            date_maximized_status: Dictionary of maximization status changes from OTDL pane
+        """
+        if clock_ring_data is None or clock_ring_data.empty:
+            return
+
+        # Define OTDL-specific violation types
+        violation_types = {
+            "8.5.D": "8.5.D Overtime Off Route",
+            "8.5.G": "8.5.G",
+        }
+
+        # Get unique dates and initialize maximization status if not provided
+        unique_dates = (
+            pd.to_datetime(clock_ring_data["rings_date"])
+            .dt.strftime("%Y-%m-%d")
+            .unique()
+        )
+        if date_maximized_status is None:
+            date_maximized_status = {
+                date: {"is_maximized": False} for date in unique_dates
+            }
+
+        # Calculate progress increments (40% for detection, 40% for tabs, 20% for summary)
+        current_progress = 0
+
+        try:
+            # Detect violations (40% of progress)
+            for key, violation_type in violation_types.items():
+                if progress_callback:
+                    if progress_callback(
+                        current_progress, f"Processing {key} violations..."
+                    ):
+                        return
+
+                self.violations[key] = detect_violations(
+                    clock_ring_data, violation_type, date_maximized_status
+                )
+                current_progress += 20
+                if progress_callback:
+                    if progress_callback(
+                        current_progress, f"Completed {key} violations"
+                    ):
+                        return
+
+            # Update violation tabs (40% of progress)
+            tab_updates = [
+                (self.vio_85d_tab, "8.5.D", "8.5.D"),
+                (self.vio_85g_tab, "8.5.G", "8.5.G"),
+            ]
+
+            for tab, key, description in tab_updates:
+                if progress_callback:
+                    if progress_callback(
+                        current_progress, f"Updating {description} tab..."
+                    ):
+                        return
+                tab.refresh_data(self.violations[key])
+                current_progress += 20
+                if progress_callback:
+                    if progress_callback(
+                        current_progress, f"Updated {description} tab"
+                    ):
+                        return
+
+            # Update remedies (final 20%)
+            if progress_callback:
+                if progress_callback(80, "Updating violation summary..."):
+                    return
+
+            remedies_data = get_violation_remedies(clock_ring_data, self.violations)
+            self.remedies_tab.refresh_data(remedies_data)
+
+            if progress_callback:
+                progress_callback(100, "OTDL maximization complete")
+
+        except Exception as e:
+            print(f"Error in update_otdl_violations: {str(e)}")
+            raise
+
     def handle_maximized_status_change(self, date_str, changes):
         """Handle changes to OTDL maximization status"""
         if "8.5.D" not in self.violations and "8.5.G" not in self.violations:
@@ -1245,12 +1332,12 @@ class MainApp(QMainWindow):
 
         # Create and show progress dialog immediately
         progress = CustomProgressDialog(
-            "Processing OTDL Changes...",  # Changed from "Starting update..."
+            "Processing OTDL Changes...",
             "Cancel",
             0,
             100,
             self,
-            "OTDL Maximization",  # Changed from "Updating Remedies"
+            "OTDL Maximization",
         )
         progress.setWindowModality(Qt.ApplicationModal)
         progress.show()
@@ -1297,7 +1384,7 @@ class MainApp(QMainWindow):
                 how="left",
             )
 
-            # Update maximization status
+            # Update maximization status for the date range
             date_maximized_status = {}
             for d in pd.date_range(start_date_str, end_date_str):
                 d_str = d.strftime("%Y-%m-%d")
@@ -1320,8 +1407,10 @@ class MainApp(QMainWindow):
                 QApplication.processEvents()
                 return progress.was_canceled()
 
-            # Use the worker system with our progress dialog
-            self.update_violations_and_remedies(clock_ring_data, progress_update)
+            # Use the optimized OTDL update function with maximization status
+            self.update_otdl_violations(
+                clock_ring_data, progress_update, date_maximized_status
+            )
 
         except Exception as e:
             print(f"Error in handle_maximized_status_change: {str(e)}")
