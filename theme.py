@@ -54,6 +54,236 @@ COLOR_TEXT_DIM = QColor("#333333")  # Secondary text
 COLOR_MAXIMIZED_TRUE = QColor("#4CAF50")  # Success state
 COLOR_MAXIMIZED_FALSE = QColor("#F44336")  # Error state
 
+# Component-specific style sheets
+TITLE_BAR_STYLE = """
+    QWidget {
+        background-color: #37474F;
+        border: none;
+    }
+    QLabel {
+        color: white;
+        font-size: 12pt;
+        font-weight: bold;
+        background-color: transparent;
+    }
+    QPushButton {
+        background-color: transparent;
+        border: none;
+        color: white;
+        padding: 5px;
+        min-width: 40px;
+        max-width: 40px;
+        font-size: 16pt;
+        font-family: Arial;
+    }
+    QPushButton:hover { background-color: #455A64; }
+"""
+
+CLOSE_BUTTON_STYLE = "QPushButton:hover { background-color: #c42b1c; }"
+
+TOP_BUTTON_ROW_STYLE = """
+    QWidget {
+        background-color: #121212;  /* Material Dark background */
+        border-bottom: 1px solid #2D2D2D;
+    }
+    QPushButton {
+        background-color: rgba(187, 134, 252, 0.05);  /* Primary color with 5% opacity */
+        border: none;
+        border-radius: 4px;
+        color: #BB86FC;  /* Primary color */
+        padding: 16px 32px;  /* Increased padding */
+        font-size: 14px;  /* Increased font size */
+        font-weight: 500;
+        text-align: center;
+        margin: 12px 6px;  /* Increased margins */
+        min-width: 180px;  /* Increased width */
+        letter-spacing: 0.15px;
+        text-transform: uppercase;
+    }
+    QPushButton:hover {
+        background-color: rgba(187, 134, 252, 0.08);
+        color: #CBB0FF;
+    }
+    QPushButton:pressed {
+        background-color: rgba(187, 134, 252, 0.12);
+        padding-top: 17px;
+        color: #BB86FC;
+    }
+    QPushButton:checked {
+        background-color: rgba(187, 134, 252, 0.12);
+        color: #E9B7FF;
+        font-weight: 600;
+    }
+    QPushButton:checked:hover {
+        background-color: rgba(187, 134, 252, 0.16);
+    }
+    QPushButton:disabled {
+        background-color: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.38);
+    }
+"""
+
+FILTER_BUTTON_ROW_STYLE = """
+    QWidget {
+        background-color: #121212;
+        border-top: 1px solid #333333;
+    }
+    QPushButton {
+        background-color: rgba(187, 134, 252, 0.05);
+        border: none;
+        color: rgba(187, 134, 252, 0.87);
+        padding: 4px 12px;
+        font-size: 12px;
+        margin: 1px;
+        min-width: 90px;
+        max-height: 24px;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: 500;
+        letter-spacing: 0.15px;
+    }
+    QPushButton:hover {
+        background-color: rgba(187, 134, 252, 0.08);
+        color: rgba(187, 134, 252, 1.0);
+    }
+    QPushButton:pressed {
+        background-color: rgba(187, 134, 252, 0.12);
+        color: rgba(187, 134, 252, 1.0);
+    }
+    QPushButton:checked {
+        background-color: rgba(187, 134, 252, 0.12);
+        color: rgba(187, 134, 252, 1.0);
+        font-weight: 600;
+    }
+    QLabel {
+        color: rgba(187, 134, 252, 0.87);
+        font-size: 12px;
+        padding: 4px 12px;
+        background-color: rgba(187, 134, 252, 0.05);
+        border-radius: 4px;
+        font-weight: 500;
+        letter-spacing: 0.15px;
+    }
+"""
+
+TAB_WIDGET_STYLE = """
+    QTabWidget::pane {
+        border: none;
+        background-color: #121212;
+    }
+    QTabBar {
+        qproperty-drawBase: 0;
+    }
+    QTabBar::tab {
+        background-color: #1E1E1E;
+        color: rgba(255, 255, 255, 0.6);
+        padding: 8px 16px;
+        border: none;
+        border-right: 1px solid #2D2D2D;
+        min-width: 80px;
+        font: 11px;
+    }
+    QTabBar::tab:selected {
+        color: #BB86FC;
+        background-color: rgba(187, 134, 252, 0.12);
+        border-bottom: 2px solid #BB86FC;
+    }
+    QTabBar::tab:hover {
+        background-color: rgba(187, 134, 252, 0.08);
+        color: #CBB0FF;
+    }
+    QTabBar::scroller {
+        width: 0px;
+    }
+"""
+
+SUB_TAB_STYLE = """
+    QTabWidget::pane {
+        border: none;
+        background-color: #121212;
+        padding-top: 2px;
+    }
+    QTabBar {
+        qproperty-drawBase: 0;
+    }
+    QTabBar::tab {
+        background-color: #1A1A1A;
+        color: rgba(255, 255, 255, 0.6);
+        padding: 6px 12px;
+        min-width: 60px;
+        margin: 0;
+        border-right: 1px solid #2D2D2D;
+        font-size: 10px;
+        font-weight: normal;
+        text-transform: uppercase;
+        letter-spacing: 0.05px;
+    }
+    QTabBar::tab:hover {
+        background-color: rgba(187, 134, 252, 0.08);
+        color: #CBB0FF;
+    }
+    QTabBar::tab:selected {
+        color: #BB86FC;
+        border-bottom: 2px solid #BB86FC;
+        background-color: rgba(187, 134, 252, 0.12);
+        border-right: 1px solid #BB86FC;
+        font-weight: 500;
+    }
+    QTabBar::scroller {
+        width: 0px;
+    }
+"""
+
+MENU_BAR_STYLE = """
+    QMenuBar {
+        background-color: #455A64;
+        color: white;
+        border: none;
+        padding: 2px;
+    }
+    QMenuBar::item {
+        background-color: transparent;
+        padding: 4px 10px;
+    }
+    QMenuBar::item:selected {
+        background-color: #546E7A;
+    }
+    QMenuBar::item:pressed {
+        background-color: #37474F;
+    }
+    QMenu {
+        background-color: #455A64;
+        color: white;
+        border: 1px solid #546E7A;
+    }
+    QMenu::item:selected {
+        background-color: #546E7A;
+    }
+"""
+
+FILTER_ROW_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+        border-bottom: 1px solid #333333;
+    }
+    QLineEdit {
+        background-color: #2D2D2D;
+        color: #E1E1E1;
+        border: 1px solid #404040;
+        border-radius: 4px;
+        padding: 8px;
+        margin: 8px;
+    }
+    QLineEdit:focus {
+        border: 1px solid #BB86FC;
+    }
+    QLineEdit::placeholder {
+        color: #808080;
+    }
+"""
+
+SIZE_GRIP_STYLE = "background: transparent;"
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application.

@@ -63,7 +63,18 @@ from tabs.violations import (
     ViolationMax60Tab,
     ViolationRemediesTab,
 )
-from theme import apply_material_dark_theme
+from theme import (
+    CLOSE_BUTTON_STYLE,
+    FILTER_BUTTON_ROW_STYLE,
+    FILTER_ROW_STYLE,
+    MENU_BAR_STYLE,
+    SIZE_GRIP_STYLE,
+    SUB_TAB_STYLE,
+    TAB_WIDGET_STYLE,
+    TITLE_BAR_STYLE,
+    TOP_BUTTON_ROW_STYLE,
+    apply_material_dark_theme,
+)
 
 VERSION = "2024.1.4.2"  # Updated by release.py
 BUILD_TIME = "2024-12-27 23:12"  # Updated by release.py
@@ -109,31 +120,7 @@ class CustomTitleBar(QWidget):
         self.setFixedHeight(40)
 
         # Set background color for the entire title bar
-        self.setStyleSheet(
-            """
-            QWidget {
-                background-color: #37474F;
-                border: none;
-            }
-            QLabel {
-                color: white;
-                font-size: 12pt;
-                font-weight: bold;
-                background-color: transparent;
-            }
-            QPushButton {
-                background-color: transparent;
-                border: none;
-                color: white;
-                padding: 5px;
-                min-width: 40px;
-                max-width: 40px;
-                font-size: 16pt;
-                font-family: Arial;
-            }
-            QPushButton:hover { background-color: #455A64; }
-        """
-        )
+        self.setStyleSheet(TITLE_BAR_STYLE)
 
         layout = QHBoxLayout()
         # Remove all margins to extend background to edges
@@ -160,7 +147,7 @@ class CustomTitleBar(QWidget):
         maximize_btn.clicked.connect(self.toggle_maximize)
 
         close_btn = QPushButton("×")
-        close_btn.setStyleSheet("QPushButton:hover { background-color: #c42b1c; }")
+        close_btn.setStyleSheet(CLOSE_BUTTON_STYLE)
         close_btn.clicked.connect(self.parent.close)
 
         window_controls_layout.addWidget(minimize_btn)
@@ -532,49 +519,7 @@ class MainApp(QMainWindow):
 
         # Create a container widget for the button row with a darker background
         button_container = QWidget()
-        button_container.setStyleSheet(
-            """
-            QWidget {
-                background-color: #121212;  /* Material Dark background */
-                border-bottom: 1px solid #2D2D2D;
-            }
-            QPushButton {
-                background-color: rgba(187, 134, 252, 0.05);  /* Primary color with 5% opacity */
-                border: none;
-                border-radius: 4px;
-                color: #BB86FC;  /* Primary color */
-                padding: 16px 32px;  /* Increased padding */
-                font-size: 14px;  /* Increased font size */
-                font-weight: 500;
-                text-align: center;
-                margin: 12px 6px;  /* Increased margins */
-                min-width: 180px;  /* Increased width */
-                letter-spacing: 0.15px;
-                text-transform: uppercase;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.08);
-                color: #CBB0FF;
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.12);
-                padding-top: 17px;
-                color: #BB86FC;
-            }
-            QPushButton:checked {
-                background-color: rgba(187, 134, 252, 0.12);
-                color: #E9B7FF;
-                font-weight: 600;
-            }
-            QPushButton:checked:hover {
-                background-color: rgba(187, 134, 252, 0.16);
-            }
-            QPushButton:disabled {
-                background-color: rgba(255, 255, 255, 0.12);
-                color: rgba(255, 255, 255, 0.38);
-            }
-            """
-        )
+        button_container.setStyleSheet(TOP_BUTTON_ROW_STYLE)
 
         # Create buttons with icons
         self.date_selection_button = QPushButton("Date Selection")
@@ -604,28 +549,7 @@ class MainApp(QMainWindow):
         """Create a row for the carrier filter textbox."""
         # Create filter row container
         filter_container = QWidget()
-        filter_container.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-                border-bottom: 1px solid #333333;
-            }
-            QLineEdit {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                border: 1px solid #404040;
-                border-radius: 4px;
-                padding: 8px;
-                margin: 8px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #BB86FC;
-            }
-            QLineEdit::placeholder {
-                color: #808080;
-            }
-            """
-        )
+        filter_container.setStyleSheet(FILTER_ROW_STYLE)
 
         # Create layout for the filter row
         filter_layout = QHBoxLayout()
@@ -672,50 +596,7 @@ class MainApp(QMainWindow):
         """Create a horizontal row for filter buttons at the bottom."""
         # Create filter row
         filter_row = QWidget()
-        filter_row.setStyleSheet(
-            """
-            QWidget {
-                background-color: #121212;
-                border-top: 1px solid #333333;
-            }
-            QPushButton {
-                background-color: rgba(187, 134, 252, 0.05);
-                border: none;
-                color: rgba(187, 134, 252, 0.87);
-                padding: 4px 12px;
-                font-size: 12px;
-                margin: 1px;
-                min-width: 90px;
-                max-height: 24px;
-                border-radius: 4px;
-                text-align: center;
-                font-weight: 500;
-                letter-spacing: 0.15px;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.08);
-                color: rgba(187, 134, 252, 1.0);
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.12);
-                color: rgba(187, 134, 252, 1.0);
-            }
-            QPushButton:checked {
-                background-color: rgba(187, 134, 252, 0.12);
-                color: rgba(187, 134, 252, 1.0);
-                font-weight: 600;
-            }
-            QLabel {
-                color: rgba(187, 134, 252, 0.87);
-                font-size: 12px;
-                padding: 4px 12px;
-                background-color: rgba(187, 134, 252, 0.05);
-                border-radius: 4px;
-                font-weight: 500;
-                letter-spacing: 0.15px;
-            }
-        """
-        )
+        filter_row.setStyleSheet(FILTER_BUTTON_ROW_STYLE)
 
         # Create main filter layout
         filter_layout = QHBoxLayout()
@@ -1564,38 +1445,7 @@ class MainApp(QMainWindow):
         self.central_tab_widget.setTabsClosable(False)
 
         # Set tab widget style
-        self.central_tab_widget.setStyleSheet(
-            """
-            QTabWidget::pane {
-                border: none;
-                background-color: #121212;
-            }
-            QTabBar {
-                qproperty-drawBase: 0;
-            }
-            QTabBar::tab {
-                background-color: #1E1E1E;
-                color: rgba(255, 255, 255, 0.6);
-                padding: 8px 16px;
-                border: none;
-                border-right: 1px solid #2D2D2D;
-                min-width: 80px;
-                font: 11px;
-            }
-            QTabBar::tab:selected {
-                color: #BB86FC;
-                background-color: rgba(187, 134, 252, 0.12);
-                border-bottom: 2px solid #BB86FC;
-            }
-            QTabBar::tab:hover {
-                background-color: rgba(187, 134, 252, 0.08);
-                color: #CBB0FF;
-            }
-            QTabBar::scroller {
-                width: 0px;
-            }
-        """
-        )
+        self.central_tab_widget.setStyleSheet(TAB_WIDGET_STYLE)
 
         # Initialize violation tabs
         self.init_85d_tab()
@@ -1630,50 +1480,13 @@ class MainApp(QMainWindow):
         tab_widget.setTabBar(sub_tab_bar)
 
         # Set sub-tab specific style
-        tab_widget.setStyleSheet(
-            """
-            QTabWidget::pane {
-                border: none;
-                background-color: #121212;
-                padding-top: 2px;
-            }
-            QTabBar {
-                qproperty-drawBase: 0;
-            }
-            QTabBar::tab {
-                background-color: #1A1A1A;
-                color: rgba(255, 255, 255, 0.6);
-                padding: 6px 12px;
-                min-width: 60px;
-                margin: 0;
-                border-right: 1px solid #2D2D2D;
-                font-size: 10px;
-                font-weight: normal;
-                text-transform: uppercase;
-                letter-spacing: 0.05px;
-            }
-            QTabBar::tab:hover {
-                background-color: rgba(187, 134, 252, 0.08);
-                color: #CBB0FF;
-            }
-            QTabBar::tab:selected {
-                color: #BB86FC;
-                border-bottom: 2px solid #BB86FC;
-                background-color: rgba(187, 134, 252, 0.12);
-                border-right: 1px solid #BB86FC;
-                font-weight: 500;
-            }
-            QTabBar::scroller {
-                width: 0px;
-            }
-        """
-        )
+        tab_widget.setStyleSheet(SUB_TAB_STYLE)
 
     def _init_size_grip(self):
         """Initialize the custom size grip."""
         self.size_grip = CustomSizeGrip(self)
         self.size_grip.setObjectName("sizeGrip")
-        self.size_grip.setStyleSheet("background: transparent;")
+        self.size_grip.setStyleSheet(SIZE_GRIP_STYLE)
         self.size_grip.move(self.width() - 20, self.height() - 20)
         self.size_grip.raise_()
 
@@ -1689,35 +1502,8 @@ class MainApp(QMainWindow):
         """Initialize the menu bar and toolbar."""
         menu_bar = QMenuBar()
 
-        # Style the menu bar with Material Dark Blue-Grey 700 (slightly lighter than title bar)
-        menu_bar.setStyleSheet(
-            """
-            QMenuBar {
-                background-color: #455A64;
-                color: white;
-                border: none;
-                padding: 2px;
-            }
-            QMenuBar::item {
-                background-color: transparent;
-                padding: 4px 10px;
-            }
-            QMenuBar::item:selected {
-                background-color: #546E7A;
-            }
-            QMenuBar::item:pressed {
-                background-color: #37474F;
-            }
-            QMenu {
-                background-color: #455A64;
-                color: white;
-                border: 1px solid #546E7A;
-            }
-            QMenu::item:selected {
-                background-color: #546E7A;
-            }
-        """
-        )
+        # Style the menu bar with Material Dark Blue-Grey 700
+        menu_bar.setStyleSheet(MENU_BAR_STYLE)
 
         # File menu
         self.file_menu = menu_bar.addMenu("File")
