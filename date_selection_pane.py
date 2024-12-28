@@ -179,12 +179,15 @@ class DateSelectionPane(QWidget):
         self.parent_main = parent
         self.db_path = db_path
         self.selected_range = None
+        self.active_processor = None  # Store reference to active processor
+        self.progress_dialog = None  # Store reference to active progress dialog
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         self.setup_ui()
         self.load_data()
 
     def hideEvent(self, event):
-        """Handle hide event by unchecking the corresponding button."""
+        """Handle hide event by cleaning up and unchecking button."""
+        self.cleanup_processor()
         if hasattr(self.parent_main, "date_selection_button"):
             self.parent_main.date_selection_button.setChecked(False)
         super().hideEvent(event)
@@ -439,8 +442,57 @@ class DateSelectionPane(QWidget):
             self.selected_range = None
             self.apply_button.setEnabled(False)
 
+    def cleanup_processor(self):
+        """Clean up the active processor and progress dialog."""
+        if self.active_processor:
+            self.active_processor.cancel_all()
+            self.active_processor = None
+        if self.progress_dialog:
+            self.progress_dialog.close()
+            self.progress_dialog = None
+
     def apply_selection(self):
-        """Apply the selected date range."""
+        """Apply the selected date range using worker threads."""
         if self.selected_range:
+            # Clean up any existing processor
+            self.cleanup_processor()
+
             start_date, end_date = self.selected_range
+
+            # Create single progress dialog for entire process
+            self.progress_dialog = self.parent_main.create_progress_dialog(
+                "Processing Date Range", "Initializing..."
+            )
+
+            # Create processor instance
+            from violation_formulas.violation_worker import DateRangeProcessor
+
+            self.active_processor = DateRangeProcessor(self.parent_main)
+
+            # Set up callbacks
+            def update_progress(value, msg):
+                if self.progress_dialog:
+                    self.progress_dialog.setValue(value)
+                    self.progress_dialog.setLabelText(msg)
+
+            def handle_error(msg):
+                if self.progress_dialog:
+                    self.progress_dialog.setLabelText(f"Error: {msg}")
+
+            def handle_finished():
+                self.cleanup_processor()
+
+            self.active_processor.set_callbacks(
+                progress_cb=update_progress,
+                error_cb=handle_error,
+                finished_cb=handle_finished,
+            )
+
+            # Start processing
+            self.active_processor.process_date_range(start_date, end_date, self.db_path)
+
+            # Emit signal for date range selection
             self.date_range_selected.emit(start_date, end_date)
+
+            # Hide the date selection pane
+            self.hide()
