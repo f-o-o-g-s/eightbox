@@ -33,6 +33,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
 
 from carrier_list_pane import CarrierListPane
 from clean_moves_dialog import CleanMovesDialog
+from clean_moves_manager import MovesManager
 from clean_moves_utils import (
     detect_invalid_moves,
     get_valid_routes,
@@ -240,6 +241,7 @@ class MainApp(QMainWindow):
         carrier_list_pane (CarrierListPane): Carrier management interface
         otdl_maximization_pane (OTDLMaximizationPane): OTDL assignment interface
         date_range_manager (DateRangeManager): Manages date range operations
+        moves_manager (MovesManager): Manages moves cleaning operations
     """
 
     VERSION = "2024.1.4.2"  # Updated by release.py
@@ -270,6 +272,9 @@ class MainApp(QMainWindow):
 
         # Initialize date range manager
         self.date_range_manager = DateRangeManager(self)
+
+        # Initialize moves manager
+        self.moves_manager = MovesManager(self)
 
         # Initialize window attributes and UI components
         self._init_window_attributes()
@@ -1723,7 +1728,7 @@ class MainApp(QMainWindow):
         clean_moves_action.setStatusTip(
             "Clean moves entries with invalid route numbers"
         )
-        clean_moves_action.triggered.connect(self.show_clean_moves_dialog)
+        clean_moves_action.triggered.connect(self.moves_manager.show_clean_moves_dialog)
 
         # Exit menu entry
         exit_action = QAction("Exit", self)
