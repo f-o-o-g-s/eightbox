@@ -1,5 +1,13 @@
 # Changelog
 
+## [2024.1.4.0] - 2024-12-27
+- Added new worker system for violation processing
+- Improved error handling and cleanup
+- Fixed progress dialog duplication issue
+- Preserved tab selection in violations summary tab after OTDL maximization updates
+
+
+
 ## [2024.1.3.3] - 2024-12-26
 - Created CHANGELOG.md for full version history
 - Updated README.md to show recent changes only
