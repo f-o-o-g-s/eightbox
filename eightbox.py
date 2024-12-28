@@ -4,7 +4,6 @@ Implements the primary window and core UI functionality, coordinating between
 different panes and managing the overall application state and user interactions.
 """
 
-import json
 import os
 import sys
 
@@ -32,12 +31,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
 )
 
 from carrier_list_pane import CarrierListPane
-from clean_moves_dialog import CleanMovesDialog
 from clean_moves_manager import MovesManager
-from clean_moves_utils import (
-    detect_invalid_moves,
-    get_valid_routes,
-)
 from custom_widgets import (
     CustomInfoDialog,
     CustomProgressDialog,
@@ -1221,180 +1215,6 @@ class MainApp(QMainWindow):
         )
         initializer = DatabaseInitializer(target_path, source_db_path, self)
         return initializer.initialize()
-
-    def show_clean_moves_dialog(self):
-        """Show the Clean Moves dialog.
-
-        Detects moves entries with invalid route numbers and allows
-        the user to clean them. Only shows entries for WAL and NL carriers
-        from the carrier list.
-        """
-        # Get current data from the date range
-        current_data = self.fetch_clock_ring_data()
-
-        if current_data.empty:
-            CustomWarningDialog.warning(
-                self, "No Data", "Please select a date range first."
-            )
-            return
-
-        # Get valid routes
-        valid_routes = get_valid_routes(self.eightbox_db_path)
-        if not valid_routes:
-            CustomWarningDialog.warning(
-                self, "Error", "Failed to get valid route numbers from database."
-            )
-            return
-
-        # Load carrier list
-        try:
-            with open("carrier_list.json", "r", encoding="utf-8") as f:
-                carrier_list = json.load(f)
-                # Only include WAL and NL carriers
-                valid_carriers = {
-                    carrier["carrier_name"].lower()
-                    for carrier in carrier_list
-                    if carrier["list_status"].lower() in ["wal", "nl"]
-                }
-        except Exception as e:
-            CustomWarningDialog.warning(
-                self, "Error", f"Failed to load carrier list: {str(e)}"
-            )
-            return
-
-        # Detect invalid moves
-        invalid_moves = detect_invalid_moves(current_data, self.eightbox_db_path)
-        if invalid_moves.empty:
-            CustomInfoDialog.information(
-                self,
-                "No Invalid Moves",
-                "No moves entries with invalid route numbers were found.",
-            )
-            return
-
-        # Filter invalid moves to only include WAL and NL carriers from the carrier list
-        invalid_moves = invalid_moves[
-            invalid_moves["carrier_name"].str.lower().isin(valid_carriers)
-        ]
-
-        if invalid_moves.empty:
-            CustomInfoDialog.information(
-                self,
-                "No Invalid Moves",
-                "No moves entries with invalid route numbers were found for WAL and NL carriers.",
-            )
-            return
-
-        # Create and show dialog
-        dialog = CleanMovesDialog(invalid_moves, valid_routes, self)
-        dialog.moves_cleaned.connect(
-            lambda cleaned: self.handle_cleaned_moves(cleaned, current_data)
-        )
-        dialog.exec_()
-
-    def handle_cleaned_moves(self, cleaned_moves, current_data):
-        """Handle cleaned moves data from the dialog.
-
-        Args:
-            cleaned_moves: Dictionary mapping (carrier, date) to cleaned moves string
-            current_data: The current DataFrame of clock ring data
-        """
-        if not cleaned_moves:
-            return
-
-        # Create progress dialog
-        progress = self.create_progress_dialog(
-            "Updating Moves", "Applying cleaned moves data..."
-        )
-        progress.show()
-
-        try:
-            # Phase 1: Update moves (0-30%)
-            progress.setLabelText("Updating moves data...")
-            progress.setValue(10)
-            QApplication.processEvents()
-
-            for (carrier, date), moves in cleaned_moves.items():
-                mask = (current_data["carrier_name"] == carrier) & (
-                    current_data["rings_date"] == date
-                )
-                current_data.loc[mask, "moves"] = moves
-
-            progress.setValue(30)
-            QApplication.processEvents()
-
-            # Phase 1.5: Merge carrier list data (30-50%)
-            progress.setLabelText("Updating carrier data...")
-            progress.setValue(40)
-            QApplication.processEvents()
-
-            try:
-                with open("carrier_list.json", "r", encoding="utf-8") as json_file:
-                    carrier_list = pd.DataFrame(json.load(json_file))
-
-                # Normalize carrier names
-                carrier_list["carrier_name"] = (
-                    carrier_list["carrier_name"].str.strip().str.lower()
-                )
-                current_data["carrier_name"] = (
-                    current_data["carrier_name"].str.strip().str.lower()
-                )
-
-                # Drop existing list_status and hour_limit columns if they exist
-                columns_to_drop = [
-                    "list_status",
-                    "list_status_x",
-                    "list_status_y",
-                    "hour_limit",
-                ]
-                for col in columns_to_drop:
-                    if col in current_data.columns:
-                        current_data = current_data.drop(columns=[col])
-
-                # Merge with carrier list data
-                current_data = current_data.merge(
-                    carrier_list[["carrier_name", "list_status", "hour_limit"]],
-                    on="carrier_name",
-                    how="left",
-                )
-
-            except Exception as e:
-                print(f"Error merging carrier list data: {e}")
-                current_data["list_status"] = "unknown"
-                current_data["hour_limit"] = 12.00
-
-            progress.setValue(50)
-            QApplication.processEvents()
-
-            # Phase 2: Reprocess violations (50-90%)
-            progress.setLabelText("Reprocessing violations...")
-            progress.setValue(60)
-            QApplication.processEvents()
-
-            self.update_violations_and_remedies(current_data)
-
-            progress.setValue(90)
-            QApplication.processEvents()
-
-            # Phase 3: Cleanup (90-100%)
-            progress.setLabelText("Finalizing changes...")
-            progress.setValue(100)
-            QApplication.processEvents()
-
-        except Exception as e:
-            # Clean up progress dialog before showing error
-            self.cleanup_progress_dialog(progress)
-            CustomWarningDialog.warning(
-                self, "Error", f"Failed to process cleaned moves: {str(e)}"
-            )
-            return
-        # Clean up progress dialog before showing success
-        self.cleanup_progress_dialog(progress)
-
-        # Show success message after progress dialog is cleaned up
-        CustomInfoDialog.information(
-            self, "Success", "Moves data has been cleaned and violations reprocessed."
-        )
 
     def _handle_database_error(self, error):
         """Handle database errors with appropriate GUI feedback."""
