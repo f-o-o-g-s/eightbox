@@ -174,23 +174,17 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
+### 2024.1.4.2
+- Fixed version formatting in README.md version history
+- Improved logic to maintain exactly 3 most recent versions
+- Preserved original version number format
+
 ### 2024.1.4.1
 - Fixed release script to include changelog and readme updates in release commit
 
-### 4.1.4.0
+### 2024.1.4.0
 - Added new worker system for violation processing
 - Improved error handling and cleanup
 - Fixed progress dialog duplication issue
 - Preserved tab selection in violations summary tab after OTDL maximization updates
-
-### 4.1.3.2
-- Added cancel button functionality to progress dialogs
-- Enhanced progress dialog styling with Material Design theme
-- Improved user control over long-running operations
-
-### 4.1.3.1
-- Improved removed carriers manager UI with single selection and simplified view
-- Added proper UTF-8 encoding to all file operations
-- Fixed restore button functionality in removed carriers manager
-- Removed unused code and improved code quality
 

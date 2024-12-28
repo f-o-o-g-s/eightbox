@@ -189,7 +189,7 @@ def format_release_notes(version, notes, commit_msg):
 
     Also updates:
     - CHANGELOG.md with the new version entry
-    - README.md's recent changes section
+    - README.md's recent changes section (keeps last 3 versions)
 
     Args:
         version (str): Version number in YYYY.MAJOR.MINOR.PATCH format
@@ -198,9 +198,6 @@ def format_release_notes(version, notes, commit_msg):
 
     Returns:
         str: Formatted release notes in markdown format
-
-    Note:
-        Includes the current git commit hash truncated to 8 characters
     """
     # Format the release notes for GitHub release
     release_notes = f"""# Version {version}
@@ -260,11 +257,25 @@ All notable changes to Eightbox will be documented in this file.
                 prefix = content[:start]
                 # Add the Recent Changes header and new version
                 new_content = prefix + "### Recent Changes\n\n" + new_version_entry
-                # Get existing versions and keep only the
-                # 2 most recent (since we're adding a new one)
-                versions = content[start:].split("### 202")[1:3]
-                if versions:
-                    new_content += "### " + "### ".join(versions)
+
+                # Find all existing version sections
+                version_sections = []
+                lines = content[start:].split("\n")
+                current_section = []
+                for line in lines:
+                    if line.startswith("### ") and any(c.isdigit() for c in line):
+                        if current_section:
+                            version_sections.append("\n".join(current_section) + "\n")
+                        current_section = [line]
+                    elif current_section:
+                        current_section.append(line)
+                if current_section:
+                    version_sections.append("\n".join(current_section) + "\n")
+
+                # Keep only the two most recent versions (since we're adding a new one)
+                if version_sections:
+                    new_content += "".join(version_sections[:2])
+
                 with open("README.md", "w", encoding="utf-8") as f:
                     f.write(new_content)
     except FileNotFoundError:

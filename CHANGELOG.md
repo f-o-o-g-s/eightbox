@@ -1,5 +1,12 @@
 # Changelog
 
+## [2024.1.4.2] - 2024-12-27
+- Fixed version formatting in README.md version history
+- Improved logic to maintain exactly 3 most recent versions
+- Preserved original version number format
+
+
+
 ## [2024.1.4.1] - 2024-12-27
 - Fixed release script to include changelog and readme updates in release commit
 
