@@ -249,6 +249,8 @@ class MainApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        # Add flag for tracking updates
+        self.otdl_update_in_progress = False
 
         # Initialize window properties
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -1243,28 +1245,18 @@ class MainApp(QMainWindow):
 
         # Create and show progress dialog immediately
         progress = CustomProgressDialog(
-            "Starting update...",
-            "Cancel",  # Add cancel button
-            0,  # Minimum value
-            100,  # Maximum value
-            self,  # Parent widget
-            "Updating Remedies",
+            "Processing OTDL Changes...",  # Changed from "Starting update..."
+            "Cancel",
+            0,
+            100,
+            self,
+            "OTDL Maximization",  # Changed from "Updating Remedies"
         )
         progress.setWindowModality(Qt.ApplicationModal)
         progress.show()
         QApplication.processEvents()
 
         try:
-            # Phase 1: Initial Setup (0-10%)
-            progress.setLabelText("Initializing date range...")
-            progress.setValue(5)
-            QApplication.processEvents()
-
-            # Check for cancellation after each major step
-            if progress.was_canceled():
-                self.cleanup_progress_dialog(progress)
-                return
-
             # Get the selected date range from the date selection pane
             if (
                 not hasattr(self, "date_selection_pane")
@@ -1277,59 +1269,22 @@ class MainApp(QMainWindow):
             start_date_str = start_date.strftime("%Y-%m-%d")
             end_date_str = end_date.strftime("%Y-%m-%d")
 
-            # Phase 2: Loading Data (10-30%)
-            progress.setLabelText("Loading clock ring data...")
-            progress.setValue(10)
-            QApplication.processEvents()
+            # Load carrier list
+            with open("carrier_list.json", "r", encoding="utf-8") as json_file:
+                carrier_list = pd.DataFrame(json.load(json_file))
 
-            # Check for cancellation
-            if progress.was_canceled():
-                self.cleanup_progress_dialog(progress)
-                return
-
+            # Fetch clock ring data
             clock_ring_data = self.fetch_clock_ring_data(start_date_str, end_date_str)
             if clock_ring_data.empty:
                 return
 
-            # Phase 3: Processing Data (30-60%)
-            progress.setLabelText("Loading carrier list...")
-            progress.setValue(20)
-            QApplication.processEvents()
-
-            # Check for cancellation
-            if progress.was_canceled():
-                self.cleanup_progress_dialog(progress)
-                return
-
-            with open("carrier_list.json", "r", encoding="utf-8") as json_file:
-                carrier_list = pd.DataFrame(json.load(json_file))
-
-            # Phase 4: Processing Data (30-60%)
-            progress.setLabelText("Processing carrier data...")
-            progress.setValue(30)
-            QApplication.processEvents()
-
-            # Check for cancellation
-            if progress.was_canceled():
-                self.cleanup_progress_dialog(progress)
-                return
-
+            # Update carrier list data in clock ring data
             carrier_list["carrier_name"] = (
                 carrier_list["carrier_name"].str.strip().str.lower()
             )
             clock_ring_data["carrier_name"] = (
                 clock_ring_data["carrier_name"].str.strip().str.lower()
             )
-
-            # Phase 5: Merging Data (60-80%)
-            progress.setLabelText("Merging carrier data...")
-            progress.setValue(40)
-            QApplication.processEvents()
-
-            # Check for cancellation
-            if progress.was_canceled():
-                self.cleanup_progress_dialog(progress)
-                return
 
             if "list_status" in clock_ring_data.columns:
                 clock_ring_data = clock_ring_data.drop(columns=["list_status"])
@@ -1342,16 +1297,7 @@ class MainApp(QMainWindow):
                 how="left",
             )
 
-            # Phase 6: Updating Status (60-80%)
-            progress.setLabelText("Processing maximization status...")
-            progress.setValue(60)
-            QApplication.processEvents()
-
-            # Check for cancellation
-            if progress.was_canceled():
-                self.cleanup_progress_dialog(progress)
-                return
-
+            # Update maximization status
             date_maximized_status = {}
             for d in pd.date_range(start_date_str, end_date_str):
                 d_str = d.strftime("%Y-%m-%d")
@@ -1367,58 +1313,15 @@ class MainApp(QMainWindow):
                         else:
                             date_maximized_status[d_str] = {"is_maximized": False}
 
-            # Phase 7: Updating Violations (80-95%)
-            if "8.5.D" in self.violations:
-                progress.setLabelText("Updating 8.5.D violations...")
-                progress.setValue(80)
+            # Create progress update function that uses our dialog
+            def progress_update(value, message):
+                progress.setValue(value)
+                progress.setLabelText(message)
                 QApplication.processEvents()
+                return progress.was_canceled()
 
-                # Check for cancellation
-                if progress.was_canceled():
-                    self.cleanup_progress_dialog(progress)
-                    return
-
-                new_violations = detect_violations(
-                    clock_ring_data,
-                    "8.5.D Overtime Off Route",
-                    date_maximized_status,
-                )
-                self.violations["8.5.D"] = new_violations
-                self.vio_85d_tab.refresh_data(new_violations)
-
-            if "8.5.G" in self.violations:
-                progress.setLabelText("Updating 8.5.G violations...")
-                progress.setValue(85)
-                QApplication.processEvents()
-
-                # Check for cancellation
-                if progress.was_canceled():
-                    self.cleanup_progress_dialog(progress)
-                    return
-
-                new_violations = detect_violations(
-                    clock_ring_data, "8.5.G", date_maximized_status
-                )
-                self.violations["8.5.G"] = new_violations
-                self.vio_85g_tab.refresh_data(new_violations)
-
-            # Phase 8: Updating Summary (95-100%)
-            progress.setLabelText("Updating violation summary...")
-            progress.setValue(95)
-            QApplication.processEvents()
-
-            # Check for cancellation
-            if progress.was_canceled():
-                self.cleanup_progress_dialog(progress)
-                return
-
-            # Calculate and update remedies
-            remedies_data = get_violation_remedies(clock_ring_data, self.violations)
-            self.remedies_tab.refresh_data(remedies_data)
-
-            progress.setLabelText("Update complete")
-            progress.setValue(100)
-            QApplication.processEvents()
+            # Use the worker system with our progress dialog
+            self.update_violations_and_remedies(clock_ring_data, progress_update)
 
         except Exception as e:
             print(f"Error in handle_maximized_status_change: {str(e)}")
@@ -1496,7 +1399,7 @@ class MainApp(QMainWindow):
 
         # Calculate progress increments
         total_steps = len(violation_types) * 2  # Detection and tab updates
-        progress_per_step = 90 / total_steps  # Save 10% for remedies
+        progress_per_step = 90 / total_steps
         current_progress = 0
 
         try:
@@ -1504,7 +1407,7 @@ class MainApp(QMainWindow):
             for key, violation_type in violation_types.items():
                 if progress_callback:
                     if progress_callback(
-                        int(current_progress), f"Detecting {key} violations..."
+                        int(current_progress), f"Processing {key} violations..."
                     ):
                         return  # Cancel if requested
 
@@ -1516,19 +1419,19 @@ class MainApp(QMainWindow):
                 current_progress += progress_per_step
                 if progress_callback:
                     if progress_callback(
-                        int(current_progress), f"Detected {key} violations"
+                        int(current_progress), f"Completed {key} violations"
                     ):
                         return  # Cancel if requested
 
             # Update violation tabs (45% of progress)
             tab_updates = [
-                (self.vio_85d_tab, "8.5.D", "8.5.D violations"),
-                (self.vio_85f_tab, "8.5.F", "8.5.F violations"),
-                (self.vio_85f_ns_tab, "8.5.F NS", "8.5.F NS violations"),
-                (self.vio_85f_5th_tab, "8.5.F 5th", "8.5.F 5th violations"),
-                (self.vio_85g_tab, "8.5.G", "8.5.G violations"),
-                (self.vio_MAX12_tab, "MAX12", "MAX12 violations"),
-                (self.vio_MAX60_tab, "MAX60", "MAX60 violations"),
+                (self.vio_85d_tab, "8.5.D", "8.5.D"),
+                (self.vio_85f_tab, "8.5.F", "8.5.F"),
+                (self.vio_85f_ns_tab, "8.5.F NS", "8.5.F NS"),
+                (self.vio_85f_5th_tab, "8.5.F 5th", "8.5.F 5th"),
+                (self.vio_85g_tab, "8.5.G", "8.5.G"),
+                (self.vio_MAX12_tab, "MAX12", "MAX12"),
+                (self.vio_MAX60_tab, "MAX60", "MAX60"),
             ]
 
             for tab, key, description in tab_updates:
@@ -1547,14 +1450,14 @@ class MainApp(QMainWindow):
 
             # Calculate and update remedies (final 10%)
             if progress_callback:
-                if progress_callback(90, "Calculating final remedies..."):
+                if progress_callback(90, "Finalizing violation summary..."):
                     return  # Cancel if requested
 
             remedies_data = get_violation_remedies(clock_ring_data, self.violations)
             self.remedies_tab.refresh_data(remedies_data)
 
             if progress_callback:
-                progress_callback(100, "Complete")
+                progress_callback(100, "OTDL maximization complete")
 
         except Exception as e:
             print(f"Error in update_violations_and_remedies: {str(e)}")

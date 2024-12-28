@@ -253,11 +253,6 @@ class OTDLMaximizationPane(QWidget):
         self.cached_date_maximized = {}
         self.excusal_data = {}
 
-        if self.parent_widget:
-            self.date_maximized_updated.connect(
-                self.parent_widget.handle_maximized_status_change
-            )
-
         # Store reference to latest data
         self.clock_ring_data = None
 
