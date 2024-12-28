@@ -1634,6 +1634,23 @@ class MainApp(QMainWindow):
             clock_ring_data["carrier_name"].isin(otdl_carriers["carrier_name"])
         ].copy()
 
+    def update_all_tabs(self):
+        """Update all violation tabs with current data."""
+        if hasattr(self, "current_data"):
+            # Update each violation tab
+            for tab in [
+                self.vio_85d_tab,
+                self.vio_85f_tab,
+                self.vio_85f_ns_tab,
+                self.vio_85f_5th_tab,
+                self.vio_85g_tab,
+                self.vio_MAX12_tab,
+                self.vio_MAX60_tab,
+                self.remedies_tab,
+            ]:
+                if hasattr(tab, "refresh_data"):
+                    tab.refresh_data(self.current_data)
+
 
 if __name__ == "__main__":
     # Run the application
