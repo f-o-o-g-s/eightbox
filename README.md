@@ -174,7 +174,10 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
-### 2024.1.4.0
+### 2024.1.4.1
+- Fixed release script to include changelog and readme updates in release commit
+
+### 4.1.4.0
 - Added new worker system for violation processing
 - Improved error handling and cleanup
 - Fixed progress dialog duplication issue

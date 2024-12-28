@@ -450,11 +450,12 @@ def create_release():
                 break
             release_notes.append(f"- {note}")
 
-        # 4. Update version and build time
+        # 4. Update all files first
         new_version = get_new_version(old_version, choice)
         update_version_and_build_time(new_version)
+        formatted_notes = format_release_notes(new_version, release_notes, commit_msg)
 
-        # 5. Git commands - now adding all changes
+        # 5. Now do all git operations after files are updated
         subprocess.run(["git", "add", "."], check=True)
         subprocess.run(
             ["git", "commit", "-m", f"{commit_msg} (v{new_version})"], check=True
@@ -465,9 +466,6 @@ def create_release():
         commit_sha = (
             subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
         )
-
-        # Format release notes with commit SHA
-        formatted_notes = format_release_notes(new_version, release_notes, commit_msg)
 
         # Create tag with formatted notes
         subprocess.run(
@@ -546,11 +544,12 @@ def create_release_non_interactive(release_type, commit_msg, notes):
                 note = f"- {note}"
             formatted_notes.append(note)
 
-        # 4. Update version and build time
+        # 4. Update all files first
         new_version = get_new_version(old_version, choice)
         update_version_and_build_time(new_version)
+        formatted_notes = format_release_notes(new_version, formatted_notes, commit_msg)
 
-        # 5. Git commands - now adding all changes
+        # 5. Now do all git operations after files are updated
         subprocess.run(["git", "add", "."], check=True)
         subprocess.run(
             ["git", "commit", "-m", f"{commit_msg} (v{new_version})"], check=True
@@ -561,9 +560,6 @@ def create_release_non_interactive(release_type, commit_msg, notes):
         commit_sha = (
             subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
         )
-
-        # Format release notes with commit SHA
-        formatted_notes = format_release_notes(new_version, formatted_notes, commit_msg)
 
         # Create tag with formatted notes
         subprocess.run(

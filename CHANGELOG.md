@@ -1,5 +1,10 @@
 # Changelog
 
+## [2024.1.4.1] - 2024-12-27
+- Fixed release script to include changelog and readme updates in release commit
+
+
+
 ## [2024.1.4.0] - 2024-12-27
 - Added new worker system for violation processing
 - Improved error handling and cleanup
