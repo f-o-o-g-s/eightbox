@@ -282,8 +282,8 @@ class DateRangeProcessor(QObject):
         """Store clock ring data and start violation detection."""
         self.clock_ring_data = data
         if data is not None:
-            # Start violation detection workers for implemented violation types only
-            for violation_type in ["8.5.D", "8.5.F", "8.5.G"]:  # Only implemented types
+            # Start violation detection workers for all implemented violation types
+            for violation_type in ["8.5.D", "8.5.F", "8.5.G", "MAX12", "MAX60"]:
                 self._start_violation_detection(data, violation_type)
 
     def _handle_violation_detection_complete(self, violations, violation_type):
@@ -293,7 +293,7 @@ class DateRangeProcessor(QObject):
 
         # If this was the last violation detection, start remedy calculation
         if (
-            len(self.active_violations) == 3
+            len(self.active_violations) == 5
         ):  # Updated to match number of violation types
             self._start_remedy_calculation(self.active_violations)
 
