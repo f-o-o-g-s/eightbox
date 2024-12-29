@@ -272,13 +272,19 @@ SUB_TAB_STYLE = f"""
         background-color: {MATERIAL_SURFACE.name()};
         color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
         padding: 4px 8px;
-        min-width: 40px;
         margin: 0;
         border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
-        font-size: 9px;
-        font-weight: normal;
+        font-size: 10px;
+        font-weight: 500;
         text-transform: uppercase;
-        letter-spacing: 0.05px;
+        letter-spacing: 0.1px;
+        width: 85px;  /* Slightly wider to accommodate larger font */
+    }}
+    QTabBar::tab:first {{
+        margin-left: 5px;  /* Match table view's left margin */
+    }}
+    QTabBar::tab:last {{
+        margin-right: 0px;
     }}
     QTabBar::tab:hover {{
         background-color: rgba(187, 134, 252, {ALPHA_HOVER});
@@ -292,6 +298,9 @@ SUB_TAB_STYLE = f"""
     }}
     QTabBar::scroller {{
         width: 0px;
+    }}
+    QTabWidget::tab-bar {{
+        alignment: left;
     }}
 """
 

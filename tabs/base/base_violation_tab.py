@@ -26,14 +26,7 @@ from PyQt5.QtWidgets import (
 )
 
 from table_utils import setup_table_copy_functionality
-from theme import ALPHA_DISABLED_TEXT  # noqa: F401
-from theme import ALPHA_HOVER  # noqa: F401
-from theme import ALPHA_PRESSED  # noqa: F401
-from theme import COLOR_ROW_HIGHLIGHT  # noqa: F401
-from theme import COLOR_TEXT_LIGHT  # noqa: F401
-from theme import MATERIAL_BACKGROUND  # noqa: F401
-from theme import MATERIAL_PRIMARY  # noqa: F401
-from theme import MATERIAL_SURFACE  # noqa: F401
+from theme import SUB_TAB_STYLE
 from violation_model import ViolationModel
 
 
@@ -238,46 +231,14 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.date_tabs = QTabWidget()
         self.date_tabs.setDocumentMode(True)
 
-        # Set tab bar height
+        # Set tab bar height and size constraints
         tab_bar = self.date_tabs.tabBar()
         tab_bar.setFixedHeight(24)  # Set a smaller fixed height for the tab bar
+        tab_bar.setExpanding(False)  # Prevent tabs from expanding to fill width
+        tab_bar.setUsesScrollButtons(True)  # Enable scrolling when many tabs
 
-        # Set tab bar styling
-        self.date_tabs.setStyleSheet(
-            """
-            QTabWidget::pane {
-                border: none;
-                background-color: {MATERIAL_BACKGROUND.name()};
-            }
-            QTabBar {
-                qproperty-drawBase: 0;
-            }
-            QTabBar::tab {
-                background-color: {MATERIAL_SURFACE.name()};
-                color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
-                padding: 2px 6px;
-                border: none;
-                border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
-                min-width: 45px;
-                font-size: 9px;
-                font-weight: normal;
-                text-transform: uppercase;
-                letter-spacing: 0.05px;
-            }
-            QTabBar::tab:selected {
-                color: {MATERIAL_PRIMARY.name()};
-                background-color: rgba(187, 134, 252, 0.12);
-                border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
-            }
-            QTabBar::tab:hover {
-                background-color: rgba(187, 134, 252, {ALPHA_HOVER});
-                color: {MATERIAL_PRIMARY.lighter(110).name()};
-            }
-            QTabBar::scroller {
-                width: 0px;
-            }
-        """
-        )
+        # Use theme's SUB_TAB_STYLE
+        self.date_tabs.setStyleSheet(SUB_TAB_STYLE)
 
         self.main_layout.addWidget(self.date_tabs)
 

@@ -1296,7 +1296,7 @@ class MainApp(QMainWindow):
         """Initialize a sub-tab bar with compact styling."""
         sub_tab_bar = QTabBar()
         sub_tab_bar.setExpanding(False)
-        sub_tab_bar.setFixedHeight(28)  # Smaller height for sub-tabs
+
         tab_widget.setTabBar(sub_tab_bar)
 
         # Set sub-tab specific style
