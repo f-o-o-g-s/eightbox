@@ -219,7 +219,7 @@ TAB_WIDGET_STYLE = f"""
     }}
     QTabBar::tab {{
         background-color: {MATERIAL_SURFACE.name()};
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
         padding: 8px 16px;
         border: none;
         border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
@@ -228,11 +228,11 @@ TAB_WIDGET_STYLE = f"""
     }}
     QTabBar::tab:selected {{
         color: {MATERIAL_PRIMARY.name()};
-        background-color: rgba(187, 134, 252, 0.12);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
     }}
     QTabBar::tab:hover {{
-        background-color: rgba(187, 134, 252, 0.08);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         color: {MATERIAL_PRIMARY.lighter(110).name()};
     }}
     QTabBar::scroller {{
@@ -251,7 +251,7 @@ SUB_TAB_STYLE = f"""
     }}
     QTabBar::tab {{
         background-color: {MATERIAL_SURFACE.name()};
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
         padding: 6px 12px;
         min-width: 60px;
         margin: 0;
@@ -262,13 +262,13 @@ SUB_TAB_STYLE = f"""
         letter-spacing: 0.05px;
     }}
     QTabBar::tab:hover {{
-        background-color: rgba(187, 134, 252, 0.08);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         color: {MATERIAL_PRIMARY.lighter(110).name()};
     }}
     QTabBar::tab:selected {{
         color: {MATERIAL_PRIMARY.name()};
         border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
-        background-color: rgba(187, 134, 252, 0.12);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         border-right: 1px solid {MATERIAL_PRIMARY.name()};
     }}
     QTabBar::scroller {{
@@ -364,7 +364,7 @@ SETTINGS_PATH_DISPLAY_STYLE = f"""
     color: {MATERIAL_PRIMARY.lighter(120).name()};
     font-size: 11px;
     padding: 8px;
-    background-color: rgba(30, 30, 30, 0.6);
+    background-color: rgba(30, 30, 30, {ALPHA_DISABLED_TEXT});
     border-radius: 4px;
     border: 1px solid {COLOR_TEXT_DIM.name()};
 """
@@ -872,17 +872,17 @@ SPLIT_MOVE_DIALOG_STYLE = f"""
         border: 1px solid {COLOR_TEXT_DIM.name()};
     }}
     QPushButton {{
-        background-color: rgba(187, 134, 252, 0.1);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         color: {MATERIAL_PRIMARY.name()};
         border: none;
         padding: 8px 16px;
         border-radius: 4px;
     }}
     QPushButton:hover {{
-        background-color: rgba(187, 134, 252, 0.2);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
     QPushButton:pressed {{
-        background-color: rgba(187, 134, 252, 0.3);
+        background-color: rgba(187, 134, 252, {ALPHA_SELECTED});
     }}
     QPushButton:disabled {{
         background-color: {MATERIAL_SURFACE.name()};
