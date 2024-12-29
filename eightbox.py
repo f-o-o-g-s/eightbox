@@ -801,14 +801,6 @@ class MainApp(QMainWindow):
     def fetch_clock_ring_data(self, start_date=None, end_date=None):
         """Fetch clock ring data for the selected date range from the working database.
 
-        Important note on date handling:
-        The SQL query uses `rings_date >= DATE(?)` for the start date and
-        `rings_date < DATE(?, '+1 day')` for the end date to ensure we get
-        all records for the entire end date. This is because SQLite's DATE()
-        function truncates times to midnight, so using <= would miss records
-        later in the day. By using < next_day, we include all records up to
-        but not including midnight of the next day.
-
         Args:
             start_date (str, optional): Start date in YYYY-MM-DD format
             end_date (str, optional): End date in YYYY-MM-DD format
@@ -825,28 +817,6 @@ class MainApp(QMainWindow):
                 - leave_time
                 - display_indicator
         """
-        # First validate database path
-        if not self.eightbox_db_path or not os.path.exists(self.eightbox_db_path):
-            QMessageBox.critical(
-                self,
-                "Database Error",
-                "No valid database path configured.\n"
-                "Please set a valid database path in Settings.",
-            )
-            return pd.DataFrame(
-                columns=[
-                    "carrier_name",
-                    "rings_date",
-                    "list_status",
-                    "total",
-                    "moves",
-                    "code",
-                    "leave_type",
-                    "leave_time",
-                    "display_indicator",
-                ]
-            )
-
         try:
             # If no dates provided, try to get them from the date selection pane
             if start_date is None or end_date is None:
@@ -862,54 +832,29 @@ class MainApp(QMainWindow):
                 start_date = start_date.strftime("%Y-%m-%d")
                 end_date = end_date.strftime("%Y-%m-%d")
 
-            # Convert string dates to datetime.date objects
-            if isinstance(start_date, str):
-                start_date = pd.to_datetime(start_date).date()
-            if isinstance(end_date, str):
-                end_date = pd.to_datetime(end_date).date()
-
+            # Create query parameters and let database service handle date conversion
             params = ClockRingQueryParams(
                 start_date=start_date,
                 end_date=end_date,
-                db_path=self.eightbox_db_path,  # Use eightbox_db_path here
+                db_path=self.eightbox_db_path,
+                carrier_list_path="carrier_list.json",
             )
 
+            # Use database service to fetch data
             data, error = self.db_service.fetch_clock_ring_data(params)
+
             if error:
-                # Error handler already called by service
-                return pd.DataFrame(
-                    columns=[
-                        "carrier_name",
-                        "rings_date",
-                        "list_status",
-                        "total",
-                        "moves",
-                        "code",
-                        "leave_type",
-                        "leave_time",
-                        "display_indicator",
-                    ]
-                )
+                # Show error dialog
+                CustomWarningDialog.warning(self, "Database Error", error.message)
+                return self.db_service.get_empty_clock_ring_frame()
 
             return data
 
         except Exception as e:
-            QMessageBox.critical(
+            CustomWarningDialog.warning(
                 self, "Error", f"An unexpected error occurred: {str(e)}"
             )
-            return pd.DataFrame(
-                columns=[
-                    "carrier_name",
-                    "rings_date",
-                    "list_status",
-                    "total",
-                    "moves",
-                    "code",
-                    "leave_type",
-                    "leave_time",
-                    "display_indicator",
-                ]
-            )
+            return self.db_service.get_empty_clock_ring_frame()
 
     def show_violation_documentation(self):
         """Show the documentation dialog."""

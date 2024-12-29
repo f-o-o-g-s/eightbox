@@ -54,6 +54,12 @@ class DatabaseService:
             Tuple of (DataFrame, None) on success or (None, DatabaseError) on failure
         """
         try:
+            # Convert dates to datetime.date objects if they're strings
+            if isinstance(params.start_date, str):
+                params.start_date = pd.to_datetime(params.start_date).date()
+            if isinstance(params.end_date, str):
+                params.end_date = pd.to_datetime(params.end_date).date()
+
             # Validate database path
             if not self._validate_database_path(params.db_path):
                 return None, DatabaseError(
@@ -266,3 +272,23 @@ class DatabaseService:
 
         except sqlite3.Error:
             return False
+
+    def get_empty_clock_ring_frame(self) -> pd.DataFrame:
+        """Get an empty DataFrame with the correct clock ring schema.
+
+        Returns:
+            pd.DataFrame: Empty DataFrame with the correct columns for clock ring data
+        """
+        return pd.DataFrame(
+            columns=[
+                "carrier_name",
+                "rings_date",
+                "list_status",
+                "total",
+                "moves",
+                "code",
+                "leave_type",
+                "leave_time",
+                "display_indicator",
+            ]
+        )
