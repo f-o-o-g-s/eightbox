@@ -69,7 +69,7 @@ class CarrierListPane(QWidget):
             mandates_db_path (str): Path to the mandates database
             otdl_maximization_pane (QWidget, optional): OTDL maximization pane
             fetch_clock_ring_data_callback (callable, optional): Callback for fetching data
-            parent (QWidget, optional): Parent widget
+            parent (QWidget): Parent widget
         """
         super().__init__(parent)
         self.parent_widget = parent
@@ -81,6 +81,15 @@ class CarrierListPane(QWidget):
         )
         self.db_manager = CarrierDBManager(mandates_db_path, self.eightbox_db_path)
         self.json_path = "carrier_list.json"
+
+        # Create ignored_carriers table if it doesn't exist
+        self.db_manager.create_ignored_carriers_table()
+
+        # Set window flags
+        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+
+        # Initialize UI (this creates self.main_model and other UI components)
+        self.setup_ui()
 
         # Load and pre-sort the carrier data
         df = self.load_carrier_list()
@@ -95,17 +104,16 @@ class CarrierListPane(QWidget):
         ).reset_index(drop=True)
         self.temp_df = self.carrier_df.copy()
 
-        # Set window flags
-        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
-
-        # Initialize UI
-        self.setup_ui()
-
-        # Create ignored_carriers table if it doesn't exist
-        self.db_manager.create_ignored_carriers_table()
+        # Update the model with initial data
+        self.main_model.update_data(self.carrier_df)
+        self.proxy_model.invalidate()
 
         # Connect our own signal to refresh the view
         self.carrier_list_updated.connect(self.refresh_carrier_list)
+        self.data_updated.connect(self.refresh_carrier_list)
+
+        # Update statistics
+        self.update_statistics()
 
     def setup_ui(self):
         """Set up the user interface."""
@@ -151,15 +159,22 @@ class CarrierListPane(QWidget):
 
         # Add table view
         self.table_view = CarrierTableView(self)
-        self.main_model = PandasTableModel(self.carrier_df)
+
+        # Initialize models with empty DataFrame
+        empty_df = pd.DataFrame(
+            columns=[
+                "carrier_name",
+                "effective_date",
+                "list_status",
+                "route_s",
+                "hour_limit",
+            ]
+        )
+        self.main_model = PandasTableModel(empty_df)
         self.proxy_model = CarrierListProxyModel(self)
         self.proxy_model.setSourceModel(self.main_model)
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
         self.table_view.setModel(self.proxy_model)
-
-        # Force initial sort by list_status
-        list_status_col = self.carrier_df.columns.get_loc("list_status")
-        self.proxy_model.sort(list_status_col, Qt.AscendingOrder)
 
         content_layout.addWidget(self.table_view)
 
@@ -422,8 +437,16 @@ class CarrierListPane(QWidget):
 
     def show_removed_carriers(self):
         """Show the removed carriers manager dialog."""
-        dialog = RemovedCarriersManager(self.eightbox_db_path, self)
+        dialog = RemovedCarriersManager(self.eightbox_db_path, parent=self)
         dialog.exec_()
+        # Force a refresh after dialog closes
+        try:
+            updated_df = pd.read_json(self.json_path, orient="records")
+            self.refresh_carrier_list(updated_df)
+        except Exception as e:
+            CustomErrorDialog.error(
+                self, "Error", f"Failed to refresh carrier list after restore: {e}"
+            )
 
     def reset_carrier_list(self):
         """Reset the carrier list to its initial state."""

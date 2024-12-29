@@ -266,62 +266,44 @@ class RemovedCarriersManager(QDialog):
                 )
                 conn.commit()
 
-            # Then, get carrier data from mandates database
-            if self.mandates_db_path:
-                try:
-                    # Load current carrier list
-                    current_carriers = pd.read_json(self.json_path, orient="records")
-                except Exception:
-                    current_carriers = pd.DataFrame(
-                        columns=[
-                            "carrier_name",
-                            "effective_date",
-                            "list_status",
-                            "route_s",
-                            "hour_limit",
-                        ]
-                    )
-
-                # Get carrier data from mandates database
-                with sqlite3.connect(self.mandates_db_path) as conn:
-                    query = f"""
-                        SELECT
-                            carrier_name,
-                            DATE(MAX(effective_date)) as effective_date,
-                            list_status,
-                            route_s,
-                            station
-                        FROM carriers
-                        WHERE carrier_name IN ({','.join('?' * len(carriers_to_restore))})
-                        GROUP BY carrier_name
-                    """
-
-                    df = pd.read_sql_query(query, conn, params=carriers_to_restore)
-
-                    # Filter out carriers with "out of station"
-                    df = df[
-                        ~df["station"].str.contains(
-                            "out of station", case=False, na=False
-                        )
+            try:
+                # Load current carrier list
+                current_carriers = pd.read_json("carrier_list.json", orient="records")
+            except Exception:
+                current_carriers = pd.DataFrame(
+                    columns=[
+                        "carrier_name",
+                        "effective_date",
+                        "list_status",
+                        "route_s",
+                        "hour_limit",
                     ]
+                )
 
-                    # Drop the station column and add hour_limit
-                    df = df.drop(columns=["station"])
-                    df["hour_limit"] = 12.00
+            # Create new carrier entries with default values
+            new_carriers = pd.DataFrame(
+                {
+                    "carrier_name": carriers_to_restore,
+                    "effective_date": pd.Timestamp.now().strftime("%Y-%m-%d"),
+                    "list_status": "nl",  # Default to no-list
+                    "route_s": "",
+                    "hour_limit": 12.00,
+                }
+            )
 
-                    # Add new carriers to the list
-                    updated_carriers = pd.concat(
-                        [current_carriers, df], ignore_index=True
-                    )
+            # Add new carriers to the list
+            updated_carriers = pd.concat(
+                [current_carriers, new_carriers], ignore_index=True
+            )
 
-                    # Save updated carrier list
-                    updated_carriers.to_json(self.json_path, orient="records")
+            # Save updated carrier list
+            updated_carriers.to_json("carrier_list.json", orient="records")
 
-                    # Emit signal to update carrier list if parent has the signal
-                    if hasattr(self.parent_widget, "carrier_list_updated"):
-                        self.parent_widget.carrier_list_updated.emit(updated_carriers)
-                    if hasattr(self.parent_widget, "data_updated"):
-                        self.parent_widget.data_updated.emit(updated_carriers)
+            # Emit signal to update carrier list if parent has the signal
+            if hasattr(self.parent_widget, "carrier_list_updated"):
+                self.parent_widget.carrier_list_updated.emit(updated_carriers)
+            if hasattr(self.parent_widget, "data_updated"):
+                self.parent_widget.data_updated.emit(updated_carriers)
 
             # Reload the removed carriers table
             self.load_removed_carriers()
