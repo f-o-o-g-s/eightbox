@@ -794,14 +794,12 @@ CUSTOM_MESSAGE_BOX_STYLE = f"""
     QWidget {{
         background-color: {MATERIAL_SURFACE.name()};
         color: {COLOR_TEXT_LIGHT.name()};
-        min-width: 400px;
     }}
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-        padding: 16px;
+        padding: 8px;
         line-height: 1.4;
-        min-height: 50px;
         qproperty-wordWrap: true;
     }}
     QPushButton {{
@@ -811,7 +809,7 @@ CUSTOM_MESSAGE_BOX_STYLE = f"""
         padding: 8px 16px;
         margin: 8px;
         color: {COLOR_TEXT_LIGHT.name()};
-        min-width: 100px;
+        min-width: 80px;
         font-weight: 500;
         letter-spacing: 0.5px;
     }}
@@ -833,14 +831,24 @@ CUSTOM_WARNING_DIALOG_STYLE = f"""
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-        padding: 8px;
         line-height: 1.4;
+    }}
+    QLabel#iconLabel {{
+        padding: 8px;
+        background-color: transparent;
+    }}
+    QLabel#messageLabel {{
+        padding: 8px;
+        font-size: 12px;
+        line-height: 1.6;
+        qproperty-wordWrap: true;
     }}
     QPushButton {{
         background-color: {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
         border: 1px solid {rgba(RGB_LOVE, ALPHA_HOVER)};
         border-radius: 4px;
         padding: 8px 16px;
+        margin: 8px;
         color: {QColor(*RGB_LOVE).lighter(110).name()};
         min-width: 80px;
         font-weight: 500;
@@ -867,8 +875,7 @@ CUSTOM_INFO_DIALOG_STYLE = f"""
         line-height: 1.4;
     }}
     QLabel#iconLabel {{
-        padding: 0;
-        margin: 0;
+        padding: 8px;
         background-color: transparent;
     }}
     QLabel#messageLabel {{
@@ -882,11 +889,11 @@ CUSTOM_INFO_DIALOG_STYLE = f"""
         border: 1px solid {rgba(RGB_PINE, ALPHA_HOVER)};
         border-radius: 4px;
         padding: 8px 16px;
+        margin: 8px;
         color: {QColor(*RGB_PINE).lighter(110).name()};
         min-width: 80px;
         font-weight: 500;
         letter-spacing: 0.5px;
-        margin: 8px;
     }}
     QPushButton:hover {{
         background-color: {rgba(RGB_HIGHLIGHT_MED, ALPHA_HOVER)};
@@ -906,14 +913,24 @@ CUSTOM_NOTIFICATION_DIALOG_STYLE = f"""
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-        padding: 8px;
         line-height: 1.4;
+    }}
+    QLabel#iconLabel {{
+        padding: 8px;
+        background-color: transparent;
+    }}
+    QLabel#messageLabel {{
+        padding: 8px;
+        font-size: 12px;
+        line-height: 1.6;
+        qproperty-wordWrap: true;
     }}
     QPushButton {{
         background-color: {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
         border: 1px solid {rgba(RGB_FOAM, ALPHA_HOVER)};
         border-radius: 4px;
         padding: 8px 16px;
+        margin: 8px;
         color: {QColor(*RGB_FOAM).lighter(110).name()};
         min-width: 80px;
         font-weight: 500;
@@ -937,14 +954,24 @@ CONFIRM_DIALOG_STYLE = f"""
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-        padding: 8px;
         line-height: 1.4;
+    }}
+    QLabel#iconLabel {{
+        padding: 8px;
+        background-color: transparent;
+    }}
+    QLabel#messageLabel {{
+        padding: 8px;
+        font-size: 12px;
+        line-height: 1.6;
+        qproperty-wordWrap: true;
     }}
     QPushButton {{
         background-color: {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
         border: 1px solid {rgba(RGB_GOLD, ALPHA_HOVER)};
         border-radius: 4px;
         padding: 8px 16px;
+        margin: 8px;
         color: {QColor(*RGB_GOLD).lighter(110).name()};
         min-width: 80px;
         font-weight: 500;
@@ -958,17 +985,6 @@ CONFIRM_DIALOG_STYLE = f"""
     QPushButton:pressed {{
         background-color: {rgba(RGB_HIGHLIGHT_HIGH, ALPHA_PRESSED)};
         color: {QColor(*RGB_GOLD).darker(110).name()};
-    }}
-    QPushButton#secondary {{
-        border: 1px solid {rgba(RGB_HIGHLIGHT_MED, ALPHA_HOVER)};
-        color: {COLOR_TEXT_LIGHT.name()};
-    }}
-    QPushButton#secondary:hover {{
-        border: 1px solid {QColor(*RGB_IRIS).name()};
-        color: {QColor(*RGB_IRIS).lighter(110).name()};
-    }}
-    QPushButton#secondary:pressed {{
-        color: {QColor(*RGB_IRIS).name()};
     }}
 """
 
