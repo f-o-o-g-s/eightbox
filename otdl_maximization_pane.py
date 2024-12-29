@@ -56,15 +56,12 @@ from PyQt5.QtWidgets import (
 
 from custom_widgets import CustomTitleBarWidget
 from table_utils import setup_table_copy_functionality
-from theme import COLOR_TEXT_DIM  # noqa: F401
 from theme import (
-    COLOR_BG_HOVER,
     COLOR_NO_HIGHLIGHT,
     COLOR_ROW_HIGHLIGHT,
-    COLOR_TEXT_LIGHT,
-    MATERIAL_BACKGROUND,
+    DATE_SELECTION_PANE_STYLE,
     MATERIAL_BLUE_GREY_900,
-    MATERIAL_PRIMARY,
+    MATERIAL_SURFACE,
     OTDL_CELL_LABEL_STYLE,
     OTDL_CELL_WIDGET_STYLE,
     OTDL_CHECKBOX_STYLE,
@@ -142,6 +139,7 @@ class OTDLMaximizationPane(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(1, 1, 1, 1)
         main_layout.setSpacing(0)
+        self.setStyleSheet(DATE_SELECTION_PANE_STYLE)
 
         # Add custom title bar
         self.title_bar = CustomTitleBarWidget(title="OTDL Maximization", parent=self)
@@ -195,58 +193,26 @@ class OTDLMaximizationPane(QWidget):
         footer.setObjectName("footer")
         footer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)  # Fixed height
         footer.setStyleSheet(
-            """
-            QWidget#footer {
+            f"""
+            QWidget#footer {{
                 background-color: {MATERIAL_SURFACE.name()};
-                border-top: 1px solid {COLOR_TEXT_DIM.name()};
-                min-height: 60px;
-                max-height: 60px;
-                padding-bottom: 8px;  /* Add margin at the bottom */
-            }
+                padding: 15px;  /* Consistent padding */
+            }}
         """
         )
         footer_layout = QHBoxLayout(footer)
-        footer_layout.setContentsMargins(10, 10, 10, 10)
+        footer_layout.setContentsMargins(15, 15, 15, 15)  # Adjusted margins
 
         # Create Apply button with existing style
-        apply_button = QPushButton("Apply All Changes")
-        apply_button.setObjectName("primary")
-        apply_button.setStyleSheet(
-            f"""
-            QPushButton {{
-                background-color: {COLOR_ROW_HIGHLIGHT.name()};
-                color: {MATERIAL_PRIMARY.name()};
-                border: 1px solid {COLOR_TEXT_DIM.name()};
-                border-bottom: 2px solid {MATERIAL_BACKGROUND.name()};
-                padding: 8px 24px;
-                font-weight: 500;
-                min-height: 32px;
-                border-radius: 4px;
-                font-size: 14px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }}
-            QPushButton:hover {{
-                background-color: {COLOR_BG_HOVER.name()};
-                border: 1px solid {COLOR_TEXT_DIM.name()};
-                border-bottom: 2px solid {MATERIAL_BACKGROUND.name()};
-                color: {COLOR_TEXT_LIGHT.name()};
-            }}
-            QPushButton:pressed {{
-                background-color: {MATERIAL_BACKGROUND.name()};
-                border: 1px solid {COLOR_BG_HOVER.name()};
-            }}
-            QPushButton:disabled {{
-                background-color: #252525;
-                color: {calculate_optimal_gray(QColor('#252525')).name()};
-                border: 1px solid #2D2D2D;
-            }}
-            """
-        )
+        apply_button = QPushButton(
+            "APPLY ALL CHANGES"
+        )  # Keep original text but in caps
+        apply_button.setMinimumHeight(42)
+        apply_button.setFixedWidth(200)
         apply_button.clicked.connect(self.apply_all_changes)
-        footer_layout.addStretch()
+        footer_layout.addStretch()  # Add stretch before button
         footer_layout.addWidget(apply_button)
-        footer_layout.addStretch()
+        footer_layout.addStretch()  # Add stretch after button
 
         # Add footer to central layout with no stretch
         central_layout.addWidget(footer, 0)  # No stretch factor
