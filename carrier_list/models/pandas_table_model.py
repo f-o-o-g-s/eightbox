@@ -1,4 +1,4 @@
-"""Table model for displaying pandas DataFrame in a QTableView."""
+"""Data model for displaying pandas DataFrames in Qt table views."""
 
 import pandas as pd
 from PyQt5.QtCore import (
@@ -7,6 +7,23 @@ from PyQt5.QtCore import (
     QVariant,
 )
 from PyQt5.QtGui import QColor
+
+from theme import (
+    COLOR_BLACK,
+    COLOR_STATUS_NL,
+    COLOR_STATUS_OTDL,
+    COLOR_STATUS_PTF,
+    COLOR_STATUS_WAL,
+    COLOR_WHITE,
+)
+
+# Map carrier list status to colors
+STATUS_COLORS = {
+    "otdl": COLOR_STATUS_OTDL,  # Purple
+    "wal": COLOR_STATUS_WAL,  # Teal
+    "nl": COLOR_STATUS_NL,  # Light Green
+    "ptf": COLOR_STATUS_PTF,  # Pink
+}
 
 
 class PandasTableModel(QAbstractTableModel):
@@ -20,13 +37,8 @@ class PandasTableModel(QAbstractTableModel):
         super().__init__(parent)
         self.df = df
         self.db_df = db_df if db_df is not None else pd.DataFrame()
-        # Define text colors for different list statuses
-        self.status_text_colors = {
-            "otdl": QColor("#BB86FC"),  # Purple
-            "wal": QColor("#03DAC6"),  # Teal
-            "nl": QColor("#64DD17"),  # Light Green
-            "ptf": QColor("#FF7597"),  # Pink
-        }
+        # Define text colors for different list statuses using theme constants
+        self.status_text_colors = STATUS_COLORS
 
     def calculate_text_color(self, bg_color):
         """Calculate optimal text color (black or white) based on background color.
@@ -52,7 +64,7 @@ class PandasTableModel(QAbstractTableModel):
         luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
         # Return white for dark backgrounds, black for light backgrounds
-        return QColor("#FFFFFF") if luminance < 0.5 else QColor("#000000")
+        return COLOR_WHITE if luminance < 0.5 else COLOR_BLACK
 
     def update_data(self, new_df, new_db_df=None):
         """Update the model's data with new DataFrame(s).

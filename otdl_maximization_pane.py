@@ -57,9 +57,16 @@ from PyQt5.QtWidgets import (
 from custom_widgets import CustomTitleBarWidget
 from table_utils import setup_table_copy_functionality
 from theme import (
+    COLOR_BG_HOVER,
+    COLOR_BLACK,
     COLOR_NO_HIGHLIGHT,
     COLOR_ROW_HIGHLIGHT,
     COLOR_TEXT_LIGHT,
+    MATERIAL_BLUE_600,
+    MATERIAL_BLUE_GREY_800,
+    MATERIAL_BLUE_GREY_900,
+    MATERIAL_GREY_800,
+    MATERIAL_PRIMARY,
 )
 from violation_model import calculate_optimal_gray
 
@@ -508,7 +515,7 @@ class OTDLMaximizationPane(QWidget):
         )
         # Set custom header colors
         header = self.table.horizontalHeader()
-        header_bg = QColor("#37474F")  # Material Blue Grey 800
+        header_bg = MATERIAL_BLUE_GREY_800  # Material Blue Grey 800
 
         # Set resize modes for columns
         header.setSectionResizeMode(
@@ -522,10 +529,9 @@ class OTDLMaximizationPane(QWidget):
             f"""
             QHeaderView::section {{
                 background-color: {header_bg.name()};
-                color: {calculate_optimal_gray(header_bg).name()};
+                color: white;
                 padding: 8px;
                 border: none;
-                border-bottom: 2px solid #455A64;
                 font-weight: bold;
             }}
         """
@@ -547,7 +553,7 @@ class OTDLMaximizationPane(QWidget):
             font.setPointSize(10)  # Slightly larger than default
             day_name_item.setFont(font)
             # Use a slightly different shade for day names
-            day_name_bg = QColor("#263238")  # Material Blue Grey 900
+            day_name_bg = MATERIAL_BLUE_GREY_900  # Material Blue Grey 900
             day_name_item.setBackground(day_name_bg)
             day_name_item.setForeground(calculate_optimal_gray(day_name_bg))
             self.table.setItem(day_name_row_index, col_idx, day_name_item)
@@ -601,7 +607,7 @@ class OTDLMaximizationPane(QWidget):
 
             # Highlight non-default hour limits
             if hour_limit_value != 12.00:
-                hour_limit_item.setForeground(QColor("#BB86FC"))  # Keep Material purple
+                hour_limit_item.setForeground(MATERIAL_PRIMARY)  # Material purple
             else:
                 hour_limit_item.setForeground(
                     calculate_optimal_gray(row_color)
@@ -643,8 +649,7 @@ class OTDLMaximizationPane(QWidget):
                     item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                     item.setForeground(
                         calculate_optimal_gray(row_color)
-                    )  # Replace COLOR_TEXT_LIGHT
-                    # Use row_color instead of dark gray
+                    )  # Use optimal gray based on background
                     item.setBackground(row_color)
                     self.table.setItem(row_idx, col_idx, item)
                     continue
@@ -656,8 +661,8 @@ class OTDLMaximizationPane(QWidget):
                     item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                     item.setForeground(
                         calculate_optimal_gray(row_color)
-                    )  # Replace COLOR_TEXT_LIGHT
-                    item.setBackground(row_color)  # Use alternating row color
+                    )  # Use optimal gray based on background
+                    item.setBackground(row_color)
                     self.table.setItem(row_idx, col_idx, item)
                     continue
 
@@ -666,19 +671,21 @@ class OTDLMaximizationPane(QWidget):
                     # Create checkbox with modern toggle switch style
                     checkbox = QCheckBox()
                     checkbox.setStyleSheet(
-                        """
-                        QCheckBox::indicator {
+                        f"""
+                        QCheckBox::indicator {{
                             width: 30px;
                             height: 15px;
                             border: none;  /* Remove the white border */
-                            background-color: #424242;  /* Unchecked color */
-                        }
-                        QCheckBox::indicator:checked {
-                            background-color: #1976D2;  /* Material Blue when checked */
-                        }
-                        QCheckBox::indicator:unchecked {
-                            background-color: #424242;  /* Dark grey when unchecked */
-                        }
+                            background-color: {MATERIAL_GREY_800.name()};  /* Unchecked color */
+                        }}
+                        QCheckBox::indicator:checked {{
+                            background-color: {MATERIAL_BLUE_600.name()};
+                                /* Material Blue when checked */
+                        }}
+                        QCheckBox::indicator:unchecked {{
+                            background-color: {MATERIAL_GREY_800.name()};
+                                /* Dark grey when unchecked */
+                        }}
                     """
                     )
 
@@ -695,7 +702,9 @@ class OTDLMaximizationPane(QWidget):
 
                     # Add hours and indicator with black text
                     label = QLabel(f"{daily_hours:.2f} {indicator}".strip())
-                    label.setStyleSheet("color: black;")  # Keep black text
+                    label.setStyleSheet(
+                        f"color: {COLOR_BLACK.name()};"
+                    )  # Use theme black
 
                     # Create compact checkbox row with black text
                     checkbox_widget = QWidget()
@@ -706,7 +715,7 @@ class OTDLMaximizationPane(QWidget):
 
                     # Make "Excuse?" text black
                     excuse_label = QLabel("Excuse?")
-                    excuse_label.setStyleSheet("color: black;")
+                    excuse_label.setStyleSheet(f"color: {COLOR_BLACK.name()};")
                     checkbox_layout.addWidget(excuse_label)
                     checkbox_layout.addStretch()
 
@@ -715,11 +724,13 @@ class OTDLMaximizationPane(QWidget):
 
                     cell_widget.setLayout(layout)
                     cell_widget.setStyleSheet(
-                        """
-                        QWidget {
-                            background-color: #d8b4fc;  /* Purple background */
-                            border-radius: 3px;
-                        }
+                        f"""
+                        QWidget {{
+                            background-color: {COLOR_BG_HOVER.name()};
+                            color: {calculate_optimal_gray(COLOR_BG_HOVER).name()};
+                            padding: 8px;
+                            border-radius: 4px;
+                        }}
                         """
                     )
 

@@ -44,6 +44,24 @@ MATERIAL_BACKGROUND = QColor("#121212")  # Main background
 MATERIAL_SURFACE = QColor("#1E1E1E")  # Elevated surface color
 MATERIAL_ERROR = QColor("#CF6679")  # Error states
 
+# Additional Material Design Colors
+MATERIAL_BLUE_GREY_800 = QColor("#37474F")  # Header backgrounds
+MATERIAL_BLUE_GREY_900 = QColor("#263238")  # Day name backgrounds
+MATERIAL_RED_900 = QColor("#B71C1C")  # Error states
+MATERIAL_RED_200 = QColor("#EF9A9A")  # Error text
+MATERIAL_GREEN_900 = QColor("#1B5E20")  # Success states
+MATERIAL_GREEN_300 = QColor("#81C784")  # Success text
+MATERIAL_GREY_600 = QColor("#666666")  # Dot color
+MATERIAL_GREY_700 = QColor("#999999")  # Hover color
+MATERIAL_GREY_800 = QColor("#424242")  # Checkbox unchecked
+MATERIAL_BLUE_600 = QColor("#1976D2")  # Checkbox checked
+MATERIAL_BLUE_GREY_700 = QColor("#455A64")  # Title bar hover
+MATERIAL_RED_700 = QColor("#c42b1c")  # Close button hover
+
+# Basic Colors
+COLOR_BLACK = QColor("#000000")  # Pure black for text
+COLOR_WHITE = QColor("#FFFFFF")  # Pure white for text
+
 # Application-specific color mappings
 COLOR_ROW_HIGHLIGHT = QColor("#2D2D2D")  # Table row hover
 COLOR_CELL_HIGHLIGHT = MATERIAL_PRIMARY.darker(150)  # Selected cell
@@ -54,89 +72,104 @@ COLOR_TEXT_DIM = QColor("#333333")  # Secondary text
 COLOR_MAXIMIZED_TRUE = QColor("#4CAF50")  # Success state
 COLOR_MAXIMIZED_FALSE = QColor("#F44336")  # Error state
 
-# Violation-specific colors (matching violation_model.py)
+# Violation-specific colors
 COLOR_VIOLATION = QColor("#7D59A8")  # Medium dark purple (125, 89, 168)
 COLOR_VIOLATION_SUMMARY = QColor("#D7B7FF")  # Light purple (215, 183, 255)
 COLOR_VIOLATION_WEEKLY = QColor("#029184")  # Teal (2, 145, 132)
 
+# Status-specific colors
+COLOR_STATUS_OTDL = MATERIAL_PRIMARY  # Purple for OTDL
+COLOR_STATUS_WAL = MATERIAL_SECONDARY  # Teal for WAL
+COLOR_STATUS_NL = QColor("#64DD17")  # Light Green for NL
+COLOR_STATUS_PTF = QColor("#FF7597")  # Pink for PTF
+
+# Background colors
+COLOR_BG_DARKER = QColor("#222222")  # Darker background
+COLOR_BG_DARK = QColor("#2A2A2A")  # Dark background
+COLOR_BG_HOVER = QColor("#252525")  # Hover background
+
 # Component-specific style sheets
-TITLE_BAR_STYLE = """
-    QWidget {
-        background-color: #37474F;
+TITLE_BAR_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_BLUE_GREY_800.name()};
         border: none;
-    }
-    QLabel {
-        color: white;
+    }}
+    QLabel {{
+        color: {COLOR_WHITE.name()};
         font-size: 12pt;
         font-weight: bold;
         background-color: transparent;
-    }
-    QPushButton {
+    }}
+    QPushButton {{
         background-color: transparent;
         border: none;
-        color: white;
+        color: {COLOR_WHITE.name()};
         padding: 5px;
         min-width: 40px;
         max-width: 40px;
         font-size: 16pt;
         font-family: Arial;
-    }
-    QPushButton:hover { background-color: #455A64; }
+    }}
+    QPushButton:hover {{
+        background-color: {MATERIAL_BLUE_GREY_700.name()};
+    }}
 """
 
-CLOSE_BUTTON_STYLE = "QPushButton:hover { background-color: #c42b1c; }"
+CLOSE_BUTTON_STYLE = (
+    f"QPushButton:hover {{ background-color: {MATERIAL_RED_700.name()}; }}"
+)
 
-TOP_BUTTON_ROW_STYLE = """
-    QWidget {
-        background-color: #121212;  /* Material Dark background */
-        border-bottom: 1px solid #2D2D2D;
-    }
-    QPushButton {
-        background-color: rgba(187, 134, 252, 0.05);  /* Primary color with 5% opacity */
-        border: none;
-        border-radius: 4px;
-        color: #BB86FC;  /* Primary color */
-        padding: 16px 32px;  /* Increased padding */
-        font-size: 14px;  /* Increased font size */
-        font-weight: 500;
-        text-align: center;
-        margin: 12px 6px;  /* Increased margins */
-        min-width: 180px;  /* Increased width */
-        letter-spacing: 0.15px;
-        text-transform: uppercase;
-    }
-    QPushButton:hover {
-        background-color: rgba(187, 134, 252, 0.08);
-        color: #CBB0FF;
-    }
-    QPushButton:pressed {
-        background-color: rgba(187, 134, 252, 0.12);
-        padding-top: 17px;
-        color: #BB86FC;
-    }
-    QPushButton:checked {
-        background-color: rgba(187, 134, 252, 0.12);
-        color: #E9B7FF;
-        font-weight: 600;
-    }
-    QPushButton:checked:hover {
-        background-color: rgba(187, 134, 252, 0.16);
-    }
-    QPushButton:disabled {
-        background-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.38);
-    }
-"""
-
-FILTER_BUTTON_ROW_STYLE = """
-    QWidget {
-        background-color: #121212;
-        border-top: 1px solid #333333;
-    }
-    QPushButton {
+TOP_BUTTON_ROW_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_BACKGROUND.name()};
+        border-bottom: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
+    }}
+    QPushButton {{
         background-color: rgba(187, 134, 252, 0.05);
         border: none;
-        color: rgba(187, 134, 252, 0.87);
+        border-radius: 4px;
+        color: {MATERIAL_PRIMARY.name()};
+        padding: 16px 32px;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+        margin: 12px 6px;
+        min-width: 180px;
+        letter-spacing: 0.15px;
+        text-transform: uppercase;
+    }}
+    QPushButton:hover {{
+        background-color: rgba(187, 134, 252, 0.08);
+        color: {MATERIAL_PRIMARY.lighter(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: rgba(187, 134, 252, 0.12);
+        padding-top: 17px;
+        color: {MATERIAL_PRIMARY.name()};
+    }}
+    QPushButton:checked {{
+        background-color: rgba(187, 134, 252, 0.12);
+        color: {MATERIAL_PRIMARY.lighter(110).name()};
+        font-weight: 600;
+    }}
+    QPushButton:checked:hover {{
+        background-color: rgba(187, 134, 252, 0.16);
+    }}
+    QPushButton:disabled {{
+        background-color: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.38);
+    }}
+"""
+
+FILTER_BUTTON_ROW_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_BACKGROUND.name()};
+        border-top: 1px solid {COLOR_TEXT_DIM.name()};
+    }}
+    QPushButton {{
+        background-color: rgba(187, 134, 252, 0.05);
+        border: none;
+        color: {MATERIAL_PRIMARY.name()};
         padding: 4px 12px;
         font-size: 12px;
         margin: 1px;
@@ -146,145 +179,142 @@ FILTER_BUTTON_ROW_STYLE = """
         text-align: center;
         font-weight: 500;
         letter-spacing: 0.15px;
-    }
-    QPushButton:hover {
+    }}
+    QPushButton:hover {{
         background-color: rgba(187, 134, 252, 0.08);
-        color: rgba(187, 134, 252, 1.0);
-    }
-    QPushButton:pressed {
+        color: {MATERIAL_PRIMARY.name()};
+    }}
+    QPushButton:pressed {{
         background-color: rgba(187, 134, 252, 0.12);
-        color: rgba(187, 134, 252, 1.0);
-    }
-    QPushButton:checked {
+        color: {MATERIAL_PRIMARY.name()};
+    }}
+    QPushButton:checked {{
         background-color: rgba(187, 134, 252, 0.12);
-        color: rgba(187, 134, 252, 1.0);
+        color: {MATERIAL_PRIMARY.name()};
         font-weight: 600;
-    }
-    QLabel {
-        color: rgba(187, 134, 252, 0.87);
+    }}
+    QLabel {{
+        color: {MATERIAL_PRIMARY.name()};
         font-size: 12px;
         padding: 4px 12px;
-        background-color: rgba(187, 134, 252, 0.05);
-        border-radius: 4px;
         font-weight: 500;
         letter-spacing: 0.15px;
-    }
+    }}
 """
 
-TAB_WIDGET_STYLE = """
-    QTabWidget::pane {
+TAB_WIDGET_STYLE = f"""
+    QTabWidget::pane {{
         border: none;
-        background-color: #121212;
-    }
-    QTabBar {
+        background-color: {MATERIAL_BACKGROUND.name()};
+    }}
+    QTabBar {{
         qproperty-drawBase: 0;
-    }
-    QTabBar::tab {
-        background-color: #1E1E1E;
+    }}
+    QTabBar::tab {{
+        background-color: {MATERIAL_SURFACE.name()};
         color: rgba(255, 255, 255, 0.6);
         padding: 8px 16px;
         border: none;
-        border-right: 1px solid #2D2D2D;
+        border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
         min-width: 80px;
         font: 11px;
-    }
-    QTabBar::tab:selected {
-        color: #BB86FC;
+    }}
+    QTabBar::tab:selected {{
+        color: {MATERIAL_PRIMARY.name()};
         background-color: rgba(187, 134, 252, 0.12);
-        border-bottom: 2px solid #BB86FC;
-    }
-    QTabBar::tab:hover {
+        border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
+    }}
+    QTabBar::tab:hover {{
         background-color: rgba(187, 134, 252, 0.08);
-        color: #CBB0FF;
-    }
-    QTabBar::scroller {
+        color: {MATERIAL_PRIMARY.lighter(110).name()};
+    }}
+    QTabBar::scroller {{
         width: 0px;
-    }
+    }}
 """
 
-SUB_TAB_STYLE = """
-    QTabWidget::pane {
+SUB_TAB_STYLE = f"""
+    QTabWidget::pane {{
         border: none;
-        background-color: #121212;
+        background-color: {MATERIAL_BACKGROUND.name()};
         padding-top: 2px;
-    }
-    QTabBar {
+    }}
+    QTabBar {{
         qproperty-drawBase: 0;
-    }
-    QTabBar::tab {
-        background-color: #1A1A1A;
+    }}
+    QTabBar::tab {{
+        background-color: {MATERIAL_SURFACE.name()};
         color: rgba(255, 255, 255, 0.6);
         padding: 6px 12px;
         min-width: 60px;
         margin: 0;
-        border-right: 1px solid #2D2D2D;
+        border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
         font-size: 10px;
         font-weight: normal;
         text-transform: uppercase;
         letter-spacing: 0.05px;
-    }
-    QTabBar::tab:hover {
+    }}
+    QTabBar::tab:hover {{
         background-color: rgba(187, 134, 252, 0.08);
-        color: #CBB0FF;
-    }
-    QTabBar::tab:selected {
-        color: #BB86FC;
-        border-bottom: 2px solid #BB86FC;
+        color: {MATERIAL_PRIMARY.lighter(110).name()};
+    }}
+    QTabBar::tab:selected {{
+        color: {MATERIAL_PRIMARY.name()};
+        border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
         background-color: rgba(187, 134, 252, 0.12);
-        border-right: 1px solid #BB86FC;
-        font-weight: 500;
-    }
-    QTabBar::scroller {
+        border-right: 1px solid {MATERIAL_PRIMARY.name()};
+    }}
+    QTabBar::scroller {{
         width: 0px;
-    }
+    }}
 """
 
-MENU_BAR_STYLE = """
-    QMenuBar {
-        background-color: #455A64;
-        color: white;
+MENU_BAR_STYLE = f"""
+    QMenuBar {{
+        background-color: {MATERIAL_BLUE_GREY_800.name()};
+        color: {COLOR_WHITE.name()};
         border: none;
         padding: 2px;
-    }
-    QMenuBar::item {
+    }}
+    QMenuBar::item {{
         background-color: transparent;
         padding: 4px 10px;
-    }
-    QMenuBar::item:selected {
-        background-color: #546E7A;
-    }
-    QMenuBar::item:pressed {
-        background-color: #37474F;
-    }
-    QMenu {
-        background-color: #455A64;
-        color: white;
-        border: 1px solid #546E7A;
-    }
-    QMenu::item:selected {
-        background-color: #546E7A;
-    }
+    }}
+    QMenuBar::item:selected {{
+        background-color: {MATERIAL_BLUE_GREY_700.name()};
+    }}
+    QMenuBar::item:pressed {{
+        background-color: {MATERIAL_BLUE_GREY_900.name()};
+    }}
+    QMenu {{
+        background-color: {MATERIAL_BLUE_GREY_800.name()};
+        color: {COLOR_WHITE.name()};
+        border: 1px solid {MATERIAL_BLUE_GREY_700.name()};
+    }}
+    QMenu::item:selected {{
+        background-color: {MATERIAL_BLUE_GREY_700.name()};
+    }}
 """
 
-FILTER_ROW_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-        border-bottom: 1px solid #333333;
-    }
-    QLineEdit {
-        background-color: #2D2D2D;
-        color: #E1E1E1;
-        border: 1px solid #404040;
+FILTER_ROW_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+        border-bottom: 1px solid {COLOR_TEXT_DIM.name()};
+    }}
+    QLineEdit {{
+        background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
         border-radius: 4px;
         padding: 8px;
         margin: 8px;
-    }
-    QLineEdit:focus {
-        border: 1px solid #BB86FC;
-    }
-    QLineEdit::placeholder {
-        color: #808080;
-    }
+    }}
+    QLineEdit:focus {{
+        border: 1px solid {MATERIAL_PRIMARY.name()};
+    }}
+    QLineEdit::placeholder {{
+        color: {COLOR_TEXT_DIM.lighter(150).name()};
+    }}
 """
 
 SIZE_GRIP_STYLE = "background: transparent;"

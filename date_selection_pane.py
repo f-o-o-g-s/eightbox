@@ -18,6 +18,7 @@ from PyQt5.QtCore import (
 )
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
+    QCalendarWidget,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -29,7 +30,11 @@ from PyQt5.QtWidgets import (
 )
 
 from custom_widgets import CustomTitleBarWidget
-from theme import DATE_SELECTION_PANE_STYLE
+from theme import (
+    COLOR_BG_DARK,
+    COLOR_BG_DARKER,
+    DATE_SELECTION_PANE_STYLE,
+)
 
 
 class DateRangeModel(QAbstractTableModel):
@@ -397,3 +402,15 @@ class DateSelectionPane(QWidget):
 
             # Hide the date selection pane
             self.hide()
+
+
+class CustomCalendarWidget(QCalendarWidget):
+    """Custom calendar widget with alternating row colors."""
+
+    def paintCell(self, painter, rect, date):
+        """Paint calendar cell with custom background colors."""
+        if date.weekNumber()[1] % 2 == 0:
+            painter.fillRect(rect, COLOR_BG_DARK)
+        else:
+            painter.fillRect(rect, COLOR_BG_DARKER)
+        super().paintCell(painter, rect, date)

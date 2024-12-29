@@ -43,6 +43,10 @@ from theme import (
     CLEAN_MOVES_DIALOG_STYLE,
     CLEAN_MOVES_SAVE_BUTTON_STYLE,
     DISABLED_START_INPUT_STYLE,
+    MATERIAL_GREEN_300,
+    MATERIAL_GREEN_900,
+    MATERIAL_RED_200,
+    MATERIAL_RED_900,
     SPLIT_MOVE_DIALOG_STYLE,
 )
 
@@ -740,10 +744,6 @@ class CleanMovesDialog(QDialog):
             # Add status
             status_item = QTableWidgetItem("Not Fixed")
             status_item.setFlags(status_item.flags() & ~Qt.ItemIsEditable)
-            status_item.setBackground(QColor("#B71C1C"))  # Material Design dark red 900
-            status_item.setForeground(
-                QColor("#EF9A9A")
-            )  # Material Design red 200 for better contrast
             self.table.setItem(i, 8, status_item)
 
     def calculate_total_hours(self, moves_str):
@@ -972,3 +972,12 @@ class CleanMovesDialog(QDialog):
 
             # Enable save button
             self.save_button.setEnabled(bool(self.cleaned_moves))
+
+    def _update_status_item(self, status_item, is_valid):
+        """Update the status item's appearance based on validity."""
+        if not is_valid:
+            status_item.setBackground(MATERIAL_RED_900)  # Material Design dark red
+            status_item.setForeground(MATERIAL_RED_200)  # Material Design light red
+        else:
+            status_item.setBackground(MATERIAL_GREEN_900)  # Material Design dark green
+            status_item.setForeground(MATERIAL_GREEN_300)  # Material Design light green
