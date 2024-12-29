@@ -519,14 +519,17 @@ class MainApp(QMainWindow):
 
         # Create buttons with icons
         self.date_selection_button = QPushButton("Date Selection")
+        self.date_selection_button.setObjectName("primary")
         self.date_selection_button.setCheckable(True)
         self.date_selection_button.clicked.connect(self.toggle_date_selection_pane)
 
         self.carrier_list_button = QPushButton("Carrier List")
+        self.carrier_list_button.setObjectName("primary")
         self.carrier_list_button.setCheckable(True)
         self.carrier_list_button.clicked.connect(self.toggle_carrier_list_pane)
 
         self.otdl_maximization_button = QPushButton("OTDL Maximization")
+        self.otdl_maximization_button.setObjectName("primary")
         self.otdl_maximization_button.setCheckable(True)
         self.otdl_maximization_button.clicked.connect(
             self.toggle_otdl_maximization_pane
@@ -630,6 +633,7 @@ class MainApp(QMainWindow):
     def create_filter_button(self, text):
         """Create a styled filter button for list status filtering."""
         btn = QPushButton(text)
+        btn.setObjectName("secondary")
         btn.setCheckable(True)
         btn.clicked.connect(self.handle_filter_click)
         return btn
@@ -852,6 +856,16 @@ class MainApp(QMainWindow):
 
             return data
 
+        except ValueError as e:
+            if str(e) == "No valid date range selected.":
+                CustomInfoDialog.information(
+                    self, "No Date Range", "Please select a date range first."
+                )
+            else:
+                CustomWarningDialog.warning(
+                    self, "Error", f"An unexpected error occurred: {str(e)}"
+                )
+            return self.db_service.get_empty_clock_ring_frame()
         except Exception as e:
             CustomWarningDialog.warning(
                 self, "Error", f"An unexpected error occurred: {str(e)}"

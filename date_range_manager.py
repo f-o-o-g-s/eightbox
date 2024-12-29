@@ -26,7 +26,6 @@ from PyQt5.QtWidgets import (
 from custom_widgets import (
     CustomInfoDialog,
     CustomProgressDialog,
-    CustomWarningDialog,
 )
 from otdl_maximization_pane import OTDLMaximizationPane
 from violation_detection import (
@@ -152,7 +151,7 @@ class DateRangeManager(QObject):
         """Apply the selected date range and process violations."""
         # First check: Database path validation
         if not os.path.exists(self.main_app.mandates_db_path):
-            CustomWarningDialog.warning(
+            CustomInfoDialog.information(
                 self.main_app,
                 "Database Not Found",
                 "Please configure the database path before proceeding.",
@@ -196,7 +195,7 @@ class DateRangeManager(QObject):
             with open("carrier_list.json", "r", encoding="utf-8") as f:
                 carrier_list = pd.DataFrame(json.load(f))
                 if carrier_list.empty:
-                    CustomWarningDialog.warning(
+                    CustomInfoDialog.information(
                         self.main_app,
                         "Empty Carrier List",
                         "The carrier list is empty. Please add carriers before proceeding.",
@@ -205,14 +204,14 @@ class DateRangeManager(QObject):
                     self.main_app.toggle_carrier_list_pane()
                     return
         except (json.JSONDecodeError, pd.errors.EmptyDataError):
-            CustomWarningDialog.warning(
+            CustomInfoDialog.information(
                 self.main_app,
                 "Invalid Carrier List",
                 "The carrier list file is corrupted. Please reconfigure the carrier list.",
             )
             return
         except Exception as e:
-            CustomWarningDialog.warning(
+            CustomInfoDialog.information(
                 self.main_app,
                 "Error",
                 f"An unexpected error occurred while reading the carrier list: {str(e)}",
@@ -306,7 +305,7 @@ class DateRangeManager(QObject):
                 )
 
             except FileNotFoundError:
-                CustomWarningDialog.warning(
+                CustomInfoDialog.information(
                     self.main_app,
                     "Missing Carrier List",
                     "Please configure and save the Carrier List before proceeding.",
@@ -318,7 +317,7 @@ class DateRangeManager(QObject):
                 clock_ring_data["hour_limit"] = ""
                 clock_ring_data["route_s"] = ""
                 clock_ring_data["effective_date"] = ""
-                CustomWarningDialog.warning(
+                CustomInfoDialog.information(
                     self.main_app,
                     "Warning",
                     f"Failed to process carrier list: {str(e)}\nProceeding with default values.",
@@ -358,9 +357,20 @@ class DateRangeManager(QObject):
                 "Date range processing complete", 5000
             )
 
+        except ValueError as e:
+            if str(e) == "No date range selected":
+                progress.cancel()
+                CustomInfoDialog.information(
+                    self.main_app, "No Date Range", "Please select a date range first."
+                )
+            else:
+                progress.cancel()
+                CustomInfoDialog.information(
+                    self.main_app, "Error", f"An unexpected error occurred: {str(e)}"
+                )
         except Exception as e:
             progress.cancel()
-            CustomWarningDialog.warning(
+            CustomInfoDialog.information(
                 self.main_app, "Error", f"An unexpected error occurred: {str(e)}"
             )
         finally:

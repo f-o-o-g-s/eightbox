@@ -43,6 +43,7 @@ from theme import (
     MATERIAL_BACKGROUND,
     MATERIAL_PRIMARY,
     MATERIAL_SURFACE,
+    SCROLLBAR_STYLE,
 )
 
 
@@ -188,6 +189,7 @@ class DocumentationDialog(QDialog):
             QPushButton:pressed {{
                 background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
             }}
+            {SCROLLBAR_STYLE}
             """
         )
 

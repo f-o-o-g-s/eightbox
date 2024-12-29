@@ -210,6 +210,7 @@ class OTDLMaximizationPane(QWidget):
 
         # Create Apply button with existing style
         apply_button = QPushButton("Apply All Changes")
+        apply_button.setObjectName("primary")
         apply_button.setStyleSheet(
             f"""
             QPushButton {{

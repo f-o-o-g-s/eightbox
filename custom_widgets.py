@@ -377,7 +377,9 @@ class CustomWarningDialog(QDialog):
         button_layout.addStretch()
 
         yes_button = QPushButton("Yes")
+        yes_button.setObjectName("destructive")
         no_button = QPushButton("No")
+        no_button.setObjectName("secondary")
 
         yes_button.clicked.connect(self.accept)
         no_button.clicked.connect(self.reject)
@@ -515,6 +517,7 @@ class CustomInfoDialog(QDialog):
         button_layout.addStretch()
 
         ok_button = QPushButton("OK")
+        ok_button.setObjectName("primary")
         ok_button.clicked.connect(self.close)
         button_layout.addWidget(ok_button)
 
@@ -607,6 +610,7 @@ class CustomNotificationDialog(QDialog):
         button_layout.addStretch()
 
         ok_button = QPushButton("OK")
+        ok_button.setObjectName("primary")
         ok_button.clicked.connect(self.accept)
         button_layout.addWidget(ok_button)
 
@@ -737,7 +741,9 @@ class ConfirmDialog(QDialog):
         button_layout.addStretch()
 
         yes_button = QPushButton("Yes")
+        yes_button.setObjectName("destructive")
         no_button = QPushButton("No")
+        no_button.setObjectName("secondary")
 
         yes_button.clicked.connect(self.accept)
         no_button.clicked.connect(self.reject)

@@ -1,9 +1,9 @@
 """Material Design styles for carrier list UI components."""
 
 from theme import (
-    ALPHA_DISABLED_TEXT,
     ALPHA_HOVER,
     ALPHA_PRESSED,
+    BUTTON_STYLE,
     COLOR_BLACK,
     COLOR_ROW_HIGHLIGHT,
     COLOR_STATUS_NL,
@@ -11,7 +11,6 @@ from theme import (
     COLOR_TEXT_DIM,
     COLOR_TEXT_LIGHT,
     MATERIAL_BACKGROUND,
-    MATERIAL_ERROR,
     MATERIAL_PRIMARY,
     MATERIAL_SECONDARY,
     MATERIAL_SURFACE,
@@ -193,48 +192,13 @@ QWidget {{
     border-radius: 4px;
     margin-top: 8px;
 }}
+{BUTTON_STYLE}
 QPushButton {{
-    background-color: {COLOR_ROW_HIGHLIGHT.name()};
-    color: {MATERIAL_PRIMARY.name()};
-    border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-weight: 500;
     min-height: 28px;
     min-width: 60px;
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-}}
-QPushButton:hover {{
-    background-color: {COLOR_ROW_HIGHLIGHT.lighter(110).name()};
-}}
-QPushButton:pressed {{
-    background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-}}
-QPushButton:disabled {{
-    background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-    color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
-}}
-QPushButton#primary {{
-    background-color: {MATERIAL_PRIMARY.name()};
-    color: {COLOR_BLACK.name()};
-}}
-QPushButton#primary:hover {{
-    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
-}}
-QPushButton#primary:pressed {{
-    background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
-}}
-QPushButton#destructive {{
-    background-color: {MATERIAL_ERROR.name()};
-    color: {COLOR_BLACK.name()};
-}}
-QPushButton#destructive:hover {{
-    background-color: {MATERIAL_ERROR.lighter(110).name()};
-}}
-QPushButton#destructive:pressed {{
-    background-color: {MATERIAL_ERROR.darker(110).name()};
+    padding: 4px 8px;
 }}
 """
 
@@ -302,34 +266,12 @@ QComboBox QAbstractItemView {{
     border: 1px solid {COLOR_TEXT_DIM.name()};
     padding: 4px;
 }}
+{BUTTON_STYLE}
 QPushButton {{
-    background-color: {MATERIAL_SURFACE.name()};
-    color: {MATERIAL_PRIMARY.name()};
-    border: 2px solid {MATERIAL_PRIMARY.name()};
-    border-radius: 4px;
     padding: 12px 24px;
-    font-weight: bold;
     min-width: 120px;
     font-size: 14px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     margin: 8px;
-}}
-QPushButton:hover {{
-    background-color: rgba(187, 134, 252, 0.1);
-}}
-QPushButton:pressed {{
-    background-color: rgba(187, 134, 252, 0.2);
-}}
-QPushButton#primary {{
-    background-color: {MATERIAL_PRIMARY.name()};
-    color: black;
-    border: none;
-}}
-QPushButton#primary:hover {{
-    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
-}}
-QPushButton#primary:pressed {{
-    background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
 }}
 """

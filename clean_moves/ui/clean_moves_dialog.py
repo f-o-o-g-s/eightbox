@@ -10,6 +10,7 @@ from PyQt5.QtCore import (
     Qt,
     pyqtSignal,
 )
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QDialog,
     QGridLayout,
@@ -41,12 +42,12 @@ from theme import (
     CLEAN_MOVES_CANCEL_BUTTON_STYLE,
     CLEAN_MOVES_DIALOG_STYLE,
     CLEAN_MOVES_SAVE_BUTTON_STYLE,
+    COLOR_TEXT_LIGHT,
     COLOR_TRANSPARENT,
     DISABLED_START_INPUT_STYLE,
-    MATERIAL_GREEN_300,
-    MATERIAL_GREEN_900,
-    MATERIAL_RED_200,
-    MATERIAL_RED_900,
+    RGB_FOAM,
+    RGB_LOVE,
+    RGB_TEXT,
     SPLIT_MOVE_DIALOG_STYLE,
 )
 
@@ -673,11 +674,13 @@ class CleanMovesDialog(QDialog):
         # Add dialog buttons
         dialog_button_layout = QHBoxLayout()
         self.save_button = QPushButton("Save All")
+        self.save_button.setObjectName("primary")
         self.save_button.clicked.connect(self.save_changes)
         self.save_button.setEnabled(False)
         self.save_button.setStyleSheet(CLEAN_MOVES_SAVE_BUTTON_STYLE)
 
         self.cancel_button = QPushButton("Cancel")
+        self.cancel_button.setObjectName("secondary")
         self.cancel_button.clicked.connect(self.reject)
         self.cancel_button.setStyleSheet(CLEAN_MOVES_CANCEL_BUTTON_STYLE)
 
@@ -729,8 +732,12 @@ class CleanMovesDialog(QDialog):
             hours_item.setFlags(hours_item.flags() & ~Qt.ItemIsEditable)
             if row["Total Moves Hours"] > 4.25:
                 hours_item.setData(Qt.UserRole, "warning")
-                hours_item.setBackground(MATERIAL_RED_900)
-                hours_item.setForeground(MATERIAL_RED_200)
+                hours_item.setBackground(
+                    QColor(*RGB_LOVE).darker(150)
+                )  # Darker red background
+                hours_item.setForeground(
+                    QColor(*RGB_TEXT)
+                )  # White text for better contrast
             self.table.setItem(i, 5, hours_item)
 
             # Add empty fixed hours
@@ -958,12 +965,16 @@ class CleanMovesDialog(QDialog):
             fixed_hours_item.setText(f"{total_hours:.2f}")
             if total_hours > 4.25:
                 fixed_hours_item.setData(Qt.UserRole, "warning")
-                fixed_hours_item.setBackground(MATERIAL_RED_900)
-                fixed_hours_item.setForeground(MATERIAL_RED_200)
+                fixed_hours_item.setBackground(
+                    QColor(*RGB_LOVE).darker(150)
+                )  # Darker red background
+                fixed_hours_item.setForeground(
+                    QColor(*RGB_TEXT)
+                )  # White text for better contrast
             else:
                 fixed_hours_item.setData(Qt.UserRole, None)
                 fixed_hours_item.setBackground(COLOR_TRANSPARENT)
-                fixed_hours_item.setForeground(COLOR_TRANSPARENT)
+                fixed_hours_item.setForeground(COLOR_TEXT_LIGHT)
 
             # Update status
             status_item = self.table.item(self.current_row, 8)
@@ -976,9 +987,17 @@ class CleanMovesDialog(QDialog):
         """Update the status item's appearance based on validity."""
         if not is_valid:
             status_item.setText("Not Fixed")
-            status_item.setBackground(MATERIAL_RED_900)
-            status_item.setForeground(MATERIAL_RED_200)
+            status_item.setBackground(
+                QColor(*RGB_LOVE).darker(150)
+            )  # Darker red background
+            status_item.setForeground(
+                QColor(*RGB_TEXT)
+            )  # White text for better contrast
         else:
             status_item.setText("Fixed")
-            status_item.setBackground(MATERIAL_GREEN_900)
-            status_item.setForeground(MATERIAL_GREEN_300)
+            status_item.setBackground(
+                QColor(*RGB_FOAM).darker(150)
+            )  # Darker green background
+            status_item.setForeground(
+                QColor(*RGB_TEXT)
+            )  # White text for better contrast

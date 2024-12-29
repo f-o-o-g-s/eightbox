@@ -51,7 +51,7 @@ class MovesManager(QObject):
         current_data = self.main_app.fetch_clock_ring_data()
 
         if current_data.empty:
-            CustomWarningDialog.warning(
+            CustomInfoDialog.information(
                 self.main_app, "No Data", "Please select a date range first."
             )
             return
