@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QWidget,
 )
 
-from carrier_list_pane import CarrierListPane
+from carrier_list import CarrierListPane
 from clean_moves_manager import MovesManager
 from custom_widgets import (
     CustomInfoDialog,
