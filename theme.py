@@ -427,57 +427,57 @@ SETTINGS_CLOSE_BUTTON_STYLE = f"""
     }}
 """
 
-DATE_SELECTION_PANE_STYLE = """
-    QWidget {
-        background-color: #121212;
-    }
-    QLabel {
-        color: #E1E1E1;
+DATE_SELECTION_PANE_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_BACKGROUND.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
         font-size: 13px;
         padding: 8px;
-        background-color: #1E1E1E;
+        background-color: {MATERIAL_SURFACE.name()};
         border-radius: 4px;
-    }
-    QTableView {
-        background-color: #121212;
+    }}
+    QTableView {{
+        background-color: {MATERIAL_BACKGROUND.name()};
         border: none;
         border-radius: 4px;
-        selection-background-color: #BB86FC;
-        selection-color: #000000;
+        selection-background-color: {MATERIAL_PRIMARY.name()};
+        selection-color: {COLOR_BLACK.name()};
         gridline-color: transparent;
-    }
-    QTableView::item {
+    }}
+    QTableView::item {{
         padding: 8px;
         border-radius: 2px;
-    }
-    QTableView::item:hover {
+    }}
+    QTableView::item:hover {{
         background-color: rgba(187, 134, 252, 0.1);
-    }
-    QTableView::item:selected {
-        background-color: #BB86FC;
-        color: #000000;
-    }
-    QHeaderView::section {
-        background-color: #1E1E1E;
-        color: #BB86FC;
+    }}
+    QTableView::item:selected {{
+        background-color: {MATERIAL_PRIMARY.name()};
+        color: {COLOR_BLACK.name()};
+    }}
+    QHeaderView::section {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {MATERIAL_PRIMARY.name()};
         font-weight: bold;
         padding: 8px;
         border: none;
         border-radius: 0px;
-    }
-    QHeaderView::section:first {
+    }}
+    QHeaderView::section:first {{
         border-top-left-radius: 4px;
         border-bottom-left-radius: 4px;
-    }
-    QHeaderView::section:last {
+    }}
+    QHeaderView::section:last {{
         border-top-right-radius: 4px;
         border-bottom-right-radius: 4px;
-    }
-    QPushButton {
-        background-color: #2D2D2D;
-        color: #BB86FC;
-        border: 1px solid #3D3D3D;
-        border-bottom: 2px solid #1D1D1D;
+    }}
+    QPushButton {{
+        background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        color: {MATERIAL_PRIMARY.name()};
+        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
+        border-bottom: 2px solid {COLOR_TEXT_DIM.name()};
         padding: 8px 24px;
         font-weight: 500;
         min-height: 32px;
@@ -485,97 +485,97 @@ DATE_SELECTION_PANE_STYLE = """
         font-size: 14px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
-    QPushButton:hover {
-        background-color: #353535;
-        border: 1px solid #454545;
-        border-bottom: 2px solid #252525;
-        color: #CBB0FF;
-    }
-    QPushButton:pressed {
-        background-color: #252525;
-        border: 1px solid #353535;
-        border-top: 2px solid #151515;
-        border-bottom: 1px solid #353535;
+    }}
+    QPushButton:hover {{
+        background-color: {COLOR_ROW_HIGHLIGHT.lighter(110).name()};
+        border: 1px solid {COLOR_TEXT_DIM.lighter(110).name()};
+        border-bottom: 2px solid {COLOR_TEXT_DIM.lighter(110).name()};
+        color: {MATERIAL_PRIMARY.lighter(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
+        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
+        border-top: 2px solid {COLOR_TEXT_DIM.darker(150).name()};
+        border-bottom: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
         padding-top: 9px;
-        color: #BB86FC;
-    }
-    QPushButton:disabled {
-        background-color: #252525;
+        color: {MATERIAL_PRIMARY.name()};
+    }}
+    QPushButton:disabled {{
+        background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
         color: rgba(225, 225, 225, 0.3);
-        border: 1px solid #2D2D2D;
-    }
-    QScrollBar:vertical {
-        background-color: #121212;
+        border: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
+    }}
+    QScrollBar:vertical {{
+        background-color: {MATERIAL_BACKGROUND.name()};
         width: 12px;
         margin: 0px;
-    }
-    QScrollBar::handle:vertical {
-        background-color: #424242;
+    }}
+    QScrollBar::handle:vertical {{
+        background-color: {MATERIAL_GREY_800.name()};
         border-radius: 6px;
         min-height: 20px;
         margin: 2px;
-    }
-    QScrollBar::handle:vertical:hover {
-        background-color: #616161;
-    }
-    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    }}
+    QScrollBar::handle:vertical:hover {{
+        background-color: {MATERIAL_GREY_700.name()};
+    }}
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
         height: 0px;
-    }
-    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    }}
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
         background: none;
-    }
+    }}
 """
 
 # Custom Widget Styles
-CUSTOM_TITLE_BAR_STYLE = """
-    QWidget {
-        background-color: #37474F;
+CUSTOM_TITLE_BAR_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_BLUE_GREY_800.name()};
         border: none;
-    }
-    QLabel {
-        color: white;
+    }}
+    QLabel {{
+        color: {COLOR_WHITE.name()};
         font-size: 12pt;
         font-weight: bold;
         background-color: transparent;
-    }
-    QPushButton {
+    }}
+    QPushButton {{
         background-color: transparent;
         border: none;
-        color: white;
+        color: {COLOR_WHITE.name()};
         padding: 5px;
         min-width: 40px;
         max-width: 40px;
         font-size: 16pt;
         font-family: Arial;
-    }
-    QPushButton:hover { background-color: #455A64; }
+    }}
+    QPushButton:hover {{ background-color: {MATERIAL_BLUE_GREY_700.name()}; }}
 """
 
-CUSTOM_PROGRESS_DIALOG_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-        color: white;
-    }
-    QProgressBar {
-        border: 1px solid #37474F;
+CUSTOM_PROGRESS_DIALOG_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_WHITE.name()};
+    }}
+    QProgressBar {{
+        border: 1px solid {MATERIAL_BLUE_GREY_800.name()};
         border-radius: 2px;
         text-align: center;
-        background-color: #2D2D2D;
+        background-color: {COLOR_ROW_HIGHLIGHT.name()};
         height: 20px;
-    }
-    QProgressBar::chunk {
-        background-color: #9575CD;
+    }}
+    QProgressBar::chunk {{
+        background-color: {MATERIAL_PRIMARY.lighter(120).name()};
         border-radius: 1px;
-    }
-    QLabel {
-        color: white;
+    }}
+    QLabel {{
+        color: {COLOR_WHITE.name()};
         font-size: 11px;
         margin-bottom: 5px;
-    }
-    QPushButton {
+    }}
+    QPushButton {{
         background-color: rgba(255, 255, 255, 0.05);
-        color: #E1E1E1;
+        color: {COLOR_TEXT_LIGHT.name()};
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 4px;
         padding: 8px 24px;
@@ -585,313 +585,313 @@ CUSTOM_PROGRESS_DIALOG_STYLE = """
         letter-spacing: 0.5px;
         min-width: 120px;
         margin: 8px 0px;
-    }
-    QPushButton:hover {
+    }}
+    QPushButton:hover {{
         background-color: rgba(187, 134, 252, 0.15);
-        border: 1px solid #BB86FC;
-        color: #BB86FC;
-    }
-    QPushButton:pressed {
+        border: 1px solid {MATERIAL_PRIMARY.name()};
+        color: {MATERIAL_PRIMARY.name()};
+    }}
+    QPushButton:pressed {{
         background-color: rgba(187, 134, 252, 0.25);
         padding-top: 9px;
         padding-bottom: 7px;
-    }
-    QPushButton:disabled {
+    }}
+    QPushButton:disabled {{
         background-color: rgba(255, 255, 255, 0.03);
         color: rgba(255, 255, 255, 0.38);
         border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+    }}
 """
 
-CUSTOM_MESSAGE_BOX_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-        color: white;
-    }
-    QLabel {
-        color: white;
+CUSTOM_MESSAGE_BOX_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_WHITE.name()};
+    }}
+    QLabel {{
+        color: {COLOR_WHITE.name()};
         font-size: 11px;
-    }
-    QPushButton {
-        background-color: #9575CD;
+    }}
+    QPushButton {{
+        background-color: {MATERIAL_PRIMARY.lighter(120).name()};
         border: none;
         border-radius: 4px;
         padding: 8px 16px;
-        color: white;
+        color: {COLOR_WHITE.name()};
         min-width: 100px;
-    }
-    QPushButton:hover {
-        background-color: #B39DDB;
-    }
-    QPushButton:pressed {
-        background-color: #7E57C2;
-    }
+    }}
+    QPushButton:hover {{
+        background-color: {MATERIAL_PRIMARY.lighter(130).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {MATERIAL_PRIMARY.lighter(110).name()};
+    }}
 """
 
-CUSTOM_WARNING_DIALOG_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-    }
-    QLabel {
-        color: #E1E1E1;
+CUSTOM_WARNING_DIALOG_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-    }
-    QPushButton {
-        background-color: #BB86FC;
+    }}
+    QPushButton {{
+        background-color: {MATERIAL_PRIMARY.name()};
         border: none;
         border-radius: 4px;
         padding: 8px 16px;
-        color: black;
+        color: {COLOR_BLACK.name()};
         min-width: 80px;
         font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #9965DA;
-    }
-    QPushButton:pressed {
-        background-color: #7B4FAF;
-    }
+    }}
+    QPushButton:hover {{
+        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+    }}
 """
 
-CUSTOM_INFO_DIALOG_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-    }
-    QLabel {
-        color: #E1E1E1;
+CUSTOM_INFO_DIALOG_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-    }
-    QPushButton {
-        background-color: #BB86FC;
+    }}
+    QPushButton {{
+        background-color: {MATERIAL_PRIMARY.name()};
         border: none;
         border-radius: 4px;
         padding: 8px 16px;
-        color: black;
+        color: {COLOR_BLACK.name()};
         min-width: 80px;
         font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #9965DA;
-    }
-    QPushButton:pressed {
-        background-color: #7B4FAF;
-    }
+    }}
+    QPushButton:hover {{
+        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+    }}
 """
 
-CUSTOM_NOTIFICATION_DIALOG_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-    }
-    QLabel {
-        color: #E1E1E1;
+CUSTOM_NOTIFICATION_DIALOG_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-    }
-    QPushButton {
-        background-color: #BB86FC;
+    }}
+    QPushButton {{
+        background-color: {MATERIAL_PRIMARY.name()};
         border: none;
         border-radius: 4px;
         padding: 8px 16px;
-        color: black;
+        color: {COLOR_BLACK.name()};
         min-width: 80px;
         font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #9965DA;
-    }
-    QPushButton:pressed {
-        background-color: #7B4FAF;
-    }
+    }}
+    QPushButton:hover {{
+        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+    }}
 """
 
-CONFIRM_DIALOG_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-    }
-    QLabel {
-        color: #E1E1E1;
+CONFIRM_DIALOG_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
-    }
-    QPushButton {
-        background-color: #BB86FC;
+    }}
+    QPushButton {{
+        background-color: {MATERIAL_PRIMARY.name()};
         border: none;
         border-radius: 4px;
         padding: 8px 16px;
-        color: black;
+        color: {COLOR_BLACK.name()};
         min-width: 80px;
         font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #9965DA;
-    }
-    QPushButton:pressed {
-        background-color: #7B4FAF;
-    }
+    }}
+    QPushButton:hover {{
+        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+    }}
 """
 
-NEW_CARRIERS_DIALOG_STYLE = """
-    QWidget {
-        background-color: #1E1E1E;
-        color: #E1E1E1;
-    }
-    QLabel {
-        color: #E1E1E1;
+NEW_CARRIERS_DIALOG_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
         padding: 4px;
-    }
-    QCheckBox {
-        color: #E1E1E1;
+    }}
+    QCheckBox {{
+        color: {COLOR_TEXT_LIGHT.name()};
         font-size: 12px;
         padding: 4px;
-    }
-    QCheckBox::indicator {
+    }}
+    QCheckBox::indicator {{
         width: 18px;
         height: 18px;
-        border: 2px solid #BB86FC;
+        border: 2px solid {MATERIAL_PRIMARY.name()};
         border-radius: 4px;
         background-color: transparent;
-    }
-    QCheckBox::indicator:checked {
-        background-color: #BB86FC;
+    }}
+    QCheckBox::indicator:checked {{
+        background-color: {MATERIAL_PRIMARY.name()};
         image: url(resources/check.png);
-    }
-    QPushButton {
-        background-color: #BB86FC;
+    }}
+    QPushButton {{
+        background-color: {MATERIAL_PRIMARY.name()};
         border: none;
         border-radius: 4px;
         padding: 8px 16px;
-        color: black;
+        color: {COLOR_BLACK.name()};
         min-width: 100px;
         font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #9965DA;
-    }
-    QPushButton:pressed {
-        background-color: #7B4FAF;
-    }
-    QPushButton#secondary {
-        background-color: #2D2D2D;
-        color: #BB86FC;
-        border: 1px solid #BB86FC;
-    }
-    QPushButton#secondary:hover {
-        background-color: #353535;
-    }
-    QPushButton#secondary:pressed {
-        background-color: #252525;
-    }
+    }}
+    QPushButton:hover {{
+        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+    }}
+    QPushButton#secondary {{
+        background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        color: {MATERIAL_PRIMARY.name()};
+        border: 1px solid {MATERIAL_PRIMARY.name()};
+    }}
+    QPushButton#secondary:hover {{
+        background-color: {COLOR_ROW_HIGHLIGHT.lighter(110).name()};
+    }}
+    QPushButton#secondary:pressed {{
+        background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
+    }}
 """
 
 # Clean Moves Dialog Styles
-CLEAN_MOVES_DIALOG_STYLE = """
-    QDialog {
-        background-color: #121212;
-        color: #E1E1E1;
-    }
-    QTableWidget {
-        background-color: #1E1E1E;
-        alternate-background-color: #262626;
-        color: #E1E1E1;
-        border: 1px solid #333333;
-        gridline-color: #333333;
-    }
-    QTableWidget::item {
+CLEAN_MOVES_DIALOG_STYLE = f"""
+    QDialog {{
+        background-color: {MATERIAL_BACKGROUND.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
+    QTableWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+        alternate-background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+        border: 1px solid {COLOR_TEXT_DIM.name()};
+        gridline-color: {COLOR_TEXT_DIM.name()};
+    }}
+    QTableWidget::item {{
         padding: 5px;
-    }
-    QTableWidget::item:selected {
-        background-color: #3700B3;
-        color: #FFFFFF;
-    }
-    QHeaderView::section {
-        background-color: #2D2D2D;
-        color: #E1E1E1;
+    }}
+    QTableWidget::item:selected {{
+        background-color: {MATERIAL_PRIMARY_VARIANT.name()};
+        color: {COLOR_WHITE.name()};
+    }}
+    QHeaderView::section {{
+        background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
         padding: 5px;
-        border: 1px solid #333333;
-    }
-    QPushButton {
+        border: 1px solid {COLOR_TEXT_DIM.name()};
+    }}
+    QPushButton {{
         background-color: rgba(187, 134, 252, 0.1);
-        color: #BB86FC;
+        color: {MATERIAL_PRIMARY.name()};
         border: none;
         padding: 8px 16px;
         border-radius: 4px;
-    }
-    QPushButton:hover {
+    }}
+    QPushButton:hover {{
         background-color: rgba(187, 134, 252, 0.2);
-    }
-    QPushButton:pressed {
+    }}
+    QPushButton:pressed {{
         background-color: rgba(187, 134, 252, 0.3);
-    }
-    QPushButton:disabled {
-        background-color: #1E1E1E;
-        color: #666666;
-    }
-    QLabel {
-        color: #E1E1E1;
-    }
+    }}
+    QPushButton:disabled {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_TEXT_DIM.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
 """
 
-SPLIT_MOVE_DIALOG_STYLE = """
-    QDialog {
-        background-color: #121212;
-        color: #E1E1E1;
-    }
-    QGroupBox {
-        background-color: #1E1E1E;
-        color: #E1E1E1;
-        border: 1px solid #333333;
+SPLIT_MOVE_DIALOG_STYLE = f"""
+    QDialog {{
+        background-color: {MATERIAL_BACKGROUND.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
+    QGroupBox {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+        border: 1px solid {COLOR_TEXT_DIM.name()};
         border-radius: 4px;
         padding: 15px;
         margin-top: 15px;
-    }
-    QGroupBox::title {
-        color: #BB86FC;
+    }}
+    QGroupBox::title {{
+        color: {MATERIAL_PRIMARY.name()};
         subcontrol-origin: margin;
         left: 10px;
         padding: 0 5px;
-    }
-    QLineEdit {
-        background-color: #2D2D2D;
-        color: #E1E1E1;
-        border: 1px solid #333333;
+    }}
+    QLineEdit {{
+        background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+        border: 1px solid {COLOR_TEXT_DIM.name()};
         padding: 5px;
         border-radius: 4px;
-    }
-    QLineEdit:focus {
-        border: 1px solid #BB86FC;
-    }
-    QLineEdit:disabled {
-        background-color: #1E1E1E;
-        color: #666666;
-        border: 1px solid #333333;
-    }
-    QPushButton {
+    }}
+    QLineEdit:focus {{
+        border: 1px solid {MATERIAL_PRIMARY.name()};
+    }}
+    QLineEdit:disabled {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_TEXT_DIM.name()};
+        border: 1px solid {COLOR_TEXT_DIM.name()};
+    }}
+    QPushButton {{
         background-color: rgba(187, 134, 252, 0.1);
-        color: #BB86FC;
+        color: {MATERIAL_PRIMARY.name()};
         border: none;
         padding: 8px 16px;
         border-radius: 4px;
-    }
-    QPushButton:hover {
+    }}
+    QPushButton:hover {{
         background-color: rgba(187, 134, 252, 0.2);
-    }
-    QPushButton:pressed {
+    }}
+    QPushButton:pressed {{
         background-color: rgba(187, 134, 252, 0.3);
-    }
-    QPushButton:disabled {
-        background-color: #1E1E1E;
-        color: #666666;
-    }
-    QLabel {
-        color: #E1E1E1;
-    }
+    }}
+    QPushButton:disabled {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_TEXT_DIM.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
 """
 
-CLEAN_MOVES_SAVE_BUTTON_STYLE = """
-    QPushButton {
-        background-color: #2D2D2D;
-        color: #BB86FC;
-        border: 1px solid #3D3D3D;
-        border-bottom: 2px solid #1D1D1D;
+CLEAN_MOVES_SAVE_BUTTON_STYLE = f"""
+    QPushButton {{
+        background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        color: {MATERIAL_PRIMARY.name()};
+        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
+        border-bottom: 2px solid {COLOR_TEXT_DIM.name()};
         padding: 8px 24px;
         font-weight: 500;
         min-height: 32px;
@@ -899,36 +899,36 @@ CLEAN_MOVES_SAVE_BUTTON_STYLE = """
         font-size: 14px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
-    QPushButton:hover {
-        background-color: #353535;
-        border: 1px solid #454545;
-        border-bottom: 2px solid #252525;
-        color: #CBB0FF;
-    }
-    QPushButton:pressed {
-        background-color: #252525;
-        border: 1px solid #353535;
-        border-top: 2px solid #151515;
-        border-bottom: 1px solid #353535;
+    }}
+    QPushButton:hover {{
+        background-color: {COLOR_ROW_HIGHLIGHT.lighter(110).name()};
+        border: 1px solid {COLOR_TEXT_DIM.lighter(110).name()};
+        border-bottom: 2px solid {COLOR_TEXT_DIM.lighter(110).name()};
+        color: {MATERIAL_PRIMARY.lighter(110).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
+        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
+        border-top: 2px solid {COLOR_TEXT_DIM.darker(150).name()};
+        border-bottom: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
         padding-top: 9px;
-        color: #BB86FC;
-    }
-    QPushButton:disabled {
-        background-color: #252525;
-        color: #666666;
-        border: 1px solid #2D2D2D;
-    }
+        color: {MATERIAL_PRIMARY.name()};
+    }}
+    QPushButton:disabled {{
+        background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
+        color: {COLOR_TEXT_DIM.name()};
+        border: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
+    }}
 """
 
 CLEAN_MOVES_CANCEL_BUTTON_STYLE = CLEAN_MOVES_SAVE_BUTTON_STYLE
 
-DISABLED_START_INPUT_STYLE = """
-    QLineEdit:disabled {
-        background-color: #1E1E1E;
-        color: #808080;
-        border: 1px solid #404040;
-    }
+DISABLED_START_INPUT_STYLE = f"""
+    QLineEdit:disabled {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_TEXT_DIM.lighter(150).name()};
+        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
+    }}
 """
 
 
