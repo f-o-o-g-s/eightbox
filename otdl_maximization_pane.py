@@ -60,16 +60,16 @@ from theme import COLOR_TEXT_DIM  # noqa: F401
 from theme import MATERIAL_SURFACE  # noqa: F401
 from theme import (
     COLOR_BG_HOVER,
-    COLOR_BLACK,
     COLOR_NO_HIGHLIGHT,
     COLOR_ROW_HIGHLIGHT,
     COLOR_TEXT_LIGHT,
     MATERIAL_BACKGROUND,
-    MATERIAL_BLUE_600,
     MATERIAL_BLUE_GREY_800,
     MATERIAL_BLUE_GREY_900,
-    MATERIAL_GREY_800,
     MATERIAL_PRIMARY,
+    OTDL_CELL_LABEL_STYLE,
+    OTDL_CELL_WIDGET_STYLE,
+    OTDL_CHECKBOX_STYLE,
 )
 from violation_model import calculate_optimal_gray
 
@@ -669,24 +669,7 @@ class OTDLMaximizationPane(QWidget):
                 if daily_hours < hour_limit_value:
                     # Create checkbox with modern toggle switch style
                     checkbox = QCheckBox()
-                    checkbox.setStyleSheet(
-                        f"""
-                        QCheckBox::indicator {{
-                            width: 30px;
-                            height: 15px;
-                            border: none;  /* Remove the white border */
-                            background-color: {MATERIAL_GREY_800.name()};  /* Unchecked color */
-                        }}
-                        QCheckBox::indicator:checked {{
-                            background-color: {MATERIAL_BLUE_600.name()};
-                                /* Material Blue when checked */
-                        }}
-                        QCheckBox::indicator:unchecked {{
-                            background-color: {MATERIAL_GREY_800.name()};
-                                /* Dark grey when unchecked */
-                        }}
-                    """
-                    )
+                    checkbox.setStyleSheet(OTDL_CHECKBOX_STYLE)
 
                     checkbox.setChecked(self.excusal_data.get((carrier, date), False))
                     checkbox.stateChanged.connect(
@@ -696,42 +679,33 @@ class OTDLMaximizationPane(QWidget):
                     # Create a more compact layout
                     cell_widget = QWidget()
                     layout = QVBoxLayout(cell_widget)
-                    layout.setContentsMargins(2, 2, 2, 2)  # Reduce margins
-                    layout.setSpacing(2)  # Reduce spacing
+                    layout.setContentsMargins(2, 1, 2, 1)  # Minimal margins
+                    layout.setSpacing(1)  # Minimal spacing
 
-                    # Add hours and indicator with black text
-                    label = QLabel(f"{daily_hours:.2f} {indicator}".strip())
-                    label.setStyleSheet(
-                        f"color: {COLOR_BLACK.name()};"
-                    )  # Use theme black
+                    # Add hours and indicator
+                    hours_text = f"{daily_hours:.2f} {indicator}".strip()
+                    if hours_text:
+                        label = QLabel(hours_text)
+                        label.setStyleSheet(OTDL_CELL_LABEL_STYLE(row_color))
+                        label.setAlignment(Qt.AlignCenter)
+                        layout.addWidget(label)
 
-                    # Create compact checkbox row with black text
-                    checkbox_widget = QWidget()
-                    checkbox_layout = QHBoxLayout(checkbox_widget)
+                    # Add checkbox with label in horizontal layout
+                    checkbox_container = QWidget()
+                    checkbox_layout = QHBoxLayout(checkbox_container)
                     checkbox_layout.setContentsMargins(0, 0, 0, 0)
-                    checkbox_layout.setSpacing(2)
+                    checkbox_layout.setSpacing(1)
+                    checkbox_layout.addStretch()
                     checkbox_layout.addWidget(checkbox)
 
-                    # Make "Excuse?" text black
                     excuse_label = QLabel("Excuse?")
-                    excuse_label.setStyleSheet(f"color: {COLOR_BLACK.name()};")
+                    excuse_label.setStyleSheet(OTDL_CELL_LABEL_STYLE(row_color))
                     checkbox_layout.addWidget(excuse_label)
                     checkbox_layout.addStretch()
 
-                    layout.addWidget(label)
-                    layout.addWidget(checkbox_widget)
+                    layout.addWidget(checkbox_container)
 
-                    cell_widget.setLayout(layout)
-                    cell_widget.setStyleSheet(
-                        f"""
-                        QWidget {{
-                            background-color: {COLOR_BG_HOVER.name()};
-                            color: {calculate_optimal_gray(COLOR_BG_HOVER).name()};
-                            padding: 8px;
-                            border-radius: 4px;
-                        }}
-                        """
-                    )
+                    cell_widget.setStyleSheet(OTDL_CELL_WIDGET_STYLE(row_color))
 
                     self.table.setCellWidget(row_idx, col_idx, cell_widget)
                 else:

@@ -957,6 +957,37 @@ DISABLED_START_INPUT_STYLE = f"""
     }}
 """
 
+# OTDL Maximization Styles
+OTDL_CHECKBOX_STYLE = f"""
+    QCheckBox::indicator {{
+        width: 14px;
+        height: 14px;
+        border: 1px solid {MATERIAL_PRIMARY.name()};
+        border-radius: 3px;
+        background-color: transparent;
+    }}
+    QCheckBox::indicator:checked {{
+        background-color: {MATERIAL_PRIMARY.name()};
+        image: url(resources/check.png);
+    }}
+"""
+
+OTDL_CELL_WIDGET_STYLE = (
+    lambda row_color: f"""
+    QWidget {{
+        background-color: {row_color.name()};
+        padding: 1px;
+    }}
+"""
+)
+
+OTDL_CELL_LABEL_STYLE = (
+    lambda row_color: f"""
+    color: {calculate_optimal_gray(row_color).name()};
+    font-size: 11px;
+"""
+)
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application.
