@@ -86,7 +86,11 @@ Currently working on Eightbox, a PyQt5-based GUI application for detecting and m
 - Include meaningful comments that explain "why" not just "what"
 
 # GUI Component Rules
-- All PyQt widgets must use Material Dark theme from theme.py
+- All PyQt widgets use a hybrid theme combining Rose Pine Dark with Material Design elements:
+  * Primary colors from Rose Pine Dark palette (Base, Surface, Overlay, Text)
+  * Accent colors from Rose Pine (Love, Gold, Rose, Pine, Foam, Iris)
+  * Material Design-inspired component structure and interactions
+  * Consistent dark theme with Rose Pine color harmonies
 - Custom widgets should inherit from appropriate PyQt base classes
 - Widget names should be descriptive and follow camelCase convention
 - Connect signals and slots using explicit method references instead of lambdas
