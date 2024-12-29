@@ -31,7 +31,7 @@ from PyQt5.QtWidgets import (  # Specific widget import for header configuration
 )
 
 from carrier_list import CarrierListPane
-from clean_moves_manager import MovesManager
+from clean_moves.clean_moves_manager import MovesManager
 from custom_widgets import (
     CustomInfoDialog,
     CustomProgressDialog,

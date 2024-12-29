@@ -10,7 +10,6 @@ from PyQt5.QtCore import (
     Qt,
     pyqtSignal,
 )
-from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QDialog,
     QGridLayout,
@@ -27,7 +26,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from clean_moves_utils import (
+from clean_moves.utils.clean_moves_utils import (
     format_moves_breakdown,
     parse_moves_entry,
     update_moves_in_database,
@@ -42,6 +41,7 @@ from theme import (
     CLEAN_MOVES_CANCEL_BUTTON_STYLE,
     CLEAN_MOVES_DIALOG_STYLE,
     CLEAN_MOVES_SAVE_BUTTON_STYLE,
+    COLOR_TRANSPARENT,
     DISABLED_START_INPUT_STYLE,
     MATERIAL_GREEN_300,
     MATERIAL_GREEN_900,
@@ -729,6 +729,8 @@ class CleanMovesDialog(QDialog):
             hours_item.setFlags(hours_item.flags() & ~Qt.ItemIsEditable)
             if row["Total Moves Hours"] > 4.25:
                 hours_item.setData(Qt.UserRole, "warning")
+                hours_item.setBackground(MATERIAL_RED_900)
+                hours_item.setForeground(MATERIAL_RED_200)
             self.table.setItem(i, 5, hours_item)
 
             # Add empty fixed hours
@@ -741,9 +743,10 @@ class CleanMovesDialog(QDialog):
             issue_item.setFlags(issue_item.flags() & ~Qt.ItemIsEditable)
             self.table.setItem(i, 7, issue_item)
 
-            # Add status
+            # Add status with Material Design colors
             status_item = QTableWidgetItem("Not Fixed")
             status_item.setFlags(status_item.flags() & ~Qt.ItemIsEditable)
+            self._update_status_item(status_item, False)  # False for "Not Fixed" status
             self.table.setItem(i, 8, status_item)
 
     def calculate_total_hours(self, moves_str):
@@ -821,19 +824,16 @@ class CleanMovesDialog(QDialog):
             fixed_item = self.table.item(self.current_row, 4)
             fixed_item.setText("(Moves Cleared)")
             fixed_item.setData(Qt.UserRole, "true")
-            fixed_item.setBackground(Qt.transparent)
+            fixed_item.setBackground(COLOR_TRANSPARENT)
 
             # Update fixed hours
             fixed_hours_item = self.table.item(self.current_row, 6)
             fixed_hours_item.setText("0.00")
             fixed_hours_item.setData(Qt.UserRole, None)
 
-            # Update status
+            # Update status with Material Design colors
             status_item = self.table.item(self.current_row, 8)
-            status_item.setText("Fixed")
-            status_item.setData(Qt.UserRole, "true")
-            status_item.setBackground(QColor("#1B5E20"))  # Material Design green 900
-            status_item.setForeground(QColor("#81C784"))  # Material Design green 300
+            self._update_status_item(status_item, True)  # True for "Fixed" status
 
             # Enable save button
             self.save_button.setEnabled(bool(self.cleaned_moves))
@@ -906,18 +906,16 @@ class CleanMovesDialog(QDialog):
             fixed_item = self.table.item(self.current_row, 4)
             fixed_item.setText("")
             fixed_item.setData(Qt.UserRole, None)
-            fixed_item.setBackground(Qt.transparent)
+            fixed_item.setBackground(COLOR_TRANSPARENT)
 
             # Clear fixed hours
             fixed_hours_item = self.table.item(self.current_row, 6)
             fixed_hours_item.setText("")
             fixed_hours_item.setData(Qt.UserRole, None)
 
-            # Reset status to Not Fixed
+            # Reset status with Material Design colors
             status_item = self.table.item(self.current_row, 8)
-            status_item.setText("Not Fixed")
-            status_item.setData(Qt.UserRole, None)
-            status_item.setBackground(Qt.transparent)
+            self._update_status_item(status_item, False)  # False for "Not Fixed" status
 
             # Enable save button if there are still other cleaned moves
             self.save_button.setEnabled(bool(self.cleaned_moves))
@@ -952,7 +950,7 @@ class CleanMovesDialog(QDialog):
             fixed_item = self.table.item(self.current_row, 4)
             fixed_item.setText(fixed_breakdown)
             fixed_item.setData(Qt.UserRole, "true")
-            fixed_item.setBackground(Qt.transparent)
+            fixed_item.setBackground(COLOR_TRANSPARENT)
 
             # Calculate and update fixed hours
             total_hours = self.calculate_total_hours(new_moves_str)
@@ -960,15 +958,16 @@ class CleanMovesDialog(QDialog):
             fixed_hours_item.setText(f"{total_hours:.2f}")
             if total_hours > 4.25:
                 fixed_hours_item.setData(Qt.UserRole, "warning")
+                fixed_hours_item.setBackground(MATERIAL_RED_900)
+                fixed_hours_item.setForeground(MATERIAL_RED_200)
             else:
                 fixed_hours_item.setData(Qt.UserRole, None)
+                fixed_hours_item.setBackground(COLOR_TRANSPARENT)
+                fixed_hours_item.setForeground(COLOR_TRANSPARENT)
 
             # Update status
             status_item = self.table.item(self.current_row, 8)
-            status_item.setText("Fixed")
-            status_item.setData(Qt.UserRole, "true")
-            status_item.setBackground(QColor("#1B5E20"))  # Material Design green 900
-            status_item.setForeground(QColor("#81C784"))  # Material Design green 300
+            self._update_status_item(status_item, True)  # True for "Fixed" status
 
             # Enable save button
             self.save_button.setEnabled(bool(self.cleaned_moves))
@@ -976,8 +975,10 @@ class CleanMovesDialog(QDialog):
     def _update_status_item(self, status_item, is_valid):
         """Update the status item's appearance based on validity."""
         if not is_valid:
-            status_item.setBackground(MATERIAL_RED_900)  # Material Design dark red
-            status_item.setForeground(MATERIAL_RED_200)  # Material Design light red
+            status_item.setText("Not Fixed")
+            status_item.setBackground(MATERIAL_RED_900)
+            status_item.setForeground(MATERIAL_RED_200)
         else:
-            status_item.setBackground(MATERIAL_GREEN_900)  # Material Design dark green
-            status_item.setForeground(MATERIAL_GREEN_300)  # Material Design light green
+            status_item.setText("Fixed")
+            status_item.setBackground(MATERIAL_GREEN_900)
+            status_item.setForeground(MATERIAL_GREEN_300)

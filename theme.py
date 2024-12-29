@@ -41,6 +41,7 @@ Note:
     5. Maintain consistency with the Material Design spec
 """
 
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QApplication,
@@ -83,6 +84,7 @@ MATERIAL_RED_700 = QColor("#c42b1c")  # Close button hover
 # Pure black and white for maximum contrast when needed
 COLOR_BLACK = QColor("#000000")  # Pure black for text
 COLOR_WHITE = QColor("#FFFFFF")  # Pure white for text
+COLOR_TRANSPARENT = Qt.transparent  # Transparent color for clearing backgrounds
 
 # Application-specific Colors
 # Custom colors for specific UI components and states

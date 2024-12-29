@@ -15,8 +15,8 @@ from PyQt5.QtCore import (
 )
 from PyQt5.QtWidgets import QApplication
 
-from clean_moves_dialog import CleanMovesDialog
-from clean_moves_utils import (
+from clean_moves.ui.clean_moves_dialog import CleanMovesDialog
+from clean_moves.utils.clean_moves_utils import (
     detect_invalid_moves,
     get_valid_routes,
 )
