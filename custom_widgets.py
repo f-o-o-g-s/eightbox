@@ -5,10 +5,7 @@ with additional functionality specific to the application's needs.
 """
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import (
-    QColor,
-    QPainter,
-)
+from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -33,6 +30,8 @@ from theme import (
     CUSTOM_PROGRESS_DIALOG_STYLE,
     CUSTOM_TITLE_BAR_STYLE,
     CUSTOM_WARNING_DIALOG_STYLE,
+    MATERIAL_GREY_600,
+    MATERIAL_GREY_700,
     NEW_CARRIERS_DIALOG_STYLE,
 )
 
@@ -873,16 +872,17 @@ class CustomSizeGrip(QSizeGrip):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # Define dot color
-        dot_color = QColor("#666666")
-        hover_color = QColor("#999999")
+        # Use theme colors
+        dot_color = MATERIAL_GREY_600
+        hover_color = MATERIAL_GREY_700
 
         # Use hover color if mouse is over the grip
         if self.underMouse():
-            dot_color = hover_color
+            painter.setBrush(hover_color)
+        else:
+            painter.setBrush(dot_color)
 
         painter.setPen(Qt.NoPen)
-        painter.setBrush(dot_color)
 
         # Draw dots in a diagonal pattern
         dot_size = 2

@@ -262,8 +262,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             }
             QTabBar::tab:selected {
                 color: {MATERIAL_PRIMARY.name()};
-                background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
-                border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
+                background-color: {MATERIAL_SURFACE.name()};
             }
             QTabBar::tab:hover {
                 background-color: rgba(187, 134, 252, {ALPHA_HOVER});

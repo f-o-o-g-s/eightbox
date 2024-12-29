@@ -56,6 +56,8 @@ from PyQt5.QtWidgets import (
 
 from custom_widgets import CustomTitleBarWidget
 from table_utils import setup_table_copy_functionality
+from theme import COLOR_TEXT_DIM  # noqa: F401
+from theme import MATERIAL_SURFACE  # noqa: F401
 from theme import (
     COLOR_BG_HOVER,
     COLOR_BLACK,
