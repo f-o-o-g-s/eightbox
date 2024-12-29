@@ -1,10 +1,14 @@
 """Material Design styles for carrier list UI components."""
 
 from theme import (
+    COLOR_ROW_HIGHLIGHT,
+    COLOR_STATUS_NL,
+    COLOR_STATUS_PTF,
     COLOR_TEXT_DIM,
     COLOR_TEXT_LIGHT,
     MATERIAL_BACKGROUND,
     MATERIAL_PRIMARY,
+    MATERIAL_SECONDARY,
     MATERIAL_SURFACE,
 )
 
@@ -62,69 +66,69 @@ QPushButton:disabled {
 }
 """
 
-STATS_PANEL_STYLE = """
-QWidget {
-    background-color: #1E1E1E;
-    border: 1px solid #333333;
+STATS_PANEL_STYLE = f"""
+QWidget {{
+    background-color: {MATERIAL_SURFACE.name()};
+    border: 1px solid {COLOR_TEXT_DIM.name()};
     border-radius: 4px;
     padding: 8px;
     margin-bottom: 10px;
-}
-QLabel {
-    color: #E1E1E1;
+}}
+QLabel {{
+    color: {COLOR_TEXT_LIGHT.name()};
     font-size: 13px;
     padding: 4px;
-}
-QLabel[class="stat-value"][status="all"] {
-    color: #E1E1E1;
+}}
+QLabel[class="stat-value"][status="all"] {{
+    color: {COLOR_TEXT_LIGHT.name()};
     font-weight: 500;
-}
-QLabel[class="stat-value"][status="otdl"] {
-    color: #BB86FC;  /* Purple */
+}}
+QLabel[class="stat-value"][status="otdl"] {{
+    color: {MATERIAL_PRIMARY.name()};  /* Purple */
     font-weight: 500;
-}
-QLabel[class="stat-value"][status="wal"] {
-    color: #03DAC6;  /* Teal */
+}}
+QLabel[class="stat-value"][status="wal"] {{
+    color: {MATERIAL_SECONDARY.name()};  /* Teal */
     font-weight: 500;
-}
-QLabel[class="stat-value"][status="nl"] {
-    color: #64DD17;  /* Light Green */
+}}
+QLabel[class="stat-value"][status="nl"] {{
+    color: {COLOR_STATUS_NL.name()};  /* Light Green */
     font-weight: 500;
-}
-QLabel[class="stat-value"][status="ptf"] {
-    color: #FF7597;  /* Pink */
+}}
+QLabel[class="stat-value"][status="ptf"] {{
+    color: {COLOR_STATUS_PTF.name()};  /* Pink */
     font-weight: 500;
-}
-QWidget[class="stat-container"] {
+}}
+QWidget[class="stat-container"] {{
     border-radius: 4px;
     padding: 4px 12px;
-}
-QWidget[class="stat-container"]:hover {
+}}
+QWidget[class="stat-container"]:hover {{
     background-color: rgba(103, 80, 164, 0.08);
-}
-QWidget[class="stat-container"][selected="true"] {
+}}
+QWidget[class="stat-container"][selected="true"] {{
     background-color: rgba(103, 80, 164, 0.15);
-}
+}}
 """
 
-SEARCH_BAR_STYLE = """
-QLineEdit {
-    background-color: #262626;
-    color: #E1E1E1;
-    border: 1px solid #333333;
+SEARCH_BAR_STYLE = f"""
+QLineEdit {{
+    background-color: {COLOR_ROW_HIGHLIGHT.name()};
+    color: {COLOR_TEXT_LIGHT.name()};
+    border: 1px solid {COLOR_TEXT_DIM.name()};
     border-radius: 4px;
     padding: 8px 12px 8px 36px;  /* Added left padding for icon */
     font-size: 13px;
-    selection-background-color: #BB86FC;
-    selection-color: #000000;
-}
-QLineEdit:focus {
-    border: 1px solid #BB86FC;
-    background-color: #2D2D2D;
-}
-QLineEdit:hover {
-    background-color: #2A2A2A;
-}
+    selection-background-color: {MATERIAL_PRIMARY.name()};
+    selection-color: black;
+}}
+QLineEdit:focus {{
+    border: 1px solid {MATERIAL_PRIMARY.name()};
+    background-color: {COLOR_ROW_HIGHLIGHT.name()};
+}}
+QLineEdit:hover {{
+    background-color: {COLOR_ROW_HIGHLIGHT.lighter(110).name()};
+}}
 """
 
 SEARCH_ICON_STYLE = """
