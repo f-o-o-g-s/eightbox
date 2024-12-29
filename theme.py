@@ -1,33 +1,44 @@
 # theme.py
 """Application theming and style management.
 
-This module defines the application's visual theme and styling, including:
-- Material Design dark theme implementation
-- Color schemes for UI elements (background, text, borders)
-- Accent colors for different states (active, hover, pressed)
-- Semantic colors (success, warning, error)
-- Font styles and sizes
-- Widget styling (QSS)
-- Layout spacing and margins
-- Custom widget appearance
+This module defines the application's visual theme and styling using Material Design dark theme
+principles. All colors and styles are centralized here to ensure consistency across the application.
 
-The theme follows Material Design principles with a dark mode focus,
-ensuring consistent styling across all application components.
+Color System:
+    The theme uses a Material Design dark theme color system with these key components:
+    - Primary: Purple (#BB86FC) - Main brand color used for key UI elements
+    - Secondary: Teal (#03DAC6) - Accent color for secondary actions
+    - Background: Dark (#121212) - Main app background
+    - Surface: Slightly lighter (#1E1E1E) - Elevated surface colors
+    - Error: Pink-red (#CF6679) - Error states and warnings
 
-Color Constants:
-    MATERIAL_PRIMARY: Primary brand color (purple)
-    MATERIAL_PRIMARY_VARIANT: Darker primary for contrast
-    MATERIAL_SECONDARY: Accent color (teal)
-    MATERIAL_BACKGROUND: Main background color
-    MATERIAL_SURFACE: Elevated surface color
-    MATERIAL_ERROR: Error state color
-    COLOR_ROW_HIGHLIGHT: Table row hover color
-    COLOR_CELL_HIGHLIGHT: Selected cell color
-    COLOR_WEEKLY_REMEDY: Weekly totals highlight
-    COLOR_TEXT_LIGHT: Primary text color
-    COLOR_TEXT_DIM: Secondary text color
-    COLOR_MAXIMIZED_TRUE: Success state color
-    COLOR_MAXIMIZED_FALSE: Error state color
+State Management:
+    UI element states are handled through alpha values:
+    - ALPHA_HOVER (0.1) - Hover state transparency
+    - ALPHA_PRESSED (0.15) - Pressed state transparency
+    - ALPHA_SELECTED (0.2) - Selected state transparency
+    - ALPHA_DISABLED (0.05) - Disabled state transparency
+    - ALPHA_DISABLED_TEXT (0.3) - Disabled text transparency
+
+Color Categories:
+    - Material Colors: Core theme colors (MATERIAL_*)
+    - Status Colors: Carrier list status indicators (COLOR_STATUS_*)
+    - UI Colors: Interface elements (COLOR_TEXT_*, COLOR_BG_*)
+    - Semantic Colors: Success/error states (COLOR_MAXIMIZED_*)
+    - Feature Colors: Violation-specific colors (COLOR_VIOLATION_*)
+
+Style Definitions:
+    Component styles are defined as formatted strings using the color constants.
+    This ensures consistent styling across all widgets while allowing for
+    dynamic color updates.
+
+Note:
+    When adding new colors or styles:
+    1. Use semantic naming that describes the color's purpose
+    2. Group related colors together in the appropriate section
+    3. Add clear comments explaining the color's usage
+    4. Consider accessibility with sufficient contrast ratios
+    5. Maintain consistency with the Material Design spec
 """
 
 from PyQt5.QtGui import QColor
@@ -36,14 +47,16 @@ from PyQt5.QtWidgets import (
     QStyleFactory,
 )
 
-# Alpha values for states
-ALPHA_HOVER = 0.1
-ALPHA_PRESSED = 0.15
-ALPHA_SELECTED = 0.2
-ALPHA_DISABLED = 0.05
-ALPHA_DISABLED_TEXT = 0.3  # For disabled text elements
+# Alpha values for UI state management
+# These control the transparency of interactive elements
+ALPHA_HOVER = 0.1  # Subtle feedback for hoverable elements
+ALPHA_PRESSED = 0.15  # Stronger feedback for active/pressed state
+ALPHA_SELECTED = 0.2  # Clear indication of selected state
+ALPHA_DISABLED = 0.05  # Very subtle appearance for disabled elements
+ALPHA_DISABLED_TEXT = 0.3  # Reduced opacity for disabled text
 
-# Material Design Dark Theme Colors
+# Material Design Dark Theme - Core Colors
+# These form the foundation of the application's color scheme
 MATERIAL_PRIMARY = QColor("#BB86FC")  # Primary brand color (purple)
 MATERIAL_PRIMARY_VARIANT = QColor("#3700B3")  # Darker primary for contrast
 MATERIAL_SECONDARY = QColor("#03DAC6")  # Accent color (teal)
@@ -51,7 +64,8 @@ MATERIAL_BACKGROUND = QColor("#121212")  # Main background
 MATERIAL_SURFACE = QColor("#1E1E1E")  # Elevated surface color
 MATERIAL_ERROR = QColor("#CF6679")  # Error states
 
-# Additional Material Design Colors
+# Additional Material Colors
+# Extended palette for specific UI components
 MATERIAL_BLUE_GREY_800 = QColor("#37474F")  # Header backgrounds
 MATERIAL_BLUE_GREY_900 = QColor("#263238")  # Day name backgrounds
 MATERIAL_RED_900 = QColor("#B71C1C")  # Error states
@@ -66,10 +80,12 @@ MATERIAL_BLUE_GREY_700 = QColor("#455A64")  # Title bar hover
 MATERIAL_RED_700 = QColor("#c42b1c")  # Close button hover
 
 # Basic Colors
+# Pure black and white for maximum contrast when needed
 COLOR_BLACK = QColor("#000000")  # Pure black for text
 COLOR_WHITE = QColor("#FFFFFF")  # Pure white for text
 
-# Application-specific color mappings
+# Application-specific Colors
+# Custom colors for specific UI components and states
 COLOR_ROW_HIGHLIGHT = QColor("#2D2D2D")  # Table row hover
 COLOR_CELL_HIGHLIGHT = MATERIAL_PRIMARY.darker(150)  # Selected cell
 COLOR_WEEKLY_REMEDY = MATERIAL_SECONDARY.darker(150)  # Weekly totals
@@ -79,18 +95,21 @@ COLOR_TEXT_DIM = QColor("#333333")  # Secondary text
 COLOR_MAXIMIZED_TRUE = QColor("#4CAF50")  # Success state
 COLOR_MAXIMIZED_FALSE = QColor("#F44336")  # Error state
 
-# Violation-specific colors
+# Violation-specific Colors
+# Colors used specifically for violation tracking and display
 COLOR_VIOLATION = QColor("#7D59A8")  # Medium dark purple (125, 89, 168)
 COLOR_VIOLATION_SUMMARY = QColor("#D7B7FF")  # Light purple (215, 183, 255)
 COLOR_VIOLATION_WEEKLY = QColor("#029184")  # Teal (2, 145, 132)
 
-# Status-specific colors
+# Status-specific Colors
+# Colors used to indicate carrier list status
 COLOR_STATUS_OTDL = MATERIAL_PRIMARY  # Purple for OTDL
 COLOR_STATUS_WAL = MATERIAL_SECONDARY  # Teal for WAL
 COLOR_STATUS_NL = QColor("#64DD17")  # Light Green for NL
 COLOR_STATUS_PTF = QColor("#FF7597")  # Pink for PTF
 
-# Background colors
+# Background Colors
+# Different background shades for layering and hierarchy
 COLOR_BG_DARKER = QColor("#222222")  # Darker background
 COLOR_BG_DARK = QColor("#2A2A2A")  # Dark background
 COLOR_BG_HOVER = QColor("#252525")  # Hover background
