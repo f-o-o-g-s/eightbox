@@ -1199,7 +1199,44 @@ DISABLED_START_INPUT_STYLE = f"""
 """
 
 # OTDL Maximization Styles
+OTDL_TABLE_STYLE = f"""
+    QTableWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+        alternate-background-color: {QColor(*RGB_HIGHLIGHT_LOW).name()};
+        border: 1px solid {QColor(*RGB_HIGHLIGHT_MED).name()};
+        gridline-color: {QColor(*RGB_HIGHLIGHT_MED).name()};
+        border-radius: 4px;
+    }}
+    QTableWidget::item {{
+        min-height: 35px;
+        padding: 2px;
+    }}
+    QTableWidget::item:selected {{
+        background-color: {QColor(*RGB_IRIS).name()};
+        color: {COLOR_BLACK.name()};
+    }}
+    QHeaderView::section {{
+        background-color: {MATERIAL_BLUE_GREY_800.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+        padding: 8px;
+        border: 1px solid {QColor(*RGB_HIGHLIGHT_MED).name()};
+        font-weight: bold;
+        min-height: 15px;
+    }}
+    QHeaderView::section:first {{
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+    }}
+    QHeaderView::section:last {{
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }}
+"""
+
 OTDL_CHECKBOX_STYLE = f"""
+    QCheckBox {{
+        spacing: 4px;
+    }}
     QCheckBox::indicator {{
         width: 14px;
         height: 14px;
@@ -1211,13 +1248,36 @@ OTDL_CHECKBOX_STYLE = f"""
         background-color: {MATERIAL_PRIMARY.name()};
         image: url(resources/check.png);
     }}
+    QCheckBox::indicator:hover {{
+        border: 1px solid {MATERIAL_PRIMARY.lighter(110).name()};
+    }}
 """
 
 OTDL_CELL_WIDGET_STYLE = (
     lambda row_color: f"""
     QWidget {{
-        background-color: {row_color.name()};
-        padding: 1px;
+        background-color: {rgba(RGB_FOAM, ALPHA_HOVER)};
+        padding: 2px;
+        margin: 0px;
+    }}
+    QCheckBox {{
+        background-color: {rgba(RGB_FOAM, ALPHA_HOVER)};
+        padding: 2px;
+        spacing: 4px;
+    }}
+    QCheckBox::indicator {{
+        width: 14px;
+        height: 14px;
+        border: 1px solid {MATERIAL_PRIMARY.name()};
+        border-radius: 3px;
+        background-color: transparent;
+    }}
+    QCheckBox::indicator:checked {{
+        background-color: {MATERIAL_PRIMARY.name()};
+        image: url(resources/check.png);
+    }}
+    QCheckBox::indicator:hover {{
+        border: 1px solid {MATERIAL_PRIMARY.lighter(110).name()};
     }}
 """
 )

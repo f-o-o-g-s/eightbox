@@ -57,19 +57,19 @@ from PyQt5.QtWidgets import (
 from custom_widgets import CustomTitleBarWidget
 from table_utils import setup_table_copy_functionality
 from theme import COLOR_TEXT_DIM  # noqa: F401
-from theme import MATERIAL_SURFACE  # noqa: F401
 from theme import (
     COLOR_BG_HOVER,
     COLOR_NO_HIGHLIGHT,
     COLOR_ROW_HIGHLIGHT,
     COLOR_TEXT_LIGHT,
     MATERIAL_BACKGROUND,
-    MATERIAL_BLUE_GREY_800,
     MATERIAL_BLUE_GREY_900,
     MATERIAL_PRIMARY,
     OTDL_CELL_LABEL_STYLE,
     OTDL_CELL_WIDGET_STYLE,
     OTDL_CHECKBOX_STYLE,
+    OTDL_TABLE_STYLE,
+    RGB_LOVE,
 )
 from violation_model import calculate_optimal_gray
 
@@ -499,9 +499,7 @@ class OTDLMaximizationPane(QWidget):
         self.setMaximumSize(16777215, 16777215)  # QWIDGETSIZE_MAX
 
         # Set up the table
-        self.table.setStyleSheet(
-            f"background-color: {COLOR_NO_HIGHLIGHT.name()}; color: {COLOR_TEXT_LIGHT.name()};"
-        )
+        self.table.setStyleSheet(OTDL_TABLE_STYLE)
 
         # Set row count: carriers + day names row
         self.table.setRowCount(len(otdl_names) + 1)
@@ -513,29 +511,14 @@ class OTDLMaximizationPane(QWidget):
         self.table.setHorizontalHeaderLabels(
             ["Carrier Name", "Hour Limit"] + unique_dates + ["Weekly Hours"]
         )
-        # Set custom header colors
-        header = self.table.horizontalHeader()
-        header_bg = MATERIAL_BLUE_GREY_800  # Material Blue Grey 800
-
         # Set resize modes for columns
+        header = self.table.horizontalHeader()
         header.setSectionResizeMode(
             QHeaderView.Interactive
         )  # Default mode for all columns
         header.setSectionResizeMode(
             len(unique_dates) + 2, QHeaderView.Stretch
         )  # Make Weekly Hours column stretch
-
-        header.setStyleSheet(
-            f"""
-            QHeaderView::section {{
-                background-color: {header_bg.name()};
-                color: white;
-                padding: 8px;
-                border: none;
-                font-weight: bold;
-            }}
-        """
-        )
 
         # Add Day Names Row
         day_name_row_index = 0  # Reserve row 0 for day names
@@ -607,11 +590,11 @@ class OTDLMaximizationPane(QWidget):
 
             # Highlight non-default hour limits
             if hour_limit_value != 12.00:
-                hour_limit_item.setForeground(MATERIAL_PRIMARY)  # Material purple
+                hour_limit_item.setForeground(QColor(*RGB_LOVE))  # Rose Pine Love color
             else:
                 hour_limit_item.setForeground(
                     calculate_optimal_gray(row_color)
-                )  # Replace COLOR_TEXT_DIM
+                )  # Default text color
 
             self.table.setItem(row_idx, 1, hour_limit_item)  # Set the Hour Limit column
 
