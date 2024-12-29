@@ -414,3 +414,9 @@ class CustomCalendarWidget(QCalendarWidget):
         else:
             painter.fillRect(rect, COLOR_BG_DARKER)
         super().paintCell(painter, rect, date)
+
+    def get_background_color(self):
+        """Get the background color for the date cell."""
+        if self.is_selected:
+            return COLOR_BG_DARK
+        return COLOR_BG_DARKER

@@ -25,7 +25,10 @@ from custom_widgets import (
 from table_utils import extract_table_state
 from theme import (
     COLOR_CELL_HIGHLIGHT,
+    COLOR_TEXT_LIGHT,
     COLOR_WEEKLY_REMEDY,
+    MATERIAL_GREY_800,
+    MATERIAL_SURFACE,
 )
 from violation_model import calculate_optimal_gray
 
@@ -200,7 +203,7 @@ class ExcelExporter:
     def _write_excel_file(self, writer, date_range):
         """Write data to Excel with proper formatting."""
         workbook = writer.book
-        border_color = "#424242"
+        border_color = MATERIAL_GREY_800.name().lstrip("#")
 
         # Calculate optimal text colors for our header backgrounds
         header_bg = COLOR_CELL_HIGHLIGHT
@@ -332,12 +335,12 @@ class ExcelExporter:
                 for col in range(len(content_df.columns)):
                     cell_format = workbook.add_format(
                         {
+                            "bg_color": MATERIAL_SURFACE.name().lstrip("#"),
                             "border": 1,
                             "border_color": border_color,
-                            "align": "center",
-                            "bg_color": "#1E1E1E",  # Dark gray background for unhighlighted cells
                         }
                     )
+                    cell_format.set_font_color(COLOR_TEXT_LIGHT.name().lstrip("#"))
 
                     # Get cell metadata
                     cell_metadata = metadata_df.iloc[row, col]
