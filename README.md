@@ -141,7 +141,7 @@ copy mandates.sqlite.backup mandates.sqlite
    - Preserves formatting and colors from Eightbox
 
 ### Notes
-- Manual cell editing is possible but won't affect violation detection
+- Tables are read-only to prevent accidental data modification
 - Help > Article 8 Violation Formulas Documentation explains detection methods
 - Violation detection is based on specific branch settlements and escalated remedies
 - MAX60/MAX12 violations may be more universally applicable
