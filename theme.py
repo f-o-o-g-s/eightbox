@@ -692,11 +692,12 @@ CUSTOM_PROGRESS_DIALOG_STYLE = f"""
         color: {COLOR_TEXT_LIGHT.name()};
     }}
     QProgressBar {{
-        border: 1px solid {QColor(*RGB_HIGHLIGHT_LOW).name()};
+        border: 1px solid {QColor(*RGB_IRIS).name()};
         border-radius: 4px;
         text-align: center;
-        background-color: {QColor(*RGB_HIGHLIGHT_LOW).name()};
+        background-color: {QColor(*RGB_HIGHLIGHT_LOW).darker(120).name()};
         height: 20px;
+        margin: 8px 0px;
     }}
     QProgressBar::chunk {{
         background-color: {QColor(*RGB_IRIS).lighter(110).name()};
@@ -704,13 +705,13 @@ CUSTOM_PROGRESS_DIALOG_STYLE = f"""
     }}
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
-        font-size: 11px;
-        margin-bottom: 5px;
+        font-size: 12px;
+        margin: 8px 0px;
     }}
     QPushButton {{
-        background-color: {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
-        color: {COLOR_TEXT_LIGHT.name()};
-        border: 1px solid {rgba(RGB_HIGHLIGHT_MED, ALPHA_HOVER)};
+        background-color: {rgba(RGB_LOVE, 0.15)};
+        color: {QColor(*RGB_LOVE).lighter(120).name()};
+        border: 1px solid {QColor(*RGB_LOVE).name()};
         border-radius: 4px;
         padding: 8px 24px;
         font-size: 13px;
@@ -721,20 +722,15 @@ CUSTOM_PROGRESS_DIALOG_STYLE = f"""
         margin: 8px 0px;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_HIGHLIGHT_MED, ALPHA_HOVER)};
-        border: 1px solid {QColor(*RGB_IRIS).name()};
-        color: {QColor(*RGB_IRIS).lighter(110).name()};
+        background-color: {rgba(RGB_LOVE, 0.25)};
+        border: 1px solid {QColor(*RGB_LOVE).lighter(110).name()};
+        color: {QColor(*RGB_LOVE).lighter(110).name()};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_HIGHLIGHT_HIGH, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_LOVE, 0.35)};
         padding-top: 9px;
         padding-bottom: 7px;
-        color: {QColor(*RGB_IRIS).name()};
-    }}
-    QPushButton:disabled {{
-        background-color: {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
-        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
-        border: 1px solid {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
+        color: {QColor(*RGB_LOVE).name()};
     }}
 """
 

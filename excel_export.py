@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import (
 
 from custom_widgets import (
     CustomErrorDialog,
-    CustomMessageBox,
+    CustomInfoDialog,
     CustomWarningDialog,
 )
 from table_utils import extract_table_state
@@ -140,13 +140,14 @@ class ExcelExporter:
             self.progress_dialog.setValue(len(self.tab_indices_to_process))
             self.main_window.cleanup_progress_dialog(self.progress_dialog)
 
-            # Use custom message box instead of QMessageBox
-            msg_box = CustomMessageBox(
+            # Use CustomInfoDialog instead of CustomMessageBox
+            export_path = os.path.join(os.getcwd(), "spreadsheets", self.date_range)
+            success_dialog = CustomInfoDialog(
                 "Export Successful",
-                f"All violation tabs have been exported to '{self.folder_path}'.",
+                f"All violation tabs have been exported to {export_path}",
                 self.main_window,
             )
-            msg_box.show()
+            success_dialog.exec_()
 
             # Open the folder in File Explorer
             try:
