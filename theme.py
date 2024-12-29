@@ -284,6 +284,114 @@ FILTER_ROW_STYLE = """
 
 SIZE_GRIP_STYLE = "background: transparent;"
 
+# Settings Dialog Styles
+SECTION_FRAME_STYLE = """
+    QFrame#sectionFrame {
+        background-color: #1E1E1E;
+        border: 1px solid #333333;
+        border-radius: 8px;
+    }
+"""
+
+SETTINGS_DIALOG_STYLE = """
+    QDialog {
+        background-color: #121212;
+    }
+    QPushButton {
+        background-color: rgba(187, 134, 252, 0.1);
+        border: none;
+        border-radius: 4px;
+        color: #BB86FC;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        min-width: 120px;
+    }
+    QPushButton:hover {
+        background-color: rgba(187, 134, 252, 0.15);
+    }
+    QPushButton:pressed {
+        background-color: rgba(187, 134, 252, 0.2);
+    }
+    QLabel {
+        color: #E1E1E1;
+    }
+"""
+
+SETTINGS_PATH_DISPLAY_STYLE = """
+    color: #9575CD;
+    font-size: 11px;
+    padding: 8px;
+    background-color: rgba(30, 30, 30, 0.6);
+    border-radius: 4px;
+    border: 1px solid #333333;
+"""
+
+SETTINGS_STATUS_STYLE = """
+    color: #81C784;
+    font-size: 11px;
+    padding: 8px;
+    font-weight: 500;
+"""
+
+SETTINGS_STATUS_ERROR_STYLE = """
+    color: #EF5350;
+    font-size: 11px;
+    padding: 5px;
+"""
+
+SETTINGS_BUTTON_CONTAINER_STYLE = """
+    QWidget#buttonContainer {
+        background-color: #1A1A1A;
+        border-radius: 8px;
+        border: 1px solid #333333;
+    }
+"""
+
+SETTINGS_SYNC_BUTTON_STYLE = """
+    QPushButton {
+        background-color: rgba(187, 134, 252, 0.1);
+        border: none;
+        border-radius: 4px;
+        color: #BB86FC;
+        padding: 12px 24px;
+        font-size: 13px;
+        font-weight: 500;
+        min-width: 200px;
+        text-align: center;
+    }
+    QPushButton:hover {
+        background-color: rgba(187, 134, 252, 0.15);
+    }
+    QPushButton:pressed {
+        background-color: rgba(187, 134, 252, 0.2);
+        padding-top: 13px;
+        padding-bottom: 11px;
+    }
+"""
+
+SETTINGS_CLOSE_BUTTON_STYLE = """
+    QPushButton {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: none;
+        border-radius: 4px;
+        color: #E1E1E1;
+        padding: 12px 24px;
+        font-size: 13px;
+        font-weight: 500;
+        min-width: 200px;
+        text-align: center;
+    }
+    QPushButton:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    QPushButton:pressed {
+        background-color: rgba(255, 255, 255, 0.12);
+        padding-top: 13px;
+        padding-bottom: 11px;
+    }
+"""
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application.

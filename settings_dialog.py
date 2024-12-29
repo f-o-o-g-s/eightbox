@@ -25,6 +25,16 @@ from custom_widgets import (
     CustomTitleBarWidget,
     CustomWarningDialog,
 )
+from theme import (
+    SECTION_FRAME_STYLE,
+    SETTINGS_BUTTON_CONTAINER_STYLE,
+    SETTINGS_CLOSE_BUTTON_STYLE,
+    SETTINGS_DIALOG_STYLE,
+    SETTINGS_PATH_DISPLAY_STYLE,
+    SETTINGS_STATUS_ERROR_STYLE,
+    SETTINGS_STATUS_STYLE,
+    SETTINGS_SYNC_BUTTON_STYLE,
+)
 
 
 class SectionFrame(QFrame):
@@ -33,15 +43,7 @@ class SectionFrame(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("sectionFrame")
-        self.setStyleSheet(
-            """
-            QFrame#sectionFrame {
-                background-color: #1E1E1E;
-                border: 1px solid #333333;
-                border-radius: 8px;
-            }
-        """
-        )
+        self.setStyleSheet(SECTION_FRAME_STYLE)
 
 
 class SettingsDialog(QDialog):
@@ -63,32 +65,7 @@ class SettingsDialog(QDialog):
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
 
         # Set dialog style
-        self.setStyleSheet(
-            """
-            QDialog {
-                background-color: #121212;
-            }
-            QPushButton {
-                background-color: rgba(187, 134, 252, 0.1);
-                border: none;
-                border-radius: 4px;
-                color: #BB86FC;
-                padding: 8px 16px;
-                font-size: 13px;
-                font-weight: 500;
-                min-width: 120px;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.15);
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.2);
-            }
-            QLabel {
-                color: #E1E1E1;
-            }
-        """
-        )
+        self.setStyleSheet(SETTINGS_DIALOG_STYLE)
 
         # Main layout
         layout = QVBoxLayout(self)
@@ -137,29 +114,13 @@ class SettingsDialog(QDialog):
         klusterbox_desc.setWordWrap(True)
 
         self.klusterbox_path_display = QLabel(self.mandates_db_path)
-        self.klusterbox_path_display.setStyleSheet(
-            """
-            color: #9575CD;
-            font-size: 11px;
-            padding: 8px;
-            background-color: rgba(30, 30, 30, 0.6);
-            border-radius: 4px;
-            border: 1px solid #333333;
-            """
-        )
+        self.klusterbox_path_display.setStyleSheet(SETTINGS_PATH_DISPLAY_STYLE)
         self.klusterbox_path_display.setWordWrap(True)
         self.klusterbox_path_display.setMinimumWidth(360)
         self.klusterbox_path_display.setToolTip("Path to the Klusterbox database file")
 
         self.klusterbox_status = QLabel("Connected ✓")
-        self.klusterbox_status.setStyleSheet(
-            """
-            color: #81C784;
-            font-size: 11px;
-            padding: 8px;
-            font-weight: 500;
-            """
-        )
+        self.klusterbox_status.setStyleSheet(SETTINGS_STATUS_STYLE)
 
         klusterbox_layout.addWidget(klusterbox_header)
         klusterbox_layout.addWidget(klusterbox_desc)
@@ -189,16 +150,7 @@ class SettingsDialog(QDialog):
         eightbox_desc.setWordWrap(True)
 
         self.eightbox_path_display = QLabel(self.eightbox_db_path)
-        self.eightbox_path_display.setStyleSheet(
-            """
-            color: #9575CD;
-            font-size: 11px;
-            padding: 8px;
-            background-color: rgba(30, 30, 30, 0.6);
-            border-radius: 4px;
-            border: 1px solid #333333;
-            """
-        )
+        self.eightbox_path_display.setStyleSheet(SETTINGS_PATH_DISPLAY_STYLE)
         self.eightbox_path_display.setWordWrap(True)
         self.eightbox_path_display.setMinimumWidth(360)
         self.eightbox_path_display.setToolTip(
@@ -206,14 +158,7 @@ class SettingsDialog(QDialog):
         )
 
         self.eightbox_status = QLabel("Initialized ✓")
-        self.eightbox_status.setStyleSheet(
-            """
-            color: #81C784;
-            font-size: 11px;
-            padding: 8px;
-            font-weight: 500;
-            """
-        )
+        self.eightbox_status.setStyleSheet(SETTINGS_STATUS_STYLE)
 
         eightbox_layout.addWidget(eightbox_header)
         eightbox_layout.addWidget(eightbox_desc)
@@ -223,15 +168,7 @@ class SettingsDialog(QDialog):
         # Button container
         button_container = QWidget()
         button_container.setObjectName("buttonContainer")
-        button_container.setStyleSheet(
-            """
-            QWidget#buttonContainer {
-                background-color: #1A1A1A;
-                border-radius: 8px;
-                border: 1px solid #333333;
-            }
-        """
-        )
+        button_container.setStyleSheet(SETTINGS_BUTTON_CONTAINER_STYLE)
 
         button_layout = QVBoxLayout(button_container)
         button_layout.setSpacing(12)
@@ -239,29 +176,7 @@ class SettingsDialog(QDialog):
 
         # Add sync button (without icon)
         sync_button = QPushButton("Sync Database")
-        sync_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: rgba(187, 134, 252, 0.1);
-                border: none;
-                border-radius: 4px;
-                color: #BB86FC;
-                padding: 12px 24px;
-                font-size: 13px;
-                font-weight: 500;
-                min-width: 200px;
-                text-align: center;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.15);
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.2);
-                padding-top: 13px;
-                padding-bottom: 11px;
-            }
-        """
-        )
+        sync_button.setStyleSheet(SETTINGS_SYNC_BUTTON_STYLE)
         sync_button.setToolTip(
             "Synchronize data between Klusterbox and Eightbox databases"
         )
@@ -270,29 +185,7 @@ class SettingsDialog(QDialog):
 
         # Add close button (without icon)
         close_button = QPushButton("Close")
-        close_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: rgba(255, 255, 255, 0.05);
-                border: none;
-                border-radius: 4px;
-                color: #E1E1E1;
-                padding: 12px 24px;
-                font-size: 13px;
-                font-weight: 500;
-                min-width: 200px;
-                text-align: center;
-            }
-            QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.08);
-            }
-            QPushButton:pressed {
-                background-color: rgba(255, 255, 255, 0.12);
-                padding-top: 13px;
-                padding-bottom: 11px;
-            }
-        """
-        )
+        close_button.setStyleSheet(SETTINGS_CLOSE_BUTTON_STYLE)
         close_button.setToolTip("Close the settings dialog")
         close_button.clicked.connect(self.hide)
         button_layout.addWidget(close_button)
@@ -425,21 +318,9 @@ class SettingsDialog(QDialog):
         """
         self.klusterbox_status.setText(message)
         if error:
-            self.klusterbox_status.setStyleSheet(
-                """
-                color: #EF5350;
-                font-size: 11px;
-                padding: 5px;
-            """
-            )
+            self.klusterbox_status.setStyleSheet(SETTINGS_STATUS_ERROR_STYLE)
         else:
-            self.klusterbox_status.setStyleSheet(
-                """
-                color: #81C784;
-                font-size: 11px;
-                padding: 5px;
-            """
-            )
+            self.klusterbox_status.setStyleSheet(SETTINGS_STATUS_STYLE)
 
     def update_eightbox_status(self, message, error=False):
         """Update the Eightbox database status display.
@@ -450,21 +331,9 @@ class SettingsDialog(QDialog):
         """
         self.eightbox_status.setText(message)
         if error:
-            self.eightbox_status.setStyleSheet(
-                """
-                color: #EF5350;
-                font-size: 11px;
-                padding: 5px;
-            """
-            )
+            self.eightbox_status.setStyleSheet(SETTINGS_STATUS_ERROR_STYLE)
         else:
-            self.eightbox_status.setStyleSheet(
-                """
-                color: #81C784;
-                font-size: 11px;
-                padding: 5px;
-            """
-            )
+            self.eightbox_status.setStyleSheet(SETTINGS_STATUS_STYLE)
 
     def sync_database(self):
         """Synchronize the working database with the source database."""
