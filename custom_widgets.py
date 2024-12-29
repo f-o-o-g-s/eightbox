@@ -24,6 +24,18 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from theme import (
+    CLOSE_BUTTON_STYLE,
+    CONFIRM_DIALOG_STYLE,
+    CUSTOM_INFO_DIALOG_STYLE,
+    CUSTOM_MESSAGE_BOX_STYLE,
+    CUSTOM_NOTIFICATION_DIALOG_STYLE,
+    CUSTOM_PROGRESS_DIALOG_STYLE,
+    CUSTOM_TITLE_BAR_STYLE,
+    CUSTOM_WARNING_DIALOG_STYLE,
+    NEW_CARRIERS_DIALOG_STYLE,
+)
+
 # Base64 encoded checkmark icon
 CHECKMARK_BASE64 = (
     "PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Im"
@@ -67,7 +79,7 @@ class CustomTitleBarWidget(QWidget):
         minimize_btn.clicked.connect(self.handle_minimize)
 
         close_btn = QPushButton("×")
-        close_btn.setStyleSheet("QPushButton:hover { background-color: #c42b1c; }")
+        close_btn.setStyleSheet(CLOSE_BUTTON_STYLE)
         close_btn.clicked.connect(self.handle_close)
 
         window_controls_layout.addWidget(minimize_btn)
@@ -77,31 +89,7 @@ class CustomTitleBarWidget(QWidget):
         layout.addWidget(window_controls)
         self.setLayout(layout)
 
-        self.setStyleSheet(
-            """
-            QWidget {
-                background-color: #37474F;
-                border: none;
-            }
-            QLabel {
-                color: white;
-                font-size: 12pt;
-                font-weight: bold;
-                background-color: transparent;
-            }
-            QPushButton {
-                background-color: transparent;
-                border: none;
-                color: white;
-                padding: 5px;
-                min-width: 40px;
-                max-width: 40px;
-                font-size: 16pt;
-                font-family: Arial;
-            }
-            QPushButton:hover { background-color: #455A64; }
-        """
-        )
+        self.setStyleSheet(CUSTOM_TITLE_BAR_STYLE)
 
     def handle_minimize(self):
         """Handle minimize button click by unchecking the corresponding button in main window."""
@@ -216,58 +204,7 @@ class CustomProgressDialog(QProgressDialog):
 
         # Create content widget with dark background
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-                color: white;
-            }
-            QProgressBar {
-                border: 1px solid #37474F;
-                border-radius: 2px;
-                text-align: center;
-                background-color: #2D2D2D;
-                height: 20px;
-            }
-            QProgressBar::chunk {
-                background-color: #9575CD;
-                border-radius: 1px;
-            }
-            QLabel {
-                color: white;
-                font-size: 11px;
-                margin-bottom: 5px;
-            }
-            QPushButton {
-                background-color: rgba(255, 255, 255, 0.05);
-                color: #E1E1E1;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 4px;
-                padding: 8px 24px;
-                font-size: 13px;
-                font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                min-width: 120px;
-                margin: 8px 0px;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.15);
-                border: 1px solid #BB86FC;
-                color: #BB86FC;
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.25);
-                padding-top: 9px;
-                padding-bottom: 7px;
-            }
-            QPushButton:disabled {
-                background-color: rgba(255, 255, 255, 0.03);
-                color: rgba(255, 255, 255, 0.38);
-                border: 1px solid rgba(255, 255, 255, 0.05);
-            }
-        """
-        )
+        content_widget.setStyleSheet(CUSTOM_PROGRESS_DIALOG_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(15, 15, 15, 15)
@@ -354,32 +291,7 @@ class CustomMessageBox(QWidget):
 
         # Create content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-                color: white;
-            }
-            QLabel {
-                color: white;
-                font-size: 11px;
-            }
-            QPushButton {
-                background-color: #9575CD;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: white;
-                min-width: 100px;
-            }
-            QPushButton:hover {
-                background-color: #B39DDB;
-            }
-            QPushButton:pressed {
-                background-color: #7E57C2;
-            }
-        """
-        )
+        content_widget.setStyleSheet(CUSTOM_MESSAGE_BOX_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
@@ -430,38 +342,13 @@ class CustomWarningDialog(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # Add custom title bar (this can stay fixed height as it's a standard UI element)
+        # Add custom title bar
         self.title_bar = CustomTitleBarWidget(title, self)
         layout.addWidget(self.title_bar)
 
         # Create content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
-            }
-            QPushButton {
-                background-color: #BB86FC;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: black;
-                min-width: 80px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
-        """
-        )
+        content_widget.setStyleSheet(CUSTOM_WARNING_DIALOG_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
@@ -589,32 +476,7 @@ class CustomInfoDialog(QDialog):
 
         # Create content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
-            }
-            QPushButton {
-                background-color: #BB86FC;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: black;
-                min-width: 80px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
-        """
-        )
+        content_widget.setStyleSheet(CUSTOM_INFO_DIALOG_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
@@ -709,32 +571,7 @@ class CustomNotificationDialog(QDialog):
 
         # Create content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
-            }
-            QPushButton {
-                background-color: #BB86FC;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: black;
-                min-width: 80px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
-        """
-        )
+        content_widget.setStyleSheet(CUSTOM_NOTIFICATION_DIALOG_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
@@ -866,32 +703,7 @@ class ConfirmDialog(QDialog):
 
         # Create content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
-            }
-            QPushButton {
-                background-color: #BB86FC;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: black;
-                min-width: 80px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
-        """
-        )
+        content_widget.setStyleSheet(CONFIRM_DIALOG_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
@@ -991,61 +803,7 @@ class NewCarriersDialog(QDialog):
 
         # Create content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-                color: #E1E1E1;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
-                padding: 4px;
-            }
-            QCheckBox {
-                color: #E1E1E1;
-                font-size: 12px;
-                padding: 4px;
-            }
-            QCheckBox::indicator {
-                width: 18px;
-                height: 18px;
-                border: 2px solid #BB86FC;
-                border-radius: 4px;
-                background-color: transparent;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #BB86FC;
-                image: url(resources/check.png);
-            }
-            QPushButton {
-                background-color: #BB86FC;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: black;
-                min-width: 100px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
-            QPushButton#secondary {
-                background-color: #2D2D2D;
-                color: #BB86FC;
-                border: 1px solid #BB86FC;
-            }
-            QPushButton#secondary:hover {
-                background-color: #353535;
-            }
-            QPushButton#secondary:pressed {
-                background-color: #252525;
-            }
-            """
-        )
+        content_widget.setStyleSheet(NEW_CARRIERS_DIALOG_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)

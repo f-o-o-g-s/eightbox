@@ -492,6 +492,261 @@ DATE_SELECTION_PANE_STYLE = """
     }
 """
 
+# Custom Widget Styles
+CUSTOM_TITLE_BAR_STYLE = """
+    QWidget {
+        background-color: #37474F;
+        border: none;
+    }
+    QLabel {
+        color: white;
+        font-size: 12pt;
+        font-weight: bold;
+        background-color: transparent;
+    }
+    QPushButton {
+        background-color: transparent;
+        border: none;
+        color: white;
+        padding: 5px;
+        min-width: 40px;
+        max-width: 40px;
+        font-size: 16pt;
+        font-family: Arial;
+    }
+    QPushButton:hover { background-color: #455A64; }
+"""
+
+CUSTOM_PROGRESS_DIALOG_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+        color: white;
+    }
+    QProgressBar {
+        border: 1px solid #37474F;
+        border-radius: 2px;
+        text-align: center;
+        background-color: #2D2D2D;
+        height: 20px;
+    }
+    QProgressBar::chunk {
+        background-color: #9575CD;
+        border-radius: 1px;
+    }
+    QLabel {
+        color: white;
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+    QPushButton {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #E1E1E1;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        padding: 8px 24px;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 120px;
+        margin: 8px 0px;
+    }
+    QPushButton:hover {
+        background-color: rgba(187, 134, 252, 0.15);
+        border: 1px solid #BB86FC;
+        color: #BB86FC;
+    }
+    QPushButton:pressed {
+        background-color: rgba(187, 134, 252, 0.25);
+        padding-top: 9px;
+        padding-bottom: 7px;
+    }
+    QPushButton:disabled {
+        background-color: rgba(255, 255, 255, 0.03);
+        color: rgba(255, 255, 255, 0.38);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+"""
+
+CUSTOM_MESSAGE_BOX_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+        color: white;
+    }
+    QLabel {
+        color: white;
+        font-size: 11px;
+    }
+    QPushButton {
+        background-color: #9575CD;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        color: white;
+        min-width: 100px;
+    }
+    QPushButton:hover {
+        background-color: #B39DDB;
+    }
+    QPushButton:pressed {
+        background-color: #7E57C2;
+    }
+"""
+
+CUSTOM_WARNING_DIALOG_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+    }
+    QLabel {
+        color: #E1E1E1;
+        font-size: 12px;
+    }
+    QPushButton {
+        background-color: #BB86FC;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        color: black;
+        min-width: 80px;
+        font-weight: bold;
+    }
+    QPushButton:hover {
+        background-color: #9965DA;
+    }
+    QPushButton:pressed {
+        background-color: #7B4FAF;
+    }
+"""
+
+CUSTOM_INFO_DIALOG_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+    }
+    QLabel {
+        color: #E1E1E1;
+        font-size: 12px;
+    }
+    QPushButton {
+        background-color: #BB86FC;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        color: black;
+        min-width: 80px;
+        font-weight: bold;
+    }
+    QPushButton:hover {
+        background-color: #9965DA;
+    }
+    QPushButton:pressed {
+        background-color: #7B4FAF;
+    }
+"""
+
+CUSTOM_NOTIFICATION_DIALOG_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+    }
+    QLabel {
+        color: #E1E1E1;
+        font-size: 12px;
+    }
+    QPushButton {
+        background-color: #BB86FC;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        color: black;
+        min-width: 80px;
+        font-weight: bold;
+    }
+    QPushButton:hover {
+        background-color: #9965DA;
+    }
+    QPushButton:pressed {
+        background-color: #7B4FAF;
+    }
+"""
+
+CONFIRM_DIALOG_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+    }
+    QLabel {
+        color: #E1E1E1;
+        font-size: 12px;
+    }
+    QPushButton {
+        background-color: #BB86FC;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        color: black;
+        min-width: 80px;
+        font-weight: bold;
+    }
+    QPushButton:hover {
+        background-color: #9965DA;
+    }
+    QPushButton:pressed {
+        background-color: #7B4FAF;
+    }
+"""
+
+NEW_CARRIERS_DIALOG_STYLE = """
+    QWidget {
+        background-color: #1E1E1E;
+        color: #E1E1E1;
+    }
+    QLabel {
+        color: #E1E1E1;
+        font-size: 12px;
+        padding: 4px;
+    }
+    QCheckBox {
+        color: #E1E1E1;
+        font-size: 12px;
+        padding: 4px;
+    }
+    QCheckBox::indicator {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #BB86FC;
+        border-radius: 4px;
+        background-color: transparent;
+    }
+    QCheckBox::indicator:checked {
+        background-color: #BB86FC;
+        image: url(resources/check.png);
+    }
+    QPushButton {
+        background-color: #BB86FC;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        color: black;
+        min-width: 100px;
+        font-weight: bold;
+    }
+    QPushButton:hover {
+        background-color: #9965DA;
+    }
+    QPushButton:pressed {
+        background-color: #7B4FAF;
+    }
+    QPushButton#secondary {
+        background-color: #2D2D2D;
+        color: #BB86FC;
+        border: 1px solid #BB86FC;
+    }
+    QPushButton#secondary:hover {
+        background-color: #353535;
+    }
+    QPushButton#secondary:pressed {
+        background-color: #252525;
+    }
+"""
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application.
