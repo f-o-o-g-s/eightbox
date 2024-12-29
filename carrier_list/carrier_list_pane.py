@@ -22,11 +22,11 @@ from custom_widgets import (
     CustomNotificationDialog,
     CustomTitleBarWidget,
 )
-from removed_carriers_manager import RemovedCarriersManager
 
 from .db.carrier_db_manager import CarrierDBManager
 from .models.carrier_list_proxy_model import CarrierListProxyModel
 from .models.pandas_table_model import PandasTableModel
+from .removed_carriers_manager import RemovedCarriersManager
 from .ui.carrier_edit_dialog import CarrierEditDialog
 from .ui.carrier_stats_panel import CarrierStatsPanel
 from .ui.carrier_table_view import CarrierTableView
