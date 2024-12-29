@@ -1450,6 +1450,61 @@ REMOVED_CARRIERS_STYLE = f"""
     }}
 """
 
+# Carrier List Button Styles
+CARRIER_LIST_BUTTON_STYLE = f"""
+    QPushButton {{
+        background-color: {rgba(RGB_HIGHLIGHT_LOW, 0.7)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 1px solid {QColor(*RGB_IRIS).name()};
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        text-transform: uppercase;
+        min-width: 60px;
+        min-height: 28px;
+    }}
+    QPushButton:hover {{
+        background-color: {rgba(RGB_HIGHLIGHT_MED, 0.8)};
+        border: 1px solid {QColor(*RGB_IRIS).lighter(115).name()};
+        color: {QColor(*RGB_IRIS).lighter(115).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {rgba(RGB_HIGHLIGHT_HIGH, 0.9)};
+        border: 1px solid {QColor(*RGB_IRIS).darker(110).name()};
+        color: {QColor(*RGB_IRIS).darker(110).name()};
+    }}
+    QPushButton[objectName="destructive"] {{
+        background-color: {rgba(RGB_LOVE, 0.15)};
+        color: {QColor(*RGB_LOVE).name()};
+        border: 1px solid {QColor(*RGB_LOVE).name()};
+    }}
+    QPushButton[objectName="destructive"]:hover {{
+        background-color: {rgba(RGB_LOVE, 0.25)};
+        border: 1px solid {QColor(*RGB_LOVE).lighter(110).name()};
+        color: {QColor(*RGB_LOVE).lighter(110).name()};
+    }}
+    QPushButton[objectName="destructive"]:pressed {{
+        background-color: {rgba(RGB_LOVE, 0.35)};
+        border: 1px solid {QColor(*RGB_LOVE).darker(110).name()};
+        color: {QColor(*RGB_LOVE).darker(110).name()};
+    }}
+    QPushButton[objectName="primary"] {{
+        background-color: {rgba(RGB_IRIS, 0.15)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 2px solid {rgba(RGB_IRIS, 0.5)};
+    }}
+    QPushButton[objectName="primary"]:hover {{
+        background-color: {rgba(RGB_IRIS, 0.25)};
+        border: 2px solid {QColor(*RGB_IRIS).name()};
+        color: {QColor(*RGB_IRIS).lighter(115).name()};
+    }}
+    QPushButton[objectName="primary"]:pressed {{
+        background-color: {rgba(RGB_IRIS, 0.35)};
+        border: 2px solid {QColor(*RGB_IRIS).darker(110).name()};
+        color: {QColor(*RGB_IRIS).darker(110).name()};
+    }}
+"""
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application."""

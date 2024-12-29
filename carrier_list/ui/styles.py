@@ -3,7 +3,7 @@
 from theme import (
     ALPHA_HOVER,
     ALPHA_PRESSED,
-    BUTTON_STYLE,
+    CARRIER_LIST_BUTTON_STYLE,
     COLOR_BLACK,
     COLOR_ROW_HIGHLIGHT,
     COLOR_STATUS_NL,
@@ -138,14 +138,7 @@ QWidget {{
     border-radius: 4px;
     margin-top: 8px;
 }}
-{BUTTON_STYLE}
-QPushButton {{
-    min-height: 28px;
-    min-width: 60px;
-    font-size: 11px;
-    text-transform: uppercase;
-    padding: 4px 8px;
-}}
+{CARRIER_LIST_BUTTON_STYLE}
 """
 
 EDIT_DIALOG_STYLE = f"""
@@ -212,7 +205,7 @@ QComboBox QAbstractItemView {{
     border: 1px solid {COLOR_TEXT_DIM.name()};
     padding: 4px;
 }}
-{BUTTON_STYLE}
+{CARRIER_LIST_BUTTON_STYLE}
 QPushButton {{
     padding: 12px 24px;
     min-width: 120px;
