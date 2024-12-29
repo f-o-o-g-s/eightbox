@@ -41,6 +41,7 @@ ALPHA_HOVER = 0.1
 ALPHA_PRESSED = 0.15
 ALPHA_SELECTED = 0.2
 ALPHA_DISABLED = 0.05
+ALPHA_DISABLED_TEXT = 0.3  # For disabled text elements
 
 # Material Design Dark Theme Colors
 MATERIAL_PRIMARY = QColor("#BB86FC")  # Primary brand color (purple)
@@ -457,7 +458,7 @@ DATE_SELECTION_PANE_STYLE = f"""
         border-radius: 2px;
     }}
     QTableView::item:hover {{
-        background-color: rgba(187, 134, 252, 0.1);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
     }}
     QTableView::item:selected {{
         background-color: {MATERIAL_PRIMARY.name()};
@@ -980,7 +981,7 @@ def apply_material_dark_theme(app: QApplication):
             font-family: Roboto, Arial, sans-serif;
         }}
         QPushButton {{
-            background-color: rgba(187, 134, 252, 0.1);
+            background-color: rgba(187, 134, 252, {ALPHA_HOVER});
             border: none;
             color: {MATERIAL_PRIMARY.name()};
             padding: 8px 16px;
@@ -988,10 +989,10 @@ def apply_material_dark_theme(app: QApplication):
             font-weight: normal;
         }}
         QPushButton:hover {{
-            background-color: rgba(187, 134, 252, 0.2);
+            background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         }}
         QPushButton:pressed {{
-            background-color: rgba(187, 134, 252, 0.3);
+            background-color: rgba(187, 134, 252, {ALPHA_SELECTED});
         }}
         QPushButton:checked {{
             background-color: {MATERIAL_PRIMARY.name()};
@@ -1120,6 +1121,11 @@ def apply_material_dark_theme(app: QApplication):
         QWidget#ButtonContainer QPushButton:checked {{
             background-color: {MATERIAL_PRIMARY.name()};
             color: {COLOR_BLACK.name()};
+        }}
+        QPushButton:disabled {{
+            background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
+            color: rgba(225, 225, 225, {ALPHA_DISABLED_TEXT});
+            border: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
         }}
     """
     )

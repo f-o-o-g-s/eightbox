@@ -1,6 +1,8 @@
 """Material Design styles for carrier list UI components."""
 
 from theme import (
+    ALPHA_HOVER,
+    ALPHA_PRESSED,
     COLOR_BLACK,
     COLOR_ROW_HIGHLIGHT,
     COLOR_STATUS_NL,
@@ -57,10 +59,10 @@ QPushButton {{
     font-weight: bold;
 }}
 QPushButton:hover {{
-    background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
 }}
 QPushButton:pressed {{
-    background-color: {MATERIAL_PRIMARY.darker(120).name()};
+    background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
 }}
 QPushButton:disabled {{
     background-color: {COLOR_TEXT_DIM.name()};

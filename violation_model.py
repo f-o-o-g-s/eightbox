@@ -66,7 +66,7 @@ def calculate_optimal_gray(bg_color, target_ratio=7.0):
         gray = (left + right) // 2
         gray_luminance = gray / 255
 
-        # Calculate contrast ratio
+        # Calculate contrast ratio using background luminance
         lighter = max(gray_luminance, bg_luminance) + 0.05
         darker = min(gray_luminance, bg_luminance) + 0.05
         ratio = lighter / darker
