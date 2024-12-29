@@ -509,7 +509,7 @@ DATE_SELECTION_PANE_STYLE = f"""
     }}
     QPushButton:disabled {{
         background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-        color: rgba(225, 225, 225, 0.3);
+        color: rgba(225, 225, 225, {ALPHA_DISABLED_TEXT});
         border: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
     }}
     QScrollBar:vertical {{

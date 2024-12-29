@@ -1,6 +1,7 @@
 """Material Design styles for carrier list UI components."""
 
 from theme import (
+    ALPHA_DISABLED_TEXT,
     ALPHA_HOVER,
     ALPHA_PRESSED,
     COLOR_BLACK,
@@ -108,10 +109,10 @@ QWidget[class="stat-container"] {{
     padding: 4px 12px;
 }}
 QWidget[class="stat-container"]:hover {{
-    background-color: rgba(103, 80, 164, 0.08);
+    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
 }}
 QWidget[class="stat-container"][selected="true"] {{
-    background-color: rgba(103, 80, 164, 0.15);
+    background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
 }}
 """
 
@@ -164,14 +165,14 @@ QHeaderView::section {{
 }}
 QTableView::item {{
     padding: 8px 4px;
-    border-bottom: 1px solid rgba(51, 51, 51, 0.5);
+    border-bottom: 1px solid {COLOR_TEXT_DIM.name()};
 }}
 QTableView::item:selected {{
     background: {MATERIAL_PRIMARY.name()};
     color: {COLOR_BLACK.name()};
 }}
 QTableView::item:hover {{
-    background-color: rgba(187, 134, 252, 0.1);
+    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
 }}
 QTableView::item:focus {{
     background: {MATERIAL_PRIMARY.name()};
@@ -213,7 +214,7 @@ QPushButton:pressed {{
 }}
 QPushButton:disabled {{
     background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-    color: rgba(225, 225, 225, 0.3);
+    color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
 }}
 QPushButton#primary {{
     background-color: {MATERIAL_PRIMARY.name()};
