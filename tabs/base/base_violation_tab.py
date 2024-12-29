@@ -434,6 +434,52 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         no_data_view.setModel(None)
         self.date_tabs.addTab(no_data_view, "No Data")
 
+    def configure_modern_table_view(self, view: QTableView):
+        """Configure modern styling for the table view.
+
+        Applies minimal visual styling to make the table more polished while
+        maintaining good performance.
+        """
+        # Configure selection behavior
+        view.setSelectionBehavior(QTableView.SelectRows)
+        view.setSelectionMode(QTableView.SingleSelection)
+
+        # Remove the focus border
+        view.setFocusPolicy(Qt.StrongFocus)
+        view.setFrameShape(QTableView.NoFrame)
+
+        # Configure the headers
+        header = view.horizontalHeader()
+        header.setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        header.setSectionsClickable(True)
+        header.setSortIndicatorShown(True)
+
+        # Hide row numbers
+        view.verticalHeader().setVisible(False)
+
+        # Modern grid style
+        view.setShowGrid(True)
+        view.setGridStyle(Qt.SolidLine)
+
+        # Set text elide mode for long text
+        view.setTextElideMode(Qt.ElideRight)
+
+        # Enable sorting
+        view.setSortingEnabled(True)
+
+        # Minimal style sheet for structure
+        view.setStyleSheet(
+            """
+            QTableView {
+                border: none;
+            }
+            QHeaderView::section {
+                padding: 6px;
+                font-weight: bold;
+            }
+        """
+        )
+
     def create_table_view(self, model, proxy_model=None):
         """Create and configure a table view for violation data."""
         container = QWidget()
@@ -458,18 +504,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         else:
             view.setModel(model)
 
-        view.setSortingEnabled(True)
+        # Apply modern styling
+        self.configure_modern_table_view(view)
         setup_table_copy_functionality(view)
-
-        # Configure the header for better sorting behavior
-        header = view.horizontalHeader()
-        header.setSectionsClickable(True)
-        header.setSortIndicatorShown(True)
-
-        # Initial sort on first column
-        if proxy_model:
-            proxy_model.sort(0, Qt.AscendingOrder)
-            header.sortIndicatorChanged.connect(proxy_model.sort)
 
         layout.addWidget(view)
         return container
