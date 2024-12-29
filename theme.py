@@ -132,7 +132,7 @@ TOP_BUTTON_ROW_STYLE = f"""
         border-bottom: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
     }}
     QPushButton {{
-        background-color: rgba(187, 134, 252, 0.05);
+        background-color: rgba(187, 134, 252, {ALPHA_DISABLED});
         border: none;
         border-radius: 4px;
         color: {MATERIAL_PRIMARY.name()};
@@ -146,25 +146,25 @@ TOP_BUTTON_ROW_STYLE = f"""
         text-transform: uppercase;
     }}
     QPushButton:hover {{
-        background-color: rgba(187, 134, 252, 0.08);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         color: {MATERIAL_PRIMARY.lighter(110).name()};
     }}
     QPushButton:pressed {{
-        background-color: rgba(187, 134, 252, 0.12);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         padding-top: 17px;
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:checked {{
-        background-color: rgba(187, 134, 252, 0.12);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         color: {MATERIAL_PRIMARY.lighter(110).name()};
         font-weight: 600;
     }}
     QPushButton:checked:hover {{
-        background-color: rgba(187, 134, 252, 0.16);
+        background-color: rgba(187, 134, 252, {ALPHA_SELECTED});
     }}
     QPushButton:disabled {{
-        background-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.38);
+        background-color: rgba(255, 255, 255, {ALPHA_DISABLED});
+        color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
     }}
 """
 
@@ -174,7 +174,7 @@ FILTER_BUTTON_ROW_STYLE = f"""
         border-top: 1px solid {COLOR_TEXT_DIM.name()};
     }}
     QPushButton {{
-        background-color: rgba(187, 134, 252, 0.05);
+        background-color: rgba(187, 134, 252, {ALPHA_DISABLED});
         border: none;
         color: {MATERIAL_PRIMARY.name()};
         padding: 4px 12px;
@@ -188,15 +188,15 @@ FILTER_BUTTON_ROW_STYLE = f"""
         letter-spacing: 0.15px;
     }}
     QPushButton:hover {{
-        background-color: rgba(187, 134, 252, 0.08);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:pressed {{
-        background-color: rgba(187, 134, 252, 0.12);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:checked {{
-        background-color: rgba(187, 134, 252, 0.12);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         color: {MATERIAL_PRIMARY.name()};
         font-weight: 600;
     }}
@@ -340,7 +340,7 @@ SETTINGS_DIALOG_STYLE = f"""
         background-color: {MATERIAL_BACKGROUND.name()};
     }}
     QPushButton {{
-        background-color: rgba(187, 134, 252, 0.1);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         border: none;
         border-radius: 4px;
         color: {MATERIAL_PRIMARY.name()};
@@ -350,10 +350,10 @@ SETTINGS_DIALOG_STYLE = f"""
         min-width: 120px;
     }}
     QPushButton:hover {{
-        background-color: rgba(187, 134, 252, 0.15);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
     QPushButton:pressed {{
-        background-color: rgba(187, 134, 252, 0.2);
+        background-color: rgba(187, 134, 252, {ALPHA_SELECTED});
     }}
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
@@ -392,7 +392,7 @@ SETTINGS_BUTTON_CONTAINER_STYLE = f"""
 
 SETTINGS_SYNC_BUTTON_STYLE = f"""
     QPushButton {{
-        background-color: rgba(187, 134, 252, 0.1);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         border: none;
         border-radius: 4px;
         color: {MATERIAL_PRIMARY.name()};
@@ -403,10 +403,10 @@ SETTINGS_SYNC_BUTTON_STYLE = f"""
         text-align: center;
     }}
     QPushButton:hover {{
-        background-color: rgba(187, 134, 252, 0.15);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
     QPushButton:pressed {{
-        background-color: rgba(187, 134, 252, 0.2);
+        background-color: rgba(187, 134, 252, {ALPHA_SELECTED});
         padding-top: 13px;
         padding-bottom: 11px;
     }}
@@ -414,7 +414,7 @@ SETTINGS_SYNC_BUTTON_STYLE = f"""
 
 SETTINGS_CLOSE_BUTTON_STYLE = f"""
     QPushButton {{
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: rgba(255, 255, 255, {ALPHA_DISABLED});
         border: none;
         border-radius: 4px;
         color: {COLOR_TEXT_LIGHT.name()};
@@ -425,10 +425,10 @@ SETTINGS_CLOSE_BUTTON_STYLE = f"""
         text-align: center;
     }}
     QPushButton:hover {{
-        background-color: rgba(255, 255, 255, 0.08);
+        background-color: rgba(255, 255, 255, {ALPHA_HOVER});
     }}
     QPushButton:pressed {{
-        background-color: rgba(255, 255, 255, 0.12);
+        background-color: rgba(255, 255, 255, {ALPHA_PRESSED});
         padding-top: 13px;
         padding-bottom: 11px;
     }}
@@ -581,9 +581,9 @@ CUSTOM_PROGRESS_DIALOG_STYLE = f"""
         margin-bottom: 5px;
     }}
     QPushButton {{
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: rgba(255, 255, 255, {ALPHA_DISABLED});
         color: {COLOR_TEXT_LIGHT.name()};
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, {ALPHA_HOVER});
         border-radius: 4px;
         padding: 8px 24px;
         font-size: 13px;
@@ -594,19 +594,19 @@ CUSTOM_PROGRESS_DIALOG_STYLE = f"""
         margin: 8px 0px;
     }}
     QPushButton:hover {{
-        background-color: rgba(187, 134, 252, 0.15);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
         border: 1px solid {MATERIAL_PRIMARY.name()};
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:pressed {{
-        background-color: rgba(187, 134, 252, 0.25);
+        background-color: rgba(187, 134, 252, {ALPHA_SELECTED});
         padding-top: 9px;
         padding-bottom: 7px;
     }}
     QPushButton:disabled {{
-        background-color: rgba(255, 255, 255, 0.03);
-        color: rgba(255, 255, 255, 0.38);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background-color: rgba(255, 255, 255, {ALPHA_DISABLED});
+        color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
+        border: 1px solid rgba(255, 255, 255, {ALPHA_DISABLED});
     }}
 """
 
@@ -816,17 +816,17 @@ CLEAN_MOVES_DIALOG_STYLE = f"""
         border: 1px solid {COLOR_TEXT_DIM.name()};
     }}
     QPushButton {{
-        background-color: rgba(187, 134, 252, 0.1);
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
         color: {MATERIAL_PRIMARY.name()};
         border: none;
         padding: 8px 16px;
         border-radius: 4px;
     }}
     QPushButton:hover {{
-        background-color: rgba(187, 134, 252, 0.2);
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
     QPushButton:pressed {{
-        background-color: rgba(187, 134, 252, 0.3);
+        background-color: rgba(187, 134, 252, {ALPHA_SELECTED});
     }}
     QPushButton:disabled {{
         background-color: {MATERIAL_SURFACE.name()};
