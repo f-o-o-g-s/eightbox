@@ -271,11 +271,11 @@ SUB_TAB_STYLE = f"""
     QTabBar::tab {{
         background-color: {MATERIAL_SURFACE.name()};
         color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
-        padding: 6px 12px;
-        min-width: 60px;
+        padding: 4px 8px;
+        min-width: 40px;
         margin: 0;
         border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
-        font-size: 10px;
+        font-size: 9px;
         font-weight: normal;
         text-transform: uppercase;
         letter-spacing: 0.05px;

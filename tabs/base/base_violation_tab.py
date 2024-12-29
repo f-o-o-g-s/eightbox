@@ -238,6 +238,10 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         self.date_tabs = QTabWidget()
         self.date_tabs.setDocumentMode(True)
 
+        # Set tab bar height
+        tab_bar = self.date_tabs.tabBar()
+        tab_bar.setFixedHeight(24)  # Set a smaller fixed height for the tab bar
+
         # Set tab bar styling
         self.date_tabs.setStyleSheet(
             """
@@ -251,18 +255,19 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             QTabBar::tab {
                 background-color: {MATERIAL_SURFACE.name()};
                 color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
-                padding: 4px 8px;
+                padding: 2px 6px;
                 border: none;
                 border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
-                min-width: 60px;
-                font-size: 10px;
+                min-width: 45px;
+                font-size: 9px;
                 font-weight: normal;
                 text-transform: uppercase;
                 letter-spacing: 0.05px;
             }
             QTabBar::tab:selected {
                 color: {MATERIAL_PRIMARY.name()};
-                background-color: {MATERIAL_SURFACE.name()};
+                background-color: rgba(187, 134, 252, 0.12);
+                border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
             }
             QTabBar::tab:hover {
                 background-color: rgba(187, 134, 252, {ALPHA_HOVER});
