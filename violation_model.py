@@ -30,18 +30,21 @@ from PyQt5.QtGui import (
     QStandardItemModel,
 )
 
+from theme import (
+    COLOR_VIOLATION,
+    COLOR_VIOLATION_SUMMARY,
+    COLOR_VIOLATION_WEEKLY,
+)
 from violation_types import ViolationType
 
 # We can remove the theme import entirely since we're calculating all text colors dynamically
 
 # fully opaque
-VIOLATION_COLOR = QColor(125, 89, 168)  # Medium dark purple (7D59A8)
+VIOLATION_COLOR = COLOR_VIOLATION  # Medium dark purple (7D59A8)
 # Softer background for summary rows with violations
-SUMMARY_ROW_COLOR = QColor(
-    215, 183, 255
-)  # D7B7FF is a lighter shade of purple/lavender
+SUMMARY_ROW_COLOR = COLOR_VIOLATION_SUMMARY  # Light purple (D7B7FF)
 # Teal color for positive weekly totals
-WEEKLY_TOTAL_COLOR = QColor(2, 145, 132)  # Teal color for weekly remedy totals
+WEEKLY_TOTAL_COLOR = COLOR_VIOLATION_WEEKLY  # Teal (029184)
 
 
 def calculate_optimal_gray(bg_color, target_ratio=7.0):

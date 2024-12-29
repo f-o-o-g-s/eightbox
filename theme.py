@@ -54,6 +54,11 @@ COLOR_TEXT_DIM = QColor("#333333")  # Secondary text
 COLOR_MAXIMIZED_TRUE = QColor("#4CAF50")  # Success state
 COLOR_MAXIMIZED_FALSE = QColor("#F44336")  # Error state
 
+# Violation-specific colors (matching violation_model.py)
+COLOR_VIOLATION = QColor("#7D59A8")  # Medium dark purple (125, 89, 168)
+COLOR_VIOLATION_SUMMARY = QColor("#D7B7FF")  # Light purple (215, 183, 255)
+COLOR_VIOLATION_WEEKLY = QColor("#029184")  # Teal (2, 145, 132)
+
 # Component-specific style sheets
 TITLE_BAR_STYLE = """
     QWidget {
