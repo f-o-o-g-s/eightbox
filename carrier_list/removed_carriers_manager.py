@@ -28,6 +28,8 @@ from custom_widgets import (
     CustomWarningDialog,
 )
 
+from .ui.styles import REMOVED_CARRIERS_STYLE
+
 
 class RemovedCarriersTableModel(QAbstractTableModel):
     """Table model for displaying removed carriers data."""
@@ -97,61 +99,7 @@ class RemovedCarriersManager(QDialog):
 
         # Create content widget
         content_widget = QWidget()
-        content_widget.setStyleSheet(
-            """
-            QWidget {
-                background-color: #1E1E1E;
-                color: #E1E1E1;
-            }
-            QLabel {
-                color: #E1E1E1;
-                font-size: 12px;
-                padding: 4px;
-            }
-            QTableView {
-                background-color: #1E1E1E;
-                alternate-background-color: #262626;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                gridline-color: #333333;
-            }
-            QTableView::item {
-                padding: 8px;
-                border: none;
-            }
-            QTableView::item:selected {
-                background-color: #BB86FC;
-                color: black;
-            }
-            QHeaderView::section {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                padding: 8px;
-                border: none;
-                border-right: 1px solid #333333;
-                border-bottom: 1px solid #333333;
-            }
-            QPushButton {
-                background-color: #BB86FC;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 16px;
-                color: black;
-                min-width: 100px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #9965DA;
-            }
-            QPushButton:pressed {
-                background-color: #7B4FAF;
-            }
-            QPushButton:disabled {
-                background-color: #666666;
-                color: #999999;
-            }
-            """
-        )
+        content_widget.setStyleSheet(REMOVED_CARRIERS_STYLE)
 
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
