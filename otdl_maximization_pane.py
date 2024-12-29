@@ -64,6 +64,7 @@ from theme import (
     COLOR_NO_HIGHLIGHT,
     COLOR_ROW_HIGHLIGHT,
     COLOR_TEXT_LIGHT,
+    MATERIAL_BACKGROUND,
     MATERIAL_BLUE_600,
     MATERIAL_BLUE_GREY_800,
     MATERIAL_BLUE_GREY_900,
@@ -196,8 +197,8 @@ class OTDLMaximizationPane(QWidget):
         footer.setStyleSheet(
             """
             QWidget#footer {
-                background-color: #1E1E1E;
-                border-top: 1px solid #333333;
+                background-color: {MATERIAL_SURFACE.name()};
+                border-top: 1px solid {COLOR_TEXT_DIM.name()};
                 min-height: 60px;
                 max-height: 60px;
                 padding-bottom: 8px;  /* Add margin at the bottom */
@@ -212,10 +213,10 @@ class OTDLMaximizationPane(QWidget):
         apply_button.setStyleSheet(
             f"""
             QPushButton {{
-                background-color: #2D2D2D;
-                color: #BB86FC;
-                border: 1px solid #3D3D3D;
-                border-bottom: 2px solid #1D1D1D;
+                background-color: {COLOR_ROW_HIGHLIGHT.name()};
+                color: {MATERIAL_PRIMARY.name()};
+                border: 1px solid {COLOR_TEXT_DIM.name()};
+                border-bottom: 2px solid {MATERIAL_BACKGROUND.name()};
                 padding: 8px 24px;
                 font-weight: 500;
                 min-height: 32px;
@@ -225,18 +226,14 @@ class OTDLMaximizationPane(QWidget):
                 letter-spacing: 0.5px;
             }}
             QPushButton:hover {{
-                background-color: #353535;
-                border: 1px solid #454545;
-                border-bottom: 2px solid #252525;
-                color: #CBB0FF;
+                background-color: {COLOR_BG_HOVER.name()};
+                border: 1px solid {COLOR_TEXT_DIM.name()};
+                border-bottom: 2px solid {MATERIAL_BACKGROUND.name()};
+                color: {COLOR_TEXT_LIGHT.name()};
             }}
             QPushButton:pressed {{
-                background-color: #252525;
-                border: 1px solid #353535;
-                border-top: 2px solid #151515;
-                border-bottom: 1px solid #353535;
-                padding-top: 9px;
-                color: #BB86FC;
+                background-color: {MATERIAL_BACKGROUND.name()};
+                border: 1px solid {COLOR_BG_HOVER.name()};
             }}
             QPushButton:disabled {{
                 background-color: #252525;
