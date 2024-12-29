@@ -392,6 +392,106 @@ SETTINGS_CLOSE_BUTTON_STYLE = """
     }
 """
 
+DATE_SELECTION_PANE_STYLE = """
+    QWidget {
+        background-color: #121212;
+    }
+    QLabel {
+        color: #E1E1E1;
+        font-size: 13px;
+        padding: 8px;
+        background-color: #1E1E1E;
+        border-radius: 4px;
+    }
+    QTableView {
+        background-color: #121212;
+        border: none;
+        border-radius: 4px;
+        selection-background-color: #BB86FC;
+        selection-color: #000000;
+        gridline-color: transparent;
+    }
+    QTableView::item {
+        padding: 8px;
+        border-radius: 2px;
+    }
+    QTableView::item:hover {
+        background-color: rgba(187, 134, 252, 0.1);
+    }
+    QTableView::item:selected {
+        background-color: #BB86FC;
+        color: #000000;
+    }
+    QHeaderView::section {
+        background-color: #1E1E1E;
+        color: #BB86FC;
+        font-weight: bold;
+        padding: 8px;
+        border: none;
+        border-radius: 0px;
+    }
+    QHeaderView::section:first {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+    }
+    QHeaderView::section:last {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+    QPushButton {
+        background-color: #2D2D2D;
+        color: #BB86FC;
+        border: 1px solid #3D3D3D;
+        border-bottom: 2px solid #1D1D1D;
+        padding: 8px 24px;
+        font-weight: 500;
+        min-height: 32px;
+        border-radius: 4px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    QPushButton:hover {
+        background-color: #353535;
+        border: 1px solid #454545;
+        border-bottom: 2px solid #252525;
+        color: #CBB0FF;
+    }
+    QPushButton:pressed {
+        background-color: #252525;
+        border: 1px solid #353535;
+        border-top: 2px solid #151515;
+        border-bottom: 1px solid #353535;
+        padding-top: 9px;
+        color: #BB86FC;
+    }
+    QPushButton:disabled {
+        background-color: #252525;
+        color: rgba(225, 225, 225, 0.3);
+        border: 1px solid #2D2D2D;
+    }
+    QScrollBar:vertical {
+        background-color: #121212;
+        width: 12px;
+        margin: 0px;
+    }
+    QScrollBar::handle:vertical {
+        background-color: #424242;
+        border-radius: 6px;
+        min-height: 20px;
+        margin: 2px;
+    }
+    QScrollBar::handle:vertical:hover {
+        background-color: #616161;
+    }
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+        height: 0px;
+    }
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+        background: none;
+    }
+"""
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application.
