@@ -133,13 +133,13 @@ QLineEdit:hover {{
 }}
 """
 
-SEARCH_ICON_STYLE = """
-QLabel {
-    color: #666666;
+SEARCH_ICON_STYLE = f"""
+QLabel {{
+    color: {COLOR_TEXT_DIM.name()};
     font-size: 16px;
     padding: 0px;
     margin: 0px;
-}
+}}
 """
 
 TABLE_VIEW_STYLE = f"""

@@ -34,13 +34,14 @@ from theme import (
     COLOR_VIOLATION,
     COLOR_VIOLATION_SUMMARY,
     COLOR_VIOLATION_WEEKLY,
+    MATERIAL_BACKGROUND,
 )
 from violation_types import ViolationType
 
 # We can remove the theme import entirely since we're calculating all text colors dynamically
 
 # fully opaque
-VIOLATION_COLOR = COLOR_VIOLATION  # Medium dark purple (7D59A8)
+VIOLATION_COLOR = COLOR_VIOLATION
 # Softer background for summary rows with violations
 SUMMARY_ROW_COLOR = COLOR_VIOLATION_SUMMARY  # Light purple (D7B7FF)
 # Teal color for positive weekly totals
@@ -49,6 +50,9 @@ WEEKLY_TOTAL_COLOR = COLOR_VIOLATION_WEEKLY  # Teal (029184)
 
 def calculate_optimal_gray(bg_color, target_ratio=7.0):
     """Calculate optimal gray value for given background color"""
+    if bg_color is None:
+        bg_color = MATERIAL_BACKGROUND  # Use theme constant instead of hardcoded value
+
     bg_luminance = (
         0.299 * bg_color.red() + 0.587 * bg_color.green() + 0.114 * bg_color.blue()
     ) / 255

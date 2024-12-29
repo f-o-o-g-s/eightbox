@@ -36,6 +36,12 @@ from PyQt5.QtWidgets import (
     QStyleFactory,
 )
 
+# Alpha values for states
+ALPHA_HOVER = 0.1
+ALPHA_PRESSED = 0.15
+ALPHA_SELECTED = 0.2
+ALPHA_DISABLED = 0.05
+
 # Material Design Dark Theme Colors
 MATERIAL_PRIMARY = QColor("#BB86FC")  # Primary brand color (purple)
 MATERIAL_PRIMARY_VARIANT = QColor("#3700B3")  # Darker primary for contrast
@@ -1117,3 +1123,47 @@ def apply_material_dark_theme(app: QApplication):
         }}
     """
     )
+
+
+def calculate_optimal_gray(bg_color, target_ratio=7.0):
+    """Calculate optimal gray value for given background color"""
+    if bg_color is None:
+        bg_color = MATERIAL_BACKGROUND  # Use theme constant instead of hardcoded value
+
+    bg_luminance = (
+        0.299 * bg_color.red() + 0.587 * bg_color.green() + 0.114 * bg_color.blue()
+    ) / 255
+
+    # Binary search for optimal gray value
+    left, right = 0, 255
+    best_gray = 0
+    best_diff = float("inf")
+
+    while left <= right:
+        gray = (left + right) // 2
+        gray_luminance = gray / 255
+
+        # Calculate contrast ratio
+        lighter = max(gray_luminance, bg_luminance) + 0.05
+        darker = min(gray_luminance, bg_luminance) + 0.05
+        ratio = lighter / darker
+
+        diff = abs(ratio - target_ratio)
+        if diff < best_diff:
+            best_diff = diff
+            best_gray = gray
+
+        if ratio < target_ratio:
+            # For dark backgrounds, prefer lighter text
+            if bg_luminance < 0.5:
+                left = gray + 1
+            # For light backgrounds, prefer darker text
+            else:
+                right = gray - 1
+        else:
+            if bg_luminance < 0.5:
+                right = gray - 1
+            else:
+                left = gray + 1
+
+    return QColor(best_gray, best_gray, best_gray)
