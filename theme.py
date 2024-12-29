@@ -48,105 +48,98 @@ from PyQt5.QtWidgets import (
     QStyleFactory,
 )
 
-# RGB Values for Material Colors
-# These are the raw RGB values used to create QColors and rgba strings
-RGB_PRIMARY = (187, 134, 252)  # Purple
-RGB_SECONDARY = (3, 218, 198)  # Teal
-RGB_WHITE = (255, 255, 255)  # White
+# Rosé Pine Moon Color Palette
+# Base colors
+RGB_BASE = (35, 33, 54)  # Base - Main background
+RGB_SURFACE = (42, 39, 63)  # Surface - Elevated surface color
+RGB_OVERLAY = (57, 53, 82)  # Overlay - Higher elevation
+RGB_MUTED = (110, 106, 134)  # Muted - Subtle text/borders
+RGB_SUBTLE = (144, 140, 170)  # Subtle - Secondary text
+RGB_TEXT = (224, 222, 244)  # Text - Primary text
+
+# Accent colors
+RGB_LOVE = (235, 111, 146)  # Love - Error/Warning states
+RGB_GOLD = (246, 193, 119)  # Gold - Highlights/Special states
+RGB_ROSE = (234, 154, 151)  # Rose - Accents
+RGB_PINE = (62, 143, 176)  # Pine - Links/Actions
+RGB_FOAM = (156, 207, 216)  # Foam - Success states
+RGB_IRIS = (196, 167, 231)  # Iris - Primary brand color
+
+# Highlight colors
+RGB_HIGHLIGHT_LOW = (42, 40, 62)  # Subtle highlights
+RGB_HIGHLIGHT_MED = (68, 65, 90)  # Medium emphasis
+RGB_HIGHLIGHT_HIGH = (86, 82, 110)  # High emphasis
 
 
 def rgba(rgb: tuple[int, int, int], alpha: float) -> str:
-    """Create an rgba string from RGB values and alpha.
-
-    Args:
-        rgb: Tuple of (r, g, b) values
-        alpha: Alpha value between 0 and 1
-
-    Returns:
-        CSS rgba string
-    """
+    """Create an rgba string from RGB values and alpha."""
     return f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {alpha})"
 
 
 def rgb_str(rgb: tuple[int, int, int]) -> str:
-    """Create an rgb string from RGB values.
-
-    Args:
-        rgb: Tuple of (r, g, b) values
-
-    Returns:
-        CSS rgb string
-    """
+    """Create an rgb string from RGB values."""
     return f"rgb({rgb[0]}, {rgb[1]}, {rgb[2]})"
 
 
 # Alpha values for UI state management
-# These control the transparency of interactive elements
 ALPHA_HOVER = 0.1  # Subtle feedback for hoverable elements
 ALPHA_PRESSED = 0.15  # Stronger feedback for active/pressed state
 ALPHA_SELECTED = 0.2  # Clear indication of selected state
 ALPHA_DISABLED = 0.05  # Very subtle appearance for disabled elements
 ALPHA_DISABLED_TEXT = 0.3  # Reduced opacity for disabled text
 
-# Material Design Dark Theme - Core Colors
-# These form the foundation of the application's color scheme
-MATERIAL_PRIMARY = QColor("#BB86FC")  # Primary brand color (purple)
-MATERIAL_PRIMARY_VARIANT = QColor("#3700B3")  # Darker primary for contrast
-MATERIAL_SECONDARY = QColor("#03DAC6")  # Accent color (teal)
-MATERIAL_BACKGROUND = QColor("#121212")  # Main background
-MATERIAL_SURFACE = QColor("#1E1E1E")  # Elevated surface color
-MATERIAL_ERROR = QColor("#CF6679")  # Error states
+# Material Design Dark Theme - Core Colors using Rosé Pine Moon
+MATERIAL_PRIMARY = QColor(*RGB_IRIS)  # Primary brand color (Iris)
+MATERIAL_PRIMARY_VARIANT = QColor(*RGB_ROSE)  # Variant for contrast (Rose)
+MATERIAL_SECONDARY = QColor(*RGB_PINE)  # Accent color (Pine)
+MATERIAL_BACKGROUND = QColor(*RGB_BASE)  # Main background
+MATERIAL_SURFACE = QColor(*RGB_SURFACE)  # Elevated surface color
+MATERIAL_ERROR = QColor(*RGB_LOVE)  # Error states (Love)
 
 # Additional Material Colors
-# Extended palette for specific UI components
-MATERIAL_BLUE_GREY_800 = QColor("#37474F")  # Header backgrounds
-MATERIAL_BLUE_GREY_900 = QColor("#263238")  # Day name backgrounds
-MATERIAL_RED_900 = QColor("#B71C1C")  # Error states
-MATERIAL_RED_200 = QColor("#EF9A9A")  # Error text
-MATERIAL_GREEN_900 = QColor("#1B5E20")  # Success states
-MATERIAL_GREEN_300 = QColor("#81C784")  # Success text
-MATERIAL_GREY_600 = QColor("#666666")  # Dot color
-MATERIAL_GREY_700 = QColor("#999999")  # Hover color
-MATERIAL_GREY_800 = QColor("#424242")  # Checkbox unchecked
-MATERIAL_BLUE_600 = QColor("#1976D2")  # Checkbox checked
-MATERIAL_BLUE_GREY_700 = QColor("#455A64")  # Title bar hover
-MATERIAL_RED_700 = QColor("#c42b1c")  # Close button hover
+MATERIAL_BLUE_GREY_800 = QColor(*RGB_HIGHLIGHT_MED)  # Header backgrounds
+MATERIAL_BLUE_GREY_900 = QColor(*RGB_HIGHLIGHT_LOW)  # Day name backgrounds
+MATERIAL_RED_900 = QColor(*RGB_LOVE)  # Error states
+MATERIAL_RED_200 = QColor(*RGB_LOVE)  # Error text
+MATERIAL_GREEN_900 = QColor(*RGB_FOAM)  # Success states
+MATERIAL_GREEN_300 = QColor(*RGB_FOAM)  # Success text
+MATERIAL_GREY_600 = QColor(*RGB_MUTED)  # Dot color
+MATERIAL_GREY_700 = QColor(*RGB_SUBTLE)  # Hover color
+MATERIAL_GREY_800 = QColor(*RGB_HIGHLIGHT_MED)  # Checkbox unchecked
+MATERIAL_BLUE_600 = QColor(*RGB_PINE)  # Checkbox checked
+MATERIAL_BLUE_GREY_700 = QColor(*RGB_HIGHLIGHT_HIGH)  # Title bar hover
+MATERIAL_RED_700 = QColor(*RGB_LOVE)  # Close button hover
 
 # Basic Colors
-# Pure black and white for maximum contrast when needed
-COLOR_BLACK = QColor("#000000")  # Pure black for text
-COLOR_WHITE = QColor("#FFFFFF")  # Pure white for text
+COLOR_BLACK = QColor(*RGB_BASE)  # Pure black for text
+COLOR_WHITE = QColor(*RGB_TEXT)  # Pure white for text
 COLOR_TRANSPARENT = Qt.transparent  # Transparent color for clearing backgrounds
 
 # Application-specific Colors
-# Custom colors for specific UI components and states
-COLOR_ROW_HIGHLIGHT = QColor("#2D2D2D")  # Table row hover
+COLOR_ROW_HIGHLIGHT = QColor(*RGB_HIGHLIGHT_LOW)  # Table row hover
 COLOR_CELL_HIGHLIGHT = MATERIAL_PRIMARY.darker(150)  # Selected cell
 COLOR_WEEKLY_REMEDY = MATERIAL_SECONDARY.darker(150)  # Weekly totals
 COLOR_NO_HIGHLIGHT = MATERIAL_SURFACE  # Default state
-COLOR_TEXT_LIGHT = QColor("#E1E1E1")  # Primary text
-COLOR_TEXT_DIM = QColor("#333333")  # Secondary text
-COLOR_MAXIMIZED_TRUE = QColor("#4CAF50")  # Success state
-COLOR_MAXIMIZED_FALSE = QColor("#F44336")  # Error state
+COLOR_TEXT_LIGHT = QColor(*RGB_TEXT)  # Primary text
+COLOR_TEXT_DIM = QColor(*RGB_MUTED)  # Secondary text
+COLOR_MAXIMIZED_TRUE = QColor(*RGB_FOAM)  # Success state
+COLOR_MAXIMIZED_FALSE = QColor(*RGB_LOVE)  # Error state
 
 # Violation-specific Colors
-# Colors used specifically for violation tracking and display
-COLOR_VIOLATION = QColor("#7D59A8")  # Medium dark purple (125, 89, 168)
-COLOR_VIOLATION_SUMMARY = QColor("#D7B7FF")  # Light purple (215, 183, 255)
-COLOR_VIOLATION_WEEKLY = QColor("#029184")  # Teal (2, 145, 132)
+COLOR_VIOLATION = QColor(*RGB_IRIS)  # Medium dark purple
+COLOR_VIOLATION_SUMMARY = QColor(*RGB_IRIS).lighter(150)  # Light purple
+COLOR_VIOLATION_WEEKLY = QColor(*RGB_PINE)  # Teal
 
 # Status-specific Colors
-# Colors used to indicate carrier list status
 COLOR_STATUS_OTDL = MATERIAL_PRIMARY  # Purple for OTDL
 COLOR_STATUS_WAL = MATERIAL_SECONDARY  # Teal for WAL
-COLOR_STATUS_NL = QColor("#64DD17")  # Light Green for NL
-COLOR_STATUS_PTF = QColor("#FF7597")  # Pink for PTF
+COLOR_STATUS_NL = QColor(*RGB_FOAM)  # Light Green for NL
+COLOR_STATUS_PTF = QColor(*RGB_ROSE)  # Pink for PTF
 
 # Background Colors
-# Different background shades for layering and hierarchy
-COLOR_BG_DARKER = QColor("#222222")  # Darker background
-COLOR_BG_DARK = QColor("#2A2A2A")  # Dark background
-COLOR_BG_HOVER = QColor("#252525")  # Hover background
+COLOR_BG_DARKER = QColor(*RGB_BASE).darker(110)  # Darker background
+COLOR_BG_DARK = QColor(*RGB_SURFACE)  # Dark background
+COLOR_BG_HOVER = QColor(*RGB_HIGHLIGHT_LOW)  # Hover background
 
 # Component-specific style sheets
 TITLE_BAR_STYLE = f"""
@@ -185,7 +178,7 @@ TOP_BUTTON_ROW_STYLE = f"""
         border-bottom: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
     }}
     QPushButton {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_DISABLED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_DISABLED)};
         border: none;
         border-radius: 4px;
         color: {MATERIAL_PRIMARY.name()};
@@ -199,25 +192,25 @@ TOP_BUTTON_ROW_STYLE = f"""
         text-transform: uppercase;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
         color: {MATERIAL_PRIMARY.lighter(110).name()};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         padding-top: 17px;
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:checked {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         color: {MATERIAL_PRIMARY.lighter(110).name()};
         font-weight: 600;
     }}
     QPushButton:checked:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_SELECTED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_SELECTED)};
     }}
     QPushButton:disabled {{
-        background-color: {rgba(RGB_WHITE, ALPHA_DISABLED)};
-        color: {rgba(RGB_WHITE, ALPHA_DISABLED_TEXT)};
+        background-color: {rgba(RGB_TEXT, ALPHA_DISABLED)};
+        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
     }}
 """
 
@@ -227,7 +220,7 @@ FILTER_BUTTON_ROW_STYLE = f"""
         border-top: 1px solid {COLOR_TEXT_DIM.name()};
     }}
     QPushButton {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_DISABLED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_DISABLED)};
         border: none;
         color: {MATERIAL_PRIMARY.name()};
         padding: 4px 12px;
@@ -241,15 +234,15 @@ FILTER_BUTTON_ROW_STYLE = f"""
         letter-spacing: 0.15px;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:checked {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         color: {MATERIAL_PRIMARY.name()};
         font-weight: 600;
     }}
@@ -272,7 +265,7 @@ TAB_WIDGET_STYLE = f"""
     }}
     QTabBar::tab {{
         background-color: {MATERIAL_SURFACE.name()};
-        color: {rgba(RGB_WHITE, ALPHA_DISABLED_TEXT)};
+        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
         padding: 8px 16px;
         border: none;
         border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
@@ -281,11 +274,11 @@ TAB_WIDGET_STYLE = f"""
     }}
     QTabBar::tab:selected {{
         color: {MATERIAL_PRIMARY.name()};
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
     }}
     QTabBar::tab:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
         color: {MATERIAL_PRIMARY.lighter(110).name()};
     }}
     QTabBar::scroller {{
@@ -304,7 +297,7 @@ SUB_TAB_STYLE = f"""
     }}
     QTabBar::tab {{
         background-color: {MATERIAL_SURFACE.name()};
-        color: {rgba(RGB_WHITE, ALPHA_DISABLED_TEXT)};
+        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
         padding: 4px 8px;
         margin: 0;
         border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
@@ -321,13 +314,13 @@ SUB_TAB_STYLE = f"""
         margin-right: 0px;
     }}
     QTabBar::tab:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
         color: {MATERIAL_PRIMARY.lighter(110).name()};
     }}
     QTabBar::tab:selected {{
         color: {MATERIAL_PRIMARY.name()};
         border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         border-right: 1px solid {MATERIAL_PRIMARY.name()};
     }}
     QTabBar::scroller {{
@@ -402,7 +395,7 @@ SETTINGS_DIALOG_STYLE = f"""
         background-color: {MATERIAL_BACKGROUND.name()};
     }}
     QPushButton {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
         border: none;
         border-radius: 4px;
         color: {MATERIAL_PRIMARY.name()};
@@ -412,10 +405,10 @@ SETTINGS_DIALOG_STYLE = f"""
         min-width: 120px;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_SELECTED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_SELECTED)};
     }}
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
@@ -454,7 +447,7 @@ SETTINGS_BUTTON_CONTAINER_STYLE = f"""
 
 SETTINGS_SYNC_BUTTON_STYLE = f"""
     QPushButton {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
         border: none;
         border-radius: 4px;
         color: {MATERIAL_PRIMARY.name()};
@@ -465,10 +458,10 @@ SETTINGS_SYNC_BUTTON_STYLE = f"""
         text-align: center;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_SELECTED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_SELECTED)};
         padding-top: 13px;
         padding-bottom: 11px;
     }}
@@ -476,7 +469,7 @@ SETTINGS_SYNC_BUTTON_STYLE = f"""
 
 SETTINGS_CLOSE_BUTTON_STYLE = f"""
     QPushButton {{
-        background-color: {rgba(RGB_WHITE, ALPHA_DISABLED)};
+        background-color: {rgba(RGB_TEXT, ALPHA_DISABLED)};
         border: none;
         border-radius: 4px;
         color: {COLOR_TEXT_LIGHT.name()};
@@ -487,10 +480,10 @@ SETTINGS_CLOSE_BUTTON_STYLE = f"""
         text-align: center;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_WHITE, ALPHA_HOVER)};
+        background-color: {rgba(RGB_TEXT, ALPHA_HOVER)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_WHITE, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_TEXT, ALPHA_PRESSED)};
         padding-top: 13px;
         padding-bottom: 11px;
     }}
@@ -520,7 +513,7 @@ DATE_SELECTION_PANE_STYLE = f"""
         border-radius: 2px;
     }}
     QTableView::item:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
     }}
     QTableView::item:selected {{
         background-color: {MATERIAL_PRIMARY.name()};
@@ -571,7 +564,7 @@ DATE_SELECTION_PANE_STYLE = f"""
     }}
     QPushButton:disabled {{
         background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-        color: {rgba(RGB_WHITE, ALPHA_DISABLED_TEXT)};
+        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
         border: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
     }}
     QScrollBar:vertical {{
@@ -643,9 +636,9 @@ CUSTOM_PROGRESS_DIALOG_STYLE = f"""
         margin-bottom: 5px;
     }}
     QPushButton {{
-        background-color: {rgba(RGB_WHITE, ALPHA_DISABLED)};
+        background-color: {rgba(RGB_TEXT, ALPHA_DISABLED)};
         color: {COLOR_TEXT_LIGHT.name()};
-        border: 1px solid {rgba(RGB_WHITE, ALPHA_HOVER)};
+        border: 1px solid {rgba(RGB_TEXT, ALPHA_HOVER)};
         border-radius: 4px;
         padding: 8px 24px;
         font-size: 13px;
@@ -656,19 +649,19 @@ CUSTOM_PROGRESS_DIALOG_STYLE = f"""
         margin: 8px 0px;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         border: 1px solid {MATERIAL_PRIMARY.name()};
         color: {MATERIAL_PRIMARY.name()};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_SELECTED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_SELECTED)};
         padding-top: 9px;
         padding-bottom: 7px;
     }}
     QPushButton:disabled {{
-        background-color: {rgba(RGB_WHITE, ALPHA_DISABLED)};
-        color: {rgba(RGB_WHITE, ALPHA_DISABLED_TEXT)};
-        border: 1px solid {rgba(RGB_WHITE, ALPHA_DISABLED)};
+        background-color: {rgba(RGB_TEXT, ALPHA_DISABLED)};
+        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
+        border: 1px solid {rgba(RGB_TEXT, ALPHA_DISABLED)};
     }}
 """
 
@@ -690,10 +683,10 @@ CUSTOM_MESSAGE_BOX_STYLE = f"""
         min-width: 100px;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
     }}
 """
 
@@ -715,10 +708,10 @@ CUSTOM_WARNING_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
     }}
 """
 
@@ -740,10 +733,10 @@ CUSTOM_INFO_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
     }}
 """
 
@@ -765,10 +758,10 @@ CUSTOM_NOTIFICATION_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
     }}
 """
 
@@ -790,10 +783,10 @@ CONFIRM_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
     }}
     QPushButton:pressed {{
-        background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+        background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
     }}
 """
 
@@ -1031,6 +1024,27 @@ OTDL_CELL_LABEL_STYLE = (
 """
 )
 
+# Violation Header Styles
+VIOLATION_HEADER_LABEL_STYLE = f"""
+    QLabel {{
+        color: {MATERIAL_PRIMARY.name()};
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 3px 6px;
+        background-color: {MATERIAL_SURFACE.name()};
+        border-radius: 3px;
+    }}
+"""
+
+VIOLATION_HEADER_WIDGET_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_BACKGROUND.name()};
+        margin: 0px;
+        padding: 5px;
+    }}
+"""
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application.
@@ -1074,7 +1088,7 @@ def apply_material_dark_theme(app: QApplication):
             font-family: Roboto, Arial, sans-serif;
         }}
         QPushButton {{
-            background-color: {rgba(RGB_PRIMARY, ALPHA_HOVER)};
+            background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
             border: none;
             color: {MATERIAL_PRIMARY.name()};
             padding: 8px 16px;
@@ -1082,10 +1096,10 @@ def apply_material_dark_theme(app: QApplication):
             font-weight: normal;
         }}
         QPushButton:hover {{
-            background-color: {rgba(RGB_PRIMARY, ALPHA_PRESSED)};
+            background-color: {rgba(RGB_IRIS, ALPHA_PRESSED)};
         }}
         QPushButton:pressed {{
-            background-color: {rgba(RGB_PRIMARY, ALPHA_SELECTED)};
+            background-color: {rgba(RGB_IRIS, ALPHA_SELECTED)};
         }}
         QPushButton:checked {{
             background-color: {MATERIAL_PRIMARY.name()};
@@ -1217,7 +1231,7 @@ def apply_material_dark_theme(app: QApplication):
         }}
         QPushButton:disabled {{
             background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-            color: {rgba(RGB_WHITE, ALPHA_DISABLED_TEXT)};
+            color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
             border: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
         }}
     """

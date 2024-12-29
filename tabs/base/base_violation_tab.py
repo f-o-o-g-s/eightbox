@@ -26,7 +26,11 @@ from PyQt5.QtWidgets import (
 )
 
 from table_utils import setup_table_copy_functionality
-from theme import SUB_TAB_STYLE
+from theme import (
+    SUB_TAB_STYLE,
+    VIOLATION_HEADER_LABEL_STYLE,
+    VIOLATION_HEADER_WIDGET_STYLE,
+)
 from violation_model import ViolationModel
 
 
@@ -1040,19 +1044,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             header_layout.addWidget(carriers_with_violations_label)
 
             # Style the labels
-            style = """
-                QLabel {
-                    color: #BB86FC;
-                    font-family: 'Consolas', 'Courier New', monospace;
-                    font-size: 12px;
-                    font-weight: bold;
-                    padding: 3px 6px;
-                    background-color: #1E1E1E;
-                    border-radius: 3px;
-                }
-            """
-            total_carriers_label.setStyleSheet(style)
-            carriers_with_violations_label.setStyleSheet(style)
+            total_carriers_label.setStyleSheet(VIOLATION_HEADER_LABEL_STYLE)
+            carriers_with_violations_label.setStyleSheet(VIOLATION_HEADER_LABEL_STYLE)
+            header_widget.setStyleSheet(VIOLATION_HEADER_WIDGET_STYLE)
 
             # Add header widget to tab layout
             layout = current_tab.layout()
