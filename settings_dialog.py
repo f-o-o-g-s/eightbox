@@ -25,7 +25,12 @@ from custom_widgets import (
     CustomTitleBarWidget,
     CustomWarningDialog,
 )
+from theme import COLOR_TEXT_LIGHT  # noqa: F401
+from theme import MATERIAL_BACKGROUND  # noqa: F401
+from theme import MATERIAL_PRIMARY  # noqa: F401
+from theme import MATERIAL_SURFACE  # noqa: F401
 from theme import (
+    COLOR_TEXT_DIM,
     SECTION_FRAME_STYLE,
     SETTINGS_BUTTON_CONTAINER_STYLE,
     SETTINGS_CLOSE_BUTTON_STYLE,
@@ -82,7 +87,7 @@ class SettingsDialog(QDialog):
         content_widget.setStyleSheet(
             """
             QWidget#contentWidget {
-                background-color: #121212;
+                background-color: {MATERIAL_BACKGROUND.name()};
             }
         """
         )
@@ -102,7 +107,7 @@ class SettingsDialog(QDialog):
             """
             font-size: 14px;
             font-weight: bold;
-            color: #BB86FC;
+            color: {MATERIAL_PRIMARY.name()};
             padding-bottom: 4px;
             """
         )
@@ -110,7 +115,9 @@ class SettingsDialog(QDialog):
         klusterbox_desc = QLabel(
             "The source database from Klusterbox containing carrier and clock ring data."
         )
-        klusterbox_desc.setStyleSheet("font-size: 11px; color: #9E9E9E;")
+        klusterbox_desc.setStyleSheet(
+            f"font-size: 11px; color: {COLOR_TEXT_DIM.name()};"
+        )
         klusterbox_desc.setWordWrap(True)
 
         self.klusterbox_path_display = QLabel(self.mandates_db_path)
@@ -138,7 +145,7 @@ class SettingsDialog(QDialog):
             """
             font-size: 14px;
             font-weight: bold;
-            color: #BB86FC;
+            color: {MATERIAL_PRIMARY.name()};
             padding-bottom: 4px;
             """
         )
@@ -146,7 +153,7 @@ class SettingsDialog(QDialog):
         eightbox_desc = QLabel(
             "The local working database used by Eightbox to store synchronized data."
         )
-        eightbox_desc.setStyleSheet("font-size: 11px; color: #9E9E9E;")
+        eightbox_desc.setStyleSheet(f"font-size: 11px; color: {COLOR_TEXT_DIM.name()};")
         eightbox_desc.setWordWrap(True)
 
         self.eightbox_path_display = QLabel(self.eightbox_db_path)

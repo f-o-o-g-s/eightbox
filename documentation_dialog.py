@@ -36,6 +36,8 @@ from documentation_content import (
     DOCUMENTATION_MAX60,
 )
 from theme import (
+    ALPHA_HOVER,
+    ALPHA_PRESSED,
     COLOR_TEXT_DIM,
     COLOR_TEXT_LIGHT,
     MATERIAL_BACKGROUND,
@@ -181,10 +183,10 @@ class DocumentationDialog(QDialog):
                 font-size: 14px;
             }}
             QPushButton:hover {{
-                background-color: {MATERIAL_PRIMARY.lighter(110).name()};
+                background-color: rgba(187, 134, 252, {ALPHA_HOVER});
             }}
             QPushButton:pressed {{
-                background-color: {MATERIAL_PRIMARY.darker(110).name()};
+                background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
             }}
             """
         )

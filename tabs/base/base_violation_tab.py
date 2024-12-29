@@ -26,6 +26,14 @@ from PyQt5.QtWidgets import (
 )
 
 from table_utils import setup_table_copy_functionality
+from theme import ALPHA_DISABLED_TEXT  # noqa: F401
+from theme import ALPHA_HOVER  # noqa: F401
+from theme import ALPHA_PRESSED  # noqa: F401
+from theme import COLOR_ROW_HIGHLIGHT  # noqa: F401
+from theme import COLOR_TEXT_LIGHT  # noqa: F401
+from theme import MATERIAL_BACKGROUND  # noqa: F401
+from theme import MATERIAL_PRIMARY  # noqa: F401
+from theme import MATERIAL_SURFACE  # noqa: F401
 from violation_model import ViolationModel
 
 
@@ -235,17 +243,17 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
             """
             QTabWidget::pane {
                 border: none;
-                background-color: #121212;
+                background-color: {MATERIAL_BACKGROUND.name()};
             }
             QTabBar {
                 qproperty-drawBase: 0;
             }
             QTabBar::tab {
-                background-color: #1E1E1E;
-                color: rgba(255, 255, 255, 0.6);
+                background-color: {MATERIAL_SURFACE.name()};
+                color: rgba(255, 255, 255, {ALPHA_DISABLED_TEXT});
                 padding: 4px 8px;
                 border: none;
-                border-right: 1px solid #2D2D2D;
+                border-right: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
                 min-width: 60px;
                 font-size: 10px;
                 font-weight: normal;
@@ -253,13 +261,13 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
                 letter-spacing: 0.05px;
             }
             QTabBar::tab:selected {
-                color: #BB86FC;
-                background-color: rgba(187, 134, 252, 0.12);
-                border-bottom: 2px solid #BB86FC;
+                color: {MATERIAL_PRIMARY.name()};
+                background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
+                border-bottom: 2px solid {MATERIAL_PRIMARY.name()};
             }
             QTabBar::tab:hover {
-                background-color: rgba(187, 134, 252, 0.08);
-                color: #CBB0FF;
+                background-color: rgba(187, 134, 252, {ALPHA_HOVER});
+                color: {MATERIAL_PRIMARY.lighter(110).name()};
             }
             QTabBar::scroller {
                 width: 0px;

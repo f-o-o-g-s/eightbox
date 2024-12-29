@@ -221,10 +221,10 @@ QPushButton#primary {{
     color: {COLOR_BLACK.name()};
 }}
 QPushButton#primary:hover {{
-    background-color: {MATERIAL_PRIMARY.lighter(110).name()};
+    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
 }}
 QPushButton#primary:pressed {{
-    background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
 }}
 QPushButton#destructive {{
     background-color: {MATERIAL_ERROR.name()};
@@ -327,9 +327,9 @@ QPushButton#primary {{
     border: none;
 }}
 QPushButton#primary:hover {{
-    background-color: {MATERIAL_PRIMARY.lighter(110).name()};
+    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
 }}
 QPushButton#primary:pressed {{
-    background-color: {MATERIAL_PRIMARY.darker(110).name()};
+    background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
 }}
 """

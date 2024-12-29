@@ -620,18 +620,18 @@ CUSTOM_MESSAGE_BOX_STYLE = f"""
         font-size: 11px;
     }}
     QPushButton {{
-        background-color: {MATERIAL_PRIMARY.lighter(120).name()};
+        background-color: {MATERIAL_PRIMARY.name()};
         border: none;
         border-radius: 4px;
         padding: 8px 16px;
-        color: {COLOR_WHITE.name()};
+        color: {COLOR_BLACK.name()};
         min-width: 100px;
     }}
     QPushButton:hover {{
-        background-color: {MATERIAL_PRIMARY.lighter(130).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
     }}
     QPushButton:pressed {{
-        background-color: {MATERIAL_PRIMARY.lighter(110).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
 """
 
@@ -653,10 +653,10 @@ CUSTOM_WARNING_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
     }}
     QPushButton:pressed {{
-        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
 """
 
@@ -678,10 +678,10 @@ CUSTOM_INFO_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
     }}
     QPushButton:pressed {{
-        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
 """
 
@@ -703,10 +703,10 @@ CUSTOM_NOTIFICATION_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
     }}
     QPushButton:pressed {{
-        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
 """
 
@@ -728,10 +728,10 @@ CONFIRM_DIALOG_STYLE = f"""
         font-weight: bold;
     }}
     QPushButton:hover {{
-        background-color: {MATERIAL_PRIMARY.darker(110).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_HOVER});
     }}
     QPushButton:pressed {{
-        background-color: {MATERIAL_PRIMARY.darker(120).name()};
+        background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
     }}
 """
 
