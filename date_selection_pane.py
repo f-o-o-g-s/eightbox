@@ -16,7 +16,6 @@ from PyQt5.QtCore import (
     Qt,
     pyqtSignal,
 )
-from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QCalendarWidget,
     QHBoxLayout,
@@ -79,8 +78,8 @@ class DateRangeModel(QAbstractTableModel):
         elif role == Qt.BackgroundRole:
             # Alternate row colors for better readability
             if row % 2:
-                return QColor("#2A2A2A")
-            return QColor("#222222")
+                return COLOR_BG_DARK
+            return COLOR_BG_DARKER
 
         return None
 
