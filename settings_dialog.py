@@ -25,10 +25,6 @@ from custom_widgets import (
     CustomTitleBarWidget,
     CustomWarningDialog,
 )
-from theme import COLOR_TEXT_LIGHT  # noqa: F401
-from theme import MATERIAL_BACKGROUND  # noqa: F401
-from theme import MATERIAL_PRIMARY  # noqa: F401
-from theme import MATERIAL_SURFACE  # noqa: F401
 from theme import (
     COLOR_TEXT_DIM,
     SECTION_FRAME_STYLE,
