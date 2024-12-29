@@ -174,6 +174,13 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
+### 2024.1.5.0
+- Implemented new Rose Pine / Material Design hybrid theme system
+- Unified all application styling in theme.py
+- Improved UI consistency and readability across all dialogs
+- Reorganized code structure for better maintainability
+- Fixed various styling and UI-related bugs
+
 ### 2024.1.4.2
 - Fixed version formatting in README.md version history
 - Improved logic to maintain exactly 3 most recent versions
@@ -181,10 +188,4 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### 2024.1.4.1
 - Fixed release script to include changelog and readme updates in release commit
-
-### 2024.1.4.0
-- Added new worker system for violation processing
-- Improved error handling and cleanup
-- Fixed progress dialog duplication issue
-- Preserved tab selection in violations summary tab after OTDL maximization updates
 
