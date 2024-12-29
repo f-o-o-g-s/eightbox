@@ -1,5 +1,11 @@
 # Changelog
 
+## [2024.1.5.1] - 2024-12-29
+- Made violation tables read-only to prevent accidental data modification
+- Updated documentation to reflect read-only tables
+
+
+
 ## [2024.1.5.0] - 2024-12-29
 - Implemented new Rose Pine / Material Design hybrid theme system
 - Unified all application styling in theme.py
