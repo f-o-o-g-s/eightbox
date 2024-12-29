@@ -442,6 +442,9 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         layout.setSpacing(5)
 
         view = QTableView()
+        # Make the table read-only
+        view.setEditTriggers(QTableView.NoEditTriggers)
+
         if isinstance(model, ViolationModel):
             renamed_df = self._rename_columns(model.df)
             model.df = renamed_df
