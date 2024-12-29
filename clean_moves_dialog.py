@@ -38,6 +38,13 @@ from custom_widgets import (
     CustomTitleBarWidget,
     CustomWarningDialog,
 )
+from theme import (
+    CLEAN_MOVES_CANCEL_BUTTON_STYLE,
+    CLEAN_MOVES_DIALOG_STYLE,
+    CLEAN_MOVES_SAVE_BUTTON_STYLE,
+    DISABLED_START_INPUT_STYLE,
+    SPLIT_MOVE_DIALOG_STYLE,
+)
 
 
 class SplitMoveDialog(QDialog):
@@ -107,63 +114,7 @@ class SplitMoveDialog(QDialog):
         layout.addWidget(content_widget)
 
         # Set style
-        self.setStyleSheet(
-            """
-            QDialog {
-                background-color: #121212;
-                color: #E1E1E1;
-            }
-            QGroupBox {
-                background-color: #1E1E1E;
-                color: #E1E1E1;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                padding: 15px;
-                margin-top: 15px;
-            }
-            QGroupBox::title {
-                color: #BB86FC;
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-            QLineEdit {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                border: 1px solid #333333;
-                padding: 5px;
-                border-radius: 4px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #BB86FC;
-            }
-            QLineEdit:disabled {
-                background-color: #1E1E1E;
-                color: #666666;
-                border: 1px solid #333333;
-            }
-            QPushButton {
-                background-color: rgba(187, 134, 252, 0.1);
-                color: #BB86FC;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.2);
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.3);
-            }
-            QPushButton:disabled {
-                background-color: #1E1E1E;
-                color: #666666;
-            }
-            QLabel {
-                color: #E1E1E1;
-            }
-        """
-        )
+        self.setStyleSheet(SPLIT_MOVE_DIALOG_STYLE)
 
     def add_move_group(self, index, start_time=None, route=None):
         """Add a new move group to the dialog."""
@@ -175,15 +126,7 @@ class SplitMoveDialog(QDialog):
         if index == 0 and start_time is not None:  # First move gets original start time
             start_input.setText(f"{start_time:.2f}")
             start_input.setEnabled(False)  # Disable editing for first move's start time
-            start_input.setStyleSheet(
-                """
-                QLineEdit:disabled {
-                    background-color: #1E1E1E;
-                    color: #808080;
-                    border: 1px solid #404040;
-                }
-            """
-            )
+            start_input.setStyleSheet(DISABLED_START_INPUT_STYLE)
         start_input.setPlaceholderText("HH.MM")
         start_input.setMaxLength(5)
 
@@ -400,63 +343,7 @@ class EditMovesDialog(QDialog):
         layout.addWidget(content_widget)
 
         # Set style
-        self.setStyleSheet(
-            """
-            QDialog {
-                background-color: #121212;
-                color: #E1E1E1;
-            }
-            QGroupBox {
-                background-color: #1E1E1E;
-                color: #E1E1E1;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                padding: 15px;
-                margin-top: 15px;
-            }
-            QGroupBox::title {
-                color: #BB86FC;
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-            QLineEdit {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                border: 1px solid #333333;
-                padding: 5px;
-                border-radius: 4px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #BB86FC;
-            }
-            QLineEdit:disabled {
-                background-color: #1E1E1E;
-                color: #666666;
-                border: 1px solid #333333;
-            }
-            QPushButton {
-                background-color: rgba(187, 134, 252, 0.1);
-                color: #BB86FC;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.2);
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.3);
-            }
-            QPushButton:disabled {
-                background-color: #1E1E1E;
-                color: #666666;
-            }
-            QLabel {
-                color: #E1E1E1;
-            }
-        """
-        )
+        self.setStyleSheet(SPLIT_MOVE_DIALOG_STYLE)
 
         # Initial validation
         self.validate_inputs()
@@ -784,81 +671,11 @@ class CleanMovesDialog(QDialog):
         self.save_button = QPushButton("Save All")
         self.save_button.clicked.connect(self.save_changes)
         self.save_button.setEnabled(False)
-        self.save_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #2D2D2D;
-                color: #BB86FC;
-                border: 1px solid #3D3D3D;
-                border-bottom: 2px solid #1D1D1D;
-                padding: 8px 24px;
-                font-weight: 500;
-                min-height: 32px;
-                border-radius: 4px;
-                font-size: 14px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            QPushButton:hover {
-                background-color: #353535;
-                border: 1px solid #454545;
-                border-bottom: 2px solid #252525;
-                color: #CBB0FF;
-            }
-            QPushButton:pressed {
-                background-color: #252525;
-                border: 1px solid #353535;
-                border-top: 2px solid #151515;
-                border-bottom: 1px solid #353535;
-                padding-top: 9px;
-                color: #BB86FC;
-            }
-            QPushButton:disabled {
-                background-color: #252525;
-                color: #666666;
-                border: 1px solid #2D2D2D;
-            }
-        """
-        )
+        self.save_button.setStyleSheet(CLEAN_MOVES_SAVE_BUTTON_STYLE)
 
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.reject)
-        self.cancel_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #2D2D2D;
-                color: #BB86FC;
-                border: 1px solid #3D3D3D;
-                border-bottom: 2px solid #1D1D1D;
-                padding: 8px 24px;
-                font-weight: 500;
-                min-height: 32px;
-                border-radius: 4px;
-                font-size: 14px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            QPushButton:hover {
-                background-color: #353535;
-                border: 1px solid #454545;
-                border-bottom: 2px solid #252525;
-                color: #CBB0FF;
-            }
-            QPushButton:pressed {
-                background-color: #252525;
-                border: 1px solid #353535;
-                border-top: 2px solid #151515;
-                border-bottom: 1px solid #353535;
-                padding-top: 9px;
-                color: #BB86FC;
-            }
-            QPushButton:disabled {
-                background-color: #252525;
-                color: #666666;
-                border: 1px solid #2D2D2D;
-            }
-        """
-        )
+        self.cancel_button.setStyleSheet(CLEAN_MOVES_CANCEL_BUTTON_STYLE)
 
         dialog_button_layout.addWidget(self.save_button)
         dialog_button_layout.addWidget(self.cancel_button)
@@ -868,54 +685,7 @@ class CleanMovesDialog(QDialog):
         layout.addWidget(content_widget)
 
         # Set dialog style
-        self.setStyleSheet(
-            """
-            QDialog {
-                background-color: #121212;
-                color: #E1E1E1;
-            }
-            QTableWidget {
-                background-color: #1E1E1E;
-                alternate-background-color: #262626;
-                color: #E1E1E1;
-                border: 1px solid #333333;
-                gridline-color: #333333;
-            }
-            QTableWidget::item {
-                padding: 5px;
-            }
-            QTableWidget::item:selected {
-                background-color: #3700B3;
-                color: #FFFFFF;
-            }
-            QHeaderView::section {
-                background-color: #2D2D2D;
-                color: #E1E1E1;
-                padding: 5px;
-                border: 1px solid #333333;
-            }
-            QPushButton {
-                background-color: rgba(187, 134, 252, 0.1);
-                color: #BB86FC;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: rgba(187, 134, 252, 0.2);
-            }
-            QPushButton:pressed {
-                background-color: rgba(187, 134, 252, 0.3);
-            }
-            QPushButton:disabled {
-                background-color: #1E1E1E;
-                color: #666666;
-            }
-            QLabel {
-                color: #E1E1E1;
-            }
-        """
-        )
+        self.setStyleSheet(CLEAN_MOVES_DIALOG_STYLE)
 
         # Connect signals
         self.table.itemSelectionChanged.connect(self.handle_selection)
