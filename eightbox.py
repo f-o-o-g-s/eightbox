@@ -14,6 +14,7 @@ from PyQt5.QtCore import (
     QTimer,
     qInstallMessageHandler,
 )
+from PyQt5.QtGui import QColor  # Add QColor import
 from PyQt5.QtWidgets import (  # Specific widget import for header configuration
     QAction,
     QApplication,
@@ -57,6 +58,7 @@ from tabs.violations import (
     ViolationMax60Tab,
     ViolationRemediesTab,
 )
+from theme import RGB_IRIS  # Import RGB_IRIS color constant
 from theme import (
     CLOSE_BUTTON_STYLE,
     FILTER_BUTTON_ROW_STYLE,
@@ -865,16 +867,21 @@ class MainApp(QMainWindow):
 
     def show_about_dialog(self):
         """Show the About dialog using our custom themed dialog."""
-
         about_text = f"""
-        <h3>Eightbox - Article 8 Violation Detection</h3>
-        <p>A tool for detecting and displaying Article 8 violations.</p>
-        <p>Created by: Branch 815</p>
-        <p>Version {self.VERSION}</p>
-        <p>Build: {self.BUILD_TIME}</p>
+        <div style='margin-bottom: 12px;'>
+            <h3 style='color: {QColor(*RGB_IRIS).name()}; margin-bottom: 8px;'>
+            Eightbox - Article 8 Violation Detection</h3>
+            <p style='margin: 4px 0;'>A tool for detecting and displaying Article 8 violations.</p>
+            <p style='margin: 4px 0;'>Created by: Branch 815</p>
+            <p style='margin: 4px 0;'>Version {self.VERSION}</p>
+            <p style='margin: 4px 0;'>Build: {self.BUILD_TIME}</p>
+        </div>
         """
 
-        CustomInfoDialog.information(self, "About Eightbox", about_text)
+        dialog = CustomInfoDialog("About Eightbox", about_text, self)
+        dialog.icon_label.setObjectName("iconLabel")
+        dialog.message_label.setObjectName("messageLabel")
+        dialog.exec_()
 
     def load_carrier_data(self):
         """Load carrier data from the database."""

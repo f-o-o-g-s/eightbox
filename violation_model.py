@@ -31,65 +31,19 @@ from PyQt5.QtGui import (
 )
 
 from theme import (
-    COLOR_VIOLATION,
-    COLOR_VIOLATION_SUMMARY,
-    COLOR_VIOLATION_WEEKLY,
-    MATERIAL_BACKGROUND,
+    VIOLATION_MODEL_COLORS,
+    calculate_optimal_gray,
 )
 from violation_types import ViolationType
 
 # We can remove the theme import entirely since we're calculating all text colors dynamically
 
 # fully opaque
-VIOLATION_COLOR = COLOR_VIOLATION
+VIOLATION_COLOR = VIOLATION_MODEL_COLORS["violation"]
 # Softer background for summary rows with violations
-SUMMARY_ROW_COLOR = COLOR_VIOLATION_SUMMARY  # Light purple (D7B7FF)
+SUMMARY_ROW_COLOR = VIOLATION_MODEL_COLORS["summary"]
 # Teal color for positive weekly totals
-WEEKLY_TOTAL_COLOR = COLOR_VIOLATION_WEEKLY  # Teal (029184)
-
-
-def calculate_optimal_gray(bg_color, target_ratio=7.0):
-    """Calculate optimal gray value for given background color"""
-    if bg_color is None:
-        bg_color = MATERIAL_BACKGROUND  # Use theme constant instead of hardcoded value
-
-    bg_luminance = (
-        0.299 * bg_color.red() + 0.587 * bg_color.green() + 0.114 * bg_color.blue()
-    ) / 255
-
-    # Binary search for optimal gray value
-    left, right = 0, 255
-    best_gray = 0
-    best_diff = float("inf")
-
-    while left <= right:
-        gray = (left + right) // 2
-        gray_luminance = gray / 255
-
-        # Calculate contrast ratio using background luminance
-        lighter = max(gray_luminance, bg_luminance) + 0.05
-        darker = min(gray_luminance, bg_luminance) + 0.05
-        ratio = lighter / darker
-
-        diff = abs(ratio - target_ratio)
-        if diff < best_diff:
-            best_diff = diff
-            best_gray = gray
-
-        if ratio < target_ratio:
-            # For dark backgrounds, prefer lighter text
-            if bg_luminance < 0.5:
-                left = gray + 1
-            # For light backgrounds, prefer darker text
-            else:
-                right = gray - 1
-        else:
-            if bg_luminance < 0.5:
-                right = gray - 1
-            else:
-                left = gray + 1
-
-    return QColor(best_gray, best_gray, best_gray)
+WEEKLY_TOTAL_COLOR = VIOLATION_MODEL_COLORS["weekly"]
 
 
 class ViolationModel(QStandardItemModel):

@@ -449,15 +449,10 @@ class CustomWarningDialog(QDialog):
 
 
 class CustomInfoDialog(QDialog):
-    """Custom information dialog with Material Design styling.
+    """Custom dialog for displaying information messages.
 
-    Provides an information dialog with an OK button and custom styling.
-    Includes an information icon and supports HTML-formatted messages.
-
-    Args:
-        title (str): Dialog title
-        message (str): Information message to display (supports HTML)
-        parent (QWidget): Parent widget
+    A themed dialog that displays information messages with an icon
+    and formatted text. Uses the custom title bar and themed styling.
     """
 
     def __init__(self, title, message, parent=None):
@@ -476,33 +471,44 @@ class CustomInfoDialog(QDialog):
         # Create content widget
         content_widget = QWidget()
         content_widget.setStyleSheet(CUSTOM_INFO_DIALOG_STYLE)
-
         content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(20, 20, 20, 20)
-        content_layout.setSpacing(15)
+        content_layout.setContentsMargins(
+            36, 24, 24, 24
+        )  # Increased left margin to 36px
 
-        # Info icon and message layout
-        message_layout = QHBoxLayout()
+        # Create horizontal layout for icon and text
+        info_layout = QHBoxLayout()
+        info_layout.setSpacing(16)
+        info_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Create fixed-width container for icon
+        icon_container = QWidget()
+        icon_container.setFixedWidth(40)  # Fixed width container
+        icon_layout = QHBoxLayout(icon_container)
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+        icon_layout.setSpacing(0)
 
         # Info icon
-        icon_label = QLabel()
-        icon_label.setPixmap(
+        self.icon_label = QLabel()
+        self.icon_label.setPixmap(
             self.style()
             .standardIcon(self.style().SP_MessageBoxInformation)
             .pixmap(32, 32)
         )
-        icon_label.setFixedSize(32, 32)  # Icons can stay fixed size
-        message_layout.addWidget(icon_label, 0)  # 0 means don't stretch
+        self.icon_label.setFixedSize(32, 32)
+        icon_layout.addWidget(self.icon_label, 0, Qt.AlignLeft)
 
-        # Message text with HTML formatting - now more flexible
-        message_label = QLabel()
-        message_label.setTextFormat(Qt.RichText)
-        message_label.setText(message)
-        message_label.setWordWrap(True)
-        message_label.setMinimumWidth(300)  # Minimum width for readability
-        message_layout.addWidget(message_label, 1)  # 1 for stretch factor
+        info_layout.addWidget(icon_container)
 
-        content_layout.addLayout(message_layout)
+        # Message text with HTML formatting
+        self.message_label = QLabel()
+        self.message_label.setTextFormat(Qt.RichText)
+        self.message_label.setText(message)
+        self.message_label.setWordWrap(True)
+        self.message_label.setMinimumWidth(300)
+        info_layout.addWidget(self.message_label, 1)
+
+        content_layout.addLayout(info_layout)
 
         # Button layout
         button_layout = QHBoxLayout()
@@ -513,12 +519,11 @@ class CustomInfoDialog(QDialog):
         button_layout.addWidget(ok_button)
 
         content_layout.addLayout(button_layout)
-
         layout.addWidget(content_widget)
         self.setLayout(layout)
 
-        # Instead of fixed size, set minimum size for usability
-        self.setMinimumSize(400, 180)
+        # Set minimum size for usability
+        self.setMinimumSize(450, 180)
 
         # Let the dialog size itself based on content
         self.adjustSize()
