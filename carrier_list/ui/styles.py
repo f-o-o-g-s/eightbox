@@ -16,60 +16,6 @@ from theme import (
     MATERIAL_SURFACE,
 )
 
-REMOVED_CARRIERS_STYLE = f"""
-QWidget {{
-    background-color: {MATERIAL_SURFACE.name()};
-    color: {COLOR_TEXT_LIGHT.name()};
-}}
-QLabel {{
-    color: {COLOR_TEXT_LIGHT.name()};
-    font-size: 12px;
-    padding: 4px;
-}}
-QTableView {{
-    background-color: {MATERIAL_SURFACE.name()};
-    alternate-background-color: {COLOR_ROW_HIGHLIGHT.name()};
-    border: 1px solid {COLOR_TEXT_DIM.name()};
-    border-radius: 4px;
-    gridline-color: {COLOR_TEXT_DIM.name()};
-}}
-QTableView::item {{
-    padding: 8px;
-    border: none;
-}}
-QTableView::item:selected {{
-    background-color: {MATERIAL_PRIMARY.name()};
-    color: {COLOR_BLACK.name()};
-}}
-QHeaderView::section {{
-    background-color: {COLOR_ROW_HIGHLIGHT.name()};
-    color: {COLOR_TEXT_LIGHT.name()};
-    padding: 8px;
-    border: none;
-    border-right: 1px solid {COLOR_TEXT_DIM.name()};
-    border-bottom: 1px solid {COLOR_TEXT_DIM.name()};
-}}
-QPushButton {{
-    background-color: {MATERIAL_PRIMARY.name()};
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    color: {COLOR_BLACK.name()};
-    min-width: 100px;
-    font-weight: bold;
-}}
-QPushButton:hover {{
-    background-color: rgba(187, 134, 252, {ALPHA_HOVER});
-}}
-QPushButton:pressed {{
-    background-color: rgba(187, 134, 252, {ALPHA_PRESSED});
-}}
-QPushButton:disabled {{
-    background-color: {COLOR_TEXT_DIM.name()};
-    color: {COLOR_TEXT_DIM.lighter(150).name()};
-}}
-"""
-
 STATS_PANEL_STYLE = f"""
 QWidget {{
     background-color: {MATERIAL_SURFACE.name()};

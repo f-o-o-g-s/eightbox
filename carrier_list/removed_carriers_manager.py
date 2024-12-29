@@ -27,8 +27,7 @@ from custom_widgets import (
     CustomTitleBarWidget,
     CustomWarningDialog,
 )
-
-from .ui.styles import REMOVED_CARRIERS_STYLE
+from theme import REMOVED_CARRIERS_STYLE
 
 
 class RemovedCarriersTableModel(QAbstractTableModel):
@@ -108,7 +107,7 @@ class RemovedCarriersManager(QDialog):
         # Add description label
         description = QLabel(
             "These carriers have been removed from the carrier list. "
-            "Select carriers and click 'Restore' to add them back to the list."
+            "Select carriers and click 'Restore Selected' to add them back to the list."
         )
         description.setWordWrap(True)
         content_layout.addWidget(description)

@@ -1387,6 +1387,69 @@ SCROLLBAR_STYLE = f"""
     }}
 """
 
+REMOVED_CARRIERS_STYLE = f"""
+    QWidget {{
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
+    QLabel {{
+        color: {COLOR_TEXT_LIGHT.name()};
+        font-size: 12px;
+        padding: 4px;
+    }}
+    QTableView {{
+        background-color: {MATERIAL_SURFACE.name()};
+        alternate-background-color: {COLOR_ROW_HIGHLIGHT.name()};
+        border: 1px solid {COLOR_TEXT_DIM.name()};
+        border-radius: 4px;
+        gridline-color: {COLOR_TEXT_DIM.name()};
+    }}
+    QTableView::item {{
+        padding: 8px;
+        border: none;
+    }}
+    QTableView::item:selected {{
+        background-color: {QColor(*RGB_IRIS).name()};
+        color: {COLOR_BLACK.name()};
+    }}
+    QHeaderView::section {{
+        background-color: {rgba(RGB_IRIS, 0.15)};
+        color: {QColor(*RGB_IRIS).name()};
+        padding: 8px;
+        border: none;
+        border-right: 1px solid {rgba(RGB_IRIS, 0.5)};
+        border-bottom: 1px solid {rgba(RGB_IRIS, 0.5)};
+        font-weight: bold;
+        font-size: 13px;
+    }}
+    QPushButton {{
+        background-color: {rgba(RGB_IRIS, 0.15)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 2px solid {rgba(RGB_IRIS, 0.5)};
+        border-radius: 6px;
+        padding: 8px 16px;
+        min-width: 100px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }}
+    QPushButton:hover {{
+        background-color: {rgba(RGB_IRIS, 0.25)};
+        border: 2px solid {QColor(*RGB_IRIS).name()};
+        color: {QColor(*RGB_IRIS).lighter(115).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {rgba(RGB_IRIS, 0.35)};
+        border: 2px solid {QColor(*RGB_IRIS).darker(110).name()};
+        color: {QColor(*RGB_IRIS).darker(110).name()};
+    }}
+    QPushButton:disabled {{
+        background-color: {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
+        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
+        border: 2px solid {rgba(RGB_HIGHLIGHT_LOW, ALPHA_DISABLED)};
+    }}
+"""
+
 
 def apply_material_dark_theme(app: QApplication):
     """Apply Material Dark theme to the entire application."""
