@@ -7,10 +7,11 @@ openpyxl==3.1.5
 numpy==2.2.0
 PyGithub==2.5.0
 xlsxwriter==3.2.0
+auto-py-to-exe==2.45.0  # For executable creation
 
 # Development Dependencies
 black==24.10.0
-flake8==7.1.1
 isort==5.13.2
 pre-commit==4.0.1  # For running pre-commit hooks
-pylint==3.3.2  # Additional linting 
+conventional-pre-commit==3.1.0  # For commit message formatting
+pylint==3.3.2  # Additional linting
