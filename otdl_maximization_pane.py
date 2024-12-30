@@ -271,7 +271,7 @@ class OTDLMaximizationPane(QWidget):
                 [self.table.rowHeight(i) for i in range(self.table.rowCount())]
             )  # Content height
             + 60  # Footer height
-            + 20  # Padding
+            + 30  # Padding
         )
 
         # Get screen dimensions
