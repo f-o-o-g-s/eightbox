@@ -400,6 +400,22 @@ FILTER_BUTTON_ROW_STYLE = f"""
         min-width: 90px;
         max-height: 24px;
     }}
+    QPushButton:checked {{
+        background-color: {rgba(RGB_IRIS, 0.25)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 2px solid {QColor(*RGB_IRIS).name()};
+        font-weight: 600;
+    }}
+    QPushButton:checked:hover {{
+        background-color: {rgba(RGB_IRIS, 0.35)};
+        color: {QColor(*RGB_IRIS).lighter(110).name()};
+        border: 2px solid {QColor(*RGB_IRIS).lighter(110).name()};
+    }}
+    QPushButton:checked:pressed {{
+        background-color: {rgba(RGB_IRIS, 0.45)};
+        color: {QColor(*RGB_IRIS).darker(110).name()};
+        border: 2px solid {QColor(*RGB_IRIS).darker(110).name()};
+    }}
 """
 
 TAB_WIDGET_STYLE = f"""
