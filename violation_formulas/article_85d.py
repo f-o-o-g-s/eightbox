@@ -35,9 +35,9 @@ def detect_85d_violations(
 
     # Handle maximized dates
     maximized_dates = result_df["rings_date"].map(
-        lambda x: date_maximized_status.get(x, False)
-        if date_maximized_status
-        else False
+        lambda x: (
+            date_maximized_status.get(x, False) if date_maximized_status else False
+        )
     )
 
     # Set "No Violation (OTDL Maxed)" for maximized dates

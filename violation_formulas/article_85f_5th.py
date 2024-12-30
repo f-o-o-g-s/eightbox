@@ -96,9 +96,11 @@ def detect_85f_5th_violations(
                         "carrier_name": carrier,
                         "date": day["rings_date"],
                         "list_status": day["list_status"],
-                        "violation_type": "No Violation (December Exclusion)"
-                        if day["is_excluded"]
-                        else "No Violation",
+                        "violation_type": (
+                            "No Violation (December Exclusion)"
+                            if day["is_excluded"]
+                            else "No Violation"
+                        ),
                         "remedy_total": 0.0,
                         "total_hours": day["daily_hours"],
                         "display_indicator": day["display_indicator"],
@@ -162,12 +164,16 @@ def detect_85f_5th_violations(
                     "carrier_name": carrier,
                     "date": day["rings_date"],
                     "list_status": day["list_status"],
-                    "violation_type": "8.5.F 5th More Than 4 Days of Overtime in a Week"
-                    if is_violation
-                    else "No Violation",
-                    "remedy_total": round(max(0, day["daily_hours"] - 8), 2)
-                    if is_violation
-                    else 0.0,
+                    "violation_type": (
+                        "8.5.F 5th More Than 4 Days of Overtime in a Week"
+                        if is_violation
+                        else "No Violation"
+                    ),
+                    "remedy_total": (
+                        round(max(0, day["daily_hours"] - 8), 2)
+                        if is_violation
+                        else 0.0
+                    ),
                     "total_hours": day["daily_hours"],
                     "display_indicator": day["display_indicator"],
                     "85F_5th_date": violation_date if is_violation else "",

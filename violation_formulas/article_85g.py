@@ -142,11 +142,15 @@ def detect_85g_violations(data, date_maximized_status=None):
                 violation_type = (
                     "No Violation (Auto Excused)"
                     if carrier_data["is_auto_excused"] or carrier_data["is_sunday"]
-                    else "No Violation (Manually Excused)"
-                    if carrier_data["is_manually_excused"]
-                    else "No Violation (Maximized)"
-                    if carrier_data["total_hours"] >= carrier_data["hour_limit"]
-                    else "No Violation"
+                    else (
+                        "No Violation (Manually Excused)"
+                        if carrier_data["is_manually_excused"]
+                        else (
+                            "No Violation (Maximized)"
+                            if carrier_data["total_hours"] >= carrier_data["hour_limit"]
+                            else "No Violation"
+                        )
+                    )
                 )
 
                 final_results.append(
@@ -193,11 +197,15 @@ def detect_85g_violations(data, date_maximized_status=None):
                 violation_type = (
                     "No Violation (Auto Excused)"
                     if is_auto_excused or otdl["is_sunday"]
-                    else "No Violation (Manually Excused)"
-                    if otdl["is_manually_excused"]
-                    else "No Violation (Maximized)"
-                    if otdl["total_hours"] >= otdl["hour_limit"]
-                    else "8.5.G OTDL Not Maximized"
+                    else (
+                        "No Violation (Manually Excused)"
+                        if otdl["is_manually_excused"]
+                        else (
+                            "No Violation (Maximized)"
+                            if otdl["total_hours"] >= otdl["hour_limit"]
+                            else "8.5.G OTDL Not Maximized"
+                        )
+                    )
                 )
 
                 remedy_total = (
@@ -237,13 +245,19 @@ def detect_85g_violations(data, date_maximized_status=None):
             violation_type = (
                 "No Violation (Non OTDL)"
                 if carrier_data["list_status"] != "otdl"
-                else "No Violation (Auto Excused)"
-                if carrier_data["is_auto_excused"] or carrier_data["is_sunday"]
-                else "No Violation (Manually Excused)"
-                if carrier_data["is_manually_excused"]
-                else "No Violation (Maximized)"
-                if carrier_data["total_hours"] >= carrier_data["hour_limit"]
-                else "No Violation"
+                else (
+                    "No Violation (Auto Excused)"
+                    if carrier_data["is_auto_excused"] or carrier_data["is_sunday"]
+                    else (
+                        "No Violation (Manually Excused)"
+                        if carrier_data["is_manually_excused"]
+                        else (
+                            "No Violation (Maximized)"
+                            if carrier_data["total_hours"] >= carrier_data["hour_limit"]
+                            else "No Violation"
+                        )
+                    )
+                )
             )
 
             final_results.append(
