@@ -28,34 +28,40 @@ HTML_STYLE = f"""
     li {{ margin: 8px 0; }}
     strong {{ color: {IRIS}; }}
     table {{ border-collapse: separate; border-spacing: 8px; width: 100%; margin: 16px 0; }}
-    th {{ background-color: {OVERLAY}; color: {FOAM}; padding: 12px; text-align: left; border-radius: 4px; }}
+    th {{
+        background-color: {OVERLAY};
+        color: {FOAM};
+        padding: 12px;
+        text-align: left;
+        border-radius: 4px;
+    }}
     td {{ padding: 12px; border-radius: 4px; }}
-    .code-block {{ 
-        background-color: {SURFACE}; 
-        color: {TEXT}; 
-        padding: 16px; 
+    .code-block {{
+        background-color: {SURFACE};
+        color: {TEXT};
+        padding: 16px;
         border-radius: 4px;
         border: 1px solid {HIGHLIGHT_MED};
         margin: 16px 0;
     }}
-    .example-primary {{ 
-        background-color: {OVERLAY}; 
-        color: {TEXT}; 
-        padding: 16px; 
+    .example-primary {{
+        background-color: {OVERLAY};
+        color: {TEXT};
+        padding: 16px;
         border-radius: 4px;
         border: 1px solid {HIGHLIGHT_MED};
     }}
-    .example-secondary {{ 
-        background-color: {SURFACE}; 
-        color: {TEXT}; 
-        padding: 16px; 
+    .example-secondary {{
+        background-color: {SURFACE};
+        color: {TEXT};
+        padding: 16px;
         border-radius: 4px;
         border: 1px solid {HIGHLIGHT_MED};
     }}
     .example-highlight {{
         background-color: {HIGHLIGHT_LOW};
-        color: {TEXT}; 
-        padding: 16px; 
+        color: {TEXT};
+        padding: 16px;
         border-radius: 4px;
         border: 1px solid {HIGHLIGHT_MED};
     }}
@@ -79,8 +85,8 @@ DOCUMENTATION_85D = (
 </div>
 
 <p style='color: {MUTED}; font-style: italic; margin-top: 10px;'>
-    Note: This language establishes a crucial requirement - management must first attempt to use all available OTDL carriers 
-    to their maximum daily (12 hours) and weekly (60 hours) limits before requiring WAL or NL carriers to work overtime off 
+    Note: This language establishes a crucial requirement - management must first attempt to use all available OTDL carriers
+    to their maximum daily (12 hours) and weekly (60 hours) limits before requiring WAL or NL carriers to work overtime off
     their assignment. This is why checking if the OTDL was maximized is a key condition for violations.
 </p>
 
