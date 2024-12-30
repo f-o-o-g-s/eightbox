@@ -313,14 +313,18 @@ COLOR_MAXIMIZED_TRUE = QColor(*RGB_FOAM)  # Success state
 COLOR_MAXIMIZED_FALSE = QColor(*RGB_LOVE)  # Error state
 
 # Violation-specific Colors
-COLOR_VIOLATION = QColor(*RGB_IRIS).darker(110)  # Darker purple for violations
-COLOR_VIOLATION_SUMMARY = QColor(*RGB_IRIS).lighter(
-    130
-)  # Light purple for summary rows
-COLOR_VIOLATION_WEEKLY = QColor(*RGB_PINE)  # Pine (teal) for weekly totals
+COLOR_VIOLATION = QColor(*RGB_IRIS).darker(
+    120
+)  # Deeper purple for individual violations
+COLOR_VIOLATION_SUMMARY = (
+    QColor(*RGB_FOAM).darker(110).lighter(120)
+)  # Soft blue for summaries
+COLOR_VIOLATION_WEEKLY = QColor(*RGB_PINE).darker(
+    105
+)  # Slightly darker teal for weekly
 COLOR_VIOLATION_BACKGROUND = QColor(
-    *RGB_HIGHLIGHT_LOW
-)  # Subtle background for violation rows
+    *RGB_HIGHLIGHT_MED
+)  # Slightly more visible background
 
 # Update the existing violation colors section to use these
 VIOLATION_MODEL_COLORS = {
