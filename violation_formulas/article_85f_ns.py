@@ -4,7 +4,6 @@ This module handles violations that occur when non-OTDL carriers work
 more than 8 hours on their non-scheduled day.
 """
 
-import numpy as np
 import pandas as pd
 
 from utils import set_display
@@ -84,23 +83,25 @@ def detect_85f_ns_violations(
     ] = "No Violation (December Exclusion)"
     result_df.loc[result_df["is_excluded"], "remedy_total"] = 0.0
 
+    # Initialize all rows as No Violation with 0.0 remedy total
+    result_df["violation_type"] = "No Violation"
+    result_df["remedy_total"] = 0.0
+
     # Calculate violations vectorized using conditions directly
-    result_df["remedy_total"] = np.where(
+    violation_mask = (
         (result_df["list_status"].isin(["wal", "nl"]))
         & (result_df["is_ns_day"])
-        & ~result_df["is_excluded"],
-        (result_df["total_hours"] - 8).clip(lower=0).round(2),
-        result_df["remedy_total"] if "remedy_total" in result_df.columns else 0.0,
+        & ~result_df["is_excluded"]
+        & (result_df["total_hours"] > 8)
     )
 
-    # Set violation types
-    result_df["violation_type"] = np.where(
-        ~result_df["is_excluded"] & (result_df["remedy_total"] > 0),
-        "8.5.F NS Overtime On a Non-Scheduled Day",
-        result_df["violation_type"]
-        if "violation_type" in result_df.columns
-        else "No Violation",
-    )
+    result_df.loc[violation_mask, "remedy_total"] = (
+        result_df.loc[violation_mask, "total_hours"] - 8
+    ).round(2)
+
+    result_df.loc[
+        violation_mask & (result_df["remedy_total"] > 0), "violation_type"
+    ] = "8.5.F NS Overtime On a Non-Scheduled Day"
 
     # Add display indicator
     result_df["display_indicator"] = result_df.apply(set_display, axis=1)

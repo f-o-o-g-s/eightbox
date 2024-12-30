@@ -57,24 +57,26 @@ def detect_85f_violations(
     ] = "No Violation (December Exclusion)"
     result_df.loc[result_df["is_excluded"], "remedy_total"] = 0.0
 
-    # Calculate remedies vectorized for all non-excluded carriers
-    mask_eligible = result_df["is_wal_nl"] & ~result_df["is_excluded"]
-    result_df["remedy_total"] = np.where(
-        mask_eligible & (result_df["total_hours"] > 10),
-        np.minimum(
-            result_df["off_route_hours"], (result_df["total_hours"] - 10).clip(lower=0)
-        ),
-        result_df["remedy_total"] if "remedy_total" in result_df.columns else 0.0,
+    # Initialize all rows as No Violation with 0.0 remedy total
+    result_df["violation_type"] = "No Violation"
+    result_df["remedy_total"] = 0.0
+
+    # Calculate violations vectorized for all non-excluded carriers
+    violation_mask = (
+        result_df["is_wal_nl"]
+        & ~result_df["is_excluded"]
+        & (result_df["total_hours"] > 10)
+        & (result_df["off_route_hours"] > 0)
     )
 
-    # Set violation types for non-excluded dates
-    result_df["violation_type"] = np.where(
-        ~result_df["is_excluded"] & (result_df["remedy_total"] > 0),
-        "8.5.F Overtime Over 10 Hours Off Route",
-        result_df["violation_type"]
-        if "violation_type" in result_df.columns
-        else "No Violation",
-    )
+    result_df.loc[violation_mask, "remedy_total"] = np.minimum(
+        result_df.loc[violation_mask, "off_route_hours"],
+        (result_df.loc[violation_mask, "total_hours"] - 10),
+    ).round(2)
+
+    result_df.loc[
+        violation_mask & (result_df["remedy_total"] > 0), "violation_type"
+    ] = "8.5.F Overtime Over 10 Hours Off Route"
 
     # Add display indicator
     result_df["display_indicator"] = result_df.apply(set_display, axis=1)
