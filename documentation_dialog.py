@@ -11,6 +11,7 @@ including:
 The dialog uses a custom title bar and supports markdown-formatted content
 with proper styling and navigation.
 """
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
