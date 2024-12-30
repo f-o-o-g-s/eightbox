@@ -413,9 +413,8 @@ def upload_release_asset(release, archive_file, max_retries=3, timeout=300):
             if attempt < max_retries - 1:
                 print(f"Upload failed ({str(e)}), retrying...")
                 continue
-            else:
-                print(f"\nFailed to upload after {max_retries} attempts: {str(e)}")
-                return False
+            print(f"\nFailed to upload after {max_retries} attempts: {str(e)}")
+            return False
 
 
 def create_release():
