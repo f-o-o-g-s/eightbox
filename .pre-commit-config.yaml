@@ -24,6 +24,16 @@ repos:
         stages: [commit-msg]
         args: [] # optional: list of Conventional Commits types to allow
 
+# Add this new hook to automatically stage files
+-   repo: local
+    hooks:
+    -   id: git-add
+        name: git add
+        entry: git add
+        language: system
+        args: ["-A"]
+        stages: [pre-commit]
+
 # Temporarily removing mypy due to Python 3.12 compatibility issues
 # -   repo: https://github.com/pre-commit/mirrors-mypy
 #     rev: v1.7.1
