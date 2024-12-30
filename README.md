@@ -174,6 +174,12 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
+### 2024.1.6.0
+- Modernized table view styling in base violation tab
+- Improved button styling consistency across OTDL and date selection
+- Enhanced carrier list pane button styling
+- Modified removed carriers manager table header for better visibility
+
 ### 2024.1.5.1
 - Made violation tables read-only to prevent accidental data modification
 - Updated documentation to reflect read-only tables
@@ -184,9 +190,4 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 - Improved UI consistency and readability across all dialogs
 - Reorganized code structure for better maintainability
 - Fixed various styling and UI-related bugs
-
-### 2024.1.4.2
-- Fixed version formatting in README.md version history
-- Improved logic to maintain exactly 3 most recent versions
-- Preserved original version number format
 

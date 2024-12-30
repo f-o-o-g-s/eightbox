@@ -1,5 +1,13 @@
 # Changelog
 
+## [2024.1.6.0] - 2024-12-29
+- Modernized table view styling in base violation tab
+- Improved button styling consistency across OTDL and date selection
+- Enhanced carrier list pane button styling
+- Modified removed carriers manager table header for better visibility
+
+
+
 ## [2024.1.5.1] - 2024-12-29
 - Made violation tables read-only to prevent accidental data modification
 - Updated documentation to reflect read-only tables
