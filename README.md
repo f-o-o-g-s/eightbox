@@ -174,6 +174,10 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
+### 2024.1.6.1
+- Fixed bug in Article 8.5.F and 8.5.F NS violation detection where No Violation and remedy_total=0.0 were not explicitly initialized
+- Improved consistency in violation type and remedy total handling
+
 ### 2024.1.6.0
 - Modernized table view styling in base violation tab
 - Improved button styling consistency across OTDL and date selection
@@ -183,11 +187,4 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 ### 2024.1.5.1
 - Made violation tables read-only to prevent accidental data modification
 - Updated documentation to reflect read-only tables
-
-### 2024.1.5.0
-- Implemented new Rose Pine / Material Design hybrid theme system
-- Unified all application styling in theme.py
-- Improved UI consistency and readability across all dialogs
-- Reorganized code structure for better maintainability
-- Fixed various styling and UI-related bugs
 
