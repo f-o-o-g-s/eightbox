@@ -3,11 +3,17 @@ line-length = 88
 extend-exclude = '''
 (
     venv
+    | .venv
     | __pycache__
     | 85F_5th_backup
     | 85F_5th_revised
     | output
     | spreadsheets
+    | dist
+    | backups
+    | .vscode
+    | test_db
+    | database
 )
 '''
 
@@ -21,9 +27,15 @@ ensure_newline_before_comments = true
 line_length = 88
 skip = [
     "venv",
+    ".venv",
     "__pycache__",
     "85F_5th_backup",
     "85F_5th_revised",
     "output",
-    "spreadsheets"
+    "spreadsheets",
+    "dist",
+    "backups",
+    ".vscode",
+    "test_db",
+    "database"
 ]
