@@ -67,41 +67,40 @@ def rgb_str(rgb_tuple):
     return f"rgb({rgb_tuple[0]}, {rgb_tuple[1]}, {rgb_tuple[2]})"
 
 
-# Material Design color palette
-RGB_BASE = (25, 23, 36)  # Base color
-RGB_SURFACE = (33, 32, 46)  # Surface color
-RGB_OVERLAY = (41, 40, 55)  # Overlay color
-RGB_MUTED = (110, 106, 134)  # Muted text
-RGB_SUBTLE = (144, 140, 170)  # Subtle accents
-RGB_TEXT = (224, 222, 244)  # Main text
-RGB_LOVE = (235, 111, 146)  # Love/Error
-RGB_GOLD = (246, 193, 119)  # Gold/Warning
-RGB_ROSE = (235, 188, 186)  # Rose/Info
-RGB_PINE = (49, 116, 143)  # Pine/Success
-RGB_FOAM = (156, 207, 216)  # Foam/Link
-RGB_IRIS = (196, 167, 231)  # Iris/Primary
+# Official Rosé Pine Color Palette
+# Base colors
+RGB_BASE = (25, 23, 36)  # Base - #191724
+RGB_SURFACE = (31, 29, 46)  # Surface - #1f1d2e
+RGB_OVERLAY = (38, 35, 58)  # Overlay - #26233a
+RGB_MUTED = (110, 106, 134)  # Muted - #6e6a86
+RGB_SUBTLE = (144, 140, 170)  # Subtle - #908caa
+RGB_TEXT = (224, 222, 244)  # Text - #e0def4
+
+# Accent colors
+RGB_LOVE = (235, 111, 146)  # Love - #eb6f92
+RGB_GOLD = (246, 193, 119)  # Gold - #f6c177
+RGB_ROSE = (235, 188, 186)  # Rose - #ebbcba
+RGB_PINE = (49, 116, 143)  # Pine - #31748f
+RGB_FOAM = (156, 207, 216)  # Foam - #9ccfd8
+RGB_IRIS = (196, 167, 231)  # Iris - #c4a7e7
 
 # Highlight colors
 RGB_HIGHLIGHT_LOW = (33, 32, 46)  # Highlight Low - #21202e
 RGB_HIGHLIGHT_MED = (64, 61, 82)  # Highlight Med - #403d52
 RGB_HIGHLIGHT_HIGH = (82, 79, 103)  # Highlight High - #524f67
 
-# Material Design color constants
+# Material Design color constants using Rosé Pine colors
 MATERIAL_SURFACE = rgb_str(RGB_SURFACE)
 MATERIAL_PRIMARY = rgb_str(RGB_IRIS)
 MATERIAL_SECONDARY = rgb_str(RGB_PINE)
 MATERIAL_BACKGROUND = rgb_str(RGB_BASE)
 MATERIAL_PRIMARY_LIGHT = rgb_str(RGB_FOAM)
 MATERIAL_PRIMARY_DARK = rgb_str(RGB_PINE)
-MATERIAL_RED_800 = rgb_str(RGB_LOVE)
-MATERIAL_RED_900 = rgb_str((187, 89, 117))
-MATERIAL_RED_200 = rgb_str((242, 153, 179))
+MATERIAL_ERROR = rgb_str(RGB_LOVE)
 COLOR_TEXT_LIGHT = rgb_str(RGB_TEXT)
 COLOR_TEXT_DIM = rgb_str(RGB_MUTED)
-COLOR_BLACK = "rgb(0, 0, 0)"
+COLOR_BLACK = rgb_str((26, 24, 38))  # Slightly darker than base for contrast
 COLOR_ROW_HIGHLIGHT = rgb_str(RGB_HIGHLIGHT_LOW)
-COLOR_STATUS_NL = rgb_str(RGB_PINE)
-COLOR_STATUS_PTF = rgb_str(RGB_FOAM)
 
 # Alpha values for UI state management
 ALPHA_DISABLED = 0.08  # More subtle disabled state
