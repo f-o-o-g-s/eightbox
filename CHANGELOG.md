@@ -1,5 +1,12 @@
 # Changelog
 
+## [2024.1.6.2] - 2024-12-29
+- Updated theme to official Rosé Pine colors
+- Improved code formatting and linting
+- Enhanced filter button styling
+
+
+
 ## [2024.1.6.1] - 2024-12-29
 - Fixed bug in Article 8.5.F and 8.5.F NS violation detection where No Violation and remedy_total=0.0 were not explicitly initialized
 - Improved consistency in violation type and remedy total handling

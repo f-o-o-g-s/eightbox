@@ -174,6 +174,11 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
+### 2024.1.6.2
+- Updated theme to official Rosé Pine colors
+- Improved code formatting and linting
+- Enhanced filter button styling
+
 ### 2024.1.6.1
 - Fixed bug in Article 8.5.F and 8.5.F NS violation detection where No Violation and remedy_total=0.0 were not explicitly initialized
 - Improved consistency in violation type and remedy total handling
@@ -183,8 +188,4 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 - Improved button styling consistency across OTDL and date selection
 - Enhanced carrier list pane button styling
 - Modified removed carriers manager table header for better visibility
-
-### 2024.1.5.1
-- Made violation tables read-only to prevent accidental data modification
-- Updated documentation to reflect read-only tables
 
