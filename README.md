@@ -2,6 +2,8 @@
 
 A Windows desktop application built with PyQt5 for a local union branch to track and analyze carrier violations using data from klusterbox's mandates.sqlite file.
 
+![Main Application Window](docs/images/main-window.png)
+
 ## Features
 
 ### Violation Detection
@@ -12,11 +14,16 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 - MAX60 Violations (60-Hour Weekly Limit)
 - Comprehensive violation summaries with remedy calculations
 
+![Violation Detection Tab](docs/images/violation-detection.png)
+
 ### OTDL Maximization Checking
 - OTDL Maximization tracking and status management
 - Carrier excusal system for 8.5.G violations
 - Single-click application of changes across multiple dates
 - Real-time violation updates when maximization status changes
+
+![OTDL Maximization Overview](docs/images/otdl-maximization.png)
+![OTDL Maximization Details](docs/images/otdl-maximization2.png)
 
 ### Data Management
 - Import carrier data from JSON
@@ -25,6 +32,8 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 - Date-based violation filtering
 - Excel export functionality with consistent carrier name sorting
 - Progress tracking for long operations
+
+![Carrier Management](docs/images/carrier-management.png)
 
 ### User Interface
 - Modern PyQt5 interface with Material Dark theme
