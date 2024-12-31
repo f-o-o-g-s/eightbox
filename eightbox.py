@@ -237,7 +237,7 @@ class MainApp(QMainWindow):
 
         # Initialize window properties
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(1375, 600)
 
         # Initialize database path manager first
         self.path_manager = DatabasePathManager()
