@@ -378,44 +378,93 @@ CLOSE_BUTTON_STYLE = (
 TOP_BUTTON_ROW_STYLE = f"""
     QWidget {{
         background-color: {MATERIAL_BACKGROUND.name()};
-        border-bottom: 1px solid {QColor(*RGB_HIGHLIGHT_LOW).name()};
+        border-bottom: 1px solid {rgba(RGB_HIGHLIGHT_LOW, 0.5)};
+        padding: 4px 0px;
     }}
-    {BUTTON_STYLE}
     QPushButton {{
-        padding: 16px 32px;
-        font-size: 14px;
-        margin: 12px 6px;
-        min-width: 180px;
+        background-color: {rgba(RGB_HIGHLIGHT_LOW, 0.4)};
+        color: {COLOR_TEXT_LIGHT.name()};
+        border: 1px solid {rgba(RGB_HIGHLIGHT_MED, 0.5)};
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
+        margin: 8px 6px;
+        min-width: 180px;
+        min-height: 48px;
+    }}
+    QPushButton:hover {{
+        background-color: {rgba(RGB_HIGHLIGHT_MED, 0.5)};
+        color: {QColor(*RGB_IRIS).lighter(115).name()};
+        border: 1px solid {QColor(*RGB_IRIS).lighter(115).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {rgba(RGB_HIGHLIGHT_HIGH, 0.6)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 1px solid {QColor(*RGB_IRIS).name()};
+    }}
+    QPushButton:checked {{
+        background-color: {rgba(RGB_IRIS, 0.15)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 2px solid {QColor(*RGB_IRIS).name()};
+    }}
+    QPushButton:checked:hover {{
+        background-color: {rgba(RGB_IRIS, 0.25)};
+        color: {QColor(*RGB_IRIS).lighter(110).name()};
+        border: 2px solid {QColor(*RGB_IRIS).lighter(110).name()};
+    }}
+    QPushButton:checked:pressed {{
+        background-color: {rgba(RGB_IRIS, 0.35)};
+        color: {QColor(*RGB_IRIS).darker(110).name()};
+        border: 2px solid {QColor(*RGB_IRIS).darker(110).name()};
     }}
 """
 
 FILTER_BUTTON_ROW_STYLE = f"""
     QWidget {{
         background-color: {MATERIAL_BACKGROUND.name()};
-        border-top: 1px solid {QColor(*RGB_HIGHLIGHT_LOW).name()};
+        border-top: 1px solid {rgba(RGB_HIGHLIGHT_LOW, 0.5)};
+        padding: 4px 0px;
     }}
-    {BUTTON_STYLE}
     QPushButton {{
-        padding: 4px 12px;
+        background-color: {rgba(RGB_HIGHLIGHT_LOW, 0.4)};
+        color: {COLOR_TEXT_LIGHT.name()};
+        border: 1px solid {rgba(RGB_HIGHLIGHT_MED, 0.5)};
+        border-radius: 4px;
+        padding: 6px 12px;
         font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
         margin: 4px;
         min-width: 90px;
-        max-height: 24px;
+        max-height: 28px;
+    }}
+    QPushButton:hover {{
+        background-color: {rgba(RGB_HIGHLIGHT_MED, 0.5)};
+        color: {QColor(*RGB_IRIS).lighter(115).name()};
+        border: 1px solid {QColor(*RGB_IRIS).lighter(115).name()};
+    }}
+    QPushButton:pressed {{
+        background-color: {rgba(RGB_HIGHLIGHT_HIGH, 0.6)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 1px solid {QColor(*RGB_IRIS).name()};
     }}
     QPushButton:checked {{
-        background-color: {rgba(RGB_IRIS, 0.25)};
+        background-color: {rgba(RGB_IRIS, 0.15)};
         color: {QColor(*RGB_IRIS).name()};
         border: 2px solid {QColor(*RGB_IRIS).name()};
         font-weight: 600;
     }}
     QPushButton:checked:hover {{
-        background-color: {rgba(RGB_IRIS, 0.35)};
+        background-color: {rgba(RGB_IRIS, 0.25)};
         color: {QColor(*RGB_IRIS).lighter(110).name()};
         border: 2px solid {QColor(*RGB_IRIS).lighter(110).name()};
     }}
     QPushButton:checked:pressed {{
-        background-color: {rgba(RGB_IRIS, 0.45)};
+        background-color: {rgba(RGB_IRIS, 0.35)};
         color: {QColor(*RGB_IRIS).darker(110).name()};
         border: 2px solid {QColor(*RGB_IRIS).darker(110).name()};
     }}
