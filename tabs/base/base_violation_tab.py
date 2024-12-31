@@ -468,15 +468,38 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         # Enable sorting
         view.setSortingEnabled(True)
 
+        # Enable alternating row colors
+        view.setAlternatingRowColors(True)
+
         # Minimal style sheet for structure
         view.setStyleSheet(
             """
             QTableView {
                 border: none;
+                alternate-background-color: rgba(38, 35, 58, 0.4);
+                /* RGB_OVERLAY with 0.4 alpha */
+                background-color: transparent;
+                /* Keep base background transparent to not interfere with violation highlighting */
+                gridline-color: rgba(64, 61, 82, 0.3);
+                /* RGB_HIGHLIGHT_MED with 0.3 alpha */
             }
             QHeaderView::section {
                 padding: 6px;
                 font-weight: bold;
+                background-color: rgb(31, 29, 46);  /* RGB_SURFACE */
+                border: none;
+                border-right: 1px solid rgba(64, 61, 82, 0.5);
+                /* RGB_HIGHLIGHT_MED with 0.5 alpha */
+                border-bottom: 1px solid rgba(64, 61, 82, 0.5);
+            }
+            QHeaderView::section:first {
+                border-top-left-radius: 4px;
+                border-bottom-left-radius: 4px;
+            }
+            QHeaderView::section:last {
+                border-right: none;
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
             }
         """
         )
