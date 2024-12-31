@@ -1,5 +1,12 @@
 # Changelog
 
+## [2024.1.6.3] - 2024-12-31
+- Updated parent/child tab colors for better visual hierarchy
+- Improved main GUI and filter button styles
+- Fixed OTDL window size to prevent row cutoff
+
+
+
 ## [2024.1.6.2] - 2024-12-29
 - Updated theme to official Rosé Pine colors
 - Improved code formatting and linting
