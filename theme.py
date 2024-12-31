@@ -717,100 +717,73 @@ SETTINGS_CLOSE_BUTTON_STYLE = f"""
 DATE_SELECTION_PANE_STYLE = f"""
     QWidget {{
         background-color: {MATERIAL_BACKGROUND.name()};
+        color: {COLOR_TEXT_LIGHT.name()};
     }}
     QLabel {{
         color: {COLOR_TEXT_LIGHT.name()};
-        font-size: 13px;
-        padding: 8px;
-        background-color: {MATERIAL_SURFACE.name()};
-        border-radius: 4px;
+        font-size: 12px;
+        padding: 4px;
     }}
     QTableView {{
-        background-color: {MATERIAL_BACKGROUND.name()};
+        background-color: {MATERIAL_SURFACE.name()};
+        alternate-background-color: {COLOR_ROW_HIGHLIGHT.name()};
         border: none;
-        border-radius: 4px;
-        selection-background-color: {MATERIAL_PRIMARY.name()};
-        selection-color: {COLOR_BLACK.name()};
         gridline-color: transparent;
     }}
     QTableView::item {{
         padding: 8px;
-        border-radius: 2px;
-    }}
-    QTableView::item:hover {{
-        background-color: {rgba(RGB_IRIS, ALPHA_HOVER)};
+        border: none;
     }}
     QTableView::item:selected {{
-        background-color: {MATERIAL_PRIMARY.name()};
+        background-color: {QColor(*RGB_IRIS).name()};
         color: {COLOR_BLACK.name()};
     }}
     QHeaderView::section {{
-        background-color: {MATERIAL_SURFACE.name()};
-        color: {MATERIAL_PRIMARY.name()};
-        font-weight: bold;
+        background-color: {rgba(RGB_IRIS, 0.15)};
+        color: {QColor(*RGB_IRIS).name()};
         padding: 8px;
         border: none;
-        border-radius: 0px;
-    }}
-    QHeaderView::section:first {{
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-    }}
-    QHeaderView::section:last {{
-        border-top-right-radius: 4px;
-        border-bottom-right-radius: 4px;
+        border-right: 1px solid {rgba(RGB_IRIS, 0.5)};
+        border-bottom: 1px solid {rgba(RGB_IRIS, 0.5)};
+        font-weight: bold;
     }}
     QPushButton {{
-        background-color: {COLOR_ROW_HIGHLIGHT.name()};
-        color: {MATERIAL_PRIMARY.name()};
-        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
-        border-bottom: 2px solid {COLOR_TEXT_DIM.name()};
-        padding: 8px 24px;
-        font-weight: 500;
-        min-height: 32px;
-        border-radius: 4px;
-        font-size: 14px;
-        text-transform: uppercase;
+        background-color: {rgba(RGB_HIGHLIGHT_LOW, 0.4)};
+        color: {COLOR_TEXT_LIGHT.name()};
+        border: 1px solid {rgba(RGB_HIGHLIGHT_MED, 0.5)};
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-size: 13px;
+        font-weight: 600;
         letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin: 8px 6px;
+        min-width: 120px;
     }}
     QPushButton:hover {{
-        background-color: {COLOR_ROW_HIGHLIGHT.lighter(110).name()};
-        border: 1px solid {COLOR_TEXT_DIM.lighter(110).name()};
-        border-bottom: 2px solid {COLOR_TEXT_DIM.lighter(110).name()};
-        color: {MATERIAL_PRIMARY.lighter(110).name()};
+        background-color: {rgba(RGB_HIGHLIGHT_MED, 0.5)};
+        color: {QColor(*RGB_IRIS).lighter(115).name()};
+        border: 1px solid {QColor(*RGB_IRIS).lighter(115).name()};
     }}
     QPushButton:pressed {{
-        background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-        border: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
-        border-top: 2px solid {COLOR_TEXT_DIM.darker(150).name()};
-        border-bottom: 1px solid {COLOR_TEXT_DIM.darker(110).name()};
-        padding-top: 9px;
-        color: {MATERIAL_PRIMARY.name()};
+        background-color: {rgba(RGB_HIGHLIGHT_HIGH, 0.6)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 1px solid {QColor(*RGB_IRIS).name()};
     }}
-    QPushButton:disabled {{
-        background-color: {COLOR_ROW_HIGHLIGHT.darker(110).name()};
-        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
-        border: 1px solid {COLOR_ROW_HIGHLIGHT.name()};
+    QPushButton[objectName="primary"] {{
+        background-color: {rgba(RGB_IRIS, 0.15)};
+        color: {QColor(*RGB_IRIS).name()};
+        border: 2px solid {rgba(RGB_IRIS, 0.5)};
     }}
-    QScrollBar:vertical {{
-        background-color: {MATERIAL_BACKGROUND.name()};
-        width: 12px;
-        margin: 0px;
+    QPushButton[objectName="primary"]:hover {{
+        background-color: {rgba(RGB_IRIS, 0.25)};
+        border: 2px solid {QColor(*RGB_IRIS).name()};
+        color: {QColor(*RGB_IRIS).lighter(115).name()};
     }}
-    QScrollBar::handle:vertical {{
-        background-color: {MATERIAL_GREY_800.name()};
-        border-radius: 6px;
-        min-height: 20px;
-        margin: 2px;
-    }}
-    QScrollBar::handle:vertical:hover {{
-        background-color: {MATERIAL_GREY_700.name()};
-    }}
-    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
-        height: 0px;
-    }}
-    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
-        background: none;
+    QPushButton[objectName="primary"]:pressed {{
+        background-color: {rgba(RGB_IRIS, 0.35)};
+        border: 2px solid {QColor(*RGB_IRIS).darker(110).name()};
+        color: {QColor(*RGB_IRIS).darker(110).name()};
     }}
 """
 

@@ -76,10 +76,8 @@ class DateRangeModel(QAbstractTableModel):
             return Qt.AlignLeft | Qt.AlignVCenter
 
         elif role == Qt.BackgroundRole:
-            # Alternate row colors for better readability
-            if row % 2:
-                return COLOR_BG_DARK
-            return COLOR_BG_DARKER
+            # Return alternating colors based on row number
+            return COLOR_BG_DARKER if row % 2 == 0 else COLOR_BG_DARK
 
         return None
 
@@ -138,6 +136,7 @@ class DateRangeSelector(QWidget):
         self.table_view.setEditTriggers(QTableView.NoEditTriggers)
         self.table_view.verticalHeader().setVisible(False)
         self.table_view.setShowGrid(False)
+        self.table_view.setAlternatingRowColors(True)  # Enable alternating row colors
 
         # Set up the header and column sizes
         header = self.table_view.horizontalHeader()
@@ -227,6 +226,7 @@ class DateSelectionPane(QWidget):
         self.table_view.setSelectionMode(QTableView.SingleSelection)
         self.table_view.setShowGrid(False)
         self.table_view.setFrameShape(QTableView.NoFrame)
+        self.table_view.verticalHeader().setDefaultSectionSize(35)  # Set row height
 
         # Set up the model
         self.model = DateRangeModel()

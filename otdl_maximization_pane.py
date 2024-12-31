@@ -205,9 +205,8 @@ class OTDLMaximizationPane(QWidget):
         footer_layout.setContentsMargins(15, 15, 15, 15)  # Adjusted margins
 
         # Create Apply button with existing style
-        apply_button = QPushButton(
-            "APPLY ALL CHANGES"
-        )  # Keep original text but in caps
+        apply_button = QPushButton("APPLY ALL CHANGES")
+        apply_button.setObjectName("primary")  # Style the button as a primary button
         apply_button.setMinimumHeight(42)
         apply_button.setFixedWidth(200)
         apply_button.clicked.connect(self.apply_all_changes)
