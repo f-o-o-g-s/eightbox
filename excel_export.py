@@ -12,6 +12,7 @@ import os
 
 import pandas as pd
 from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QApplication,
     QTableView,
@@ -24,13 +25,14 @@ from custom_widgets import (
 )
 from table_utils import extract_table_state
 from theme import (
-    COLOR_CELL_HIGHLIGHT,
     COLOR_TEXT_LIGHT,
-    COLOR_WEEKLY_REMEDY,
-    MATERIAL_GREY_800,
     MATERIAL_SURFACE,
+    RGB_HIGHLIGHT_MED,
+    RGB_IRIS,
+    RGB_PINE,
+    RGB_TEXT,
+    calculate_optimal_gray,
 )
-from violation_model import calculate_optimal_gray
 
 
 class ExcelExporter:
@@ -204,11 +206,11 @@ class ExcelExporter:
     def _write_excel_file(self, writer, date_range):
         """Write data to Excel with proper formatting."""
         workbook = writer.book
-        border_color = MATERIAL_GREY_800.name().lstrip("#")
+        border_color = QColor(*RGB_HIGHLIGHT_MED).name().lstrip("#")
 
         # Calculate optimal text colors for our header backgrounds
-        header_bg = COLOR_CELL_HIGHLIGHT
-        title_bg = COLOR_WEEKLY_REMEDY
+        header_bg = QColor(*RGB_IRIS).darker(110)  # Slightly darker Iris for headers
+        title_bg = QColor(*RGB_PINE).darker(110)  # Slightly darker Pine for titles
         header_text_color = calculate_optimal_gray(header_bg)
         title_text_color = calculate_optimal_gray(title_bg)
 
@@ -321,8 +323,12 @@ class ExcelExporter:
             used_worksheet_names.add(worksheet_name.lower())
             worksheet = workbook.add_worksheet(worksheet_name)
 
-            # Write title
-            title = f"{current_tab_name} - {date_range}"
+            # Write title - different format for Summary vs daily worksheets
+            if subtab_name == "Summary":
+                title = f"{current_tab_name} - {date_range}"
+            else:
+                title = f"{current_tab_name} - {subtab_name}"
+
             worksheet.merge_range(
                 0, 0, 0, len(content_df.columns) - 1, title, title_format
             )
@@ -331,7 +337,7 @@ class ExcelExporter:
             for col, header in enumerate(content_df.columns):
                 worksheet.write(1, col, header, header_format)
 
-            # Write data with formatting - using DataFrame's order
+            # Write data with formatting
             for row_idx, row in enumerate(range(len(content_df))):
                 for col in range(len(content_df.columns)):
                     cell_format = workbook.add_format(
@@ -341,6 +347,7 @@ class ExcelExporter:
                             "border_color": border_color,
                         }
                     )
+                    # Use theme's text color instead of hardcoded white
                     cell_format.set_font_color(COLOR_TEXT_LIGHT.name().lstrip("#"))
 
                     # Get cell metadata
@@ -356,8 +363,8 @@ class ExcelExporter:
                     if text_color:
                         cell_format.set_font_color(text_color)
                     else:
-                        # Default to white text on dark background for better visibility
-                        cell_format.set_font_color("#FFFFFF")
+                        # Use theme's text color instead of hardcoded white
+                        cell_format.set_font_color(QColor(*RGB_TEXT).name().lstrip("#"))
 
                     value = content_df.iloc[row, col]
                     worksheet.write(row_idx + 2, col, value, cell_format)
