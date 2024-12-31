@@ -474,34 +474,40 @@ TAB_WIDGET_STYLE = f"""
     QTabWidget::pane {{
         border: none;
         background-color: {MATERIAL_BACKGROUND.name()};
+        border-top: 2px solid {QColor(*RGB_PINE).name()};
     }}
     QTabBar {{
         qproperty-drawBase: 0;
     }}
     QTabBar::tab {{
-        background-color: {rgba(RGB_HIGHLIGHT_LOW, 0.7)};
-        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
-        padding: 10px 24px;
+        background-color: {MATERIAL_SURFACE.name()};
+        color: {rgba(RGB_TEXT, 0.7)};
+        padding: 8px 20px;
         border: none;
-        border-right: 1px solid {QColor(*RGB_HIGHLIGHT_MED).name()};
         min-width: 100px;
-        font: 12px;
+        font-size: 12px;
         font-weight: 500;
-        margin-right: 2px;
+        margin-right: 1px;
+        margin-bottom: -1px;
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
     }}
     QTabBar::tab:selected {{
-        color: {QColor(*RGB_IRIS).name()};
-        background-color: {MATERIAL_SURFACE.name()};
-        border-top: 2px solid {QColor(*RGB_IRIS).name()};
-        border-right: 1px solid {QColor(*RGB_HIGHLIGHT_HIGH).name()};
-        border-left: 1px solid {QColor(*RGB_HIGHLIGHT_HIGH).name()};
-        padding-top: 8px;
+        color: {QColor(*RGB_PINE).name()};
+        background-color: {MATERIAL_BACKGROUND.name()};
+        border-top: 2px solid {QColor(*RGB_PINE).name()};
+        border-left: 2px solid {QColor(*RGB_PINE).name()};
+        border-right: 2px solid {QColor(*RGB_PINE).name()};
+        padding-top: 6px;
+        font-weight: 600;
+        margin-bottom: -2px;
     }}
     QTabBar::tab:hover {{
-        background-color: {rgba(RGB_HIGHLIGHT_MED, ALPHA_HOVER)};
-        color: {QColor(*RGB_IRIS).lighter(110).name()};
+        background-color: {rgba(RGB_HIGHLIGHT_HIGH, 0.4)};
+        color: {QColor(*RGB_PINE).lighter(115).name()};
+    }}
+    QTabBar::tab:selected:hover {{
+        color: {QColor(*RGB_PINE).lighter(115).name()};
     }}
     QTabBar::scroller {{
         width: 0px;
@@ -512,38 +518,39 @@ SUB_TAB_STYLE = f"""
     QTabWidget::pane {{
         border: none;
         background-color: {MATERIAL_BACKGROUND.name()};
-        padding-top: 2px;
+        border-top: 1px solid {rgba(RGB_HIGHLIGHT_MED, 0.5)};
+        margin-top: -1px;
     }}
     QTabBar {{
         qproperty-drawBase: 0;
     }}
     QTabBar::tab {{
-        background-color: {MATERIAL_SURFACE.name()};
-        color: {rgba(RGB_TEXT, ALPHA_DISABLED_TEXT)};
-        padding: 4px 8px;
+        background-color: transparent;
+        color: {rgba(RGB_TEXT, 0.6)};
+        padding: 6px 16px;
         margin: 0;
-        border-right: 1px solid {QColor(*RGB_HIGHLIGHT_LOW).name()};
-        font-size: 10px;
+        border: none;
+        font-size: 11px;
         font-weight: 500;
         text-transform: uppercase;
-        letter-spacing: 0.1px;
         width: 85px;
     }}
     QTabBar::tab:first {{
-        margin-left: 5px;
+        margin-left: 2px;
     }}
     QTabBar::tab:last {{
-        margin-right: 0px;
+        margin-right: 2px;
     }}
     QTabBar::tab:hover {{
-        background-color: {rgba(RGB_HIGHLIGHT_LOW, ALPHA_HOVER)};
-        color: {QColor(*RGB_IRIS).lighter(110).name()};
+        color: {QColor(*RGB_PINE).lighter(115).name()};
     }}
     QTabBar::tab:selected {{
-        color: {QColor(*RGB_IRIS).name()};
-        border-bottom: 2px solid {QColor(*RGB_IRIS).name()};
-        background-color: {rgba(RGB_HIGHLIGHT_MED, ALPHA_PRESSED)};
-        border-right: 1px solid {QColor(*RGB_IRIS).name()};
+        color: {QColor(*RGB_PINE).name()};
+        border-bottom: 2px solid {QColor(*RGB_PINE).name()};
+        font-weight: 600;
+    }}
+    QTabBar::tab:selected:hover {{
+        color: {QColor(*RGB_PINE).lighter(115).name()};
     }}
     QTabBar::scroller {{
         width: 0px;
@@ -1272,7 +1279,7 @@ OTDL_TABLE_STYLE = f"""
         background-color: {MATERIAL_SURFACE.name()};
         alternate-background-color: {QColor(*RGB_HIGHLIGHT_LOW).name()};
         border: 1px solid {QColor(*RGB_HIGHLIGHT_MED).name()};
-        gridline-color: {QColor(*RGB_HIGHLIGHT_MED).name()};
+        gridline-color: {QColor(*RGB_HIGHLIGHT_LOW).name()};
         border-radius: 4px;
     }}
     QTableWidget::item {{
