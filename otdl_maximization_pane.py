@@ -168,6 +168,7 @@ class OTDLMaximizationPane(QWidget):
         # Add table to table container
         self.table = QTableWidget()
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.table.setAlternatingRowColors(True)  # Enable alternating row colors
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
         header.setDefaultSectionSize(100)

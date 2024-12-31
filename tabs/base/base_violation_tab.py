@@ -234,6 +234,7 @@ class BaseViolationTab(QWidget, ABC, TabRefreshMixin, metaclass=MetaQWidgetABC):
         # Create tab widget
         self.date_tabs = QTabWidget()
         self.date_tabs.setDocumentMode(True)
+        self.date_tabs.setTabPosition(QTabWidget.South)  # Move tabs to bottom
 
         # Set tab bar height and size constraints
         tab_bar = self.date_tabs.tabBar()

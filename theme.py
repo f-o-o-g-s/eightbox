@@ -472,12 +472,14 @@ FILTER_BUTTON_ROW_STYLE = f"""
 
 TAB_WIDGET_STYLE = f"""
     QTabWidget::pane {{
-        border: none;
+        margin-left: 4px;
+        border: 1px solid {QColor(*RGB_PINE).name()};
         background-color: {MATERIAL_BACKGROUND.name()};
         border-top: 2px solid {QColor(*RGB_PINE).name()};
     }}
     QTabBar {{
         qproperty-drawBase: 0;
+        min-height: 48px;
     }}
     QTabBar::tab {{
         background-color: {MATERIAL_SURFACE.name()};
@@ -486,6 +488,7 @@ TAB_WIDGET_STYLE = f"""
         border: none;
         min-width: 100px;
         font-size: 12px;
+        text-transform: uppercase;
         font-weight: 500;
         margin-right: 1px;
         margin-bottom: -1px;
@@ -503,7 +506,7 @@ TAB_WIDGET_STYLE = f"""
         margin-bottom: -2px;
     }}
     QTabBar::tab:hover {{
-        background-color: {rgba(RGB_HIGHLIGHT_HIGH, 0.4)};
+        background-color: {rgba(RGB_BASE, 0.4)};
         color: {QColor(*RGB_PINE).lighter(115).name()};
     }}
     QTabBar::tab:selected:hover {{
@@ -518,22 +521,25 @@ SUB_TAB_STYLE = f"""
     QTabWidget::pane {{
         border: none;
         background-color: {MATERIAL_BACKGROUND.name()};
-        border-top: 1px solid {rgba(RGB_HIGHLIGHT_MED, 0.5)};
-        margin-top: -1px;
+        margin-bottom: 4px;
     }}
     QTabBar {{
         qproperty-drawBase: 0;
+        min-height: 32px;
     }}
     QTabBar::tab {{
-        background-color: transparent;
-        color: {rgba(RGB_TEXT, 0.6)};
-        padding: 6px 16px;
-        margin: 0;
-        border: none;
+        background: {rgba(RGB_PINE, 0.15)};
+        padding: 8px 20px;
+        color: {rgba(RGB_TEXT, 0.75)};
         font-size: 11px;
-        font-weight: 500;
+        letter-spacing: 0.3px;
+        margin-top: 1px;
         text-transform: uppercase;
-        width: 85px;
+        min-width: 95px;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border: 1px solid {rgba(RGB_PINE, 0.3)};
+        border-top: none;
     }}
     QTabBar::tab:first {{
         margin-left: 2px;
@@ -542,21 +548,26 @@ SUB_TAB_STYLE = f"""
         margin-right: 2px;
     }}
     QTabBar::tab:hover {{
+        background: {rgba(RGB_PINE, 0.25)};
         color: {QColor(*RGB_PINE).lighter(115).name()};
+        border: 1px solid {rgba(RGB_PINE, 0.5)};
+        border-top: none;
     }}
     QTabBar::tab:selected {{
+        background: {rgba(RGB_BASE, 0.3)};
         color: {QColor(*RGB_PINE).name()};
-        border-bottom: 2px solid {QColor(*RGB_PINE).name()};
-        font-weight: 600;
-    }}
-    QTabBar::tab:selected:hover {{
-        color: {QColor(*RGB_PINE).lighter(115).name()};
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-top: 0px;
+        border: 1px solid {QColor(*RGB_PINE).name()};
+        border-top: none;
     }}
     QTabBar::scroller {{
         width: 0px;
     }}
     QTabWidget::tab-bar {{
         alignment: left;
+        height: 32px;
     }}
 """
 
@@ -1426,14 +1437,12 @@ SCROLLBAR_STYLE = f"""
     QScrollBar::handle:vertical:hover {{
         background-color: {HIGHLIGHT_HIGH};
     }}
-    QScrollBar::add-line:vertical,
-    QScrollBar::sub-line:vertical {{
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
         height: 0;
         border: none;
         background: none;
     }}
-    QScrollBar::add-page:vertical,
-    QScrollBar::sub-page:vertical {{
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
         background: none;
     }}
     QScrollBar:horizontal {{
