@@ -22,6 +22,8 @@ A Windows desktop application built with PyQt5 for a local union branch to track
 - Single-click application of changes across multiple dates
 - Real-time violation updates when maximization status changes
 
+The screenshots below demonstrate the before and after effects of excusing OTDL carriers from overtime. When an OTDL carrier is excused, it prevents 8.5.D violations for WAL/NL carriers (since the OTDL carrier was unavailable for overtime) and also prevents 8.5.G violations for the excused OTDL carrier.
+
 ![OTDL Maximization Overview](docs/images/otdl-maximization.png)
 ![OTDL Maximization Details](docs/images/otdl-maximization2.png)
 
