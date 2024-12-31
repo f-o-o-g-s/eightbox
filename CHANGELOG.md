@@ -1,5 +1,12 @@
 # Changelog
 
+## [2024.1.6.5] - 2024-12-31
+- Updated Excel export to use Rose Pine colors consistently
+- Improved date selection pane styling
+- Updated window and tab styles
+
+
+
 ## [2024.1.6.4] - 2024-12-31
 - Added alternating row background colors to violation tables
 - Improved selection highlight visibility in OTDL maximization table
