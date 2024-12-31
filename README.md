@@ -174,6 +174,11 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
+### 2024.1.6.4
+- Added alternating row background colors to violation tables
+- Improved selection highlight visibility in OTDL maximization table
+- Moved subtabs below table for better layout flow
+
 ### 2024.1.6.3
 - Updated parent/child tab colors for better visual hierarchy
 - Improved main GUI and filter button styles
@@ -183,8 +188,4 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 - Updated theme to official Rosé Pine colors
 - Improved code formatting and linting
 - Enhanced filter button styling
-
-### 2024.1.6.1
-- Fixed bug in Article 8.5.F and 8.5.F NS violation detection where No Violation and remedy_total=0.0 were not explicitly initialized
-- Improved consistency in violation type and remedy total handling
 

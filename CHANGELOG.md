@@ -1,5 +1,12 @@
 # Changelog
 
+## [2024.1.6.4] - 2024-12-31
+- Added alternating row background colors to violation tables
+- Improved selection highlight visibility in OTDL maximization table
+- Moved subtabs below table for better layout flow
+
+
+
 ## [2024.1.6.3] - 2024-12-31
 - Updated parent/child tab colors for better visual hierarchy
 - Improved main GUI and filter button styles
