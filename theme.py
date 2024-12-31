@@ -1288,7 +1288,7 @@ DISABLED_START_INPUT_STYLE = f"""
 OTDL_TABLE_STYLE = f"""
     QTableWidget {{
         background-color: {MATERIAL_SURFACE.name()};
-        alternate-background-color: {QColor(*RGB_HIGHLIGHT_LOW).name()};
+        alternate-background-color: {QColor(*RGB_OVERLAY).name()};
         border: 1px solid {QColor(*RGB_HIGHLIGHT_MED).name()};
         gridline-color: {QColor(*RGB_HIGHLIGHT_LOW).name()};
         border-radius: 4px;
@@ -1298,8 +1298,16 @@ OTDL_TABLE_STYLE = f"""
         padding: 2px;
     }}
     QTableWidget::item:selected {{
-        background-color: {QColor(*RGB_IRIS).name()};
-        color: {COLOR_BLACK.name()};
+        background-color: {rgba(RGB_BASE, 0.7)};
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
+    QTableWidget::item:selected:active {{
+        background-color: {rgba(RGB_BASE, 0.85)};
+        color: {COLOR_TEXT_LIGHT.name()};
+    }}
+    QTableWidget::item:selected:!active {{
+        background-color: {rgba(RGB_BASE, 0.6)};
+        color: {COLOR_TEXT_LIGHT.name()};
     }}
     QHeaderView::section {{
         background-color: {MATERIAL_BLUE_GREY_800.name()};
