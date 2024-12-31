@@ -144,6 +144,30 @@ Currently working on Eightbox, a PyQt5-based GUI application for detecting and m
 - Follow .gitignore patterns for excluded files
 - Use restore.py for reverting changes if needed
 
+## Release Workflow
+1. Check recent commits since last release:
+   ```bash
+   git log --oneline $(git describe --tags --abbrev=0)..HEAD
+   ```
+
+2. Review release.py for non-interactive mode options:
+   - Read the file to understand parameters
+   - Check for any new features or breaking changes
+   - Determine appropriate version bump (patch/minor/major)
+
+3. Create release using non-interactive mode:
+   ```bash
+   python release.py --non-interactive \
+       --type [patch|minor|major] \
+       --message "type: description" \
+       --notes "Change 1" "Change 2"
+   ```
+
+4. Verify the release:
+   - Check version number in eightbox.py
+   - Verify CHANGELOG.md updates
+   - Confirm GitHub release creation
+
 # Excel Export Rules
 - Follow the patterns in excel_export.py
 - Use consistent carrier name sorting
