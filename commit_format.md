@@ -87,4 +87,10 @@ python release.py --non-interactive \
 
 3. The pre-commit hook will show helpful examples if your format is incorrect
 
-4. Both backup.py and release.py will add `fix:` automatically if you forget the type 
+4. Both backup.py and release.py will add `fix:` automatically if you forget the type
+
+5. For non-code changes (documentation, images, etc.), you can bypass pre-commit hooks:
+   ```bash
+   git commit --no-verify -m "docs: update README"
+   ```
+   This is useful when committing files that don't need code formatting checks. 
