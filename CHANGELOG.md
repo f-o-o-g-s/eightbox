@@ -1,5 +1,13 @@
 # Changelog
 
+## [2024.1.6.6] - 2024-12-31
+- Updated test database with more entries
+- Added screenshots to documentation
+- Updated OTDL maximization documentation
+- Updated release workflow documentation
+
+
+
 ## [2024.1.6.5] - 2024-12-31
 - Updated Excel export to use Rose Pine colors consistently
 - Improved date selection pane styling

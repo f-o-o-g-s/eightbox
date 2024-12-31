@@ -185,6 +185,12 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Changes
 
+### 2024.1.6.6
+- Updated test database with more entries
+- Added screenshots to documentation
+- Updated OTDL maximization documentation
+- Updated release workflow documentation
+
 ### 2024.1.6.5
 - Updated Excel export to use Rose Pine colors consistently
 - Improved date selection pane styling
@@ -194,9 +200,4 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 - Added alternating row background colors to violation tables
 - Improved selection highlight visibility in OTDL maximization table
 - Moved subtabs below table for better layout flow
-
-### 2024.1.6.3
-- Updated parent/child tab colors for better visual hierarchy
-- Improved main GUI and filter button styles
-- Fixed OTDL window size to prevent row cutoff
 

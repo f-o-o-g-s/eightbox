@@ -72,8 +72,8 @@ from theme import (
     apply_material_dark_theme,
 )
 
-VERSION = "2024.1.6.5"  # Updated by release.py
-BUILD_TIME = "2024-12-31 10:06"  # Updated by release.py
+VERSION = "2024.1.6.6"  # Updated by release.py
+BUILD_TIME = "2024-12-31 11:17"  # Updated by release.py
 
 
 def qt_message_handler(mode, context, message):
@@ -227,8 +227,8 @@ class MainApp(QMainWindow):
         moves_manager (MovesManager): Manages moves cleaning operations
     """
 
-    VERSION = "2024.1.6.5"  # Updated by release.py
-    BUILD_TIME = "2024-12-31 10:06"  # Updated by release.py
+    VERSION = "2024.1.6.6"  # Updated by release.py
+    BUILD_TIME = "2024-12-31 11:17"  # Updated by release.py
 
     def __init__(self):
         super().__init__()
