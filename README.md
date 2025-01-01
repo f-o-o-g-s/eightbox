@@ -201,3 +201,5 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 - Improved selection highlight visibility in OTDL maximization table
 - Moved subtabs below table for better layout flow
 
+# Linux Support
+Eightbox now supports Linux systems. The database path is automatically detected at ~/.klusterbox/mandates.sqlite
