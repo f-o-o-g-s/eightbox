@@ -203,3 +203,9 @@ For a complete list of changes, see [CHANGELOG.md](CHANGELOG.md).
 
 # Linux Support
 Eightbox now supports Linux systems. The database path is automatically detected at ~/.klusterbox/mandates.sqlite
+
+## Setup
+To set up the database path on Linux:
+```bash
+python utils/setup_klusterbox_path.py --db path/to/your/mandates.sqlite
+```
